@@ -1,107 +1,110 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
-
-import { HelloWave } from "@/components/hello-wave";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { StatsGrid } from "@/components/custom-ui/StatGrid";
+import { StreakCard } from "@/components/custom-ui/StreakCard";
+import { WeekCalendar } from "@/components/custom-ui/WeekCalendar";
+import { WorkoutCard } from "@/components/custom-ui/WorkoutCard";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Link } from "expo-router";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { Workout } from "@/types/workout.types";
+import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import React from "react";
+import { View } from "react-native";
+
+const data: Workout[] = [
+  {
+    id: 1,
+    title: "Push-ups",
+    subtitle: "Chest Workout",
+    sets: "4 Sets",
+    duration: "12 Minutes",
+    level: "Beginner",
+    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e",
+  },
+  {
+    id: 2,
+    title: "Dumbbell Fly",
+    subtitle: "Chest Workout",
+    sets: "3 Sets",
+    duration: "6 Minutes",
+    level: "Intermediate",
+    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61",
+  },
+  {
+    id: 3,
+    title: "Push-ups",
+    subtitle: "Chest Workout",
+    sets: "4 Sets",
+    duration: "12 Minutes",
+    level: "Beginner",
+    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e",
+  },
+  {
+    id: 4,
+    title: "Dumbbell Fly",
+    subtitle: "Chest Workout",
+    sets: "3 Sets",
+    duration: "6 Minutes",
+    level: "Intermediate",
+    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61",
+  },
+  {
+    id: 5,
+    title: "Push-ups",
+    subtitle: "Chest Workout",
+    sets: "4 Sets",
+    duration: "12 Minutes",
+    level: "Beginner",
+    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e",
+  },
+];
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </ThemedText>{" "}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction
-              title="Action"
-              icon="cube"
-              onPress={() => alert("Action pressed")}
-            />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert("Share pressed")}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert("Delete pressed")}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { colors } = useAppTheme();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">
-            npm run reset-project
-          </ThemedText>{" "}
-          to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-          directory. This will move the current{" "}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <PageLayout>
+      {/* Streak Card */}
+      <StreakCard />
+
+      {/* Stats */}
+      <View className="mt-3">
+        <SectionHeader title="Your stats" />
+
+        <View className="mt-2">
+          <StatsGrid />
+        </View>
+      </View>
+
+      {/* Calendar */}
+      <View className="mt-3">
+        <WeekCalendar onDateChange={(d) => console.log("Selected:", d)} />
+
+        <View className="mt-2 flex-row items-center justify-between">
+          <ChevronLeft size={24} color={colors.app.textSecondary} />
+
+          <ThemedText
+            type="default"
+            variant="primary"
+            style={{ color: colors.app.textAccent }}
+          >
+            November 2025
+          </ThemedText>
+
+          <ChevronRight size={24} color={colors.app.textSecondary} />
+        </View>
+      </View>
+
+      {/* Today Plan */}
+      <View className="mt-3">
+        <SectionHeader title="Today plan" />
+
+        <View className="mt-2">
+          {data.map((workout) => (
+            <WorkoutCard key={workout.id} data={workout} />
+          ))}
+        </View>
+      </View>
+    </PageLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-});

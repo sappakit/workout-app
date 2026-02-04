@@ -1,60 +1,60 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { Text, type TextProps } from "react-native";
 
-import { useThemeColor } from '@/hooks/use-theme-color';
+type Variant =
+  | "primary"
+  | "secondary"
+  | "accent"
+  | "brand"
+  | "success"
+  | "warning"
+  | "error";
+
+type TextType = "default" | "defaultSemiBold" | "title" | "subtitle";
 
 export type ThemedTextProps = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  type?: TextType;
+  variant?: Variant;
+  color?: string;
+  className?: string;
 };
 
+const typeClassMap = {
+  default: "text-base",
+  defaultSemiBold: "text-base font-semibold",
+  title: "text-3xl font-bold",
+  subtitle: "text-xl font-bold",
+} satisfies Record<TextType, string>;
+
 export function ThemedText({
+  className,
+  type = "default",
+  variant = "primary",
+  color,
   style,
-  lightColor,
-  darkColor,
-  type = 'default',
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const { colors } = useAppTheme();
+
+  const variantColorMap = {
+    primary: colors.app.textPrimary,
+    secondary: colors.app.textSecondary,
+    accent: colors.app.textAccent,
+    brand: colors.app.brand,
+    success: colors.app.success,
+    warning: colors.app.warning,
+    error: colors.app.error,
+  } satisfies Record<Variant, string>;
+
+  const themedColor = color ?? variantColorMap[variant];
+
+  const mergedClassName = `${typeClassMap[type]} ${className ?? ""}`.trim();
 
   return (
     <Text
-      style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
-        style,
-      ]}
       {...rest}
+      className={mergedClassName}
+      style={[{ color: themedColor }, style]}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
-  },
-});
