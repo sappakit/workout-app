@@ -1,3 +1,4 @@
+import MainButton from "@/components/custom-ui/MainButton";
 import { StatsGrid } from "@/components/custom-ui/StatGrid";
 import { StreakCard } from "@/components/custom-ui/StreakCard";
 import { WeekCalendar } from "@/components/custom-ui/WeekCalendar";
@@ -5,10 +6,10 @@ import { WorkoutCard } from "@/components/custom-ui/WorkoutCard";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
+import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Workout } from "@/types/workout.types";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
-import React from "react";
 import { View } from "react-native";
 
 const data: Workout[] = [
@@ -61,12 +62,20 @@ const data: Workout[] = [
 
 export default function HomeScreen() {
   const { colors } = useAppTheme();
+  const { signOut, loading } = useAuth();
 
   return (
     <PageLayout>
+      {/* TODO: remove */}
+      <MainButton
+        title="Log out"
+        onPress={signOut}
+        loading={loading}
+        className="mb-4"
+      />
+
       {/* Streak Card */}
       <StreakCard />
-
       {/* Stats */}
       <View className="mt-3">
         <SectionHeader title="Your stats" />
@@ -75,7 +84,6 @@ export default function HomeScreen() {
           <StatsGrid />
         </View>
       </View>
-
       {/* Calendar */}
       <View className="mt-3">
         <WeekCalendar onDateChange={(d) => console.log("Selected:", d)} />
@@ -94,7 +102,6 @@ export default function HomeScreen() {
           <ChevronRight size={24} color={colors.app.textSecondary} />
         </View>
       </View>
-
       {/* Today Plan */}
       <View className="mt-3">
         <SectionHeader title="Today plan" />

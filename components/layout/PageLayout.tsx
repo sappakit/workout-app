@@ -50,8 +50,8 @@ export function PageLayout({
           className={contentClassName}
           showsVerticalScrollIndicator={showsVerticalScrollIndicator}
           contentContainerStyle={{
-            paddingBottom: bottomInset,
             paddingTop: topInset,
+            paddingBottom: bottomInset,
           }}
         >
           {children}
@@ -59,7 +59,7 @@ export function PageLayout({
       ) : (
         <View
           className={contentClassName}
-          style={{ paddingBottom: bottomInset }}
+          style={{ paddingTop: topInset, paddingBottom: bottomInset }}
         >
           {children}
         </View>

@@ -9,7 +9,7 @@ export default function PageHeader() {
 
   return (
     <View
-      className="flex-row items-center justify-between p-4"
+      className="z-50 flex-row items-center justify-between p-4"
       style={{
         backgroundColor: colors.app.pageHeaderBackground,
         boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.05)",
