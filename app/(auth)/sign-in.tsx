@@ -186,6 +186,7 @@ export default function SignInScreen() {
               loading={loading}
             />
 
+            {/* Sign Up */}
             <View className="mt-4 flex-row justify-center">
               <ThemedText type="default" variant="primary" className="text-sm">
                 Don't have an account?{" "}
@@ -196,7 +197,7 @@ export default function SignInScreen() {
                   style={{
                     color: colors.app.brand,
                   }}
-                  // onPress={() => router.push("/(auth)/forgot-password")}
+                  onPress={() => router.push("/sign-up")}
                 >
                   Sign Up
                 </ThemedText>

@@ -1,5 +1,5 @@
 import { api, AuthStorage } from "@/lib/api";
-import { SignInForm, User } from "@/types/auth.types";
+import { SignInForm, SignUpRequest, User } from "@/types/auth.types";
 import { useRouter } from "expo-router";
 import {
   createContext,
@@ -20,6 +20,7 @@ type AuthContextType = {
   loading: boolean;
   user: User | null;
   isAuthenticated: boolean;
+  signUp: (values: SignUpRequest) => Promise<void>;
   signIn: (values: SignInForm) => Promise<void>;
   signOut: () => Promise<void>;
   loadUser: () => Promise<void>;
@@ -57,18 +58,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
+  // Sign up
+  async function signUp(values: SignUpRequest) {
+    const { data } = await api.post("/auth/register", values);
+    const { accessToken, refreshToken, user } = data as AuthResponse;
+
+    await AuthStorage.setTokens(accessToken, refreshToken);
+    setUser(user);
+  }
+
   // Sign in
   async function signIn(values: SignInForm) {
-    setLoading(true);
-    try {
-      const { data } = await api.post("/auth/login", values);
-      const { accessToken, refreshToken, user } = data as AuthResponse;
+    const { data } = await api.post("/auth/login", values);
+    const { accessToken, refreshToken, user } = data as AuthResponse;
 
-      await AuthStorage.setTokens(accessToken, refreshToken);
-      setUser(user);
-    } finally {
-      setLoading(false);
-    }
+    await AuthStorage.setTokens(accessToken, refreshToken);
+    setUser(user);
   }
 
   // Sign out
@@ -99,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       user,
       isAuthenticated: !!user,
+      signUp,
       signIn,
       signOut,
       loadUser,

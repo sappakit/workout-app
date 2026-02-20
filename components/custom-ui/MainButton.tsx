@@ -39,7 +39,7 @@ export default function MainButton({
       disabled={isDisabled}
       activeOpacity={0.8}
       className={clsx(
-        "h-12 flex-row items-center justify-center rounded-xl",
+        "h-12 flex-row items-center justify-center rounded-xl opacity-100",
         isDisabled && "opacity-60",
         className,
       )}

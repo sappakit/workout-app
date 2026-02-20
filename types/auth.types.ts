@@ -27,16 +27,15 @@ export type SignInForm = z.infer<typeof signInSchema>;
 // Sign up
 export const signUpSchema = z
   .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    email: z.email("Invalid email"),
-    phoneNumber: z.string().min(8, "Invalid phone number"),
-    username: z.string().min(4, "Username must be at least 4 characters"),
+    username: z.string().min(3, "Username must be at least 3 characters"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
-    termsAccepted: z.boolean().refine((v) => v === true, {
-      message: "You must accept the terms of use",
-    }),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    email: z
+      .string()
+      .nonempty("Email is required")
+      .pipe(z.email("Invalid email")),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -45,12 +44,19 @@ export const signUpSchema = z
 
 export type SignUpForm = z.infer<typeof signUpSchema>;
 
+export type SignUpRequest = {
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
 type Role = {
   code: string;
   naame: string;
 };
 
-// User
 export type User = {
   id: number;
   username: string;
