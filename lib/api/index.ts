@@ -58,7 +58,11 @@ api.interceptors.response.use(
     }
 
     // Handle 401 (Refresh)
-    if (status === 401 && !originalRequest._retry) {
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/auth/login") // skip in login process
+    ) {
       originalRequest._retry = true;
 
       // If refresh already running -> wait

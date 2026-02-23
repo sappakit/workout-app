@@ -78,9 +78,8 @@ export const Colors = {
     cardPrimary: "#FFFFFF",
     cardSecondary: "#E3E3E3",
 
-    // Streak
-    streakPrimary: "0F0F0F",
-    streakSecondary: "1D1D1D",
+    // Toast
+    toastBackground: "#FFFFFF",
   },
 
   appDark: {
@@ -108,9 +107,8 @@ export const Colors = {
     cardPrimary: "#0F0F0F",
     cardSecondary: "#1D1D1D",
 
-    // Streak
-    streakPrimary: "0F0F0F",
-    streakSecondary: "1D1D1D",
+    // Toast
+    toastBackground: "#1D1D1D",
   },
 };
 

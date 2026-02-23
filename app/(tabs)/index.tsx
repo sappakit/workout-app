@@ -8,6 +8,7 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppToast } from "@/lib/toast/useAppToast";
 import { Workout } from "@/types/workout.types";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
@@ -64,12 +65,28 @@ export default function HomeScreen() {
   const { colors } = useAppTheme();
   const { signOut, loading } = useAuth();
 
+  // TODO: remove
+  const toast = useAppToast();
+
   return (
     <PageLayout>
       {/* TODO: remove */}
       <MainButton
         title="Log out"
         onPress={signOut}
+        loading={loading}
+        className="mb-4"
+      />
+
+      {/* TODO: remove */}
+      <MainButton
+        title="Toast"
+        onPress={() =>
+          toast.error({
+            title: "Sign-up failed",
+            message: "Something went wrong. Please try again.",
+          })
+        }
         loading={loading}
         className="mb-4"
       />

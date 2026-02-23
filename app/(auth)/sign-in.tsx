@@ -6,6 +6,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppToast } from "@/lib/toast/useAppToast";
 import { SignInForm, signInSchema } from "@/types/auth.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -13,13 +14,14 @@ import { useRouter } from "expo-router";
 import { AtSign, Facebook, LogIn, Mail } from "lucide-react-native";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 
-// TODO: Add toast for error (don't show error from backend like dto should not exists)
 export default function SignInScreen() {
   const { colors } = useAppTheme();
   const { signIn } = useAuth();
   const router = useRouter();
+
+  const toast = useAppToast();
 
   const {
     control,
@@ -38,19 +40,16 @@ export default function SignInScreen() {
     mutationKey: ["auth", "sign-in"],
     mutationFn: (values: SignInForm) => signIn(values),
     onSuccess: () => {
-      console.log("Login successful");
+      toast.success({
+        title: "Welcome back 👋",
+        message: "You're ready to train.",
+      });
     },
-    onError: (err: unknown) => {
-      const message =
-        (err as any)?.response?.data?.message ??
-        (err instanceof Error
-          ? err.message
-          : "Sign in failed. Please try again.");
-
-      Alert.alert(
-        "Error",
-        Array.isArray(message) ? message.join("\n") : message,
-      );
+    onError: (_err: unknown) => {
+      toast.error({
+        title: "Sign in failed",
+        message: "Incorrect email/username or password",
+      });
     },
   });
 
@@ -205,6 +204,7 @@ export default function SignInScreen() {
             </View>
           </View>
 
+          {/* Third party login */}
           {/* Divider */}
           <View className="mt-6 flex-row items-center">
             <View
@@ -228,7 +228,6 @@ export default function SignInScreen() {
             />
           </View>
 
-          {/* Third party login */}
           {/* TODO: Facebook, Google, Hotmail */}
           <View className="mt-6 flex-row justify-center gap-4">
             <View

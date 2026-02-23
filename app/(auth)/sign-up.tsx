@@ -6,6 +6,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppToast } from "@/lib/toast/useAppToast";
 import { SignUpForm, SignUpRequest, signUpSchema } from "@/types/auth.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -13,12 +14,14 @@ import { useRouter } from "expo-router";
 import { UserPlus } from "lucide-react-native";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 
 export default function SignUpScreen() {
   const { colors } = useAppTheme();
   const { signUp } = useAuth();
   const router = useRouter();
+
+  const toast = useAppToast();
 
   const {
     control,
@@ -41,7 +44,11 @@ export default function SignUpScreen() {
     mutationKey: ["auth", "sign-up"],
     mutationFn: (values: SignUpRequest) => signUp(values),
     onSuccess: () => {
-      Alert.alert("Success", "Account created successfully!");
+      toast.success({
+        title: "Welcome!",
+        message: "Your account has been created.",
+      });
+
       router.replace("/(auth)/sign-in");
     },
     onError: (err: unknown) => {
@@ -49,12 +56,12 @@ export default function SignUpScreen() {
         (err as any)?.response?.data?.message ??
         (err instanceof Error
           ? err.message
-          : "Sign up failed. Please try again.");
+          : "Something went wrong. Please try again.");
 
-      Alert.alert(
-        "Error",
-        Array.isArray(message) ? message.join("\n") : message,
-      );
+      toast.error({
+        title: "Sign-up failed",
+        message: Array.isArray(message) ? message.join("\n") : message,
+      });
     },
   });
 
