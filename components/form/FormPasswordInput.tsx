@@ -1,7 +1,9 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
+import clsx from "clsx";
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { TextInput, TouchableOpacity, View } from "react-native";
+import { twMerge } from "tailwind-merge";
 import { FormTextInputProps } from "./FormTextInput";
 
 export default function FormPasswordInput({
@@ -19,7 +21,9 @@ export default function FormPasswordInput({
       <TextInput
         {...props}
         secureTextEntry={!showPassword}
-        className={`h-12 rounded-lg border px-4 py-3 pr-12 text-sm ${className}`.trim()}
+        className={twMerge(
+          clsx("h-12 rounded-lg border px-4 py-3 pr-12 text-sm", className),
+        )}
         style={[
           {
             color: colors.app.textAccent,

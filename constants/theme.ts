@@ -67,12 +67,13 @@ export const Colors = {
 
     // Text
     textPrimary: "#8C8C8C",
-    textSecondary: "#AEAEAE",
+    textSecondary: "#D9D9D9",
     textAccent: "#2D2D2D",
 
     // Border
     borderPrimary: "#D7D7D7",
     borderSecondary: "#C3C3C3",
+    borderTertiary: "#3B3B3B",
 
     // Card
     cardPrimary: "#FFFFFF",
@@ -96,12 +97,13 @@ export const Colors = {
 
     // Text
     textPrimary: "#8F8F8F",
-    textSecondary: "#2D2D2D",
+    textSecondary: "#D9D9D9",
     textAccent: "#FFFFFF",
 
     // Border
     borderPrimary: "#1D1D1D",
-    borderSecondary: "#2D2D2D",
+    borderSecondary: "#8F8F8F",
+    borderTertiary: "#3B3B3B",
 
     // Card
     cardPrimary: "#0F0F0F",

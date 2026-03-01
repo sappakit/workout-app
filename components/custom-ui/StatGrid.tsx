@@ -1,8 +1,8 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   BicepsFlexed,
-  Clock,
-  Heart,
+  Flame,
+  Timer,
   type LucideIcon,
 } from "lucide-react-native";
 import { FlatList, View } from "react-native";
@@ -22,8 +22,8 @@ const stats: StatItem[] = [
     label: "Completed\nWorkouts",
     icon: BicepsFlexed,
   },
-  { key: "minutes", value: "240", label: "Minutes\nTotal time", icon: Clock },
-  { key: "calories", value: "325", label: "Calories\nBurned", icon: Heart },
+  { key: "minutes", value: "240", label: "Minutes\nTotal time", icon: Timer },
+  { key: "calories", value: "325", label: "Calories\nBurned", icon: Flame },
 ];
 
 export function StatsGrid() {

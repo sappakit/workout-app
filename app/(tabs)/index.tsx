@@ -7,59 +7,11 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
+import { workoutData } from "@/data/workouts.mock";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { Workout } from "@/types/workout.types";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
-
-const data: Workout[] = [
-  {
-    id: 1,
-    title: "Push-ups",
-    subtitle: "Chest Workout",
-    sets: "4 Sets",
-    duration: "12 Minutes",
-    level: "Beginner",
-    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e",
-  },
-  {
-    id: 2,
-    title: "Dumbbell Fly",
-    subtitle: "Chest Workout",
-    sets: "3 Sets",
-    duration: "6 Minutes",
-    level: "Intermediate",
-    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61",
-  },
-  {
-    id: 3,
-    title: "Push-ups",
-    subtitle: "Chest Workout",
-    sets: "4 Sets",
-    duration: "12 Minutes",
-    level: "Beginner",
-    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e",
-  },
-  {
-    id: 4,
-    title: "Dumbbell Fly",
-    subtitle: "Chest Workout",
-    sets: "3 Sets",
-    duration: "6 Minutes",
-    level: "Intermediate",
-    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61",
-  },
-  {
-    id: 5,
-    title: "Push-ups",
-    subtitle: "Chest Workout",
-    sets: "4 Sets",
-    duration: "12 Minutes",
-    level: "Beginner",
-    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e",
-  },
-];
 
 export default function HomeScreen() {
   const { colors } = useAppTheme();
@@ -67,6 +19,9 @@ export default function HomeScreen() {
 
   // TODO: remove
   const toast = useAppToast();
+
+  // TODO: mock data
+  const data = workoutData;
 
   return (
     <PageLayout>

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { View } from "react-native";
+import { twMerge } from "tailwind-merge";
 import { ThemedText } from "../themed-text";
 
 interface SectionHeaderProps {
@@ -16,7 +17,11 @@ export function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <View className={clsx("flex-row items-center justify-between", className)}>
+    <View
+      className={twMerge(
+        clsx("flex-row items-center justify-between", className),
+      )}
+    >
       <ThemedText type="defaultSemiBold" variant="accent" className="text-xl">
         {title}
       </ThemedText>

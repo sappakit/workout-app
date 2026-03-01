@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
 } from "react-native";
+import { twMerge } from "tailwind-merge";
 import { ThemedText } from "../themed-text";
 
 interface MainButtonProps extends TouchableOpacityProps {
@@ -38,10 +39,12 @@ export default function MainButton({
       onPress={onPress}
       disabled={isDisabled}
       activeOpacity={0.8}
-      className={clsx(
-        "h-12 flex-row items-center justify-center rounded-xl opacity-100",
-        isDisabled && "opacity-60",
-        className,
+      className={twMerge(
+        clsx(
+          "h-12 flex-row items-center justify-center rounded-xl opacity-100",
+          isDisabled && "opacity-60",
+          className,
+        ),
       )}
       style={[{ backgroundColor: colors.app.brand }, style]}
       {...props}

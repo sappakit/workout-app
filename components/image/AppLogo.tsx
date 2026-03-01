@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 import { Image, ImageStyle, StyleProp, View } from "react-native";
+import { twMerge } from "tailwind-merge";
 
 type AppLogoVariant = "color" | "mono";
 
@@ -23,7 +24,7 @@ export function AppLogo({
   style,
 }: AppLogoProps) {
   return (
-    <View className={clsx("items-center justify-center", className)}>
+    <View className={twMerge(clsx("items-center justify-center", className))}>
       <Image
         source={SOURCES[variant]}
         resizeMode="contain"

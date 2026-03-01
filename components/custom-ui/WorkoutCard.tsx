@@ -20,7 +20,7 @@ export function WorkoutCard({ data }: WorkoutCardProps) {
         borderColor: colors.app.borderPrimary,
       }}
     >
-      <View className="flex-1 flex-row overflow-hidden p-3">
+      <View className="flex-1 flex-row overflow-hidden p-2">
         <Thumbnail image={data.image} />
 
         <View className="ml-4" style={{ justifyContent: "flex-end" }}>

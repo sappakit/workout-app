@@ -10,7 +10,7 @@ export function UserIcon() {
       className="items-center justify-center rounded-full border p-2"
       style={{
         backgroundColor: colors.app.cardSecondary,
-        borderColor: colors.app.borderSecondary,
+        borderColor: colors.app.borderTertiary,
       }}
     >
       <User className="size-8" color={colors.app.textSecondary} />

@@ -17,9 +17,10 @@ export default function Thumbnail({
   aspectRatio = 4 / 3,
   borderRadius = 8,
   iconSize = 28,
-  iconColor = "#CCCCCC",
+  iconColor,
 }: ThumbnailProps) {
   const { colors } = useAppTheme();
+  const finalIconColor = iconColor ?? colors.app.textPrimary;
 
   return (
     <View
@@ -30,7 +31,7 @@ export default function Thumbnail({
           aspectRatio,
           borderRadius,
           borderColor: colors.app.borderPrimary,
-          backgroundColor: colors.app.borderPrimary,
+          backgroundColor: colors.app.cardSecondary,
         },
       ]}
     >
@@ -42,12 +43,9 @@ export default function Thumbnail({
         />
       ) : (
         <View
-          style={[
-            styles.image,
-            { backgroundColor: colors.app.borderSecondary },
-          ]}
+          style={[styles.image, { backgroundColor: colors.app.cardSecondary }]}
         >
-          <ImageIcon size={iconSize} color={iconColor} />
+          <ImageIcon size={iconSize} color={finalIconColor} />
         </View>
       )}
     </View>

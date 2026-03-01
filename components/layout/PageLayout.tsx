@@ -1,14 +1,16 @@
 import PageHeader from "@/components/layout/PageHeader";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import clsx from "clsx";
 import React from "react";
 import { ScrollView, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { twMerge } from "tailwind-merge";
 
 type ScreenLayoutProps = {
   children: React.ReactNode;
   showHeader?: boolean;
   scroll?: boolean;
-  contentClassName?: string;
+  className?: string;
   topInset?: number;
   bottomInset?: number;
   backgroundColor?: string;
@@ -20,7 +22,7 @@ export function PageLayout({
   children,
   showHeader = true,
   scroll = true,
-  contentClassName = "px-4",
+  className,
   topInset = 12,
   bottomInset = 12,
   backgroundColor,
@@ -47,7 +49,7 @@ export function PageLayout({
 
       {scroll ? (
         <ScrollView
-          className={contentClassName}
+          className={twMerge(clsx("px-4", className))}
           showsVerticalScrollIndicator={showsVerticalScrollIndicator}
           contentContainerStyle={{
             paddingTop: topInset,
@@ -58,7 +60,7 @@ export function PageLayout({
         </ScrollView>
       ) : (
         <View
-          className={contentClassName}
+          className={twMerge(clsx("px-4", className))}
           style={{ paddingTop: topInset, paddingBottom: bottomInset }}
         >
           {children}

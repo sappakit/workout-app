@@ -1,5 +1,9 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
+import clsx from "clsx";
 import { Text, type TextProps } from "react-native";
+import { twMerge } from "tailwind-merge";
+
+type TextType = "default" | "defaultSemiBold" | "title" | "subtitle";
 
 type Variant =
   | "primary"
@@ -10,8 +14,6 @@ type Variant =
   | "warning"
   | "error";
 
-type TextType = "default" | "defaultSemiBold" | "title" | "subtitle";
-
 export type ThemedTextProps = TextProps & {
   type?: TextType;
   variant?: Variant;
@@ -20,10 +22,10 @@ export type ThemedTextProps = TextProps & {
 };
 
 const typeClassMap = {
-  default: "text-base",
-  defaultSemiBold: "text-base font-semibold",
-  title: "text-3xl font-bold",
-  subtitle: "text-xl font-bold",
+  default: "",
+  defaultSemiBold: "font-semibold",
+  title: "text-3xl font-semibold",
+  subtitle: "text-xl font-semibold",
 } satisfies Record<TextType, string>;
 
 export function ThemedText({
@@ -48,12 +50,10 @@ export function ThemedText({
 
   const themedColor = color ?? variantColorMap[variant];
 
-  const mergedClassName = `${typeClassMap[type]} ${className ?? ""}`.trim();
-
   return (
     <Text
       {...rest}
-      className={mergedClassName}
+      className={twMerge(clsx(typeClassMap[type], className))}
       style={[{ color: themedColor }, style]}
     />
   );

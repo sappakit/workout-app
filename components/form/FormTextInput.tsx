@@ -1,6 +1,8 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
+import clsx from "clsx";
 import React from "react";
 import { TextInput, TextInputProps } from "react-native";
+import { twMerge } from "tailwind-merge";
 
 export interface FormTextInputProps extends TextInputProps {
   error?: boolean;
@@ -17,7 +19,9 @@ export default function FormTextInput({
 
   return (
     <TextInput
-      className={`h-12 rounded-lg border px-4 py-3 text-sm ${className}`.trim()}
+      className={twMerge(
+        clsx("h-12 rounded-lg border px-4 py-3 text-sm", className),
+      )}
       style={[
         {
           color: colors.app.textAccent,

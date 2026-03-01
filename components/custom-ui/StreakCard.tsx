@@ -19,7 +19,7 @@ export function StreakCard() {
           className="mr-3 items-center justify-center rounded-full border p-2"
           style={{
             backgroundColor: colors.app.cardSecondary,
-            borderColor: colors.app.borderSecondary,
+            borderColor: colors.app.borderTertiary,
           }}
         >
           <Text className="text-[2rem]">🔥</Text>
