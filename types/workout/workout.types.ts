@@ -19,12 +19,12 @@ export interface WorkoutExerciseItem {
 
   orderIndex: number;
 
-  plannedSets: number;
-  plannedRepsRange: string;
-  plannedWeight: number;
-  plannedRestTime: number;
-  plannedDuration: number;
-  plannedDistance: number;
+  plannedSets?: number;
+  plannedRepsRange?: string;
+  plannedWeight?: number;
+  plannedRestTime?: number;
+  plannedDuration?: number;
+  plannedDistance?: number;
 
   exercise: Exercise;
 }
@@ -32,6 +32,12 @@ export interface WorkoutExerciseItem {
 export interface WorkoutMuscleItem {
   id: number;
   muscle: Muscle;
+}
+
+export interface WorkoutFocusType {
+  id: number;
+  code: string;
+  name: string;
 }
 
 export interface WorkoutResponse {
@@ -42,6 +48,7 @@ export interface WorkoutResponse {
 
   workoutExercises: WorkoutExerciseItem[];
   muscles: WorkoutMuscleItem[];
+  workoutFocusType: WorkoutFocusType;
 }
 
 export interface WorkoutSchedule {

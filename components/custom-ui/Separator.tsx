@@ -1,18 +1,18 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
-import { View } from "react-native";
+import { View, ViewProps } from "react-native";
 import { twMerge } from "tailwind-merge";
 
-type SeparatorProps = {
+interface SeparatorProps extends ViewProps {
   orientation?: "vertical" | "horizontal";
-  color?: string;
   className?: string;
-};
+}
 
 export function Separator({
   orientation = "vertical",
-  color,
   className,
+  style,
+  ...props
 }: SeparatorProps) {
   const { colors } = useAppTheme();
   const lineOrientation =
@@ -21,9 +21,8 @@ export function Separator({
   return (
     <View
       className={twMerge(clsx(lineOrientation, className))}
-      style={{
-        backgroundColor: color ?? colors.app.borderTertiary,
-      }}
+      style={[{ backgroundColor: colors.app.borderTertiary }, style]}
+      {...props}
     />
   );
 }

@@ -17,22 +17,20 @@ type Variant =
 export type ThemedTextProps = TextProps & {
   type?: TextType;
   variant?: Variant;
-  color?: string;
   className?: string;
 };
 
 const typeClassMap = {
   default: "",
   defaultSemiBold: "font-semibold",
-  title: "text-3xl font-semibold",
-  subtitle: "text-xl font-semibold",
+  title: "text-2xl font-semibold",
+  subtitle: "text-lg",
 } satisfies Record<TextType, string>;
 
 export function ThemedText({
   className,
   type = "default",
   variant = "primary",
-  color,
   style,
   ...rest
 }: ThemedTextProps) {
@@ -48,13 +46,11 @@ export function ThemedText({
     error: colors.app.error,
   } satisfies Record<Variant, string>;
 
-  const themedColor = color ?? variantColorMap[variant];
-
   return (
     <Text
       {...rest}
       className={twMerge(clsx(typeClassMap[type], className))}
-      style={[{ color: themedColor }, style]}
+      style={[{ color: variantColorMap[variant] }, style]}
     />
   );
 }

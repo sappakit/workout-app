@@ -73,7 +73,7 @@ export const Colors = {
     // Border
     borderPrimary: "#D7D7D7",
     borderSecondary: "#C3C3C3",
-    borderTertiary: "#3B3B3B",
+    borderTertiary: "#AAAAAA",
 
     // Card
     cardPrimary: "#FFFFFF",

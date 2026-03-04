@@ -2,16 +2,18 @@ import MainButton from "@/components/custom-ui/MainButton";
 import { StatsGrid } from "@/components/custom-ui/StatGrid";
 import { StreakCard } from "@/components/custom-ui/StreakCard";
 import { WeekCalendar } from "@/components/custom-ui/WeekCalendar";
-import { WorkoutCard } from "@/components/custom-ui/WorkoutCard";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
+import { ExerciseCard } from "@/components/workout/ExerciseCard";
 import { useAuth } from "@/context/AuthContext";
-import { workoutData } from "@/data/workouts.mock";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useGetQuery } from "@/hooks/useGetQuery";
 import { useAppToast } from "@/lib/toast/useAppToast";
+import { WorkoutSchedule } from "@/types/workout/workout.types";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
+import { workoutApi } from "../api/workout.api";
 
 export default function HomeScreen() {
   const { colors } = useAppTheme();
@@ -21,7 +23,19 @@ export default function HomeScreen() {
   const toast = useAppToast();
 
   // TODO: mock data
-  const data = workoutData;
+  // const data = workoutData;
+
+  // Today workout data
+  const url = workoutApi.getSchedule();
+
+  const { data, isLoading, isError, isSuccess } = useGetQuery<WorkoutSchedule>(
+    ["workout-schedule"],
+    url,
+  );
+
+  // TODO: add loading/error
+  if (isLoading) return null;
+  if (isError || !data) return null;
 
   return (
     <PageLayout>
@@ -49,7 +63,7 @@ export default function HomeScreen() {
       {/* Streak Card */}
       <StreakCard />
       {/* Stats */}
-      <View className="mt-3">
+      <View className="mt-4">
         <SectionHeader title="Your stats" />
 
         <View className="mt-2">
@@ -57,7 +71,7 @@ export default function HomeScreen() {
         </View>
       </View>
       {/* Calendar */}
-      <View className="mt-3">
+      <View className="mt-4">
         <WeekCalendar onDateChange={(d) => console.log("Selected:", d)} />
 
         <View className="mt-2 flex-row items-center justify-between">
@@ -74,15 +88,18 @@ export default function HomeScreen() {
           <ChevronRight size={24} color={colors.app.textSecondary} />
         </View>
       </View>
+
       {/* Today Plan */}
-      <View className="mt-3">
+      <View className="mt-4">
         <SectionHeader title="Today plan" />
 
-        <View className="mt-2">
-          {data.map((workout) => (
-            <WorkoutCard key={workout.id} data={workout} />
-          ))}
-        </View>
+        {data.workout.workoutExercises.map((item, index) => (
+          <ExerciseCard
+            key={item.id}
+            data={item}
+            className={`${index > 0 && "mt-4"}`}
+          />
+        ))}
       </View>
     </PageLayout>
   );

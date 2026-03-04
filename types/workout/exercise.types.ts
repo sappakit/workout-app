@@ -1,15 +1,27 @@
 import { Equipment, Muscle } from "./shared.types";
 
 export enum ExerciseType {
-  WEIGHT = "weight",
+  STRENGTH = "strength",
   CARDIO = "cardio",
   CALISTHENICS = "calisthenics",
 }
 
 export const ExerciseTypeLabel: Record<ExerciseType, string> = {
-  [ExerciseType.WEIGHT]: "Strength",
+  [ExerciseType.STRENGTH]: "Strength",
   [ExerciseType.CARDIO]: "Cardio Training",
   [ExerciseType.CALISTHENICS]: "Bodyweight",
+};
+
+export enum DifficultyLevel {
+  BEGINNER = "beginner",
+  INTERMEDIATE = "intermediate",
+  ADVANCED = "advanced",
+}
+
+export const DifficultyLabel: Record<DifficultyLevel, string> = {
+  [DifficultyLevel.BEGINNER]: "Beginner",
+  [DifficultyLevel.INTERMEDIATE]: "Intermediate",
+  [DifficultyLevel.ADVANCED]: "Advanced",
 };
 
 export interface ExerciseMuscleItem {
@@ -28,6 +40,7 @@ export interface Exercise {
   description: string;
 
   exerciseType: ExerciseType;
+  difficultyLevel: DifficultyLevel;
 
   defaultCaloriesBurned: number;
   defaultDuration: number;

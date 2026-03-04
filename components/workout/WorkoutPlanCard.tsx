@@ -6,16 +6,26 @@ import {
 import { WorkoutResponse } from "@/types/workout/workout.types";
 import clsx from "clsx";
 import {
+  ArrowUpDown,
   BicepsFlexed,
-  Ellipsis,
   Flame,
   LucideIcon,
+  PanelTopOpen,
+  Pencil,
+  Repeat,
   Timer,
+  Trash2,
+  UserPlus,
 } from "lucide-react-native";
-import { Fragment } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Fragment, useState } from "react";
+import { View } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { Separator } from "../custom-ui/Separator";
+import {
+  DropdownItem,
+  MenuSectionLabel,
+  OptionsMenu,
+} from "../optionsMenu/OptionsMenu";
 import { ThemedText } from "../themed-text";
 
 type WorkoutPlanCardProps = {
@@ -65,20 +75,13 @@ export function WorkoutPlanCard({ data }: WorkoutPlanCardProps) {
         backgroundColor: colors.app.cardPrimary,
       }}
     >
-      {/* Options */}
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="absolute right-4 top-4 h-7 w-7 items-center justify-center rounded-lg"
-        style={{
-          backgroundColor: colors.app.cardSecondary,
-        }}
-      >
-        <Ellipsis size={12} color={colors.app.textPrimary} />
-      </TouchableOpacity>
+      {/* Options menu */}
+      <View className="absolute right-4 top-4">
+        <WorkoutCardMenu />
+      </View>
 
-      {/* TODO: add workout type */}
       <ThemedText type="default" variant="primary" className="text-sm">
-        Strength training
+        {data.workoutFocusType.name}
       </ThemedText>
 
       <ThemedText type="title" variant="brand" className="mt-1">
@@ -141,5 +144,41 @@ function WorkoutDetail({
         {text}
       </ThemedText>
     </View>
+  );
+}
+
+export function WorkoutCardMenu() {
+  const { colors } = useAppTheme();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <OptionsMenu>
+      <MenuSectionLabel label="Actions" />
+
+      <DropdownItem label="Edit" icon={Pencil} />
+      <DropdownItem label="Delete" icon={Trash2} />
+      <DropdownItem label="Switch plan" icon={Repeat} />
+      <DropdownItem label="Change order" icon={ArrowUpDown} />
+      <DropdownItem
+        label="Show full details"
+        icon={PanelTopOpen}
+        checked={expanded}
+        onSelect={() => {
+          setExpanded((prev) => !prev);
+
+          // Prevent menu closing
+          return false;
+        }}
+      />
+
+      <Separator
+        orientation="horizontal"
+        style={{ backgroundColor: colors.app.borderTertiary }}
+      />
+
+      <MenuSectionLabel label="Team" />
+
+      <DropdownItem label="Invite Users" icon={UserPlus} />
+    </OptionsMenu>
   );
 }

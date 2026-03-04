@@ -13,7 +13,7 @@ export function UserIcon() {
         borderColor: colors.app.borderTertiary,
       }}
     >
-      <User className="size-8" color={colors.app.textSecondary} />
+      <User className="size-8" color={colors.app.borderTertiary} />
     </View>
   );
 }

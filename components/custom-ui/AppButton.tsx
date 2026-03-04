@@ -33,7 +33,7 @@ type ButtonContent =
   | { title: string; icon?: LucideIcon }
   | { title?: string; icon: LucideIcon };
 
-type ButtonProps = BaseButtonProps & ButtonContent;
+export type ButtonProps = BaseButtonProps & ButtonContent;
 
 export function AppButton({
   title,
@@ -109,7 +109,7 @@ export function AppButton({
           {Icon && (
             <Icon
               size={iconSize}
-              color={currentVariant.text.color ?? iconColor}
+              color={iconColor ?? currentVariant.text.color}
               style={[title && { marginRight: 8 }, iconStyle]}
             />
           )}

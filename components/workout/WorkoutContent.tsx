@@ -1,9 +1,9 @@
 import { WorkoutSchedule } from "@/types/workout/workout.types";
+import { useRouter } from "expo-router";
 import { Dumbbell, SquarePen } from "lucide-react-native";
-import { View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
 import { PageLayout } from "../layout/PageLayout";
-import { WorkoutCard } from "./WorkoutCardExpandable";
+import { ExerciseCard } from "./ExerciseCard";
 import { WorkoutPlanCard } from "./WorkoutPlanCard";
 
 interface WorkoutContentProps {
@@ -11,11 +11,39 @@ interface WorkoutContentProps {
 }
 
 export function WorkoutContent({ data }: WorkoutContentProps) {
-  return (
+  const router = useRouter();
+
+  const footer = (
     <>
-      <PageLayout bottomInset={64}>
-        {/* TODO: for working in progress */}
-        {/* <View className="flex-row gap-2">
+      <AppButton
+        title="Start Workout"
+        variant="primary"
+        icon={Dumbbell}
+        className="flex-1"
+        textClassName="font-medium"
+        // onPress={handleSubmit(onSubmit)}
+        // loading={loading}
+      />
+
+      <AppButton
+        title="Edit Plan"
+        variant="secondary"
+        icon={SquarePen}
+        className="w-36"
+        onPress={() =>
+          router.push({
+            pathname: "/edit-plan/[id]",
+            params: { id: data.workout.id },
+          })
+        }
+      />
+    </>
+  );
+
+  return (
+    <PageLayout stickyFooter={footer}>
+      {/* TODO: for working in progress */}
+      {/* <View className="flex-row gap-2">
           <AppButton
             title="Complete set"
             variant="primary"
@@ -32,40 +60,17 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
           />
         </View> */}
 
-        <WorkoutPlanCard data={data.workout} />
+      {/* Workout plan card */}
+      <WorkoutPlanCard data={data.workout} />
 
-        <View className="mt-4">
-          {data.workout.workoutExercises.map((item, index) => (
-            <WorkoutCard
-              key={item.id}
-              data={item}
-              className={`${index > 0 && "mt-4"}`}
-            />
-          ))}
-        </View>
-      </PageLayout>
-
-      {/* Sticky buttons */}
-      <View className="absolute bottom-0 left-0 right-0 flex-row gap-2 px-4 py-2">
-        <AppButton
-          title="Start Workout"
-          variant="primary"
-          icon={Dumbbell}
-          className="flex-1"
-          textClassName="font-medium"
-          // onPress={handleSubmit(onSubmit)}
-          // loading={loading}
+      {/* Exercise card */}
+      {data.workout.workoutExercises.map((item, index) => (
+        <ExerciseCard
+          key={item.id}
+          data={item}
+          className={`${index > 0 && "mt-4"}`}
         />
-
-        <AppButton
-          title="Edit Plan"
-          variant="secondary"
-          icon={SquarePen}
-          className="w-36"
-          // onPress={handleSubmit(onSubmit)}
-          // loading={loading}
-        />
-      </View>
-    </>
+      ))}
+    </PageLayout>
   );
 }

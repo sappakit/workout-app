@@ -1,6 +1,9 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { calculateExerciseDuration } from "@/lib/workout/utils";
-import { ExerciseTypeLabel } from "@/types/workout/exercise.types";
+import {
+  DifficultyLabel,
+  ExerciseTypeLabel,
+} from "@/types/workout/exercise.types";
 import { WorkoutExerciseItem } from "@/types/workout/workout.types";
 import clsx from "clsx";
 import {
@@ -17,18 +20,19 @@ import MainButton from "../custom-ui/MainButton";
 import Thumbnail from "../custom-ui/Thumbnail";
 import { ThemedText } from "../themed-text";
 
-interface WorkoutCardProps {
+interface ExerciseCardProps {
   data: WorkoutExerciseItem;
   className?: string;
 }
 
-type WorkoutInfoItem = {
+type ExerciseInfoItem = {
   key: string;
   label: string;
   value: string;
 };
 
-export function WorkoutCard({ data, className }: WorkoutCardProps) {
+// TODO: handle cardio case (expected no sets, reps, etc, field)
+export function ExerciseCard({ data, className }: ExerciseCardProps) {
   const { colors } = useAppTheme();
   const [expanded, setExpanded] = useState(false);
 
@@ -43,7 +47,7 @@ export function WorkoutCard({ data, className }: WorkoutCardProps) {
 
   const duration = calculateExerciseDuration({ item: data });
 
-  const infoData: WorkoutInfoItem[] = [
+  const infoData: ExerciseInfoItem[] = [
     { key: "sets", label: "Total Sets", value: `${sets}` },
     { key: "reps", label: "Reps per Set", value: `${reps}` },
     { key: "rest", label: "Rest time per set", value: `${rest} Minutes` },
@@ -57,7 +61,9 @@ export function WorkoutCard({ data, className }: WorkoutCardProps) {
 
   return (
     <View
-      className={twMerge(clsx("overflow-hidden rounded-2xl border", className))}
+      className={twMerge(
+        clsx("mt-4 overflow-hidden rounded-2xl border", className),
+      )}
       style={{
         backgroundColor: colors.app.cardPrimary,
         borderColor: colors.app.borderPrimary,
@@ -74,8 +80,12 @@ export function WorkoutCard({ data, className }: WorkoutCardProps) {
         }}
       >
         {/* TODO: Add level */}
-        <ThemedText type="default" color="white" className="text-xs">
-          Intermediate
+        <ThemedText
+          type="default"
+          className="text-xs"
+          style={{ color: colors.app.textWhite }}
+        >
+          {DifficultyLabel[data.exercise.difficultyLevel]}
         </ThemedText>
       </View>
 
@@ -163,11 +173,12 @@ export function WorkoutCard({ data, className }: WorkoutCardProps) {
             contentContainerStyle={{ gap: 8 }}
             renderItem={({ item }) => (
               <View style={{ flex: 1 }}>
-                <WorkoutInfoCard label={item.label} value={item.value} />
+                <ExerciseInfoCard label={item.label} value={item.value} />
               </View>
             )}
           />
 
+          {/* TODO: add more detail */}
           <MainButton
             className="mt-2 rounded-lg border"
             style={{
@@ -192,7 +203,7 @@ export function WorkoutCard({ data, className }: WorkoutCardProps) {
   );
 }
 
-function WorkoutInfoCard({ label, value }: { label: string; value: string }) {
+function ExerciseInfoCard({ label, value }: { label: string; value: string }) {
   const { colors } = useAppTheme();
 
   return (

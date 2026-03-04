@@ -1,14 +1,19 @@
 import { WorkoutContent } from "@/components/workout/WorkoutContent";
 import { useGetQuery } from "@/hooks/useGetQuery";
 import { WorkoutSchedule } from "@/types/workout/workout.types";
+import { workoutApi } from "../api/workout.api";
 
 export default function WorkoutScreen() {
+  const url = workoutApi.getSchedule();
+
   const { data, isLoading, isError, isSuccess } = useGetQuery<WorkoutSchedule>(
     ["workout-schedule"],
-    "/workout/schedule",
+    url,
   );
 
+  // TODO: add loading/error
   if (isLoading) return null;
+  if (isError || !data) return null;
 
   // if (isLoading) return <WorkoutSkeleton />;
 

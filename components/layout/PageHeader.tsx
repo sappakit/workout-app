@@ -15,7 +15,7 @@ export default function PageHeader() {
         boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.05)",
       }}
     >
-      <View className="flex-row">
+      <View className="flex-row items-center">
         <UserIcon />
 
         <View className="ml-4">

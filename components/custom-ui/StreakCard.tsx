@@ -65,9 +65,9 @@ export function WorkoutButton() {
     >
       <Dumbbell size={18} color={colors.app.textWhite} />
       <ThemedText
-        color="white"
         type="default"
         className="ml-2 text-xs font-bold"
+        style={{ color: colors.app.textWhite }}
       >
         WORK OUT
       </ThemedText>
