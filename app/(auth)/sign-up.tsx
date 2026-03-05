@@ -1,4 +1,4 @@
-import MainButton from "@/components/custom-ui/MainButton";
+import { AppButton } from "@/components/custom-ui/AppButton";
 import FormPasswordInput from "@/components/form/FormPasswordInput";
 import FormTextInput from "@/components/form/FormTextInput";
 import { AppLogo } from "@/components/image/AppLogo";
@@ -26,7 +26,7 @@ export default function SignUpScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignUpForm>({
     resolver: zodResolver(signUpSchema),
     mode: "onTouched",
@@ -69,7 +69,6 @@ export default function SignUpScreen() {
     const { confirmPassword, ...payload } = values;
     await mutateAsync(payload);
   };
-  const loading = isPending || isSubmitting;
 
   return (
     <PageLayout showHeader={false}>
@@ -294,17 +293,13 @@ export default function SignUpScreen() {
 
           {/* Submit */}
           <View className="mt-6">
-            <MainButton
+            <AppButton
               title="Sign Up"
-              icon={
-                <UserPlus
-                  size={18}
-                  color={colors.app.textWhite}
-                  style={{ marginRight: 8 }}
-                />
-              }
+              variant="primary"
+              icon={UserPlus}
+              textClassName="font-medium"
               onPress={handleSubmit(onSubmit)}
-              loading={loading}
+              loading={isPending}
             />
 
             <View className="mt-4 flex-row justify-center">

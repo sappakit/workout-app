@@ -1,7 +1,8 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Dumbbell } from "lucide-react-native";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { ThemedText } from "../themed-text";
+import { AppButton } from "./AppButton";
 
 export function StreakCard() {
   const { colors } = useAppTheme();
@@ -46,31 +47,15 @@ export function StreakCard() {
         </View>
       </View>
 
-      <WorkoutButton />
+      <AppButton
+        title="WORK OUT"
+        variant="primary"
+        icon={Dumbbell}
+        className="rounded-full px-5"
+        textClassName="font-bold"
+        // onPress={handleSubmit(onSubmit)}
+        // loading={isPending}
+      />
     </View>
-  );
-}
-
-export function WorkoutButton() {
-  const { colors } = useAppTheme();
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      className="flex-row items-center rounded-full border px-5 py-2"
-      style={{
-        backgroundColor: colors.app.brand,
-        borderColor: colors.app.brandLight,
-      }}
-    >
-      <Dumbbell size={18} color={colors.app.textWhite} />
-      <ThemedText
-        type="default"
-        className="ml-2 text-xs font-bold"
-        style={{ color: colors.app.textWhite }}
-      >
-        WORK OUT
-      </ThemedText>
-    </TouchableOpacity>
   );
 }

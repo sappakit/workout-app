@@ -1,4 +1,4 @@
-import MainButton from "@/components/custom-ui/MainButton";
+import { AppButton } from "@/components/custom-ui/AppButton";
 import { StatsGrid } from "@/components/custom-ui/StatGrid";
 import { StreakCard } from "@/components/custom-ui/StreakCard";
 import { WeekCalendar } from "@/components/custom-ui/WeekCalendar";
@@ -40,28 +40,31 @@ export default function HomeScreen() {
   return (
     <PageLayout>
       {/* TODO: remove */}
-      <MainButton
+      <AppButton
         title="Log out"
+        variant="primary"
+        textClassName="font-medium"
         onPress={signOut}
-        loading={loading}
         className="mb-4"
       />
 
       {/* TODO: remove */}
-      <MainButton
+      <AppButton
         title="Toast"
+        variant="primary"
+        textClassName="font-medium"
         onPress={() =>
           toast.error({
             title: "Sign-up failed",
             message: "Something went wrong. Please try again.",
           })
         }
-        loading={loading}
         className="mb-4"
       />
 
       {/* Streak Card */}
       <StreakCard />
+
       {/* Stats */}
       <View className="mt-4">
         <SectionHeader title="Your stats" />
@@ -70,6 +73,7 @@ export default function HomeScreen() {
           <StatsGrid />
         </View>
       </View>
+
       {/* Calendar */}
       <View className="mt-4">
         <WeekCalendar onDateChange={(d) => console.log("Selected:", d)} />

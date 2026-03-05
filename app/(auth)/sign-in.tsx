@@ -1,4 +1,4 @@
-import MainButton from "@/components/custom-ui/MainButton";
+import { AppButton } from "@/components/custom-ui/AppButton";
 import FormPasswordInput from "@/components/form/FormPasswordInput";
 import FormTextInput from "@/components/form/FormTextInput";
 import { AppLogo } from "@/components/image/AppLogo";
@@ -26,7 +26,7 @@ export default function SignInScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
     mode: "onTouched",
@@ -54,8 +54,6 @@ export default function SignInScreen() {
   });
 
   const onSubmit = async (values: SignInForm) => await mutateAsync(values);
-
-  const loading = isPending || isSubmitting;
 
   return (
     <PageLayout showHeader={false}>
@@ -172,17 +170,13 @@ export default function SignInScreen() {
 
           {/* Submit */}
           <View className="mt-6">
-            <MainButton
+            <AppButton
               title="Sign in"
-              icon={
-                <LogIn
-                  size={18}
-                  color={colors.app.textWhite}
-                  style={{ marginRight: 8 }}
-                />
-              }
+              variant="primary"
+              icon={LogIn}
+              textClassName="font-medium"
               onPress={handleSubmit(onSubmit)}
-              loading={loading}
+              loading={isPending}
             />
 
             {/* Sign Up */}

@@ -16,7 +16,7 @@ import {
 import { useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { twMerge } from "tailwind-merge";
-import MainButton from "../custom-ui/MainButton";
+import { AppButton } from "../custom-ui/AppButton";
 import Thumbnail from "../custom-ui/Thumbnail";
 import { ThemedText } from "../themed-text";
 
@@ -179,23 +179,14 @@ export function ExerciseCard({ data, className }: ExerciseCardProps) {
           />
 
           {/* TODO: add more detail */}
-          <MainButton
-            className="mt-2 rounded-lg border"
-            style={{
-              backgroundColor: colors.app.cardSecondary,
-              borderColor: colors.app.borderSecondary,
-            }}
-            textStyle={{ color: colors.app.textAccent }}
+          <AppButton
             title="More detail"
-            icon={
-              <FileText
-                size={16}
-                color={colors.app.textAccent}
-                style={{ marginRight: 8 }}
-              />
-            }
+            variant="secondary"
+            icon={FileText}
+            className="mt-2 rounded-md"
+            textClassName="font-medium"
             // onPress={handleSubmit(onSubmit)}
-            // loading={loading}
+            // loading={isPending}
           />
         </View>
       )}
