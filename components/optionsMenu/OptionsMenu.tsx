@@ -65,9 +65,9 @@ export function DropdownItem({
 
   return (
     <MenuOption
+      {...props}
       onSelect={onSelect}
       customStyles={{ optionWrapper: { padding: 0 } }}
-      {...props}
     >
       <View
         className="flex-row items-center justify-between"

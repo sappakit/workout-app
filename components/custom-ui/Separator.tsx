@@ -20,9 +20,9 @@ export function Separator({
 
   return (
     <View
+      {...props}
       className={twMerge(clsx(lineOrientation, className))}
       style={[{ backgroundColor: colors.app.borderTertiary }, style]}
-      {...props}
     />
   );
 }

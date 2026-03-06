@@ -19,6 +19,7 @@ export default function FormTextInput({
 
   return (
     <TextInput
+      {...props}
       className={twMerge(
         clsx("h-12 rounded-lg border px-4 py-3 text-sm", className),
       )}
@@ -33,7 +34,6 @@ export default function FormTextInput({
         style,
       ]}
       placeholderTextColor={placeholderTextColor ?? colors.app.textPrimary}
-      {...props}
     />
   );
 }

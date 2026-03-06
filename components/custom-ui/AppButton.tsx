@@ -90,6 +90,7 @@ export function AppButton({
 
   return (
     <TouchableOpacity
+      {...props}
       disabled={isDisabled}
       activeOpacity={0.8}
       className={twMerge(
@@ -100,7 +101,6 @@ export function AppButton({
         ),
       )}
       style={[currentVariant.container, style]}
-      {...props}
     >
       {loading ? (
         <ActivityIndicator color={currentVariant.text.color} />

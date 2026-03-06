@@ -4,18 +4,23 @@ import {
   WorkoutResponse,
 } from "@/types/workout/workout.types";
 
-export function calculateExerciseDuration({
-  item,
-  timeType = "minutes",
-}: {
-  item: WorkoutExerciseItem;
+type DurationOptions = {
+  // Default: minutes
   timeType?: "seconds" | "minutes";
-}): number {
+};
+
+// Calculate the duration of a single exercise
+export function calculateExerciseDuration(
+  item: WorkoutExerciseItem,
+  options?: DurationOptions,
+): number {
   const { plannedDuration, plannedRestTime, plannedSets, exercise } = item;
 
   // If planned duration exists, use it
   if (plannedDuration && plannedDuration > 0) {
-    return Math.round(plannedDuration / 60);
+    return options?.timeType === "seconds"
+      ? plannedDuration
+      : Math.round(plannedDuration / 60);
   }
 
   const sets = plannedSets ?? exercise.defaultSets ?? 0;
@@ -25,24 +30,38 @@ export function calculateExerciseDuration({
   if (sets <= 0) return 0;
 
   const totalSeconds = sets * (setTime + restTime);
-  return timeType === "minutes" ? Math.round(totalSeconds / 60) : totalSeconds;
+  return options?.timeType === "seconds"
+    ? totalSeconds
+    : Math.round(totalSeconds / 60);
 }
 
+// Calculate the total duration of a list of exercises
+export function calculateWorkoutDurationFromExercises(
+  exercises: WorkoutExerciseItem[],
+  options?: DurationOptions,
+): number {
+  const totalSeconds = exercises.reduce(
+    (sum, item) =>
+      sum + calculateExerciseDuration(item, { timeType: "seconds" }),
+    0,
+  );
+
+  return options?.timeType === "seconds"
+    ? totalSeconds
+    : Math.round(totalSeconds / 60);
+}
+
+// Calculate the duration of the entire workout program
 export function calculateWorkoutDuration(workout: WorkoutResponse): number {
   // If workout has duration, use it
   if (workout.duration && workout.duration > 0) {
     return Math.round(workout.duration / 60);
   }
 
-  const totalSeconds = workout.workoutExercises.reduce(
-    (sum, item) =>
-      sum + calculateExerciseDuration({ item, timeType: "seconds" }),
-    0,
-  );
-
-  return Math.round(totalSeconds / 60);
+  return calculateWorkoutDurationFromExercises(workout.workoutExercises);
 }
 
+// Calcurate total calories used for the workout program
 export function calculateWorkoutCalories(workout: WorkoutResponse): number {
   let totalCalories = 0;
 
@@ -65,7 +84,7 @@ export function calculateWorkoutCalories(workout: WorkoutResponse): number {
       }
 
       // Calories per set
-      case ExerciseType.WEIGHT:
+      case ExerciseType.STRENGTH:
       case ExerciseType.CALISTHENICS:
         totalCalories += sets * baseCalories;
         break;

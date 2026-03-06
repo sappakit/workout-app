@@ -1,17 +1,23 @@
+import { workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { WorkoutResponse } from "@/types/workout/workout.types";
+import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
+import {
+  WorkoutFocusType,
+  WorkoutResponse,
+} from "@/types/workout/workout.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Save } from "lucide-react-native";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { View } from "react-native";
 import { z } from "zod";
 import { AppButton } from "../custom-ui/AppButton";
 import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
+import FormInfiniteSelectInput from "../form/FormInfiniteSelectInput";
 import FormNumberInput from "../form/FormNumberInput";
-import FormSelectInput from "../form/FormSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
 import { ExerciseCard } from "../workout/ExerciseCard";
 
@@ -23,12 +29,12 @@ interface EditPlanContentProps {
 const workoutExerciseSchema = z.object({
   id: z.number(),
   orderIndex: z.number(),
-  plannedSets: z.number().optional(),
-  plannedRepsRange: z.string().optional(),
-  plannedWeight: z.number().optional(),
-  plannedRestTime: z.number().optional(),
-  plannedDuration: z.number().optional(),
-  plannedDistance: z.number().optional(),
+  plannedSets: z.number().nullish(),
+  plannedRepsRange: z.string().nullish(),
+  plannedWeight: z.number().nullish(),
+  plannedRestTime: z.number().nullish(),
+  plannedDuration: z.number().nullish(),
+  plannedDistance: z.number().nullish(),
   exercise: z.any(),
 });
 
@@ -49,7 +55,8 @@ const editPlanSchema = z.object({
   durationSeconds: z
     .number({ error: "Enter 0+ seconds or enable Auto-fill" })
     .min(0, { message: "Seconds cannot be negative" }),
-  autoFill: z.boolean(),
+  autoFillMuscles: z.boolean(),
+  autoFillDuration: z.boolean(),
   workoutExercises: z.array(workoutExerciseSchema),
 });
 
@@ -63,8 +70,9 @@ const WORKOUT_TYPES = [
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
   const {
-    control,
+    control: control,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<EditPlanForm>({
     resolver: zodResolver(editPlanSchema),
@@ -76,7 +84,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       durationHours: undefined,
       durationMinutes: undefined,
       durationSeconds: undefined,
-      autoFill: false,
+      autoFillMuscles: false,
+      autoFillDuration: false,
       workoutExercises: data.workoutExercises,
     },
   });
@@ -95,6 +104,41 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     control,
     name: "workoutExercises",
   });
+
+  const workoutExercises = useWatch({
+    control,
+    name: "workoutExercises",
+  });
+
+  // Auto-filled duration
+  const autoFillDuration = useWatch({
+    control,
+    name: "autoFillDuration",
+  });
+
+  useEffect(() => {
+    if (!autoFillDuration) return;
+
+    const totalSeconds = calculateWorkoutDurationFromExercises(
+      workoutExercises,
+      { timeType: "seconds" },
+    );
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    setValue("durationHours", hours);
+    setValue("durationMinutes", minutes);
+    setValue("durationSeconds", seconds);
+  }, [workoutExercises, autoFillDuration]);
+
+  // TODO: remove
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log("Form errors:", errors);
+    }
+  }, [errors]);
 
   const footer = (
     <>
@@ -157,7 +201,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           Workout Type
         </ThemedText>
 
-        <Controller
+        {/* <Controller
           control={control}
           name="workoutFocusTypeId"
           render={({ field }) => (
@@ -168,6 +212,29 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
               placeholder="Select workout type"
               error={!!errors.workoutFocusTypeId}
               title="Select Workout Type"
+            />
+          )}
+        /> */}
+
+        <Controller
+          control={control}
+          name="workoutFocusTypeId"
+          render={({ field }) => (
+            <FormInfiniteSelectInput<WorkoutFocusType>
+              url={workoutApi.getTypes()}
+              queryKey={["workout-types"]}
+              mapOption={(item) => ({ label: item.name, value: item.id })}
+              value={field.value}
+              onChange={field.onChange}
+              placeholder="Select workout type"
+              validationError={!!errors.workoutFocusTypeId}
+              title="Select Workout Type"
+              selectedOption={
+                data.workoutFocusType && {
+                  label: data.workoutFocusType.name,
+                  value: data.workoutFocusType.id,
+                }
+              }
             />
           )}
         />
@@ -189,13 +256,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <View className="my-2">
           <Controller
             control={control}
-            name="autoFill"
+            name="autoFillMuscles"
             render={({ field }) => (
               <FormCheckbox
                 label="Auto-filled"
                 value={field.value}
                 onChange={field.onChange}
-                error={!!errors.autoFill}
+                error={!!errors.autoFillMuscles}
               />
             )}
           />
@@ -230,13 +297,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <View className="my-2">
           <Controller
             control={control}
-            name="autoFill"
+            name="autoFillDuration"
             render={({ field }) => (
               <FormCheckbox
                 label="Auto-filled"
                 value={field.value}
                 onChange={field.onChange}
-                error={!!errors.autoFill}
+                error={!!errors.autoFillDuration}
               />
             )}
           />
@@ -255,6 +322,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   step={1}
                   placeholder="0"
                   error={!!errors.durationHours}
+                  disabled={autoFillDuration}
                 />
               )}
             />
@@ -280,6 +348,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   step={1}
                   placeholder="0"
                   error={!!errors.durationMinutes}
+                  disabled={autoFillDuration}
                 />
               )}
             />
@@ -305,6 +374,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   step={1}
                   placeholder="0"
                   error={!!errors.durationSeconds}
+                  disabled={autoFillDuration}
                 />
               )}
             />

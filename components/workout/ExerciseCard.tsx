@@ -45,7 +45,7 @@ export function ExerciseCard({ data, className }: ExerciseCardProps) {
     (link) => link.equipment.name,
   );
 
-  const duration = calculateExerciseDuration({ item: data });
+  const duration = calculateExerciseDuration(data);
 
   const infoData: ExerciseInfoItem[] = [
     { key: "sets", label: "Total Sets", value: `${sets}` },

@@ -1,13 +1,14 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   BottomSheetBackdrop,
+  BottomSheetFlatList,
   BottomSheetModal,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import clsx from "clsx";
 import { Check, ChevronDown } from "lucide-react-native";
 import React, { useCallback, useRef } from "react";
-import { Pressable, View, ViewStyle } from "react-native";
+import { ListRenderItem, Pressable, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
 import { ThemedText } from "../themed-text";
@@ -28,6 +29,9 @@ export interface FormSelectInputProps {
   title?: string;
   isLoading?: boolean;
   isError?: boolean;
+  isFetchingNextPage?: boolean;
+  onEndReached?: () => void;
+  selectedOption?: SelectOption;
 }
 
 export default function FormSelectInput({
@@ -41,6 +45,9 @@ export default function FormSelectInput({
   title,
   isLoading,
   isError,
+  isFetchingNextPage,
+  onEndReached,
+  selectedOption,
 }: FormSelectInputProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -75,6 +82,38 @@ export default function FormSelectInput({
   } else if (options.length === 0) {
     content = "No options available.";
   }
+
+  const renderItem: ListRenderItem<SelectOption> = ({ item, index }) => {
+    const isSelected = item.value === value;
+
+    return (
+      <View className={twMerge(clsx("px-2", index > 0 && "pt-1"))}>
+        <Pressable
+          onPress={() => handleSelect(item.value)}
+          className="flex-row items-center justify-between rounded-xl p-4"
+          style={{
+            backgroundColor: isSelected
+              ? colors.app.brand + "20"
+              : "transparent",
+          }}
+        >
+          <ThemedText type="default" variant={isSelected ? "brand" : "accent"}>
+            {item.label}
+          </ThemedText>
+
+          {isSelected && <Check size={18} color={colors.app.brand} />}
+        </Pressable>
+      </View>
+    );
+  };
+
+  const ListFooterComponent = (
+    <View className="px-2">
+      <ThemedText type="default" variant="primary" className="p-4">
+        Loading more...
+      </ThemedText>
+    </View>
+  );
 
   return (
     <>
@@ -111,7 +150,8 @@ export default function FormSelectInput({
       {/* Bottom Sheet Modal */}
       <BottomSheetModal
         ref={bottomSheetModalRef}
-        enableDynamicSizing
+        snapPoints={["20%"]}
+        enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
         backgroundStyle={{
@@ -119,53 +159,40 @@ export default function FormSelectInput({
         }}
         handleIndicatorStyle={{ backgroundColor: colors.app.borderSecondary }}
       >
-        <BottomSheetView style={{ paddingBottom: insets.bottom + 16 }}>
-          {/* Title */}
-          {title && (
-            <ThemedText type="title" variant="accent" className="px-6 py-3">
-              {title}
-            </ThemedText>
-          )}
-
-          {/* Options display */}
-          {isLoading || isError || options.length === 0 ? (
-            <View className={clsx("px-2")}>
+        {/* Options display */}
+        {isLoading || isError || options.length === 0 ? (
+          <BottomSheetView style={{ paddingBottom: insets.bottom + 16 }}>
+            {title && (
+              <ThemedText type="title" variant="accent" className="px-6 py-3">
+                {title}
+              </ThemedText>
+            )}
+            <View className="px-2">
               <ThemedText type="default" variant="primary" className="p-4">
                 {content}
               </ThemedText>
             </View>
-          ) : (
-            options.map((option, index) => {
-              const isSelected = option.value === value;
-
-              return (
-                <View
-                  key={option.value}
-                  className={clsx("px-2", index > 0 && "pt-1")}
-                >
-                  <Pressable
-                    onPress={() => handleSelect(option.value)}
-                    className="flex-row items-center justify-between rounded-xl p-4"
-                    style={{
-                      backgroundColor: isSelected
-                        ? colors.app.brand + "20"
-                        : "transparent",
-                    }}
-                  >
-                    <ThemedText
-                      type="default"
-                      variant={isSelected ? "brand" : "accent"}
-                    >
-                      {option.label}
-                    </ThemedText>
-
-                    {isSelected && <Check size={18} color={colors.app.brand} />}
-                  </Pressable>
-                </View>
-              );
-            })
-          )}
-        </BottomSheetView>
+          </BottomSheetView>
+        ) : (
+          <BottomSheetFlatList
+            data={options}
+            keyExtractor={(item: SelectOption) => item.value.toString()}
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.4}
+            renderItem={renderItem}
+            ListHeaderComponent={
+              title ? (
+                <ThemedText type="title" variant="accent" className="px-6 py-3">
+                  {title}
+                </ThemedText>
+              ) : null
+            }
+            ListFooterComponent={
+              isFetchingNextPage ? ListFooterComponent : null
+            }
+            contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
+          />
+        )}
       </BottomSheetModal>
     </>
   );

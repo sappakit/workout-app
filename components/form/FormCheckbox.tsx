@@ -35,9 +35,9 @@ export default function FormCheckbox({
 
   return (
     <Pressable
+      {...props}
       onPress={() => !disabled && onChange(!value)}
       className={twMerge(clsx("flex-row items-center", className))}
-      {...props}
     >
       {/* Checkbox box */}
       <View

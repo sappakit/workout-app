@@ -19,12 +19,12 @@ export interface WorkoutExerciseItem {
 
   orderIndex: number;
 
-  plannedSets?: number;
-  plannedRepsRange?: string;
-  plannedWeight?: number;
-  plannedRestTime?: number;
-  plannedDuration?: number;
-  plannedDistance?: number;
+  plannedSets?: number | null;
+  plannedRepsRange?: string | null;
+  plannedWeight?: number | null;
+  plannedRestTime?: number | null;
+  plannedDuration?: number | null;
+  plannedDistance?: number | null;
 
   exercise: Exercise;
 }
