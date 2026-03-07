@@ -41,7 +41,7 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
   );
 
   return (
-    <PageLayout stickyFooter={footer}>
+    <PageLayout stickyFooter={{ content: footer }}>
       {/* TODO: for working in progress */}
       {/* <View className="flex-row gap-2">
           <AppButton

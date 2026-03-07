@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import FormSelectInput, {
   FormSelectInputProps,
   SelectOption,
-} from "./FormSelectInput2";
+} from "./FormSelectInput";
 
 interface FormInfiniteSelectInputProps<T> extends Omit<
   FormSelectInputProps,
@@ -35,7 +35,7 @@ export default function FormInfiniteSelectInput<T>({
     queryKey,
     queryFn: async ({ pageParam }) => {
       const { data } = await api.get<PaginatedResponse<T[]>>(url, {
-        params: { page: pageParam },
+        params: { page: pageParam, limit: 20 },
       });
 
       return data;
@@ -69,7 +69,6 @@ export default function FormInfiniteSelectInput<T>({
       isFetchingNextPage={isFetchingNextPage}
       isError={isError}
       onEndReached={loadMore}
-      snapPoints={["30%"]}
     />
   );
 }

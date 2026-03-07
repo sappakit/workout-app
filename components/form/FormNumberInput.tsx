@@ -78,7 +78,7 @@ export default function FormNumberInput({
         placeholder={placeholder}
         keyboardType="numeric"
         onChangeText={handleTextChange}
-        className="min-w-0 flex-1 px-2 text-sm"
+        className="min-w-0 flex-1 px-2"
         placeholderTextColor={colors.app.textPrimary}
         style={{
           color: colors.app.textAccent,

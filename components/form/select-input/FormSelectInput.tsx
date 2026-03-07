@@ -1,3 +1,4 @@
+import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   BottomSheetBackdrop,
@@ -11,7 +12,6 @@ import { useCallback, useRef } from "react";
 import { ListRenderItem, Pressable, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
-import { ThemedText } from "../themed-text";
 
 export interface SelectOption {
   label: string;
@@ -133,13 +133,13 @@ export default function FormSelectInput({
     );
   };
 
-  const ListFooterComponent = (
+  const listFooterComponent = isFetchingNextPage ? (
     <View className="px-2">
       <ThemedText type="default" variant="primary" className="p-4">
         Loading more...
       </ThemedText>
     </View>
-  );
+  ) : null;
 
   return (
     <>
@@ -177,7 +177,8 @@ export default function FormSelectInput({
       <BottomSheetModal
         ref={bottomSheetModalRef}
         onChange={handleSheetChange}
-        snapPoints={snapPoints}
+        snapPoints={snapPoints ?? ["100%"]}
+        topInset={insets.top}
         enableDynamicSizing={false}
         enablePanDownToClose
         enableOverDrag
@@ -218,9 +219,7 @@ export default function FormSelectInput({
             keyboardShouldPersistTaps="handled"
             bounces={false}
             onScrollToIndexFailed={onScrollToIndexFailed}
-            ListFooterComponent={
-              isFetchingNextPage ? ListFooterComponent : null
-            }
+            ListFooterComponent={listFooterComponent}
             contentContainerStyle={{
               paddingBottom: insets.bottom + 16,
             }}

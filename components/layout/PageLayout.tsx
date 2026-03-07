@@ -16,7 +16,7 @@ type ScreenLayoutProps = {
   backgroundColor?: string;
   containerStyle?: ViewStyle;
   showsVerticalScrollIndicator?: boolean;
-  stickyFooter?: ReactNode;
+  stickyFooter?: { content: ReactNode; options?: { addBottomInset: boolean } };
 };
 
 export function PageLayout({
@@ -67,8 +67,13 @@ export function PageLayout({
             <View
               onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
               className="absolute bottom-0 left-0 right-0 flex-row gap-2 px-4 py-2"
+              style={
+                stickyFooter.options?.addBottomInset && {
+                  paddingBottom: insets.bottom,
+                }
+              }
             >
-              {stickyFooter}
+              {stickyFooter.content}
             </View>
           )}
         </>

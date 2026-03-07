@@ -9,15 +9,17 @@ import { ExerciseCard } from "@/components/workout/ExerciseCard";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useGetQuery } from "@/hooks/useGetQuery";
+import { AuthStorage } from "@/lib/api";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { WorkoutSchedule } from "@/types/workout/workout.types";
+import * as Clipboard from "expo-clipboard";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
 import { workoutApi } from "../api/workout.api";
 
 export default function HomeScreen() {
   const { colors } = useAppTheme();
-  const { signOut, loading } = useAuth();
+  const { signOut, loading, user } = useAuth();
 
   // TODO: remove
   const toast = useAppToast();
@@ -59,6 +61,22 @@ export default function HomeScreen() {
             message: "Something went wrong. Please try again.",
           })
         }
+        className="mb-4"
+      />
+
+      {/* TODO: remove */}
+      <AppButton
+        title="Get access token"
+        variant="primary"
+        textClassName="font-medium"
+        onPress={async () => {
+          const token = await AuthStorage.getAccessToken();
+
+          if (token) {
+            await Clipboard.setStringAsync(token);
+            console.log("Token copied");
+          }
+        }}
         className="mb-4"
       />
 

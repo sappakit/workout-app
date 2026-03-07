@@ -1,8 +1,10 @@
-import { workoutApi } from "@/app/api/workout.api";
+import { muscleApi, workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
+import { ExerciseMuscleItem } from "@/types/workout/exercise.types";
+import { Muscle } from "@/types/workout/shared.types";
 import {
   WorkoutFocusType,
   WorkoutResponse,
@@ -16,8 +18,9 @@ import { z } from "zod";
 import { AppButton } from "../custom-ui/AppButton";
 import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
-import FormInfiniteSelectInput from "../form/FormInfiniteSelectInput";
 import FormNumberInput from "../form/FormNumberInput";
+import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
+import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
 import { ExerciseCard } from "../workout/ExerciseCard";
 
@@ -44,8 +47,8 @@ const editPlanSchema = z.object({
     error: "Workout type is required",
   }),
   targetMuscles: z
-    .string()
-    .min(1, "Enter target muscle groups or enable Auto-fill"),
+    .array(z.number())
+    .min(1, "Select target muscle groups or enable Auto-fill"),
   durationHours: z
     .number({ error: "Enter 0+ hours or enable Auto-fill" })
     .min(0, { message: "Minutes cannot be negative" }),
@@ -62,13 +65,15 @@ const editPlanSchema = z.object({
 
 type EditPlanForm = z.infer<typeof editPlanSchema>;
 
-const WORKOUT_TYPES = [
-  { label: "Strength", value: 1 },
-  { label: "Cardio", value: 2 },
-  { label: "Calisthenics", value: 3 },
-];
-
 export default function EditPlanContent({ data }: EditPlanContentProps) {
+  const totalSeconds = data.duration ?? 0;
+
+  const durationHours = Math.floor(totalSeconds / 3600);
+  const durationMinutes = Math.floor((totalSeconds % 3600) / 60);
+  const durationSeconds = totalSeconds % 60;
+
+  const targetMuscles = data.muscles.map((item) => item.muscle.id);
+
   const {
     control: control,
     handleSubmit,
@@ -80,10 +85,10 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     defaultValues: {
       name: data.name,
       workoutFocusTypeId: data.workoutFocusType.id,
-      targetMuscles: "",
-      durationHours: undefined,
-      durationMinutes: undefined,
-      durationSeconds: undefined,
+      targetMuscles: targetMuscles,
+      durationHours: durationHours,
+      durationMinutes: durationMinutes,
+      durationSeconds: durationSeconds,
       autoFillMuscles: false,
       autoFillDuration: false,
       workoutExercises: data.workoutExercises,
@@ -133,6 +138,31 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     setValue("durationSeconds", seconds);
   }, [workoutExercises, autoFillDuration]);
 
+  // Auto-filled muscles
+  const autoFillMuscles = useWatch({
+    control,
+    name: "autoFillMuscles",
+  });
+
+  useEffect(() => {
+    if (!autoFillMuscles) return;
+
+    const uniqueMuscleIds = Array.from(
+      new Set(
+        workoutExercises.flatMap((workoutExercise) =>
+          workoutExercise.exercise.muscles.map(
+            (item: ExerciseMuscleItem) => item.muscle.id,
+          ),
+        ),
+      ),
+    );
+
+    setValue("targetMuscles", uniqueMuscleIds, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }, [workoutExercises, autoFillMuscles, setValue]);
+
   // TODO: remove
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -163,7 +193,12 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   );
 
   return (
-    <PageLayout stickyFooter={footer}>
+    <PageLayout
+      stickyFooter={{
+        content: footer,
+        options: { addBottomInset: true },
+      }}
+    >
       {/* Title */}
       <ThemedText type="title" variant="accent">
         Edit Plan
@@ -201,21 +236,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           Workout Type
         </ThemedText>
 
-        {/* <Controller
-          control={control}
-          name="workoutFocusTypeId"
-          render={({ field }) => (
-            <FormSelectInput
-              options={WORKOUT_TYPES}
-              value={field.value}
-              onChange={field.onChange}
-              placeholder="Select workout type"
-              error={!!errors.workoutFocusTypeId}
-              title="Select Workout Type"
-            />
-          )}
-        /> */}
-
         <Controller
           control={control}
           name="workoutFocusTypeId"
@@ -229,6 +249,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
               placeholder="Select workout type"
               validationError={!!errors.workoutFocusTypeId}
               title="Select Workout Type"
+              snapPoints={["70%"]}
               selectedOption={
                 data.workoutFocusType && {
                   label: data.workoutFocusType.name,
@@ -272,11 +293,17 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           control={control}
           name="targetMuscles"
           render={({ field }) => (
-            <FormTextInput
-              placeholder="Chest, Triceps, Shoulders"
+            <FormInfiniteMultiSelectInput<Muscle>
+              url={muscleApi.getAll()}
+              queryKey={["muscles"]}
+              mapOption={(item) => ({ label: item.name, value: item.id })}
               value={field.value}
-              onChangeText={field.onChange}
-              error={!!errors.targetMuscles}
+              onChange={field.onChange}
+              placeholder="Select target muscle group"
+              validationError={!!errors.targetMuscles}
+              title="Select Target Muscles"
+              snapPoints={["70%"]}
+              disabled={autoFillMuscles}
             />
           )}
         />

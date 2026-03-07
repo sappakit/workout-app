@@ -4,3 +4,11 @@ export const workoutApi = {
   getSchedule: () => "/workout/schedule",
   getTypes: () => "/workout/types",
 };
+
+export const muscleApi = {
+  getAll: () => "/workout/muscles",
+};
+
+export const exerciseApi = {
+  getAll: () => "/workout/exercises",
+};
