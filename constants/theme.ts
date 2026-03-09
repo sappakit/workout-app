@@ -78,6 +78,7 @@ export const Colors = {
     // Card
     cardPrimary: "#FFFFFF",
     cardSecondary: "#E3E3E3",
+    cardTertiary: "#2D2D2D",
 
     // Toast
     toastBackground: "#FFFFFF",
@@ -108,6 +109,7 @@ export const Colors = {
     // Card
     cardPrimary: "#0F0F0F",
     cardSecondary: "#1D1D1D",
+    cardTertiary: "#2D2D2D",
 
     // Toast
     toastBackground: "#1D1D1D",

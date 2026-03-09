@@ -37,20 +37,20 @@ export interface ExerciseEquipmentLink {
 export interface Exercise {
   id: number;
   name: string;
-  description: string;
+  description: string | null;
 
   exerciseType: ExerciseType;
   difficultyLevel: DifficultyLevel;
 
-  defaultCaloriesBurned: number;
-  defaultDuration: number;
-  defaultRestTime: number;
-  defaultRepsRange: string;
-  defaultSets: number;
+  defaultCaloriesBurned: number | null;
+  defaultDuration: number | null;
+  defaultRestTime: number | null;
+  defaultRepsRange: string | null;
+  defaultSets: number | null;
 
-  demoLink: string;
-  howToPerform: string;
+  demoLink: string | null;
+  howToPerform: string | null;
 
-  muscles: ExerciseMuscleItem[];
-  equipmentLinks: ExerciseEquipmentLink[];
+  muscles: ExerciseMuscleItem[] | null;
+  equipmentLinks: ExerciseEquipmentLink[] | null;
 }

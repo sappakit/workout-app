@@ -19,12 +19,12 @@ export interface WorkoutExerciseItem {
 
   orderIndex: number;
 
-  plannedSets?: number | null;
-  plannedRepsRange?: string | null;
-  plannedWeight?: number | null;
-  plannedRestTime?: number | null;
-  plannedDuration?: number | null;
-  plannedDistance?: number | null;
+  plannedSets: number | null;
+  plannedRepsRange: string | null;
+  plannedWeight: number | null;
+  plannedRestTime: number | null;
+  plannedDuration: number | null;
+  plannedDistance: number | null;
 
   exercise: Exercise;
 }
@@ -57,3 +57,4 @@ export interface WorkoutSchedule {
   status: WorkoutScheduleStatus;
   workout: WorkoutResponse;
 }
+

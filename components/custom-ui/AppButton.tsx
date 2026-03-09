@@ -12,7 +12,7 @@ import {
 import { twMerge } from "tailwind-merge";
 import { ThemedText } from "../themed-text";
 
-type ButtonVariant = "primary" | "secondary" | "tertiary";
+type ButtonVariant = "primary" | "secondary" | "tertiary" | "option";
 type ButtonVariantStyles = {
   container: ViewStyle;
   text: TextStyle;
@@ -82,6 +82,14 @@ export function AppButton({
       },
       text: {
         color: colors.app.textAccent,
+      },
+    },
+    option: {
+      container: {
+        backgroundColor: colors.app.cardSecondary,
+      },
+      text: {
+        color: colors.app.textPrimary,
       },
     },
   };

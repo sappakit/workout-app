@@ -2,19 +2,20 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { Minus, Plus } from "lucide-react-native";
 import React from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { Pressable, StyleProp, TextInput, View, ViewStyle } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { Separator } from "../custom-ui/Separator";
 
 export interface FormNumberInputProps {
-  value?: number;
+  value?: number | null;
   placeholder?: string;
-  onChange?: (value: number | undefined) => void;
+  onChange?: (value: number | null) => void;
   min?: number;
   max?: number;
   step?: number;
   error?: boolean;
   className?: string;
+  style?: StyleProp<ViewStyle>;
   disabled?: boolean;
 }
 
@@ -27,6 +28,7 @@ export default function FormNumberInput({
   step = 1,
   error,
   className,
+  style,
   disabled,
 }: FormNumberInputProps) {
   const { colors } = useAppTheme();
@@ -45,7 +47,7 @@ export default function FormNumberInput({
     const clean = text.replace(/[^0-9]/g, "");
 
     if (clean === "") {
-      onChange?.(undefined);
+      onChange?.(null);
       return;
     }
 
@@ -66,15 +68,18 @@ export default function FormNumberInput({
       className={twMerge(
         clsx("h-12 flex-row items-center rounded-lg border px-2", className),
       )}
-      style={{
-        backgroundColor: colors.app.cardSecondary,
-        borderColor,
-        opacity: disabled ? 0.5 : 1,
-      }}
+      style={[
+        {
+          backgroundColor: colors.app.cardSecondary,
+          borderColor,
+          opacity: disabled ? 0.5 : 1,
+        },
+        style,
+      ]}
     >
       {/* Input */}
       <TextInput
-        value={value !== undefined ? String(value) : ""}
+        value={value != null ? String(value) : ""}
         placeholder={placeholder}
         keyboardType="numeric"
         onChangeText={handleTextChange}
