@@ -1,5 +1,7 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { exerciseTypeFieldConfig } from "@/lib/workout/config";
 import { calculateExerciseDuration } from "@/lib/workout/utils";
+import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import {
   DifficultyLabel,
   ExerciseTypeLabel,
@@ -21,7 +23,6 @@ import { Alert, FlatList, TouchableOpacity, View } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { AppButton } from "../custom-ui/AppButton";
 import Thumbnail from "../custom-ui/Thumbnail";
-import { EditPlanForm } from "../edit-plan/EditPlanContent";
 import FormNumberInput from "../form/FormNumberInput";
 import { ThemedText } from "../themed-text";
 
@@ -61,6 +62,14 @@ export function ExerciseCard({
   });
 
   if (!data) return null;
+
+  // Display data based on exercsie type
+  const typeConfig = exerciseTypeFieldConfig[data.exercise.exerciseType];
+  const showSets = typeConfig.visibleFields.includes("plannedSets");
+  const showReps = typeConfig.visibleFields.includes("plannedRepsRange");
+  const showRest = typeConfig.visibleFields.includes("plannedRestTime");
+  const showDuration = typeConfig.visibleFields.includes("plannedDuration");
+  const showDistance = typeConfig.visibleFields.includes("plannedDistance");
 
   const duration = calculateExerciseDuration(data);
 
@@ -262,227 +271,288 @@ export function ExerciseCard({
             }}
           >
             {/* Total Sets */}
-            <View>
-              <ThemedText
-                type="default"
-                variant="primary"
-                className="mb-1 text-xs"
-              >
-                Total Sets
-              </ThemedText>
+            {showSets && (
+              <View>
+                <ThemedText
+                  type="default"
+                  variant="primary"
+                  className="mb-1 text-xs"
+                >
+                  Total Sets
+                </ThemedText>
 
-              <Controller
-                control={control}
-                name={`workoutExercises.${index}.plannedSets`}
-                render={({ field, fieldState }) => (
-                  <>
-                    <FormNumberInput
-                      style={{ backgroundColor: colors.app.cardTertiary }}
-                      value={field.value}
-                      onChange={(value) => {
-                        console.log(value);
-                        field.onChange(value ?? null);
+                <Controller
+                  control={control}
+                  name={`workoutExercises.${index}.plannedSets`}
+                  render={({ field, fieldState }) => (
+                    <>
+                      <FormNumberInput
+                        style={{ backgroundColor: colors.app.cardTertiary }}
+                        value={field.value}
+                        onChange={(value) => {
+                          console.log(value);
+                          field.onChange(value ?? null);
 
-                        // Auto validate after submitted
-                        if (hasTriedSave) {
-                          void trigger(`workoutExercises.${index}.plannedSets`);
-                        }
-                      }}
-                      min={0}
-                      step={1}
-                      placeholder="0"
-                      error={!!fieldState.error}
-                    />
+                          // Auto validate after submitted
+                          if (hasTriedSave) {
+                            void trigger(
+                              `workoutExercises.${index}.plannedSets`,
+                            );
+                          }
+                        }}
+                        min={0}
+                        step={1}
+                        placeholder="0"
+                        error={!!fieldState.error}
+                      />
 
-                    {fieldState.error?.message && (
-                      <ThemedText
-                        type="default"
-                        variant="error"
-                        className="mt-1 text-xs"
-                      >
-                        {fieldState.error?.message}
-                      </ThemedText>
-                    )}
-                  </>
-                )}
-              />
-            </View>
+                      {fieldState.error?.message && (
+                        <ThemedText
+                          type="default"
+                          variant="error"
+                          className="mt-1 text-xs"
+                        >
+                          {fieldState.error?.message}
+                        </ThemedText>
+                      )}
+                    </>
+                  )}
+                />
+              </View>
+            )}
 
             {/* Reps per set */}
-            <View>
-              <ThemedText
-                type="default"
-                variant="primary"
-                className="mb-1 text-xs"
-              >
-                Reps per set
-              </ThemedText>
+            {showReps && (
+              <View>
+                <ThemedText
+                  type="default"
+                  variant="primary"
+                  className="mb-1 text-xs"
+                >
+                  Reps per set
+                </ThemedText>
 
-              <Controller
-                control={control}
-                name={`workoutExercises.${index}.plannedRepsRange`}
-                render={({ field, fieldState }) => {
-                  const repsRange =
-                    field.value ?? data.exercise.defaultRepsRange ?? "";
-                  const [minRepsRaw, maxRepsRaw] = repsRange.split("-");
-                  const minReps = Number(minRepsRaw) || 0;
-                  const maxReps = Number(maxRepsRaw) || 0;
+                <Controller
+                  control={control}
+                  name={`workoutExercises.${index}.plannedRepsRange`}
+                  render={({ field, fieldState }) => {
+                    const repsRange =
+                      field.value ?? data.exercise.defaultRepsRange ?? "";
+                    const [minRepsRaw, maxRepsRaw] = repsRange.split("-");
+                    const minReps = Number(minRepsRaw) || 0;
+                    const maxReps = Number(maxRepsRaw) || 0;
 
-                  return (
-                    <>
-                      <View className="flex-row items-center gap-2">
-                        <FormNumberInput
-                          className="flex-1"
-                          style={{ backgroundColor: colors.app.cardTertiary }}
-                          value={minReps}
-                          onChange={(value) => {
-                            const safeValue = value ?? 0;
-                            field.onChange(`${safeValue}-${maxReps}`);
+                    return (
+                      <>
+                        <View className="flex-row items-center gap-2">
+                          <FormNumberInput
+                            className="flex-1"
+                            style={{ backgroundColor: colors.app.cardTertiary }}
+                            value={minReps}
+                            onChange={(value) => {
+                              const safeValue = value ?? 0;
+                              field.onChange(`${safeValue}-${maxReps}`);
 
-                            // Auto validate after submitted
-                            if (hasTriedSave) {
-                              void trigger(
-                                `workoutExercises.${index}.plannedRepsRange`,
-                              );
-                            }
-                          }}
-                          min={0}
-                          step={1}
-                          placeholder="0"
-                          error={!!fieldState.error}
-                        />
+                              // Auto validate after submitted
+                              if (hasTriedSave) {
+                                void trigger(
+                                  `workoutExercises.${index}.plannedRepsRange`,
+                                );
+                              }
+                            }}
+                            min={0}
+                            step={1}
+                            placeholder="0"
+                            error={!!fieldState.error}
+                          />
 
-                        <View
-                          className="h-0.5 w-3 rounded"
-                          style={{
-                            backgroundColor: colors.app.borderSecondary,
-                          }}
-                        />
+                          <View
+                            className="h-0.5 w-3 rounded"
+                            style={{
+                              backgroundColor: colors.app.borderSecondary,
+                            }}
+                          />
 
-                        <FormNumberInput
-                          className="flex-1"
-                          style={{ backgroundColor: colors.app.cardTertiary }}
-                          value={maxReps}
-                          onChange={(value) => {
-                            const safeValue = value ?? 0;
-                            field.onChange(`${minReps}-${safeValue}`);
+                          <FormNumberInput
+                            className="flex-1"
+                            style={{ backgroundColor: colors.app.cardTertiary }}
+                            value={maxReps}
+                            onChange={(value) => {
+                              const safeValue = value ?? 0;
+                              field.onChange(`${minReps}-${safeValue}`);
 
-                            // Auto validate after submitted
-                            if (hasTriedSave) {
-                              void trigger(
-                                `workoutExercises.${index}.plannedRepsRange`,
-                              );
-                            }
-                          }}
-                          min={0}
-                          step={1}
-                          placeholder="0"
-                          error={!!fieldState.error}
-                        />
-                      </View>
+                              // Auto validate after submitted
+                              if (hasTriedSave) {
+                                void trigger(
+                                  `workoutExercises.${index}.plannedRepsRange`,
+                                );
+                              }
+                            }}
+                            min={0}
+                            step={1}
+                            placeholder="0"
+                            error={!!fieldState.error}
+                          />
+                        </View>
 
-                      {fieldState.error?.message && (
-                        <ThemedText
-                          type="default"
-                          variant="error"
-                          className="mt-1 text-xs"
-                        >
-                          {fieldState.error.message}
-                        </ThemedText>
-                      )}
-                    </>
-                  );
-                }}
-              />
-            </View>
+                        {fieldState.error?.message && (
+                          <ThemedText
+                            type="default"
+                            variant="error"
+                            className="mt-1 text-xs"
+                          >
+                            {fieldState.error.message}
+                          </ThemedText>
+                        )}
+                      </>
+                    );
+                  }}
+                />
+              </View>
+            )}
 
             {/* Rest time per set */}
-            <View>
-              <ThemedText
-                type="default"
-                variant="primary"
-                className="mb-1 text-xs"
-              >
-                Rest time per set
-              </ThemedText>
+            {showRest && (
+              <View>
+                <ThemedText
+                  type="default"
+                  variant="primary"
+                  className="mb-1 text-xs"
+                >
+                  Rest time per set
+                </ThemedText>
 
-              <Controller
-                control={control}
-                name={`workoutExercises.${index}.plannedRestTime`}
-                render={({ field, fieldState }) => {
-                  const plannedRestTime =
-                    field.value ?? data.exercise.defaultRestTime ?? 0;
-                  const restMinutes = Math.floor(plannedRestTime / 60);
-                  const restSeconds = plannedRestTime % 60;
+                <Controller
+                  control={control}
+                  name={`workoutExercises.${index}.plannedRestTime`}
+                  render={({ field, fieldState }) => {
+                    const plannedRestTime =
+                      field.value ?? data.exercise.defaultRestTime ?? 0;
+                    const restMinutes = Math.floor(plannedRestTime / 60);
+                    const restSeconds = plannedRestTime % 60;
 
-                  return (
+                    return (
+                      <>
+                        <View className="flex-row justify-between gap-2">
+                          <View className="flex-1">
+                            <FormNumberInput
+                              style={{
+                                backgroundColor: colors.app.cardTertiary,
+                              }}
+                              value={restMinutes}
+                              onChange={(minutes) => {
+                                const safeMinutes = minutes ?? 0;
+                                field.onChange(safeMinutes * 60 + restSeconds);
+
+                                // Auto validate after submitted
+                                if (hasTriedSave) {
+                                  void trigger(
+                                    `workoutExercises.${index}.plannedRestTime`,
+                                  );
+                                }
+                              }}
+                              min={0}
+                              step={1}
+                              placeholder="0"
+                              error={!!fieldState.error}
+                            />
+
+                            <ThemedText
+                              type="default"
+                              variant="primary"
+                              className="mt-2 self-center text-xs"
+                            >
+                              Minutes
+                            </ThemedText>
+                          </View>
+
+                          <View className="flex-1">
+                            <FormNumberInput
+                              style={{
+                                backgroundColor: colors.app.cardTertiary,
+                              }}
+                              value={restSeconds}
+                              onChange={(seconds) => {
+                                const normalizedSeconds = seconds ?? 0;
+                                const safeSeconds = Math.max(
+                                  0,
+                                  Math.min(59, normalizedSeconds),
+                                );
+                                field.onChange(restMinutes * 60 + safeSeconds);
+
+                                // Auto validate after submitted
+                                if (hasTriedSave) {
+                                  void trigger(
+                                    `workoutExercises.${index}.plannedRestTime`,
+                                  );
+                                }
+                              }}
+                              min={0}
+                              max={59}
+                              step={1}
+                              placeholder="0"
+                              error={!!fieldState.error}
+                            />
+
+                            <ThemedText
+                              type="default"
+                              variant="primary"
+                              className="mt-2 self-center text-xs"
+                            >
+                              Seconds
+                            </ThemedText>
+                          </View>
+                        </View>
+
+                        {fieldState.error?.message && (
+                          <ThemedText
+                            type="default"
+                            variant="error"
+                            className="mt-1 text-xs"
+                          >
+                            {fieldState.error.message}
+                          </ThemedText>
+                        )}
+                      </>
+                    );
+                  }}
+                />
+              </View>
+            )}
+
+            {/* Duration */}
+            {showDuration && (
+              <View>
+                <ThemedText
+                  type="default"
+                  variant="primary"
+                  className="mb-1 text-xs"
+                >
+                  Duration
+                </ThemedText>
+
+                <Controller
+                  control={control}
+                  name={`workoutExercises.${index}.plannedDuration`}
+                  render={({ field, fieldState }) => (
                     <>
-                      <View className="flex-row justify-between gap-2">
-                        <View className="flex-1">
-                          <FormNumberInput
-                            style={{ backgroundColor: colors.app.cardTertiary }}
-                            value={restMinutes}
-                            onChange={(minutes) => {
-                              const safeMinutes = minutes ?? 0;
-                              field.onChange(safeMinutes * 60 + restSeconds);
+                      <FormNumberInput
+                        style={{ backgroundColor: colors.app.cardTertiary }}
+                        value={field.value}
+                        onChange={(value) => {
+                          field.onChange(value ?? null);
 
-                              // Auto validate after submitted
-                              if (hasTriedSave) {
-                                void trigger(
-                                  `workoutExercises.${index}.plannedRestTime`,
-                                );
-                              }
-                            }}
-                            min={0}
-                            step={1}
-                            placeholder="0"
-                            error={!!fieldState.error}
-                          />
-
-                          <ThemedText
-                            type="default"
-                            variant="primary"
-                            className="mt-2 self-center text-xs"
-                          >
-                            Minutes
-                          </ThemedText>
-                        </View>
-
-                        <View className="flex-1">
-                          <FormNumberInput
-                            style={{ backgroundColor: colors.app.cardTertiary }}
-                            value={restSeconds}
-                            onChange={(seconds) => {
-                              const normalizedSeconds = seconds ?? 0;
-                              const safeSeconds = Math.max(
-                                0,
-                                Math.min(59, normalizedSeconds),
-                              );
-                              field.onChange(restMinutes * 60 + safeSeconds);
-
-                              // Auto validate after submitted
-                              if (hasTriedSave) {
-                                void trigger(
-                                  `workoutExercises.${index}.plannedRestTime`,
-                                );
-                              }
-                            }}
-                            min={0}
-                            max={59}
-                            step={1}
-                            placeholder="0"
-                            error={!!fieldState.error}
-                          />
-
-                          <ThemedText
-                            type="default"
-                            variant="primary"
-                            className="mt-2 self-center text-xs"
-                          >
-                            Seconds
-                          </ThemedText>
-                        </View>
-                      </View>
+                          if (hasTriedSave) {
+                            void trigger(
+                              `workoutExercises.${index}.plannedDuration`,
+                            );
+                          }
+                        }}
+                        min={0}
+                        step={1}
+                        placeholder="0"
+                        error={!!fieldState.error}
+                      />
 
                       {fieldState.error?.message && (
                         <ThemedText
@@ -494,10 +564,59 @@ export function ExerciseCard({
                         </ThemedText>
                       )}
                     </>
-                  );
-                }}
-              />
-            </View>
+                  )}
+                />
+              </View>
+            )}
+
+            {/* Distance */}
+            {showDistance && (
+              <View>
+                <ThemedText
+                  type="default"
+                  variant="primary"
+                  className="mb-1 text-xs"
+                >
+                  Distance
+                </ThemedText>
+
+                <Controller
+                  control={control}
+                  name={`workoutExercises.${index}.plannedDistance`}
+                  render={({ field, fieldState }) => (
+                    <>
+                      <FormNumberInput
+                        style={{ backgroundColor: colors.app.cardTertiary }}
+                        value={field.value}
+                        onChange={(value) => {
+                          field.onChange(value ?? null);
+
+                          if (hasTriedSave) {
+                            void trigger(
+                              `workoutExercises.${index}.plannedDistance`,
+                            );
+                          }
+                        }}
+                        min={0}
+                        step={1}
+                        placeholder="0"
+                        error={!!fieldState.error}
+                      />
+
+                      {fieldState.error?.message && (
+                        <ThemedText
+                          type="default"
+                          variant="error"
+                          className="mt-1 text-xs"
+                        >
+                          {fieldState.error.message}
+                        </ThemedText>
+                      )}
+                    </>
+                  )}
+                />
+              </View>
+            )}
 
             {/* Save changes */}
             <AppButton

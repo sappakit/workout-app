@@ -57,4 +57,3 @@ export interface WorkoutSchedule {
   status: WorkoutScheduleStatus;
   workout: WorkoutResponse;
 }
-

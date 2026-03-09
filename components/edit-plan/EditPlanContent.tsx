@@ -3,13 +3,9 @@ import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
-import {
-  DifficultyLevel,
-  Exercise,
-  ExerciseMuscleItem,
-  ExerciseType,
-} from "@/types/workout/exercise.types";
-import { EquipmentCategory, Muscle } from "@/types/workout/shared.types";
+import { EditPlanForm, editPlanSchema } from "@/schemas/edit-plan.schema";
+import { Exercise, ExerciseMuscleItem } from "@/types/workout/exercise.types";
+import { Muscle } from "@/types/workout/shared.types";
 import {
   WorkoutFocusType,
   WorkoutResponse,
@@ -19,7 +15,6 @@ import { Plus, Save } from "lucide-react-native";
 import { useEffect } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { View } from "react-native";
-import { z } from "zod";
 import { AppButton } from "../custom-ui/AppButton";
 import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
@@ -35,127 +30,8 @@ interface EditPlanContentProps {
   data: WorkoutResponse;
 }
 
-const muscleSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-});
-
-const equipmentSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  category: z.enum(EquipmentCategory),
-});
-
-const exerciseMuscleItemSchema = z.object({
-  id: z.number(),
-  muscle: muscleSchema,
-});
-
-const exerciseEquipmentLinkSchema = z.object({
-  id: z.number(),
-  equipment: equipmentSchema,
-});
-
-const exerciseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string().nullable(),
-
-  exerciseType: z.enum(ExerciseType),
-  difficultyLevel: z.enum(DifficultyLevel),
-
-  defaultCaloriesBurned: z.number().nullable(),
-  defaultDuration: z.number().nullable(),
-  defaultRestTime: z.number().nullable(),
-  defaultRepsRange: z.string().nullable(),
-  defaultSets: z.number().nullable(),
-
-  demoLink: z.string().nullable(),
-  howToPerform: z.string().nullable(),
-
-  muscles: z.array(exerciseMuscleItemSchema).nullable(),
-  equipmentLinks: z.array(exerciseEquipmentLinkSchema).nullable(),
-});
-
-const workoutExerciseSchema = z
-  .object({
-    id: z.number(),
-    orderIndex: z.number(),
-
-    plannedSets: z.number().min(1, "Sets must be at least 1").nullable(), // TODO: fix accept null
-    plannedRepsRange: z.string().nullable(),
-    plannedWeight: z.number().nullable(),
-    plannedRestTime: z
-      .number()
-      .min(0, "Rest time cannot be negative")
-      .nullable(),
-    plannedDuration: z.number().nullable(),
-    plannedDistance: z.number().nullable(),
-
-    exercise: exerciseSchema,
-  })
-  .superRefine((value, ctx) => {
-    const repsRange = value.plannedRepsRange ?? value.exercise.defaultRepsRange;
-
-    if (repsRange) {
-      const [minRaw, maxRaw] = repsRange.split("-");
-      const min = Number(minRaw);
-      const max = Number(maxRaw);
-
-      if (
-        Number.isNaN(min) ||
-        Number.isNaN(max) ||
-        !Number.isFinite(min) ||
-        !Number.isFinite(max)
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedRepsRange"],
-          message: "Reps range must be in min-max format",
-        });
-      } else if (min < 0 || max < 0) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedRepsRange"],
-          message: "Reps cannot be negative",
-        });
-      } else if (min > max) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedRepsRange"],
-          message: "Min reps cannot be greater than max reps",
-        });
-      }
-    }
-  });
-
-const editPlanSchema = z.object({
-  name: z.string().min(1, "Plan name is required"),
-  workoutFocusTypeId: z.number({
-    error: "Workout type is required",
-  }),
-  targetMuscles: z
-    .array(z.number())
-    .min(1, "Select target muscle groups or enable Auto-fill"),
-  durationHours: z
-    .number({ error: "Enter 0+ hours or enable Auto-fill" })
-    .min(0, { message: "Minutes cannot be negative" }),
-  durationMinutes: z
-    .number({ error: "Enter 0+ minutes or enable Auto-fill" })
-    .min(0, { message: "Minutes cannot be negative" }),
-  durationSeconds: z
-    .number({ error: "Enter 0+ seconds or enable Auto-fill" })
-    .min(0, { message: "Seconds cannot be negative" }),
-  autoFillMuscles: z.boolean(),
-  autoFillDuration: z.boolean(),
-  workoutExercises: z.array(workoutExerciseSchema),
-});
-
-export type EditPlanForm = z.infer<typeof editPlanSchema>;
-
 export default function EditPlanContent({ data }: EditPlanContentProps) {
   const totalSeconds = data.duration ?? 0;
-
   const durationHours = Math.floor(totalSeconds / 3600);
   const durationMinutes = Math.floor((totalSeconds % 3600) / 60);
   const durationSeconds = totalSeconds % 60;
@@ -489,6 +365,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   value={field.value}
                   onChange={field.onChange}
                   min={0}
+                  max={59}
                   step={1}
                   placeholder="0"
                   error={!!errors.durationMinutes}
@@ -515,6 +392,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   value={field.value}
                   onChange={field.onChange}
                   min={0}
+                  max={59}
                   step={1}
                   placeholder="0"
                   error={!!errors.durationSeconds}

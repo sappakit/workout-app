@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { SignInForm, signInSchema } from "@/types/auth.types";
+import { SignInForm, signInSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
