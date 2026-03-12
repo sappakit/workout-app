@@ -3,8 +3,8 @@ import { calculateExerciseDuration } from "@/lib/workout/utils";
 import {
   DifficultyLabel,
   ExerciseTypeLabel,
-} from "@/types/workout/exercise.types";
-import { WorkoutExerciseItem } from "@/types/workout/workout.types";
+} from "@/types/workout/response/exercise.types";
+import { WorkoutExerciseItem } from "@/types/workout/response/workout.types";
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -41,7 +41,7 @@ export function ExerciseCard({ data, className }: ExerciseCardProps) {
   const rest = Math.round(
     (data.plannedRestTime ?? data.exercise.defaultRestTime ?? 0) / 60,
   );
-  const equipment = data.exercise.equipmentLinks.map(
+  const equipment = (data.exercise.equipmentLinks ?? []).map(
     (link) => link.equipment.name,
   );
 

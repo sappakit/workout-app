@@ -3,7 +3,7 @@ import {
   calculateWorkoutCalories,
   calculateWorkoutDuration,
 } from "@/lib/workout/utils";
-import { WorkoutResponse } from "@/types/workout/workout.types";
+import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import clsx from "clsx";
 import {
   ArrowUpDown,

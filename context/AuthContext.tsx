@@ -1,5 +1,6 @@
 import { api, AuthStorage } from "@/lib/api";
-import { SignInForm, SignUpRequest, User } from "@/types/auth.types";
+import { SignInForm } from "@/schemas/auth.schema";
+import { SignUpRequest, User } from "@/types/auth.types";
 import { useRouter } from "expo-router";
 import {
   createContext,

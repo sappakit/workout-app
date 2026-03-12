@@ -1,4 +1,4 @@
-import { ExerciseType } from "@/types/workout/exercise.types";
+import { ExerciseType } from "@/types/workout/response/exercise.types";
 
 export type ExerciseFieldKey =
   | "plannedSets"
@@ -24,7 +24,7 @@ export const exerciseTypeFieldConfig: Record<
       "plannedRestTime",
       "plannedWeight",
     ],
-    requiredFields: ["plannedSets", "plannedRepsRange"],
+    requiredFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
   },
 
   [ExerciseType.CARDIO]: {
@@ -34,6 +34,6 @@ export const exerciseTypeFieldConfig: Record<
 
   [ExerciseType.CALISTHENICS]: {
     visibleFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
-    requiredFields: ["plannedSets", "plannedRepsRange"],
+    requiredFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
   },
 };

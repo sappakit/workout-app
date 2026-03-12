@@ -1,4 +1,4 @@
-import { WorkoutSchedule } from "@/types/workout/workout.types";
+import { WorkoutSchedule } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import { Dumbbell, SquarePen } from "lucide-react-native";
 import { AppButton } from "../custom-ui/AppButton";

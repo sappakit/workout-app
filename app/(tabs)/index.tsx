@@ -11,7 +11,7 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import { useGetQuery } from "@/hooks/useGetQuery";
 import { AuthStorage } from "@/lib/api";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { WorkoutSchedule } from "@/types/workout/workout.types";
+import { WorkoutSchedule } from "@/types/workout/response/workout.types";
 import * as Clipboard from "expo-clipboard";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { View } from "react-native";

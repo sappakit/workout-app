@@ -2,14 +2,20 @@ import { exerciseApi, muscleApi, workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
-import { EditPlanForm, editPlanSchema } from "@/schemas/edit-plan.schema";
-import { Exercise, ExerciseMuscleItem } from "@/types/workout/exercise.types";
-import { Muscle } from "@/types/workout/shared.types";
+import {
+  mapEditPlanFormToUpdateWorkoutPayload,
+  mapWorkoutResponseToEditPlanForm,
+} from "@/lib/workout/mappers";
+import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
+import {
+  Exercise,
+  ExerciseMuscleItem,
+} from "@/types/workout/response/exercise.types";
+import { Muscle } from "@/types/workout/response/shared.types";
 import {
   WorkoutFocusType,
   WorkoutResponse,
-} from "@/types/workout/workout.types";
+} from "@/types/workout/response/workout.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Save } from "lucide-react-native";
 import { useEffect } from "react";
@@ -31,28 +37,11 @@ interface EditPlanContentProps {
 }
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
-  const totalSeconds = data.duration ?? 0;
-  const durationHours = Math.floor(totalSeconds / 3600);
-  const durationMinutes = Math.floor((totalSeconds % 3600) / 60);
-  const durationSeconds = totalSeconds % 60;
-
-  const targetMuscles = data.muscles.map((item) => item.muscle.id);
-
   const form = useForm<EditPlanForm>({
-    resolver: zodResolver(editPlanSchema),
+    resolver: zodResolver(editPlanFormSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
-    defaultValues: {
-      name: data.name,
-      workoutFocusTypeId: data.workoutFocusType.id,
-      targetMuscles: targetMuscles,
-      durationHours: durationHours,
-      durationMinutes: durationMinutes,
-      durationSeconds: durationSeconds,
-      autoFillMuscles: false,
-      autoFillDuration: false,
-      workoutExercises: data.workoutExercises,
-    },
+    defaultValues: mapWorkoutResponseToEditPlanForm(data),
   });
 
   const {
@@ -63,7 +52,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   } = form;
 
   const onSubmit = async (values: EditPlanForm) => {
-    console.log("Edit plan values:", values);
+    const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
+    console.log("Edit plan values:", payload);
     // TODO: connect API later
   };
 
@@ -91,10 +81,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   useEffect(() => {
     if (!autoFillDuration) return;
 
-    const totalSeconds = calculateWorkoutDurationFromExercises(
-      workoutExercises,
-      { timeType: "seconds" },
-    );
+    // TODO: update function
+    // const totalSeconds = calculateWorkoutDurationFromExercises(
+    //   workoutExercises,
+    //   { timeType: "seconds" },
+    // );
+
+    const totalSeconds = 0;
 
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -172,14 +165,50 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         ? Math.max(...workoutExercises.map((item) => item.orderIndex)) + 1
         : 1;
 
+    const defaultRepsRange = exercise.defaultRepsRange ?? null;
+    const [minRepsRaw, maxRepsRaw] = defaultRepsRange
+      ? defaultRepsRange.split("-")
+      : [];
+
+    const plannedRepsMin =
+      minRepsRaw != null && minRepsRaw !== "" ? Number(minRepsRaw) : null;
+
+    const plannedRepsMax =
+      maxRepsRaw != null && maxRepsRaw !== "" ? Number(maxRepsRaw) : null;
+
     append({
       id: Date.now(),
       orderIndex: nextOrderIndex,
       plannedSets: exercise.defaultSets ?? null,
-      plannedRepsRange: exercise.defaultRepsRange ?? null,
+
+      // plannedRepsRange
+      plannedRepsMin:
+        plannedRepsMin != null && Number.isFinite(plannedRepsMin)
+          ? plannedRepsMin
+          : null,
+      plannedRepsMax:
+        plannedRepsMax != null && Number.isFinite(plannedRepsMax)
+          ? plannedRepsMax
+          : null,
+
       plannedWeight: null,
-      plannedRestTime: exercise.defaultRestTime ?? null,
-      plannedDuration: exercise.defaultDuration ?? null,
+
+      // plannedRestTime
+      plannedRestMinutes:
+        exercise.defaultRestTime != null
+          ? Math.floor(exercise.defaultRestTime / 60)
+          : null,
+      plannedRestSeconds:
+        exercise.defaultRestTime != null ? exercise.defaultRestTime % 60 : null,
+
+      // plannedDuration
+      plannedDurationMinutes:
+        exercise.defaultDuration != null
+          ? Math.floor(exercise.defaultDuration / 60)
+          : null,
+      plannedDurationSeconds:
+        exercise.defaultDuration != null ? exercise.defaultDuration % 60 : null,
+
       plannedDistance: null,
       exercise,
     });
@@ -206,21 +235,27 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <Controller
           control={control}
           name="name"
-          render={({ field }) => (
-            <FormTextInput
-              placeholder="Enter plan name"
-              value={field.value}
-              onChangeText={field.onChange}
-              error={!!errors.name}
-            />
+          render={({ field, fieldState }) => (
+            <>
+              <FormTextInput
+                placeholder="Enter plan name"
+                value={field.value}
+                onChangeText={field.onChange}
+                error={!!errors.name}
+              />
+
+              {fieldState.error?.message && (
+                <ThemedText
+                  type="default"
+                  variant="error"
+                  className="mt-2 text-sm"
+                >
+                  {fieldState.error?.message}
+                </ThemedText>
+              )}
+            </>
           )}
         />
-
-        {errors.name?.message && (
-          <ThemedText type="default" variant="error" className="mt-2 text-sm">
-            {errors.name.message}
-          </ThemedText>
-        )}
       </View>
 
       {/* Workout Type */}
@@ -232,32 +267,38 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <Controller
           control={control}
           name="workoutFocusTypeId"
-          render={({ field }) => (
-            <FormInfiniteSelectInput<WorkoutFocusType>
-              url={workoutApi.getTypes()}
-              queryKey={["workout-types"]}
-              mapOption={(item) => ({ label: item.name, value: item.id })}
-              value={field.value}
-              onChange={field.onChange}
-              placeholder="Select workout type"
-              validationError={!!errors.workoutFocusTypeId}
-              title="Select Workout Type"
-              snapPoints={["70%"]}
-              selectedOption={
-                data.workoutFocusType && {
-                  label: data.workoutFocusType.name,
-                  value: data.workoutFocusType.id,
+          render={({ field, fieldState }) => (
+            <>
+              <FormInfiniteSelectInput<WorkoutFocusType>
+                url={workoutApi.getTypes()}
+                queryKey={["workout-types"]}
+                mapOption={(item) => ({ label: item.name, value: item.id })}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Select workout type"
+                validationError={!!errors.workoutFocusTypeId}
+                title="Select Workout Type"
+                snapPoints={["70%"]}
+                selectedOption={
+                  data.workoutFocusType && {
+                    label: data.workoutFocusType.name,
+                    value: data.workoutFocusType.id,
+                  }
                 }
-              }
-            />
+              />
+
+              {fieldState.error?.message && (
+                <ThemedText
+                  type="default"
+                  variant="error"
+                  className="mt-2 text-sm"
+                >
+                  {fieldState.error?.message}
+                </ThemedText>
+              )}
+            </>
           )}
         />
-
-        {errors.workoutFocusTypeId?.message && (
-          <ThemedText type="default" variant="error" className="mt-2 text-sm">
-            {errors.workoutFocusTypeId.message}
-          </ThemedText>
-        )}
       </View>
 
       {/* Target Muscle Groups */}
@@ -285,27 +326,37 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <Controller
           control={control}
           name="targetMuscles"
-          render={({ field }) => (
-            <FormInfiniteMultiSelectInput<Muscle>
-              url={muscleApi.getAll()}
-              queryKey={["muscles"]}
-              mapOption={(item) => ({ label: item.name, value: item.id })}
-              value={field.value}
-              onChange={field.onChange}
-              placeholder="Select target muscle group"
-              validationError={!!errors.targetMuscles}
-              title="Select Target Muscles"
-              snapPoints={["70%"]}
-              disabled={autoFillMuscles}
-            />
+          render={({ field, fieldState }) => (
+            <>
+              <FormInfiniteMultiSelectInput<Muscle>
+                url={muscleApi.getAll()}
+                queryKey={["muscles"]}
+                mapOption={(item) => ({ label: item.name, value: item.id })}
+                value={field.value}
+                onChange={field.onChange}
+                selectedOptions={data.muscles.map((item) => ({
+                  label: item.muscle.name,
+                  value: item.muscle.id,
+                }))}
+                placeholder="Select target muscle group"
+                validationError={!!errors.targetMuscles}
+                title="Select Target Muscles"
+                snapPoints={["70%"]}
+                disabled={autoFillMuscles}
+              />
+
+              {fieldState.error?.message && (
+                <ThemedText
+                  type="default"
+                  variant="error"
+                  className="mt-2 text-sm"
+                >
+                  {fieldState.error?.message}
+                </ThemedText>
+              )}
+            </>
           )}
         />
-
-        {errors.targetMuscles?.message && (
-          <ThemedText type="default" variant="error" className="mt-2 text-sm">
-            {errors.targetMuscles.message}
-          </ThemedText>
-        )}
       </View>
 
       {/* Estimated Duration */}
@@ -434,7 +485,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
               data: item,
             })}
             onChange={(_, option?: SelectOption<Exercise>) => {
-              console.log(option);
               if (!option?.data) return;
               handleAddExercise(option.data);
             }}

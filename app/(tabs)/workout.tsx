@@ -1,6 +1,6 @@
 import { WorkoutContent } from "@/components/workout/WorkoutContent";
 import { useGetQuery } from "@/hooks/useGetQuery";
-import { WorkoutSchedule } from "@/types/workout/workout.types";
+import { WorkoutSchedule } from "@/types/workout/response/workout.types";
 import { workoutApi } from "../api/workout.api";
 
 export default function WorkoutScreen() {

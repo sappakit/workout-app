@@ -1,6 +1,9 @@
 import { exerciseTypeFieldConfig } from "@/lib/workout/config";
-import { DifficultyLevel, ExerciseType } from "@/types/workout/exercise.types";
-import { EquipmentCategory } from "@/types/workout/shared.types";
+import {
+  DifficultyLevel,
+  ExerciseType,
+} from "@/types/workout/response/exercise.types";
+import { EquipmentCategory } from "@/types/workout/response/shared.types";
 import { z } from "zod";
 
 // helper: add validation error based on exercise-type
@@ -64,19 +67,41 @@ export const exerciseSchema = z.object({
   equipmentLinks: z.array(exerciseEquipmentLinkSchema).nullish(),
 });
 
-export const workoutExerciseSchema = z
+export const workoutExerciseFormSchema = z
   .object({
     id: z.number(),
     orderIndex: z.number(),
 
     plannedSets: z.number().min(1, "Sets must be at least 1").nullable(),
-    plannedRepsRange: z.string().nullable(),
+
+    // plannedRepsRange
+    plannedRepsMin: z.number().min(0, "Min reps cannot be negative").nullable(),
+    plannedRepsMax: z.number().min(0, "Max reps cannot be negative").nullable(),
+
     plannedWeight: z.number().nullable(),
-    plannedRestTime: z
+
+    // plannedRest
+    plannedRestMinutes: z
       .number()
-      .min(0, "Rest time cannot be negative")
+      .min(0, "Minutes cannot be negative")
       .nullable(),
-    plannedDuration: z.number().nullable(),
+    plannedRestSeconds: z
+      .number()
+      .min(0, "Seconds cannot be negative")
+      .max(59, "Seconds must be between 0 and 59")
+      .nullable(),
+
+    // plannedDuration
+    plannedDurationMinutes: z
+      .number()
+      .min(0, "Minutes cannot be negative")
+      .nullable(),
+    plannedDurationSeconds: z
+      .number()
+      .min(0, "Seconds cannot be negative")
+      .max(59, "Seconds must be between 0 and 59")
+      .nullable(),
+
     plannedDistance: z.number().nullable(),
 
     exercise: exerciseSchema,
@@ -85,7 +110,6 @@ export const workoutExerciseSchema = z
     const type = value.exercise.exerciseType;
     const config = exerciseTypeFieldConfig[type];
 
-    // Required field rules from config
     // plannedSets
     addRequiredIssueIfMissing(
       ctx,
@@ -93,42 +117,6 @@ export const workoutExerciseSchema = z
       "plannedSets",
       value.plannedSets,
       "Sets is required",
-    );
-
-    // plannedRepsRange
-    addRequiredIssueIfMissing(
-      ctx,
-      config,
-      "plannedRepsRange",
-      value.plannedRepsRange,
-      "Reps range is required",
-    );
-
-    // plannedRestTime
-    addRequiredIssueIfMissing(
-      ctx,
-      config,
-      "plannedRestTime",
-      value.plannedRestTime,
-      "Rest time is required",
-    );
-
-    // plannedDuration
-    addRequiredIssueIfMissing(
-      ctx,
-      config,
-      "plannedDuration",
-      value.plannedDuration,
-      "Duration is required",
-    );
-
-    // plannedDistance
-    addRequiredIssueIfMissing(
-      ctx,
-      config,
-      "plannedDistance",
-      value.plannedDistance,
-      "Distance is required",
     );
 
     // plannedWeight
@@ -140,42 +128,92 @@ export const workoutExerciseSchema = z
       "Weight is required",
     );
 
-    // Reps format rule
-    const repsRange = value.plannedRepsRange;
+    // plannedDistance
+    addRequiredIssueIfMissing(
+      ctx,
+      config,
+      "plannedDistance",
+      value.plannedDistance,
+      "Distance is required",
+    );
 
-    if (repsRange) {
-      const [minRaw, maxRaw] = repsRange.split("-");
-      const min = Number(minRaw);
-      const max = Number(maxRaw);
+    // plannedRepsRange (split fields)
+    if (config.requiredFields.includes("plannedRepsRange")) {
+      if (value.plannedRepsMin == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["plannedRepsMin"],
+          message: "Enter minimum reps",
+        });
+      }
 
-      if (
-        Number.isNaN(min) ||
-        Number.isNaN(max) ||
-        !Number.isFinite(min) ||
-        !Number.isFinite(max)
-      ) {
+      if (value.plannedRepsMax == null) {
         ctx.addIssue({
           code: "custom",
-          path: ["plannedRepsRange"],
-          message: "Reps range must be in min-max format",
+          path: ["plannedRepsMax"],
+          message: "Enter maximum reps",
         });
-      } else if (min < 0 || max < 0) {
+      }
+    }
+
+    if (
+      value.plannedRepsMin != null &&
+      value.plannedRepsMax != null &&
+      value.plannedRepsMin > value.plannedRepsMax
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["plannedRepsMin"],
+        message: "Min reps cannot be greater than max reps",
+      });
+
+      ctx.addIssue({
+        code: "custom",
+        path: ["plannedRepsMax"],
+        message: "Max reps must be at least min reps",
+      });
+    }
+
+    // plannedRestTime (split fields)
+    if (config.requiredFields.includes("plannedRestTime")) {
+      if (value.plannedRestMinutes == null) {
         ctx.addIssue({
           code: "custom",
-          path: ["plannedRepsRange"],
-          message: "Reps cannot be negative",
+          path: ["plannedRestMinutes"],
+          message: "Enter rest minutes (0 if none)",
         });
-      } else if (min > max) {
+      }
+
+      if (value.plannedRestSeconds == null) {
         ctx.addIssue({
           code: "custom",
-          path: ["plannedRepsRange"],
-          message: "Min reps cannot be greater than max reps",
+          path: ["plannedRestSeconds"],
+          message: "Enter rest seconds (0 if none)",
+        });
+      }
+    }
+
+    // plannedDuration (split fields)
+    if (config.requiredFields.includes("plannedDuration")) {
+      if (value.plannedDurationMinutes == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["plannedDurationMinutes"],
+          message: "Enter duration minutes (0 if none)",
+        });
+      }
+
+      if (value.plannedDurationSeconds == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["plannedDurationSeconds"],
+          message: "Enter duration seconds (0 if none)",
         });
       }
     }
   });
 
-export const editPlanSchema = z.object({
+export const editPlanFormSchema = z.object({
   name: z.string().min(1, "Plan name is required"),
   workoutFocusTypeId: z.number({
     error: "Workout type is required",
@@ -183,18 +221,23 @@ export const editPlanSchema = z.object({
   targetMuscles: z
     .array(z.number())
     .min(1, "Select target muscle groups or enable Auto-fill"),
+
   durationHours: z
     .number({ error: "Enter 0+ hours or enable Auto-fill" })
     .min(0, { message: "Hours cannot be negative" }),
   durationMinutes: z
     .number({ error: "Enter 0+ minutes or enable Auto-fill" })
-    .min(59, { message: "Minutes cannot be negative" }),
+    .min(0, { message: "Minutes cannot be negative" })
+    .max(59, { message: "Minutes must be between 0 and 59" }),
   durationSeconds: z
     .number({ error: "Enter 0+ seconds or enable Auto-fill" })
-    .min(59, { message: "Seconds cannot be negative" }),
+    .min(0, { message: "Seconds cannot be negative" })
+    .max(59, { message: "Seconds must be between 0 and 59" }),
+
   autoFillMuscles: z.boolean(),
   autoFillDuration: z.boolean(),
-  workoutExercises: z.array(workoutExerciseSchema),
+
+  workoutExercises: z.array(workoutExerciseFormSchema),
 });
 
-export type EditPlanForm = z.infer<typeof editPlanSchema>;
+export type EditPlanForm = z.infer<typeof editPlanFormSchema>;

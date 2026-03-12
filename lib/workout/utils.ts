@@ -1,14 +1,51 @@
-import { ExerciseType } from "@/types/workout/exercise.types";
+import { ExerciseType } from "@/types/workout/response/exercise.types";
 import {
   WorkoutExerciseItem,
   WorkoutResponse,
-} from "@/types/workout/workout.types";
+} from "@/types/workout/response/workout.types";
 
 type DurationOptions = {
   // Default: minutes
   timeType?: "seconds" | "minutes";
 };
 
+// Calcurate total calories used for the workout program
+export function calculateWorkoutCalories(workout: WorkoutResponse): number {
+  let totalCalories = 0;
+
+  workout.workoutExercises.forEach((item) => {
+    const { plannedSets, plannedDuration, exercise } = item;
+
+    const sets = plannedSets ?? exercise.defaultSets ?? 0;
+    const baseCalories = exercise.defaultCaloriesBurned ?? 0;
+
+    switch (exercise.exerciseType) {
+      case ExerciseType.CARDIO: {
+        // Calories per minute
+        const durationSeconds =
+          plannedDuration ?? exercise.defaultDuration ?? 0;
+
+        const durationMinutes = durationSeconds / 60;
+
+        totalCalories += durationMinutes * baseCalories;
+        break;
+      }
+
+      // Calories per set
+      case ExerciseType.STRENGTH:
+      case ExerciseType.CALISTHENICS:
+        totalCalories += sets * baseCalories;
+        break;
+
+      default:
+        break;
+    }
+  });
+
+  return Math.round(totalCalories);
+}
+
+// Duration
 // Calculate the duration of a single exercise
 export function calculateExerciseDuration(
   item: WorkoutExerciseItem,
@@ -59,40 +96,4 @@ export function calculateWorkoutDuration(workout: WorkoutResponse): number {
   }
 
   return calculateWorkoutDurationFromExercises(workout.workoutExercises);
-}
-
-// Calcurate total calories used for the workout program
-export function calculateWorkoutCalories(workout: WorkoutResponse): number {
-  let totalCalories = 0;
-
-  workout.workoutExercises.forEach((item) => {
-    const { plannedSets, plannedDuration, exercise } = item;
-
-    const sets = plannedSets ?? exercise.defaultSets ?? 0;
-    const baseCalories = exercise.defaultCaloriesBurned ?? 0;
-
-    switch (exercise.exerciseType) {
-      case ExerciseType.CARDIO: {
-        // Calories per minute
-        const durationSeconds =
-          plannedDuration ?? exercise.defaultDuration ?? 0;
-
-        const durationMinutes = durationSeconds / 60;
-
-        totalCalories += durationMinutes * baseCalories;
-        break;
-      }
-
-      // Calories per set
-      case ExerciseType.STRENGTH:
-      case ExerciseType.CALISTHENICS:
-        totalCalories += sets * baseCalories;
-        break;
-
-      default:
-        break;
-    }
-  });
-
-  return Math.round(totalCalories);
 }

@@ -1,7 +1,7 @@
 import { workoutApi } from "@/app/api/workout.api";
 import EditPlanContent from "@/components/edit-plan/EditPlanContent";
 import { useGetQuery } from "@/hooks/useGetQuery";
-import { WorkoutResponse } from "@/types/workout/workout.types";
+import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useLocalSearchParams } from "expo-router";
 
 export default function EditPlanScreen() {
