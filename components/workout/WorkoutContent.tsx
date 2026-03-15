@@ -3,8 +3,8 @@ import { useRouter } from "expo-router";
 import { Dumbbell, SquarePen } from "lucide-react-native";
 import { AppButton } from "../custom-ui/AppButton";
 import { PageLayout } from "../layout/PageLayout";
-import { ExerciseCard } from "./ExerciseCard";
 import { WorkoutPlanCard } from "./WorkoutPlanCard";
+import { ExerciseCardReadonly } from "./exercise-card/ExerciseCardReadonly";
 
 interface WorkoutContentProps {
   data: WorkoutSchedule;
@@ -65,7 +65,7 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
 
       {/* Exercise card */}
       {data.workout.workoutExercises.map((item, index) => (
-        <ExerciseCard
+        <ExerciseCardReadonly
           key={item.id}
           data={item}
           className={`${index > 0 && "mt-4"}`}

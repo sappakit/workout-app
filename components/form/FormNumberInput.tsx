@@ -1,7 +1,7 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { Minus, Plus } from "lucide-react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, StyleProp, TextInput, View, ViewStyle } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { Separator } from "../custom-ui/Separator";
@@ -17,6 +17,7 @@ export interface FormNumberInputProps {
   className?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  keyboardType?: "numeric" | "decimal-pad";
 }
 
 export default function FormNumberInput({
@@ -30,12 +31,23 @@ export default function FormNumberInput({
   className,
   style,
   disabled,
+  keyboardType = "numeric",
 }: FormNumberInputProps) {
   const { colors } = useAppTheme();
+  const [inputValue, setInputValue] = useState(
+    value != null ? String(value) : "",
+  );
+  const [isFocused, setIsFocused] = useState(false);
 
   const borderColor = error
     ? colors.app.error || "red"
     : colors.app.borderPrimary;
+
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(value != null ? String(value) : "");
+    }
+  }, [value, isFocused]);
 
   const clamp = (num: number) => {
     if (min !== undefined && num < min) return min;
@@ -44,15 +56,35 @@ export default function FormNumberInput({
   };
 
   const handleTextChange = (text: string) => {
-    const clean = text.replace(/[^0-9]/g, "");
+    let clean = text.replace(/[^0-9.]/g, "");
 
-    if (clean === "") {
+    const parts = clean.split(".");
+    if (parts.length > 2) {
+      clean = `${parts[0]}.${parts.slice(1).join("")}`;
+    }
+
+    setInputValue(clean);
+
+    const num = Number(clean);
+
+    if (!Number.isNaN(num)) {
+      onChange?.(clamp(num));
+    }
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+
+    if (inputValue === "" || inputValue === ".") {
+      setInputValue("");
       onChange?.(null);
       return;
     }
 
-    const num = clamp(Number(clean));
-    onChange?.(num);
+    if (inputValue.endsWith(".")) {
+      const normalized = String(value ?? "");
+      setInputValue(normalized);
+    }
   };
 
   const adjustValue = (change: number) => {
@@ -60,6 +92,8 @@ export default function FormNumberInput({
 
     const current = value ?? 0;
     const newValue = clamp(current + change);
+
+    setInputValue(String(newValue));
     onChange?.(newValue);
   };
 
@@ -77,12 +111,13 @@ export default function FormNumberInput({
         style,
       ]}
     >
-      {/* Input */}
       <TextInput
-        value={value != null ? String(value) : ""}
+        value={inputValue}
         placeholder={placeholder}
-        keyboardType="numeric"
+        keyboardType={keyboardType}
         onChangeText={handleTextChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleBlur}
         className="min-w-0 flex-1 px-2"
         placeholderTextColor={colors.app.textPrimary}
         style={{
@@ -92,15 +127,12 @@ export default function FormNumberInput({
       />
 
       <View className="flex-row items-center gap-2">
-        {/* Minus */}
         <Pressable onPress={() => adjustValue(-step)} className="p-1">
           <Minus size={18} color={colors.app.textAccent} />
         </Pressable>
 
-        {/* Divider */}
         <Separator className="h-6" />
 
-        {/* Plus */}
         <Pressable onPress={() => adjustValue(+step)} className="p-1">
           <Plus size={18} color={colors.app.textAccent} />
         </Pressable>

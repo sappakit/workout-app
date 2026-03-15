@@ -78,7 +78,7 @@ export const workoutExerciseFormSchema = z
     plannedRepsMin: z.number().min(0, "Min reps cannot be negative").nullable(),
     plannedRepsMax: z.number().min(0, "Max reps cannot be negative").nullable(),
 
-    plannedWeight: z.number().nullable(),
+    plannedWeight: z.number().min(0, "Weight cannot be negative").nullable(),
 
     // plannedRest
     plannedRestMinutes: z

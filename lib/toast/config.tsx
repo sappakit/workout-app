@@ -22,7 +22,6 @@ export const createToastConfig = (
         }}
         text2Style={{
           color: theme.colors.app.textPrimary,
-          // opacity: 0.8,
         }}
       />
     ),
@@ -41,7 +40,6 @@ export const createToastConfig = (
         }}
         text2Style={{
           color: theme.colors.app.textPrimary,
-          // opacity: 0.8,
         }}
       />
     ),
@@ -60,7 +58,6 @@ export const createToastConfig = (
         }}
         text2Style={{
           color: theme.colors.app.textPrimary,
-          // opacity: 0.8,
         }}
       />
     ),

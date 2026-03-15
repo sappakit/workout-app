@@ -9,7 +9,7 @@ export enum ExerciseType {
 export const ExerciseTypeLabel: Record<ExerciseType, string> = {
   [ExerciseType.STRENGTH]: "Strength",
   [ExerciseType.CARDIO]: "Cardio Training",
-  [ExerciseType.CALISTHENICS]: "Bodyweight",
+  [ExerciseType.CALISTHENICS]: "Calisthenics",
 };
 
 export enum DifficultyLevel {

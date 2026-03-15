@@ -21,8 +21,8 @@ export const exerciseTypeFieldConfig: Record<
     visibleFields: [
       "plannedSets",
       "plannedRepsRange",
-      "plannedRestTime",
       "plannedWeight",
+      "plannedRestTime",
     ],
     requiredFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
   },
@@ -33,7 +33,16 @@ export const exerciseTypeFieldConfig: Record<
   },
 
   [ExerciseType.CALISTHENICS]: {
-    visibleFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
+    visibleFields: [
+      "plannedSets",
+      "plannedRepsRange",
+      "plannedWeight",
+      "plannedRestTime",
+    ],
     requiredFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
   },
 };
+
+export function getVisibleFields(typeConfig: ExerciseTypeFieldConfig) {
+  return new Set(typeConfig.visibleFields);
+}

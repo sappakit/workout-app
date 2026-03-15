@@ -3,7 +3,10 @@ import {
   UpdateWorkoutExercisePayload,
   UpdateWorkoutPayload,
 } from "@/types/workout/payload/edit-plan.types";
-import { WorkoutResponse } from "@/types/workout/response/workout.types";
+import {
+  WorkoutExerciseItem,
+  WorkoutResponse,
+} from "@/types/workout/response/workout.types";
 
 export type RepsRange = {
   minReps: number | null;
@@ -163,6 +166,29 @@ export function mapEditPlanFormToUpdateWorkoutPayload(
       ) ?? 0,
     workoutExercises: values.workoutExercises.map(
       mapWorkoutExerciseFormToPayload,
+    ),
+  };
+}
+
+// Form -> WorkoutExerciseItem (for ExerciseCardBase ui)
+export function mapEditPlanExerciseToWorkoutExerciseItem(
+  item: EditPlanForm["workoutExercises"][number],
+): WorkoutExerciseItem {
+  return {
+    ...item,
+    plannedRepsRange: formatRepsRange({
+      minReps: item.plannedRepsMin,
+      maxReps: item.plannedRepsMax,
+    }),
+    plannedRestTime: hmsToSeconds(
+      0,
+      item.plannedRestMinutes,
+      item.plannedRestSeconds,
+    ),
+    plannedDuration: hmsToSeconds(
+      0,
+      item.plannedDurationMinutes,
+      item.plannedDurationSeconds,
     ),
   };
 }

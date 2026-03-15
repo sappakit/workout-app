@@ -2,10 +2,13 @@ import { exerciseApi, muscleApi, workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
+import { getGroupedFieldError } from "@/lib/forms/utils";
 import {
   mapEditPlanFormToUpdateWorkoutPayload,
   mapWorkoutResponseToEditPlanForm,
+  secondsToHMS,
 } from "@/lib/workout/mappers";
+import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import {
   Exercise,
@@ -24,13 +27,14 @@ import { View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
 import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
+import { FormErrorMessage } from "../form/FormErrorMessage";
 import FormNumberInput from "../form/FormNumberInput";
 import FormInfiniteSelectInputExercise from "../form/select-input/exercise/FormInfiniteSelectInputExercise";
 import { SelectOption } from "../form/select-input/exercise/FormSelectInputExercise";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
-import { ExerciseCard } from "../workout/ExerciseCardEditPlan";
+import { ExerciseCardEdit } from "../workout/exercise-card/ExerciseCardEdit";
 
 interface EditPlanContentProps {
   data: WorkoutResponse;
@@ -57,10 +61,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     // TODO: connect API later
   };
 
-  const durationErrorMessage =
-    errors.durationHours?.message ||
-    errors.durationMinutes?.message ||
-    errors.durationSeconds?.message;
+  // Duration errors
+  const durationErrorMessage = getGroupedFieldError(
+    errors,
+    "durationHours",
+    "durationMinutes",
+    "durationSeconds",
+  );
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -81,21 +88,16 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   useEffect(() => {
     if (!autoFillDuration) return;
 
-    // TODO: update function
-    // const totalSeconds = calculateWorkoutDurationFromExercises(
-    //   workoutExercises,
-    //   { timeType: "seconds" },
-    // );
+    const totalSeconds = calculateWorkoutDurationFromExercises(
+      workoutExercises,
+      { timeType: "seconds" },
+    );
 
-    const totalSeconds = 0;
+    const { hours, minutes, seconds } = secondsToHMS(totalSeconds);
 
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    setValue("durationHours", hours);
-    setValue("durationMinutes", minutes);
-    setValue("durationSeconds", seconds);
+    setValue("durationHours", hours ?? 0);
+    setValue("durationMinutes", minutes ?? 0);
+    setValue("durationSeconds", seconds ?? 0);
   }, [workoutExercises, autoFillDuration]);
 
   // Auto-filled muscles
@@ -241,18 +243,10 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                 placeholder="Enter plan name"
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.name}
+                error={!!fieldState.error}
               />
 
-              {fieldState.error?.message && (
-                <ThemedText
-                  type="default"
-                  variant="error"
-                  className="mt-2 text-sm"
-                >
-                  {fieldState.error?.message}
-                </ThemedText>
-              )}
+              <FormErrorMessage message={fieldState.error?.message} />
             </>
           )}
         />
@@ -276,7 +270,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Select workout type"
-                validationError={!!errors.workoutFocusTypeId}
+                validationError={!!fieldState.error}
                 title="Select Workout Type"
                 snapPoints={["70%"]}
                 selectedOption={
@@ -287,15 +281,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                 }
               />
 
-              {fieldState.error?.message && (
-                <ThemedText
-                  type="default"
-                  variant="error"
-                  className="mt-2 text-sm"
-                >
-                  {fieldState.error?.message}
-                </ThemedText>
-              )}
+              <FormErrorMessage message={fieldState.error?.message} />
             </>
           )}
         />
@@ -339,21 +325,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   value: item.muscle.id,
                 }))}
                 placeholder="Select target muscle group"
-                validationError={!!errors.targetMuscles}
+                validationError={!!fieldState.error}
                 title="Select Target Muscles"
                 snapPoints={["70%"]}
                 disabled={autoFillMuscles}
               />
 
-              {fieldState.error?.message && (
-                <ThemedText
-                  type="default"
-                  variant="error"
-                  className="mt-2 text-sm"
-                >
-                  {fieldState.error?.message}
-                </ThemedText>
-              )}
+              <FormErrorMessage message={fieldState.error?.message} />
             </>
           )}
         />
@@ -385,14 +363,14 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
             <Controller
               control={control}
               name="durationHours"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormNumberInput
                   value={field.value}
                   onChange={field.onChange}
                   min={0}
                   step={1}
                   placeholder="0"
-                  error={!!errors.durationHours}
+                  error={!!fieldState.error}
                   disabled={autoFillDuration}
                 />
               )}
@@ -411,7 +389,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
             <Controller
               control={control}
               name="durationMinutes"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormNumberInput
                   value={field.value}
                   onChange={field.onChange}
@@ -419,7 +397,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   max={59}
                   step={1}
                   placeholder="0"
-                  error={!!errors.durationMinutes}
+                  error={!!fieldState.error}
                   disabled={autoFillDuration}
                 />
               )}
@@ -438,7 +416,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
             <Controller
               control={control}
               name="durationSeconds"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormNumberInput
                   value={field.value}
                   onChange={field.onChange}
@@ -446,7 +424,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   max={59}
                   step={1}
                   placeholder="0"
-                  error={!!errors.durationSeconds}
+                  error={!!fieldState.error}
                   disabled={autoFillDuration}
                 />
               )}
@@ -462,11 +440,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           </View>
         </View>
 
-        {durationErrorMessage && (
-          <ThemedText type="default" variant="error" className="mt-2 text-sm">
-            {durationErrorMessage}
-          </ThemedText>
-        )}
+        <FormErrorMessage message={durationErrorMessage} />
       </View>
 
       <Separator orientation="horizontal" className="my-6" />
@@ -495,21 +469,11 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         </View>
 
         <View className="mt-4">
-          {/* {fields.map((item, index) => (
-            <ExerciseCard
-              key={item.id}
-              data={item}
-              editable={true}
-              className={index > 0 ? "mt-4" : ""}
-            />
-          ))} */}
-
           {fields.map((item, index) => (
-            <ExerciseCard
+            <ExerciseCardEdit
               key={item.id}
               form={form}
               index={index}
-              editable
               className={index > 0 ? "mt-4" : ""}
             />
           ))}

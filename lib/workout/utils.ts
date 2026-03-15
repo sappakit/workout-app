@@ -1,14 +1,108 @@
 import { ExerciseType } from "@/types/workout/response/exercise.types";
-import {
-  WorkoutExerciseItem,
-  WorkoutResponse,
-} from "@/types/workout/response/workout.types";
+import { WorkoutResponse } from "@/types/workout/response/workout.types";
+import { hmsToSeconds } from "./mappers";
 
+// Duration
 type DurationOptions = {
-  // Default: minutes
   timeType?: "seconds" | "minutes";
 };
 
+// Exercise shape for calculations (API [seconds]/form [minutes/seconds])
+type ExerciseDurationInput = {
+  plannedSets: number | null;
+
+  plannedRestTime?: number | null;
+  plannedRestMinutes?: number | null;
+  plannedRestSeconds?: number | null;
+
+  plannedDuration?: number | null;
+  plannedDurationMinutes?: number | null;
+  plannedDurationSeconds?: number | null;
+
+  exercise: {
+    exerciseType: ExerciseType;
+
+    defaultSets?: number | null;
+    defaultDuration?: number | null;
+    defaultRestTime?: number | null;
+  };
+};
+
+function convertDuration(seconds: number, options?: DurationOptions) {
+  return options?.timeType === "seconds" ? seconds : Math.round(seconds / 60);
+}
+
+function getPlannedRestTimeSeconds(item: ExerciseDurationInput): number | null {
+  if (item.plannedRestTime != null) return item.plannedRestTime;
+
+  return hmsToSeconds(0, item.plannedRestMinutes, item.plannedRestSeconds);
+}
+
+function getPlannedDurationSeconds(item: ExerciseDurationInput): number | null {
+  if (item.plannedDuration != null) return item.plannedDuration;
+
+  return hmsToSeconds(
+    0,
+    item.plannedDurationMinutes,
+    item.plannedDurationSeconds,
+  );
+}
+
+// Calculate the duration of a single exercise
+export function calculateExerciseDuration(
+  item: ExerciseDurationInput,
+  options?: DurationOptions,
+): number {
+  const plannedDuration = getPlannedDurationSeconds(item);
+  const plannedRestTime = getPlannedRestTimeSeconds(item);
+
+  const defaultDuration = item.exercise.defaultDuration ?? 0;
+
+  // Explicit planned duration always takes priority
+  if (plannedDuration != null && plannedDuration > 0) {
+    return convertDuration(plannedDuration, options);
+  }
+
+  // Cardio: use duration directly
+  if (item.exercise.exerciseType === ExerciseType.CARDIO) {
+    return convertDuration(defaultDuration, options);
+  }
+
+  const sets = item.plannedSets ?? item.exercise.defaultSets ?? 0;
+  const setTime = defaultDuration;
+  const restTime = plannedRestTime ?? item.exercise.defaultRestTime ?? 0;
+
+  if (sets <= 0) return 0;
+
+  const totalSeconds = sets * setTime + Math.max(sets - 1, 0) * restTime;
+
+  return convertDuration(totalSeconds, options);
+}
+
+// Calculate the total duration of a list of exercises
+export function calculateWorkoutDurationFromExercises(
+  exercises: ExerciseDurationInput[],
+  options?: DurationOptions,
+): number {
+  const totalSeconds = exercises.reduce(
+    (sum, item) =>
+      sum + calculateExerciseDuration(item, { timeType: "seconds" }),
+    0,
+  );
+
+  return convertDuration(totalSeconds, options);
+}
+
+// Calculate the duration of the entire workout program
+export function calculateWorkoutDuration(workout: WorkoutResponse): number {
+  if (workout.duration != null && workout.duration > 0) {
+    return convertDuration(workout.duration, { timeType: "minutes" });
+  }
+
+  return calculateWorkoutDurationFromExercises(workout.workoutExercises);
+}
+
+// Calories
 // Calcurate total calories used for the workout program
 export function calculateWorkoutCalories(workout: WorkoutResponse): number {
   let totalCalories = 0;
@@ -43,57 +137,4 @@ export function calculateWorkoutCalories(workout: WorkoutResponse): number {
   });
 
   return Math.round(totalCalories);
-}
-
-// Duration
-// Calculate the duration of a single exercise
-export function calculateExerciseDuration(
-  item: WorkoutExerciseItem,
-  options?: DurationOptions,
-): number {
-  const { plannedDuration, plannedRestTime, plannedSets, exercise } = item;
-
-  // If planned duration exists, use it
-  if (plannedDuration && plannedDuration > 0) {
-    return options?.timeType === "seconds"
-      ? plannedDuration
-      : Math.round(plannedDuration / 60);
-  }
-
-  const sets = plannedSets ?? exercise.defaultSets ?? 0;
-  const setTime = exercise.defaultDuration ?? 0;
-  const restTime = plannedRestTime ?? exercise.defaultRestTime ?? 0;
-
-  if (sets <= 0) return 0;
-
-  const totalSeconds = sets * (setTime + restTime);
-  return options?.timeType === "seconds"
-    ? totalSeconds
-    : Math.round(totalSeconds / 60);
-}
-
-// Calculate the total duration of a list of exercises
-export function calculateWorkoutDurationFromExercises(
-  exercises: WorkoutExerciseItem[],
-  options?: DurationOptions,
-): number {
-  const totalSeconds = exercises.reduce(
-    (sum, item) =>
-      sum + calculateExerciseDuration(item, { timeType: "seconds" }),
-    0,
-  );
-
-  return options?.timeType === "seconds"
-    ? totalSeconds
-    : Math.round(totalSeconds / 60);
-}
-
-// Calculate the duration of the entire workout program
-export function calculateWorkoutDuration(workout: WorkoutResponse): number {
-  // If workout has duration, use it
-  if (workout.duration && workout.duration > 0) {
-    return Math.round(workout.duration / 60);
-  }
-
-  return calculateWorkoutDurationFromExercises(workout.workoutExercises);
 }

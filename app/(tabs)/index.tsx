@@ -5,7 +5,7 @@ import { WeekCalendar } from "@/components/custom-ui/WeekCalendar";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
-import { ExerciseCard } from "@/components/workout/ExerciseCard";
+import { ExerciseCardReadonly } from "@/components/workout/exercise-card/ExerciseCardReadonly";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useGetQuery } from "@/hooks/useGetQuery";
@@ -116,7 +116,7 @@ export default function HomeScreen() {
         <SectionHeader title="Today plan" />
 
         {data.workout.workoutExercises.map((item, index) => (
-          <ExerciseCard
+          <ExerciseCardReadonly
             key={item.id}
             data={item}
             className={`${index > 0 && "mt-4"}`}
