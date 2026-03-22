@@ -1,5 +1,5 @@
 export interface UpdateWorkoutExercisePayload {
-  id: number;
+  id: number | null;
   orderIndex: number;
   plannedSets: number | null;
   plannedRepsRange: string | null;

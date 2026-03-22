@@ -1,11 +1,14 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
-import { exerciseTypeFieldConfig } from "@/lib/workout/config";
+import {
+  exerciseTypeFieldConfig,
+  getExerciseFieldNames,
+} from "@/lib/workout/config";
 import { mapEditPlanExerciseToWorkoutExerciseItem } from "@/lib/workout/mappers";
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { Pencil, X } from "lucide-react-native";
 import { useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
-import { Alert, View } from "react-native";
+import { Alert } from "react-native";
 import ExerciseCardBase from "./base/ExerciseCardBase";
 import ExerciseCardEditFields from "./edit/ExerciseCardEditFields";
 
@@ -81,7 +84,9 @@ export function ExerciseCardEdit({
   const handleSaveEdit = async () => {
     setHasTriedSave(true);
 
-    const isValid = await trigger(`workoutExercises.${index}`);
+    const fieldNames = getExerciseFieldNames(index, typeConfig);
+    const isValid = await trigger(fieldNames);
+
     if (!isValid) return;
 
     setIsEditMode(false);
@@ -94,15 +99,14 @@ export function ExerciseCardEdit({
       onToggleExpanded={() => setExpanded((prev) => !prev)}
       className={className}
       isEditMode={isEditMode}
-      topRightContent={
-        <View className="flex-row gap-2">
-          <AppButton
-            variant="option"
-            icon={isEditMode ? X : Pencil}
-            className="h-8 w-8 rounded-lg"
-            onPress={handleEditMode}
-          />
-        </View>
+      bottomRightContent={
+        <AppButton
+          variant="option"
+          icon={isEditMode ? X : Pencil}
+          iconSize={isEditMode ? 16 : 14}
+          className="h-8 w-8 self-end rounded-full"
+          onPress={handleEditMode}
+        />
       }
       editContent={
         <ExerciseCardEditFields

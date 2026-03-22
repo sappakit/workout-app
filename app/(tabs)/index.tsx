@@ -8,9 +8,10 @@ import { ThemedText } from "@/components/themed-text";
 import { ExerciseCardReadonly } from "@/components/workout/exercise-card/ExerciseCardReadonly";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useGetQuery } from "@/hooks/useGetQuery";
 import { AuthStorage } from "@/lib/api";
+import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useAppToast } from "@/lib/toast/useAppToast";
+import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutSchedule } from "@/types/workout/response/workout.types";
 import * as Clipboard from "expo-clipboard";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
@@ -24,14 +25,11 @@ export default function HomeScreen() {
   // TODO: remove
   const toast = useAppToast();
 
-  // TODO: mock data
-  // const data = workoutData;
-
   // Today workout data
   const url = workoutApi.getSchedule();
 
   const { data, isLoading, isError, isSuccess } = useGetQuery<WorkoutSchedule>(
-    ["workout-schedule"],
+    workoutQueryKeys.schedule,
     url,
   );
 

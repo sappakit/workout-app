@@ -13,9 +13,9 @@ interface ThumbnailProps {
 
 export default function Thumbnail({
   image,
-  width = 100,
+  width = 112,
   aspectRatio = 4 / 3,
-  borderRadius = 8,
+  borderRadius = 16,
   iconSize = 28,
   iconColor,
 }: ThumbnailProps) {

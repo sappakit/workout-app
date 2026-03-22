@@ -1,8 +1,11 @@
 # TODO
 
 - Add keyboard focus
-- some cardio shouldn't have distance (jump rope, boxing)
+- Migrate ExerciseTypeFieldConfig from frontend to db
 
 # BUG
 
-- Edit page: some field shouldn't be able to put in decimal (sets, reps, rest time)
+- some cardio shouldn't have distance (jump rope, boxing)
+  Fix: add fieldConfigOverride in exercise-level
+
+- Extract 'exercise' part from ExerciseCardBase so we can send only 'exercise' instead of whole 'WorkoutExerciseItem' (or make different ui for add exercise)

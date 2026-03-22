@@ -17,7 +17,7 @@ export interface FormNumberInputProps {
   className?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
-  keyboardType?: "numeric" | "decimal-pad";
+  allowDecimal?: boolean;
 }
 
 export default function FormNumberInput({
@@ -31,7 +31,7 @@ export default function FormNumberInput({
   className,
   style,
   disabled,
-  keyboardType = "numeric",
+  allowDecimal = false,
 }: FormNumberInputProps) {
   const { colors } = useAppTheme();
   const [inputValue, setInputValue] = useState(
@@ -42,6 +42,8 @@ export default function FormNumberInput({
   const borderColor = error
     ? colors.app.error || "red"
     : colors.app.borderPrimary;
+
+  const keyboardType = allowDecimal ? "decimal-pad" : "numeric";
 
   useEffect(() => {
     if (!isFocused) {
@@ -56,17 +58,25 @@ export default function FormNumberInput({
   };
 
   const handleTextChange = (text: string) => {
-    let clean = text.replace(/[^0-9.]/g, "");
+    let clean = allowDecimal
+      ? text.replace(/[^0-9.]/g, "")
+      : text.replace(/[^0-9]/g, "");
 
-    const parts = clean.split(".");
-    if (parts.length > 2) {
-      clean = `${parts[0]}.${parts.slice(1).join("")}`;
+    if (allowDecimal) {
+      const parts = clean.split(".");
+      if (parts.length > 2) {
+        clean = `${parts[0]}.${parts.slice(1).join("")}`;
+      }
     }
 
     setInputValue(clean);
 
-    const num = Number(clean);
+    if (clean === "") {
+      onChange?.(null);
+      return;
+    }
 
+    const num = Number(clean);
     if (!Number.isNaN(num)) {
       onChange?.(clamp(num));
     }

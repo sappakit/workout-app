@@ -1,16 +1,19 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
+import { LucideIcon } from "lucide-react-native";
 import React from "react";
-import { TextInput, TextInputProps } from "react-native";
+import { TextInput, TextInputProps, View } from "react-native";
 import { twMerge } from "tailwind-merge";
 
 export interface FormTextInputProps extends TextInputProps {
   error?: boolean;
+  icon?: LucideIcon;
 }
 
 export default function FormTextInput({
   className,
   error,
+  icon: Icon,
   placeholderTextColor,
   style,
   ...props
@@ -18,22 +21,28 @@ export default function FormTextInput({
   const { colors } = useAppTheme();
 
   return (
-    <TextInput
-      {...props}
+    <View
       className={twMerge(
-        clsx("h-12 rounded-lg border px-4 py-3 text-sm", className),
+        clsx(
+          "h-12 flex-row items-center gap-2 rounded-lg border px-4",
+          className,
+        ),
       )}
-      style={[
-        {
-          color: colors.app.textAccent,
-          backgroundColor: colors.app.cardSecondary,
-          borderColor: error
-            ? colors.app.error || "red"
-            : colors.app.borderPrimary,
-        },
-        style,
-      ]}
-      placeholderTextColor={placeholderTextColor ?? colors.app.textPrimary}
-    />
+      style={{
+        backgroundColor: colors.app.cardSecondary,
+        borderColor: error
+          ? colors.app.error || "red"
+          : colors.app.borderPrimary,
+      }}
+    >
+      {Icon && <Icon size={18} color={colors.app.textPrimary} />}
+
+      <TextInput
+        {...props}
+        className="flex-1 text-sm"
+        style={[{ color: colors.app.textAccent }, style]}
+        placeholderTextColor={placeholderTextColor ?? colors.app.textPrimary}
+      />
+    </View>
   );
 }

@@ -103,12 +103,15 @@ export function AppButton({
       activeOpacity={0.8}
       className={twMerge(
         clsx(
-          isDisabled && "opacity-60",
-          "h-12 flex-row items-center justify-center rounded-xl opacity-100",
+          "h-12 flex-row items-center justify-center rounded-full opacity-100",
           className,
         ),
       )}
-      style={[currentVariant.container, style]}
+      style={[
+        currentVariant.container,
+        { opacity: isDisabled ? 0.6 : 1 },
+        style,
+      ]}
     >
       {loading ? (
         <ActivityIndicator color={currentVariant.text.color} />

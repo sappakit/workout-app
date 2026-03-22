@@ -1,14 +1,9 @@
+const BASE = "/workout";
+
 export const workoutApi = {
-  getAll: () => "/workout",
-  getById: (id: string) => `/workout/${id}`,
-  getSchedule: () => "/workout/schedule",
-  getTypes: () => "/workout/types",
-};
-
-export const muscleApi = {
-  getAll: () => "/workout/muscles",
-};
-
-export const exerciseApi = {
-  getAll: () => "/workout/exercises",
+  getAll: () => BASE,
+  getById: (id: string | number) => `${BASE}/${id}`,
+  getSchedule: () => `${BASE}/schedule`,
+  getTypes: () => `${BASE}/types`,
+  update: (id: string | number) => `${BASE}/${id}`,
 };

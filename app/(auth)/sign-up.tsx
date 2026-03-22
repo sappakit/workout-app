@@ -41,7 +41,7 @@ export default function SignUpScreen() {
     },
   });
 
-  const { mutateAsync, isPending } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ["auth", "sign-up"],
     mutationFn: (values: SignUpRequest) => signUp(values),
     onSuccess: () => {
@@ -66,9 +66,9 @@ export default function SignUpScreen() {
     },
   });
 
-  const onSubmit = async (values: SignUpForm) => {
+  const onSubmit = (values: SignUpForm) => {
     const { confirmPassword, ...payload } = values;
-    await mutateAsync(payload);
+    mutate(payload);
   };
 
   return (

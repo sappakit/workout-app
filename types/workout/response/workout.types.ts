@@ -15,7 +15,7 @@ export enum WorkoutSessionStatus {
 }
 
 export interface WorkoutExerciseItem {
-  id: number;
+  id: number | null;
 
   orderIndex: number;
 

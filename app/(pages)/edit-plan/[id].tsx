@@ -1,15 +1,17 @@
 import { workoutApi } from "@/app/api/workout.api";
 import EditPlanContent from "@/components/edit-plan/EditPlanContent";
-import { useGetQuery } from "@/hooks/useGetQuery";
+import { useGetQuery } from "@/lib/query/useGetQuery";
+import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useLocalSearchParams } from "expo-router";
 
 export default function EditPlanScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const workoutId = Number(id);
   const url = workoutApi.getById(id);
 
   const { data, isLoading, isError, isSuccess } = useGetQuery<WorkoutResponse>(
-    ["workout", id],
+    workoutQueryKeys.detail(workoutId),
     url,
   );
 

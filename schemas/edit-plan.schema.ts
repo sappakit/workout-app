@@ -69,7 +69,7 @@ export const exerciseSchema = z.object({
 
 export const workoutExerciseFormSchema = z
   .object({
-    id: z.number(),
+    id: z.number().nullable(),
     orderIndex: z.number(),
 
     plannedSets: z.number().min(1, "Sets must be at least 1").nullable(),

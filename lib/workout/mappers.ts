@@ -3,6 +3,7 @@ import {
   UpdateWorkoutExercisePayload,
   UpdateWorkoutPayload,
 } from "@/types/workout/payload/edit-plan.types";
+import { Exercise } from "@/types/workout/response/exercise.types";
 import {
   WorkoutExerciseItem,
   WorkoutResponse,
@@ -190,5 +191,35 @@ export function mapEditPlanExerciseToWorkoutExerciseItem(
       item.plannedDurationMinutes,
       item.plannedDurationSeconds,
     ),
+  };
+}
+
+// Exercise (from Add Exercise picker) -> CreateWorkoutExerciseFormItem (for Edit plan ui)
+export function mapExerciseToCreateWorkoutExerciseFormItem(
+  exercise: Exercise,
+  orderIndex: number,
+): EditPlanForm["workoutExercises"][number] {
+  const reps = parseRepsRange(exercise.defaultRepsRange ?? null);
+  const rest = secondsToHMS(exercise.defaultRestTime);
+  const duration = secondsToHMS(exercise.defaultDuration);
+
+  return {
+    id: null, // new workoutExercise item
+    orderIndex,
+    plannedSets: exercise.defaultSets ?? null,
+
+    plannedRepsMin: reps.minReps,
+    plannedRepsMax: reps.maxReps,
+
+    plannedWeight: null,
+
+    plannedRestMinutes: rest.minutes,
+    plannedRestSeconds: rest.seconds,
+
+    plannedDurationMinutes: duration.minutes,
+    plannedDurationSeconds: duration.seconds,
+
+    plannedDistance: null,
+    exercise,
   };
 }

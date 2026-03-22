@@ -3,7 +3,6 @@ import { FormErrorMessage } from "@/components/form/FormErrorMessage";
 import FormNumberInput from "@/components/form/FormNumberInput";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { getGroupedFieldError } from "@/lib/forms/utils";
 import {
   ExerciseTypeFieldConfig,
   getVisibleFields,
@@ -48,27 +47,17 @@ export default function ExerciseCardEditFields({
 
   if (!data) return null;
 
-  const exerciseErrors = formErrors.workoutExercises?.[index] as
-    | Record<string, { message?: string }>
-    | undefined;
+  const repsErrorMessage =
+    formErrors.workoutExercises?.[index]?.plannedRepsMin?.message ||
+    formErrors.workoutExercises?.[index]?.plannedRepsMax?.message;
 
-  const repsErrorMessage = getGroupedFieldError(
-    exerciseErrors,
-    "plannedRepsMin",
-    "plannedRepsMax",
-  );
+  const restTimeErrorMessage =
+    formErrors.workoutExercises?.[index]?.plannedRestMinutes?.message ||
+    formErrors.workoutExercises?.[index]?.plannedRestSeconds?.message;
 
-  const restTimeErrorMessage = getGroupedFieldError(
-    exerciseErrors,
-    "plannedRestMinutes",
-    "plannedRestSeconds",
-  );
-
-  const durationErrorMessage = getGroupedFieldError(
-    exerciseErrors,
-    "plannedDurationMinutes",
-    "plannedDurationSeconds",
-  );
+  const durationErrorMessage =
+    formErrors.workoutExercises?.[index]?.plannedDurationMinutes?.message ||
+    formErrors.workoutExercises?.[index]?.plannedDurationSeconds?.message;
 
   // Display data based on exercsie type
   const visibleFields = getVisibleFields(typeConfig);
@@ -210,7 +199,7 @@ export default function ExerciseCardEditFields({
               <>
                 <FormNumberInput
                   style={{ backgroundColor: colors.app.cardTertiary }}
-                  keyboardType="decimal-pad"
+                  allowDecimal
                   value={field.value}
                   onChange={(value) => {
                     field.onChange(value ?? null);

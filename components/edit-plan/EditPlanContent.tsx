@@ -1,10 +1,15 @@
-import { exerciseApi, muscleApi, workoutApi } from "@/app/api/workout.api";
+import { muscleApi } from "@/app/api/muscle.api";
+import { workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { getGroupedFieldError } from "@/lib/forms/utils";
+import { api } from "@/lib/api";
+import { invalidateQueryKeys } from "@/lib/query/utils";
+import { useAppToast } from "@/lib/toast/useAppToast";
+import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
 import {
   mapEditPlanFormToUpdateWorkoutPayload,
+  mapExerciseToCreateWorkoutExerciseFormItem,
   mapWorkoutResponseToEditPlanForm,
   secondsToHMS,
 } from "@/lib/workout/mappers";
@@ -20,8 +25,9 @@ import {
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Save } from "lucide-react-native";
-import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Save, X } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
@@ -29,8 +35,7 @@ import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
 import { FormErrorMessage } from "../form/FormErrorMessage";
 import FormNumberInput from "../form/FormNumberInput";
-import FormInfiniteSelectInputExercise from "../form/select-input/exercise/FormInfiniteSelectInputExercise";
-import { SelectOption } from "../form/select-input/exercise/FormSelectInputExercise";
+import ExercisePickerModal from "../form/picker/ExercisePickerModal";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
@@ -41,6 +46,11 @@ interface EditPlanContentProps {
 }
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
+  const queryClient = useQueryClient();
+  const toast = useAppToast();
+
+  const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
+
   const form = useForm<EditPlanForm>({
     resolver: zodResolver(editPlanFormSchema),
     mode: "onSubmit",
@@ -52,22 +62,45 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     control,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = form;
 
-  const onSubmit = async (values: EditPlanForm) => {
-    const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
-    console.log("Edit plan values:", payload);
-    // TODO: connect API later
+  const { mutate, isPending } = useMutation({
+    mutationKey: workoutMutationKeys.update(data.id),
+    mutationFn: async (values: EditPlanForm) => {
+      const url = workoutApi.update(data.id);
+      const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
+
+      return await api.patch(url, payload);
+    },
+    onSuccess: async () => {
+      await invalidateQueryKeys(queryClient, [
+        workoutQueryKeys.detail(data.id),
+        workoutQueryKeys.schedule,
+      ]);
+
+      toast.success({
+        title: "Plan updated",
+        message: "Your workout plan has been saved.",
+      });
+    },
+    onError: (_err: unknown) => {
+      toast.error({
+        title: "Update failed",
+        message: "Unable to save workout plan.",
+      });
+    },
+  });
+
+  const onSubmit = (values: EditPlanForm) => {
+    mutate(values);
   };
 
   // Duration errors
-  const durationErrorMessage = getGroupedFieldError(
-    errors,
-    "durationHours",
-    "durationMinutes",
-    "durationSeconds",
-  );
+  const durationErrorMessage =
+    errors.durationHours?.message ||
+    errors.durationMinutes?.message ||
+    errors.durationSeconds?.message;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -125,35 +158,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     });
   }, [workoutExercises, autoFillMuscles, setValue]);
 
-  // TODO: remove
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log("Form errors:", errors);
-    }
-  }, [errors]);
-
-  const footer = (
-    <>
-      <AppButton
-        title="Save Changes"
-        variant="primary"
-        icon={Save}
-        className="flex-1"
-        textClassName="font-medium"
-        onPress={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-      />
-
-      <AppButton
-        variant="secondary"
-        icon={Plus}
-        className="h-12 w-12"
-        // onPress={handleSubmit(onSubmit)}
-        // loading={loading}
-      />
-    </>
-  );
-
   // Add exercise
   const handleAddExercise = (exercise: Exercise) => {
     const exists = workoutExercises.some(
@@ -167,54 +171,54 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         ? Math.max(...workoutExercises.map((item) => item.orderIndex)) + 1
         : 1;
 
-    const defaultRepsRange = exercise.defaultRepsRange ?? null;
-    const [minRepsRaw, maxRepsRaw] = defaultRepsRange
-      ? defaultRepsRange.split("-")
-      : [];
+    append(
+      mapExerciseToCreateWorkoutExerciseFormItem(exercise, nextOrderIndex),
+    );
+  };
 
-    const plannedRepsMin =
-      minRepsRaw != null && minRepsRaw !== "" ? Number(minRepsRaw) : null;
+  // Remove exercise
+  const handleRemoveExercise = (indexToRemove: number) => {
+    const nextExercises = workoutExercises.filter(
+      (_, index) => index !== indexToRemove,
+    );
 
-    const plannedRepsMax =
-      maxRepsRaw != null && maxRepsRaw !== "" ? Number(maxRepsRaw) : null;
+    remove(indexToRemove);
 
-    append({
-      id: Date.now(),
-      orderIndex: nextOrderIndex,
-      plannedSets: exercise.defaultSets ?? null,
-
-      // plannedRepsRange
-      plannedRepsMin:
-        plannedRepsMin != null && Number.isFinite(plannedRepsMin)
-          ? plannedRepsMin
-          : null,
-      plannedRepsMax:
-        plannedRepsMax != null && Number.isFinite(plannedRepsMax)
-          ? plannedRepsMax
-          : null,
-
-      plannedWeight: null,
-
-      // plannedRestTime
-      plannedRestMinutes:
-        exercise.defaultRestTime != null
-          ? Math.floor(exercise.defaultRestTime / 60)
-          : null,
-      plannedRestSeconds:
-        exercise.defaultRestTime != null ? exercise.defaultRestTime % 60 : null,
-
-      // plannedDuration
-      plannedDurationMinutes:
-        exercise.defaultDuration != null
-          ? Math.floor(exercise.defaultDuration / 60)
-          : null,
-      plannedDurationSeconds:
-        exercise.defaultDuration != null ? exercise.defaultDuration % 60 : null,
-
-      plannedDistance: null,
-      exercise,
+    nextExercises.forEach((_, index) => {
+      setValue(`workoutExercises.${index}.orderIndex`, index + 1, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
     });
   };
+
+  const footer = (
+    <>
+      <AppButton
+        title="Save Changes"
+        variant="primary"
+        icon={Save}
+        className="flex-1"
+        textClassName="font-medium"
+        onPress={handleSubmit(onSubmit)}
+        loading={isPending}
+      />
+
+      <AppButton
+        variant="secondary"
+        icon={Plus}
+        className="h-12 w-12"
+        onPress={() => setIsExercisePickerOpen(true)}
+      />
+    </>
+  );
+
+  // TODO: remove
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log("Form errors:", errors);
+    }
+  }, [errors]);
 
   return (
     <PageLayout
@@ -450,35 +454,36 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <SectionHeader title="Exercise List" />
 
         <View className="mt-4">
-          <FormInfiniteSelectInputExercise<Exercise>
-            url={exerciseApi.getAll()}
-            queryKey={["exercises"]}
-            mapOption={(item) => ({
-              label: item.name,
-              value: item.id,
-              data: item,
-            })}
-            onChange={(_, option?: SelectOption<Exercise>) => {
-              if (!option?.data) return;
-              handleAddExercise(option.data);
-            }}
-            placeholder="Add exercise"
-            title="Select Exercise"
-            snapPoints={["70%"]}
-          />
-        </View>
-
-        <View className="mt-4">
           {fields.map((item, index) => (
-            <ExerciseCardEdit
-              key={item.id}
-              form={form}
-              index={index}
-              className={index > 0 ? "mt-4" : ""}
-            />
+            <>
+              <AppButton
+                variant="secondary"
+                icon={X}
+                className="ml-auto h-12 w-12"
+                onPress={() => handleRemoveExercise(index)}
+              />
+
+              <ExerciseCardEdit
+                key={item.id}
+                form={form}
+                index={index}
+                className={index > 0 ? "mt-4" : ""}
+              />
+            </>
           ))}
         </View>
       </View>
+
+      {/* Exercise picker */}
+      <ExercisePickerModal
+        visible={isExercisePickerOpen}
+        onClose={() => setIsExercisePickerOpen(false)}
+        onDone={(selectedExercises) => {
+          selectedExercises.forEach(handleAddExercise);
+          setIsExercisePickerOpen(false);
+        }}
+        selectedExerciseIds={workoutExercises.map((item) => item.exercise.id)}
+      />
     </PageLayout>
   );
 }

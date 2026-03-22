@@ -24,6 +24,7 @@ import {
   Clock,
   Dumbbell,
   FileText,
+  Info,
   LucideIcon,
 } from "lucide-react-native";
 import { ReactNode } from "react";
@@ -55,7 +56,7 @@ interface ExerciseCardBaseProps {
   className?: string;
   isEditMode?: boolean;
   editContent?: ReactNode;
-  topRightContent?: ReactNode;
+  bottomRightContent?: ReactNode;
 }
 
 export default function ExerciseCardBase({
@@ -65,7 +66,7 @@ export default function ExerciseCardBase({
   className,
   isEditMode = false,
   editContent,
-  topRightContent,
+  bottomRightContent,
 }: ExerciseCardBaseProps) {
   const { colors } = useAppTheme();
 
@@ -163,67 +164,64 @@ export default function ExerciseCardBase({
 
   return (
     <View
-      className={twMerge(clsx("overflow-hidden rounded-2xl border", className))}
+      className={twMerge(clsx("overflow-hidden rounded-3xl border", className))}
       style={{
         backgroundColor: colors.app.cardPrimary,
         borderColor: colors.app.borderPrimary,
       }}
     >
       {/* Top right */}
-      <View className="absolute right-0 top-0 z-10 flex-row gap-2 p-2">
-        {topRightContent ?? (
-          <DifficultyBadge
-            label={DifficultyLabel[data.exercise.difficultyLevel]}
-          />
-        )}
+      <View className="absolute right-0 top-0 z-10 flex-row gap-2 px-4">
+        <DifficultyBadge
+          label={DifficultyLabel[data.exercise.difficultyLevel]}
+        />
       </View>
 
-      {/* Main content */}
-      <View className="flex-row p-2">
+      <View className="flex-row gap-2 p-2">
         {/* TODO: add image */}
         {/* <Thumbnail image={data.image} /> */}
         <Thumbnail />
 
-        <View className="ml-4" style={{ justifyContent: "flex-end" }}>
-          {/* Subtitle */}
-          <ThemedText type="default" variant="accent" className="text-xs">
-            {ExerciseTypeLabel[data.exercise.exerciseType]}
-          </ThemedText>
+        {/* Main content */}
+        <View className="flex-1 justify-between">
+          <View>
+            {/* Subtitle */}
+            <ThemedText type="default" variant="accent" className="text-xs">
+              {ExerciseTypeLabel[data.exercise.exerciseType]}
+            </ThemedText>
 
-          {/* Title */}
-          <ThemedText
-            type="default"
-            variant="brand"
-            className="text-xl font-medium"
-          >
-            {data.exercise.name}
-          </ThemedText>
+            {/* Title */}
+            <ThemedText
+              type="default"
+              variant="brand"
+              className="text-lg font-semibold"
+              numberOfLines={1}
+            >
+              {data.exercise.name}
+            </ThemedText>
 
-          {/* Exercise stats */}
-          <View className="flex-row gap-2">
-            {stats.map((item) => (
-              <ExerciseStat
-                key={item.key}
-                label={item.label}
-                icon={item.icon}
-              />
-            ))}
+            {/* Exercise stats */}
+            <View className="flex-row gap-2">
+              {stats.map((item) => (
+                <ExerciseStat
+                  key={item.key}
+                  label={item.label}
+                  icon={item.icon}
+                />
+              ))}
+            </View>
           </View>
 
           {/* Expand / edit state */}
           {isEditMode ? (
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="mt-2 text-xs"
-            >
+            <ThemedText type="default" variant="primary" className="text-xs">
               Editing ...
             </ThemedText>
           ) : (
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={onToggleExpanded}
-              className="mt-2 flex-row items-center gap-1"
+              className="flex-row items-center gap-1"
             >
               <ThemedText type="default" variant="primary" className="text-xs">
                 {expanded ? "Show less" : "Show more"}
@@ -236,6 +234,19 @@ export default function ExerciseCardBase({
               )}
             </TouchableOpacity>
           )}
+        </View>
+
+        <View className="absolute bottom-0 right-0 z-10 flex-row gap-2 p-2">
+          {!expanded && (
+            <AppButton
+              variant="option"
+              icon={Info}
+              className="h-8 w-8 self-end rounded-full"
+              // onPress={handleEditMode}
+            />
+          )}
+
+          {bottomRightContent}
         </View>
       </View>
 

@@ -15,11 +15,11 @@ export function DifficultyBadge({
 
   return (
     <View
-      className={twMerge(clsx("px-4 py-1", className))}
+      className={twMerge(clsx("px-3 py-0.5", className))}
       style={{
         backgroundColor: colors.app.brand,
-        borderBottomLeftRadius: 4,
-        borderBottomRightRadius: 4,
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
       }}
     >
       <ThemedText

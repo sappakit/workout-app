@@ -36,7 +36,7 @@ export default function SignInScreen() {
     },
   });
 
-  const { mutateAsync, isPending } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ["auth", "sign-in"],
     mutationFn: (values: SignInForm) => signIn(values),
     onSuccess: () => {
@@ -53,7 +53,9 @@ export default function SignInScreen() {
     },
   });
 
-  const onSubmit = async (values: SignInForm) => await mutateAsync(values);
+  const onSubmit = (values: SignInForm) => {
+    mutate(values);
+  };
 
   return (
     <PageLayout showHeader={false}>

@@ -220,7 +220,7 @@ export default function FormMultiSelectInput({
 
       {/* Selected chips display */}
       {selectedOptions.length > 0 && (
-        <View className="mt-2 flex">
+        <View className="mt-2">
           {/* Show all */}
           {selectedOptions.length > 3 && (
             <Pressable
@@ -241,7 +241,7 @@ export default function FormMultiSelectInput({
             </Pressable>
           )}
 
-          <View className="flex-1 flex-row flex-wrap items-center gap-2">
+          <View className="flex-row flex-wrap items-center gap-2">
             {visibleOptions.map((option) => (
               <SelectedMuscleBadge
                 key={option.value}
@@ -325,8 +325,8 @@ export default function FormMultiSelectInput({
             />
 
             <View
-              className="px-4 pt-3"
-              style={{ paddingBottom: insets.bottom + 16 }}
+              className="px-4 py-2"
+              style={{ paddingBottom: insets.bottom }}
             >
               <AppButton title="Done" variant="primary" onPress={closeSheet} />
             </View>
