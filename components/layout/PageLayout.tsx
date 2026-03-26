@@ -9,7 +9,7 @@ import { twMerge } from "tailwind-merge";
 type ScreenLayoutProps = {
   children: ReactNode;
   showHeader?: boolean;
-  scroll?: boolean;
+  scrollable?: boolean;
   className?: string;
   topInset?: number;
   bottomInset?: number;
@@ -22,7 +22,7 @@ type ScreenLayoutProps = {
 export function PageLayout({
   children,
   showHeader = true,
-  scroll = true,
+  scrollable = true,
   className,
   topInset = 12,
   bottomInset = 12,
@@ -36,6 +36,8 @@ export function PageLayout({
 
   const { colors } = useAppTheme();
   const bg = backgroundColor ?? colors.app.background;
+  const paddingBottom = stickyFooter ? footerHeight : bottomInset;
+  const mainContainerClassName = className ?? "px-4";
 
   return (
     <View
@@ -48,44 +50,43 @@ export function PageLayout({
         containerStyle,
       ]}
     >
-      {showHeader ? <PageHeader /> : null}
+      {showHeader && <PageHeader />}
 
-      {scroll ? (
-        <>
-          <ScrollView
-            className={twMerge(clsx("px-4", className))}
-            showsVerticalScrollIndicator={showsVerticalScrollIndicator}
-            contentContainerStyle={{
-              paddingTop: topInset,
-              paddingBottom: stickyFooter ? footerHeight : bottomInset,
-            }}
-          >
-            {children}
-          </ScrollView>
-
-          {stickyFooter && (
-            <View
-              onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-              className="absolute bottom-0 left-0 right-0 flex-row gap-2 px-4 py-2"
-              style={
-                stickyFooter.options?.addBottomInset && {
-                  paddingBottom: insets.bottom,
-                }
-              }
-            >
-              {stickyFooter.content}
-            </View>
-          )}
-        </>
+      {scrollable ? (
+        <ScrollView
+          className={mainContainerClassName}
+          showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+          contentContainerStyle={{
+            paddingTop: topInset,
+            paddingBottom: paddingBottom,
+          }}
+        >
+          {children}
+        </ScrollView>
       ) : (
-        <>
-          <View
-            className={twMerge(clsx("px-4", className))}
-            style={{ paddingTop: topInset, paddingBottom: bottomInset }}
-          >
-            {children}
-          </View>
-        </>
+        <View
+          className={twMerge(clsx("flex-1", mainContainerClassName))}
+          style={{
+            paddingTop: topInset,
+            paddingBottom: paddingBottom,
+          }}
+        >
+          {children}
+        </View>
+      )}
+
+      {stickyFooter && (
+        <View
+          onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
+          className="absolute bottom-0 left-0 right-0 flex-row gap-2 px-4 py-2"
+          style={
+            stickyFooter.options?.addBottomInset
+              ? { paddingBottom: insets.bottom }
+              : undefined
+          }
+        >
+          {stickyFooter.content}
+        </View>
       )}
     </View>
   );

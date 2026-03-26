@@ -48,14 +48,14 @@ export function OptionsMenu({ children }: { children: ReactNode }) {
 
 interface DropdownItemProps extends MenuOptionProps {
   label: string;
-  textColor?: string;
+  color?: string;
   icon?: LucideIcon;
   checked?: boolean;
 }
 
 export function DropdownItem({
   label,
-  textColor,
+  color,
   icon: Icon,
   checked,
   onSelect,
@@ -84,7 +84,7 @@ export function DropdownItem({
 
           <ThemedText
             style={{
-              color: textColor ?? colors.app.textAccent,
+              color: color ?? colors.app.textAccent,
             }}
           >
             {label}
@@ -92,7 +92,7 @@ export function DropdownItem({
         </View>
 
         {/* Icon */}
-        {Icon && <Icon size={14} color={colors.app.textPrimary} />}
+        {Icon && <Icon size={14} color={color ?? colors.app.textPrimary} />}
       </View>
     </MenuOption>
   );

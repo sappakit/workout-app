@@ -3,7 +3,7 @@ import { workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { api } from "@/lib/api";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { invalidateQueryKeys } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
@@ -15,6 +15,7 @@ import {
 } from "@/lib/workout/mappers";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
+import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
 import {
   Exercise,
   ExerciseMuscleItem,
@@ -26,10 +27,17 @@ import {
 } from "@/types/workout/response/workout.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, X } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import {
+  ArrowUpDown,
+  PanelTopOpen,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
 import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
@@ -39,6 +47,11 @@ import ExercisePickerModal from "../form/picker/ExercisePickerModal";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
+import {
+  DropdownItem,
+  MenuSectionLabel,
+  OptionsMenu,
+} from "../optionsMenu/OptionsMenu";
 import { ExerciseCardEdit } from "../workout/exercise-card/ExerciseCardEdit";
 
 interface EditPlanContentProps {
@@ -46,24 +59,83 @@ interface EditPlanContentProps {
 }
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
+  const { colors } = useAppTheme();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const toast = useAppToast();
 
   const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
 
+  // Draft store
+  const draftWorkoutId = useEditPlanDraftStore((state) => state.workoutId);
+  const draft = useEditPlanDraftStore((state) => state.draft);
+  const initializeDraft = useEditPlanDraftStore(
+    (state) => state.initializeDraft,
+  );
+  const replaceDraft = useEditPlanDraftStore((state) => state.replaceDraft);
+  const resetDraft = useEditPlanDraftStore((state) => state.resetDraft);
+
+  // Base values from API response
+  const mappedDefaultValues = useMemo(
+    () => mapWorkoutResponseToEditPlanForm(data),
+    [data],
+  );
+
+  // If store already contains draft for this workout, use it instead
+  const initialFormValues = useMemo(() => {
+    if (draftWorkoutId === data.id && draft) {
+      return draft;
+    }
+
+    return mappedDefaultValues;
+  }, [draftWorkoutId, draft, data.id, mappedDefaultValues]);
+
   const form = useForm<EditPlanForm>({
     resolver: zodResolver(editPlanFormSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
-    defaultValues: mapWorkoutResponseToEditPlanForm(data),
+    defaultValues: initialFormValues,
   });
 
   const {
     control,
     handleSubmit,
     setValue,
-    formState: { errors },
+    reset,
+    getValues,
+    formState: { errors, isDirty },
   } = form;
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "workoutExercises",
+    keyName: "fieldId",
+  });
+
+  const workoutExercises = useWatch({
+    control,
+    name: "workoutExercises",
+  });
+
+  // Initialize Zustand draft once for this workout
+  useEffect(() => {
+    initializeDraft(data.id, initialFormValues);
+  }, [data.id, initialFormValues, initializeDraft]);
+
+  // When draft changes from another page (like manage mode),
+  // refresh RHF so this screen reflects the latest shared draft.
+  useEffect(() => {
+    if (draftWorkoutId !== data.id || !draft) return;
+
+    // Wait for the page to fully mount
+    const frame = requestAnimationFrame(() => {
+      reset(draft, {
+        keepDefaultValues: true,
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [draftWorkoutId, draft, data.id, reset]);
 
   const { mutate, isPending } = useMutation({
     mutationKey: workoutMutationKeys.update(data.id),
@@ -71,9 +143,14 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       const url = workoutApi.update(data.id);
       const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
 
-      return await api.patch(url, payload);
+      console.log(payload);
+
+      // return await api.patch(url, payload);
     },
-    onSuccess: async () => {
+    onSuccess: async (_, values) => {
+      form.reset(values);
+      replaceDraft(values);
+
       await invalidateQueryKeys(queryClient, [
         workoutQueryKeys.detail(data.id),
         workoutQueryKeys.schedule,
@@ -96,21 +173,39 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     mutate(values);
   };
 
+  const handleCancelEdit = () => {
+    const resetFormAndBack = () => {
+      resetDraft();
+      router.back();
+    };
+
+    if (!isDirty) {
+      resetFormAndBack();
+      return;
+    }
+
+    Alert.alert(
+      "Discard changes?",
+      "You have unsaved changes. If you go back, your edits will be lost.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Discard",
+          style: "destructive",
+          onPress: resetFormAndBack,
+        },
+      ],
+    );
+  };
+
   // Duration errors
   const durationErrorMessage =
     errors.durationHours?.message ||
     errors.durationMinutes?.message ||
     errors.durationSeconds?.message;
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "workoutExercises",
-  });
-
-  const workoutExercises = useWatch({
-    control,
-    name: "workoutExercises",
-  });
 
   // Auto-filled duration
   const autoFillDuration = useWatch({
@@ -192,6 +287,16 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     });
   };
 
+  const handleOpenManageMode = () => {
+    // Make sure the latest RHF values are in Zustand before navigating
+    replaceDraft(getValues());
+
+    router.push({
+      pathname: "/(pages)/workout/[id]/edit/manage-exercises",
+      params: { id: String(data.id) },
+    });
+  };
+
   const footer = (
     <>
       <AppButton
@@ -227,6 +332,15 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         options: { addBottomInset: true },
       }}
     >
+      {/* TODO: remove this */}
+      <View className="my-4">
+        <AppButton
+          title="Back (Cancel Edit)"
+          variant="secondary"
+          onPress={handleCancelEdit}
+        />
+      </View>
+
       {/* Title */}
       <ThemedText type="title" variant="accent">
         Edit Plan
@@ -451,25 +565,55 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
 
       {/* Exercise List */}
       <View>
-        <SectionHeader title="Exercise List" />
+        <SectionHeader
+          title="Exercise List"
+          action={
+            <OptionsMenu>
+              <MenuSectionLabel label="Actions" />
+
+              <DropdownItem
+                label="Show full details"
+                icon={PanelTopOpen}
+                // checked={expanded}
+                // onSelect={() => {
+                //   setExpanded((prev) => !prev);
+
+                //   // Prevent menu closing
+                //   return false;
+                // }}
+              />
+              <DropdownItem
+                label="Manage exercises"
+                icon={ArrowUpDown}
+                onSelect={handleOpenManageMode}
+              />
+              <DropdownItem
+                label="Remove all"
+                color={colors.app.error}
+                icon={Trash2}
+              />
+            </OptionsMenu>
+          }
+        />
+
+        {/* TODO: remove */}
+        {/* <View className="mt-3">
+          <AppButton
+            title="Manage Exercises"
+            variant="secondary"
+            icon={ArrowUpDown}
+            onPress={handleOpenManageMode}
+          />
+        </View> */}
 
         <View className="mt-4">
           {fields.map((item, index) => (
-            <>
-              <AppButton
-                variant="secondary"
-                icon={X}
-                className="ml-auto h-12 w-12"
-                onPress={() => handleRemoveExercise(index)}
-              />
-
-              <ExerciseCardEdit
-                key={item.id}
-                form={form}
-                index={index}
-                className={index > 0 ? "mt-4" : ""}
-              />
-            </>
+            <ExerciseCardEdit
+              key={item.fieldId}
+              form={form}
+              index={index}
+              className={index > 0 ? "mt-4" : ""}
+            />
           ))}
         </View>
       </View>
@@ -485,5 +629,34 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         selectedExerciseIds={workoutExercises.map((item) => item.exercise.id)}
       />
     </PageLayout>
+  );
+}
+
+function ExerciseListMenu() {
+  const { colors } = useAppTheme();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <OptionsMenu>
+      <MenuSectionLabel label="Actions" />
+
+      <DropdownItem
+        label="Show full details"
+        icon={PanelTopOpen}
+        checked={expanded}
+        onSelect={() => {
+          setExpanded((prev) => !prev);
+
+          // Prevent menu closing
+          return false;
+        }}
+      />
+      <DropdownItem
+        label="Manage exercises"
+        icon={ArrowUpDown}
+        onSelect={() => {}}
+      />
+      <DropdownItem label="Remove all" color={colors.app.error} icon={Trash2} />
+    </OptionsMenu>
   );
 }

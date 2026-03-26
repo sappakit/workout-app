@@ -2,7 +2,7 @@ import { ExerciseType } from "@/types/workout/response/exercise.types";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { hmsToSeconds } from "./mappers";
 
-// Duration
+/* Duration */
 type DurationOptions = {
   timeType?: "seconds" | "minutes";
 };
@@ -102,7 +102,7 @@ export function calculateWorkoutDuration(workout: WorkoutResponse): number {
   return calculateWorkoutDurationFromExercises(workout.workoutExercises);
 }
 
-// Calories
+/* Calories */
 // Calcurate total calories used for the workout program
 export function calculateWorkoutCalories(workout: WorkoutResponse): number {
   let totalCalories = 0;

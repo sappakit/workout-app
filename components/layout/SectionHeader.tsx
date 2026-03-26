@@ -1,19 +1,18 @@
 import clsx from "clsx";
+import { ReactNode } from "react";
 import { View } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { ThemedText } from "../themed-text";
 
 interface SectionHeaderProps {
   title: string;
-  actionText?: string;
-  showActionText?: boolean;
+  action?: ReactNode;
   className?: string;
 }
 
 export function SectionHeader({
   title,
-  actionText = "View All",
-  showActionText = true,
+  action,
   className,
 }: SectionHeaderProps) {
   return (
@@ -26,11 +25,7 @@ export function SectionHeader({
         {title}
       </ThemedText>
 
-      {showActionText && (
-        <ThemedText type="default" variant="primary" className="text-sm">
-          {actionText}
-        </ThemedText>
-      )}
+      {action}
     </View>
   );
 }

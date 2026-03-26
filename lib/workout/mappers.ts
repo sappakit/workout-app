@@ -8,6 +8,7 @@ import {
   WorkoutExerciseItem,
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
+import { createClientId } from "../id/utils";
 
 export type RepsRange = {
   minReps: number | null;
@@ -72,6 +73,7 @@ export function mapWorkoutExerciseToFormItem(
 
   return {
     id: item.id,
+    clientId: `existing-${item.id}`,
     orderIndex: item.orderIndex,
     plannedSets: item.plannedSets,
 
@@ -156,7 +158,7 @@ export function mapEditPlanFormToUpdateWorkoutPayload(
   values: EditPlanForm,
 ): UpdateWorkoutPayload {
   return {
-    name: values.name,
+    name: values.name.trim(),
     workoutFocusTypeId: values.workoutFocusTypeId,
     targetMuscles: values.targetMuscles,
     duration:
@@ -205,6 +207,7 @@ export function mapExerciseToCreateWorkoutExerciseFormItem(
 
   return {
     id: null, // new workoutExercise item
+    clientId: createClientId("new"),
     orderIndex,
     plannedSets: exercise.defaultSets ?? null,
 
