@@ -16,6 +16,7 @@ import {
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
+import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import {
   Exercise,
   ExerciseMuscleItem,
@@ -29,10 +30,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
-  ArrowUpDown,
   PanelTopOpen,
   Plus,
   Save,
+  Settings2,
   Trash2,
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
@@ -65,6 +66,14 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   const toast = useAppToast();
 
   const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
+
+  // Display full exercise details toggle
+  const showFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.showFullExerciseDetails,
+  );
+  const toggleShowFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.toggleShowFullExerciseDetails,
+  );
 
   // Draft store
   const draftWorkoutId = useEditPlanDraftStore((state) => state.workoutId);
@@ -103,10 +112,11 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     setValue,
     reset,
     getValues,
+    clearErrors,
     formState: { errors, isDirty },
   } = form;
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, replace } = useFieldArray({
     control,
     name: "workoutExercises",
     keyName: "fieldId",
@@ -173,6 +183,88 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     mutate(values);
   };
 
+  // Duration errors
+  const durationErrorMessage =
+    errors.durationHours?.message ||
+    errors.durationMinutes?.message ||
+    errors.durationSeconds?.message;
+
+  // Auto-filled duration
+  const autoFillDuration = useWatch({
+    control,
+    name: "autoFillDuration",
+  });
+
+  useEffect(() => {
+    if (!autoFillDuration) return;
+
+    // Empty duration field if no exercises
+    if (workoutExercises.length === 0) {
+      setValue("durationHours", null);
+      setValue("durationMinutes", null);
+      setValue("durationSeconds", null);
+      return;
+    }
+
+    const totalSeconds = calculateWorkoutDurationFromExercises(
+      workoutExercises,
+      { timeType: "seconds" },
+    );
+
+    const { hours, minutes, seconds } = secondsToHMS(totalSeconds);
+
+    setValue("durationHours", hours);
+    setValue("durationMinutes", minutes);
+    setValue("durationSeconds", seconds);
+  }, [workoutExercises, autoFillDuration]);
+
+  // Auto-filled muscles
+  const autoFillMuscles = useWatch({
+    control,
+    name: "autoFillMuscles",
+  });
+
+  useEffect(() => {
+    if (!autoFillMuscles) return;
+
+    const uniqueMuscleIds = Array.from(
+      new Set(
+        workoutExercises.flatMap((workoutExercise) =>
+          (workoutExercise.exercise.muscles ?? []).map(
+            (item: ExerciseMuscleItem) => item.muscle.id,
+          ),
+        ),
+      ),
+    );
+
+    setValue("targetMuscles", uniqueMuscleIds, {
+      shouldValidate: false,
+      shouldDirty: true,
+    });
+  }, [workoutExercises, autoFillMuscles, setValue]);
+
+  // Disable auto-fill if no exercises
+  const hasExercises = workoutExercises.length > 0;
+
+  useEffect(() => {
+    if (hasExercises) return;
+
+    if (getValues("autoFillMuscles")) {
+      setValue("autoFillMuscles", false, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+    }
+
+    if (getValues("autoFillDuration")) {
+      setValue("autoFillDuration", false, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+    }
+  }, [hasExercises, getValues, setValue]);
+
+  // Cancel edit
   const handleCancelEdit = () => {
     const resetFormAndBack = () => {
       resetDraft();
@@ -201,58 +293,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
-  // Duration errors
-  const durationErrorMessage =
-    errors.durationHours?.message ||
-    errors.durationMinutes?.message ||
-    errors.durationSeconds?.message;
-
-  // Auto-filled duration
-  const autoFillDuration = useWatch({
-    control,
-    name: "autoFillDuration",
-  });
-
-  useEffect(() => {
-    if (!autoFillDuration) return;
-
-    const totalSeconds = calculateWorkoutDurationFromExercises(
-      workoutExercises,
-      { timeType: "seconds" },
-    );
-
-    const { hours, minutes, seconds } = secondsToHMS(totalSeconds);
-
-    setValue("durationHours", hours ?? 0);
-    setValue("durationMinutes", minutes ?? 0);
-    setValue("durationSeconds", seconds ?? 0);
-  }, [workoutExercises, autoFillDuration]);
-
-  // Auto-filled muscles
-  const autoFillMuscles = useWatch({
-    control,
-    name: "autoFillMuscles",
-  });
-
-  useEffect(() => {
-    if (!autoFillMuscles) return;
-
-    const uniqueMuscleIds = Array.from(
-      new Set(
-        workoutExercises.flatMap((workoutExercise) =>
-          (workoutExercise.exercise.muscles ?? []).map(
-            (item: ExerciseMuscleItem) => item.muscle.id,
-          ),
-        ),
-      ),
-    );
-
-    setValue("targetMuscles", uniqueMuscleIds, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  }, [workoutExercises, autoFillMuscles, setValue]);
-
   // Add exercise
   const handleAddExercise = (exercise: Exercise) => {
     const exists = workoutExercises.some(
@@ -271,22 +311,30 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
-  // Remove exercise
-  const handleRemoveExercise = (indexToRemove: number) => {
-    const nextExercises = workoutExercises.filter(
-      (_, index) => index !== indexToRemove,
+  // Remove all exercises
+  const handleRemoveAllExercises = () => {
+    if (workoutExercises.length === 0) return;
+
+    Alert.alert(
+      "Remove all exercises?",
+      "This will remove all exercises from this workout plan.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove All",
+          style: "destructive",
+          onPress: () => {
+            replace([]);
+          },
+        },
+      ],
     );
-
-    remove(indexToRemove);
-
-    nextExercises.forEach((_, index) => {
-      setValue(`workoutExercises.${index}.orderIndex`, index + 1, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-    });
   };
 
+  // Open manage mode
   const handleOpenManageMode = () => {
     // Make sure the latest RHF values are in Zustand before navigating
     replaceDraft(getValues());
@@ -420,8 +468,15 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
               <FormCheckbox
                 label="Auto-filled"
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(value) => {
+                  field.onChange(value);
+
+                  if (value) {
+                    clearErrors(["targetMuscles"]);
+                  }
+                }}
                 error={!!errors.autoFillMuscles}
+                disabled={!hasExercises}
               />
             )}
           />
@@ -469,8 +524,19 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
               <FormCheckbox
                 label="Auto-filled"
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(value) => {
+                  field.onChange(value);
+
+                  if (value) {
+                    clearErrors([
+                      "durationHours",
+                      "durationMinutes",
+                      "durationSeconds",
+                    ]);
+                  }
+                }}
                 error={!!errors.autoFillDuration}
+                disabled={!hasExercises}
               />
             )}
           />
@@ -568,54 +634,40 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <SectionHeader
           title="Exercise List"
           action={
-            <OptionsMenu>
-              <MenuSectionLabel label="Actions" />
-
-              <DropdownItem
-                label="Show full details"
-                icon={PanelTopOpen}
-                // checked={expanded}
-                // onSelect={() => {
-                //   setExpanded((prev) => !prev);
-
-                //   // Prevent menu closing
-                //   return false;
-                // }}
-              />
-              <DropdownItem
-                label="Manage exercises"
-                icon={ArrowUpDown}
-                onSelect={handleOpenManageMode}
-              />
-              <DropdownItem
-                label="Remove all"
-                color={colors.app.error}
-                icon={Trash2}
-              />
-            </OptionsMenu>
+            <ExerciseListMenu
+              isDisabled={fields.length === 0}
+              showFullExerciseDetails={showFullExerciseDetails}
+              actions={{
+                toggleShowFullExerciseDetails,
+                handleOpenManageMode,
+                handleRemoveAllExercises,
+              }}
+            />
           }
         />
 
-        {/* TODO: remove */}
-        {/* <View className="mt-3">
-          <AppButton
-            title="Manage Exercises"
-            variant="secondary"
-            icon={ArrowUpDown}
-            onPress={handleOpenManageMode}
-          />
-        </View> */}
+        {fields.length === 0 ? (
+          <View className="gap-2 py-4">
+            <ThemedText type="default" variant="secondary">
+              No exercises added yet
+            </ThemedText>
 
-        <View className="mt-4">
-          {fields.map((item, index) => (
-            <ExerciseCardEdit
-              key={item.fieldId}
-              form={form}
-              index={index}
-              className={index > 0 ? "mt-4" : ""}
-            />
-          ))}
-        </View>
+            <ThemedText type="default" variant="primary">
+              Tap the + button to add your first exercise
+            </ThemedText>
+          </View>
+        ) : (
+          <View className="mt-4">
+            {fields.map((item, index) => (
+              <ExerciseCardEdit
+                key={item.fieldId}
+                form={form}
+                index={index}
+                className={index > 0 ? "mt-4" : ""}
+              />
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Exercise picker */}
@@ -632,31 +684,52 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   );
 }
 
-function ExerciseListMenu() {
+type ExerciseListMenuProps = {
+  showFullExerciseDetails: boolean;
+  actions: {
+    toggleShowFullExerciseDetails: () => void;
+    handleOpenManageMode: () => void;
+    handleRemoveAllExercises: () => void;
+  };
+  isDisabled?: boolean;
+};
+
+function ExerciseListMenu({
+  isDisabled,
+  showFullExerciseDetails,
+  actions,
+}: ExerciseListMenuProps) {
   const { colors } = useAppTheme();
-  const [expanded, setExpanded] = useState(false);
 
   return (
-    <OptionsMenu>
-      <MenuSectionLabel label="Actions" />
+    <OptionsMenu isDisabled={isDisabled}>
+      <MenuSectionLabel label="View" />
 
       <DropdownItem
         label="Show full details"
         icon={PanelTopOpen}
-        checked={expanded}
+        checked={showFullExerciseDetails}
         onSelect={() => {
-          setExpanded((prev) => !prev);
+          actions.toggleShowFullExerciseDetails();
 
-          // Prevent menu closing
           return false;
         }}
       />
+
+      <MenuSectionLabel label="Actions" />
+
       <DropdownItem
         label="Manage exercises"
-        icon={ArrowUpDown}
-        onSelect={() => {}}
+        icon={Settings2}
+        onSelect={actions.handleOpenManageMode}
       />
-      <DropdownItem label="Remove all" color={colors.app.error} icon={Trash2} />
+
+      <DropdownItem
+        label="Remove all"
+        color={colors.app.error}
+        icon={Trash2}
+        onSelect={actions.handleRemoveAllExercises}
+      />
     </OptionsMenu>
   );
 }

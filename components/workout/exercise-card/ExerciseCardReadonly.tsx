@@ -1,5 +1,6 @@
+import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { WorkoutExerciseItem } from "@/types/workout/response/workout.types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ExerciseCardBase from "./base/ExerciseCardBase";
 
 interface ExerciseCardReadonlyProps {
@@ -11,13 +12,31 @@ export function ExerciseCardReadonly({
   data,
   className,
 }: ExerciseCardReadonlyProps) {
-  const [expanded, setExpanded] = useState(false);
+  // Exercise card expansion state
+  const showFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.showFullExerciseDetails,
+  );
+  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(
+    null,
+  );
+  const expanded = expandedOverride ?? showFullExerciseDetails;
+
+  useEffect(() => {
+    setExpandedOverride(null);
+  }, [showFullExerciseDetails]);
+
+  const handleToggleExpanded = () => {
+    setExpandedOverride((prev) => {
+      const current = prev ?? showFullExerciseDetails;
+      return !current;
+    });
+  };
 
   return (
     <ExerciseCardBase
       data={data}
       expanded={expanded}
-      onToggleExpanded={() => setExpanded((prev) => !prev)}
+      onToggleExpanded={handleToggleExpanded}
       className={className}
     />
   );

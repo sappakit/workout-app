@@ -32,7 +32,7 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
         className="w-36"
         onPress={() =>
           router.push({
-            pathname: "/edit-plan/[id]",
+            pathname: "/(pages)/workout/[id]/edit",
             params: { id: data.workout.id },
           })
         }

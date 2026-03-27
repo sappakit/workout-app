@@ -5,8 +5,9 @@ import {
 } from "@/lib/workout/config";
 import { mapEditPlanExerciseToWorkoutExerciseItem } from "@/lib/workout/mappers";
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
+import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { Pencil, X } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { Alert } from "react-native";
 import ExerciseCardBase from "./base/ExerciseCardBase";
@@ -25,13 +26,26 @@ export function ExerciseCardEdit({
 }: ExerciseCardEditProps) {
   const { control, setValue, getValues, trigger } = form;
 
-  const [expanded, setExpanded] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [hasTriedSave, setHasTriedSave] = useState(false);
   const [draftSnapshot, setDraftSnapshot] = useState<
     EditPlanForm["workoutExercises"][number] | null
   >(null);
 
+  // Exercise card expansion state
+  const showFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.showFullExerciseDetails,
+  );
+  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(
+    null,
+  );
+  const expanded = expandedOverride ?? showFullExerciseDetails;
+
+  useEffect(() => {
+    setExpandedOverride(null);
+  }, [showFullExerciseDetails]);
+
+  // Data
   const data = useWatch({
     control,
     name: `workoutExercises.${index}`,
@@ -42,10 +56,17 @@ export function ExerciseCardEdit({
   const typeConfig = exerciseTypeFieldConfig[data.exercise.exerciseType];
   const cardData = mapEditPlanExerciseToWorkoutExerciseItem(data);
 
+  const handleToggleExpanded = () => {
+    setExpandedOverride((prev) => {
+      const current = prev ?? showFullExerciseDetails;
+      return !current;
+    });
+  };
+
   const handleStartEdit = () => {
     setDraftSnapshot(getValues(`workoutExercises.${index}`));
     setHasTriedSave(false);
-    setExpanded(true);
+    setExpandedOverride(true);
     setIsEditMode(true);
   };
 
@@ -96,7 +117,7 @@ export function ExerciseCardEdit({
     <ExerciseCardBase
       data={cardData}
       expanded={expanded}
-      onToggleExpanded={() => setExpanded((prev) => !prev)}
+      onToggleExpanded={handleToggleExpanded}
       className={className}
       isEditMode={isEditMode}
       bottomRightContent={

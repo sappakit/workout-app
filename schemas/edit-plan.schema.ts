@@ -214,31 +214,60 @@ export const workoutExerciseFormSchema = z
     }
   });
 
-export const editPlanFormSchema = z.object({
-  name: z.string().min(1, "Plan name is required"),
-  workoutFocusTypeId: z.number({
-    error: "Workout type is required",
-  }),
-  targetMuscles: z
-    .array(z.number())
-    .min(1, "Select target muscle groups or enable Auto-fill"),
+export const editPlanFormSchema = z
+  .object({
+    name: z.string().min(1, "Plan name is required"),
+    workoutFocusTypeId: z.number({
+      error: "Workout type is required",
+    }),
+    targetMuscles: z
+      .array(z.number())
+      .min(1, "Select target muscle groups or enable Auto-fill"),
 
-  durationHours: z
-    .number({ error: "Enter 0+ hours or enable Auto-fill" })
-    .min(0, { message: "Hours cannot be negative" }),
-  durationMinutes: z
-    .number({ error: "Enter 0+ minutes or enable Auto-fill" })
-    .min(0, { message: "Minutes cannot be negative" })
-    .max(59, { message: "Minutes must be between 0 and 59" }),
-  durationSeconds: z
-    .number({ error: "Enter 0+ seconds or enable Auto-fill" })
-    .min(0, { message: "Seconds cannot be negative" })
-    .max(59, { message: "Seconds must be between 0 and 59" }),
+    durationHours: z
+      .number()
+      .min(0, { message: "Hours cannot be negative" })
+      .nullable(),
+    durationMinutes: z
+      .number()
+      .min(0, { message: "Minutes cannot be negative" })
+      .max(59, { message: "Minutes must be between 0 and 59" })
+      .nullable(),
+    durationSeconds: z
+      .number()
+      .min(0, { message: "Seconds cannot be negative" })
+      .max(59, { message: "Seconds must be between 0 and 59" })
+      .nullable(),
 
-  autoFillMuscles: z.boolean(),
-  autoFillDuration: z.boolean(),
+    autoFillMuscles: z.boolean(),
+    autoFillDuration: z.boolean(),
 
-  workoutExercises: z.array(workoutExerciseFormSchema),
-});
+    workoutExercises: z.array(workoutExerciseFormSchema),
+  })
+  .superRefine((value, ctx) => {
+    if (value.durationHours == null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["durationHours"],
+        message: "Enter hours (0 if none)",
+      });
+    }
+
+    if (value.durationMinutes == null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["durationMinutes"],
+        message: "Enter minutes (0 if none)",
+      });
+    }
+
+    if (value.durationSeconds == null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["durationSeconds"],
+        message: "Enter seconds (0 if none)",
+      });
+    }
+  });
 
 export type EditPlanForm = z.infer<typeof editPlanFormSchema>;

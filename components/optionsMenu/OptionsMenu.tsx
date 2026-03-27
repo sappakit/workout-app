@@ -11,13 +11,19 @@ import {
 } from "react-native-popup-menu";
 import { ThemedText } from "../themed-text";
 
-export function OptionsMenu({ children }: { children: ReactNode }) {
+export function OptionsMenu({
+  children,
+  isDisabled,
+}: {
+  children: ReactNode;
+  isDisabled?: boolean;
+}) {
   const { colors } = useAppTheme();
 
   return (
     <Menu>
-      <MenuTrigger>
-        <OptionsButton />
+      <MenuTrigger disabled={isDisabled}>
+        <OptionsButton isDisabled={isDisabled} />
       </MenuTrigger>
 
       <MenuOptions
@@ -109,7 +115,7 @@ export function MenuSectionLabel({ label }: { label: string }) {
 }
 
 // TODO: add animation on button
-function OptionsButton() {
+function OptionsButton({ isDisabled }: { isDisabled?: boolean }) {
   const { colors } = useAppTheme();
 
   return (
@@ -117,6 +123,7 @@ function OptionsButton() {
       className="h-7 w-7 items-center justify-center rounded-lg"
       style={{
         backgroundColor: colors.app.cardSecondary,
+        opacity: isDisabled ? 0.6 : 1,
       }}
     >
       <Ellipsis size={12} color={colors.app.textPrimary} />

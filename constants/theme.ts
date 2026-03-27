@@ -26,7 +26,7 @@ const appColors = {
   // Status
   success: "#01B008",
   warning: "#FFC107",
-  error: "#E60012",
+  error: "#F44336",
 
   // Icons / Tabs
   icon: "#687076",
