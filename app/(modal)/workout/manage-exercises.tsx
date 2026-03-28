@@ -6,7 +6,7 @@ import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
 import { useRouter } from "expo-router";
 import { Check, GripVertical, Trash2, X } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
 import ReorderableList, {
   ReorderableListReorderEvent,
@@ -30,9 +30,12 @@ export default function ManageExercisesPage() {
 
   const [items, setItems] = useState<WorkoutExerciseDraftItem[]>(initialItems);
 
-  useEffect(() => {
-    setItems(initialItems);
-  }, [initialItems]);
+  // Disable Done if there are no changes
+  const doneDisabled =
+    initialItems.length === items.length &&
+    initialItems.every(
+      (item, index) => item.clientId === items[index].clientId,
+    );
 
   const handleRemove = (clientIdToRemove: string) => {
     setItems((prev) =>
@@ -71,6 +74,7 @@ export default function ManageExercisesPage() {
         className="flex-1"
         textClassName="font-medium"
         onPress={handleDone}
+        disabled={doneDisabled}
       />
 
       <AppButton

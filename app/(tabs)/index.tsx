@@ -113,12 +113,8 @@ export default function HomeScreen() {
       <View className="mt-4">
         <SectionHeader title="Today plan" />
 
-        {data.workout.workoutExercises.map((item, index) => (
-          <ExerciseCardReadonly
-            key={item.id}
-            data={item}
-            className={`${index > 0 && "mt-4"}`}
-          />
+        {data.workout.workoutExercises.map((item) => (
+          <ExerciseCardReadonly key={item.id} data={item} className="mt-2" />
         ))}
       </View>
     </PageLayout>

@@ -49,8 +49,6 @@ export default function SignUpScreen() {
         title: "Welcome!",
         message: "Your account has been created.",
       });
-
-      router.replace("/(auth)/sign-in");
     },
     onError: (err: unknown) => {
       const message =

@@ -9,7 +9,6 @@ import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
 import {
   mapEditPlanFormToUpdateWorkoutPayload,
-  mapExerciseToCreateWorkoutExerciseFormItem,
   mapWorkoutResponseToEditPlanForm,
   secondsToHMS,
 } from "@/lib/workout/mappers";
@@ -17,10 +16,7 @@ import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
-import {
-  Exercise,
-  ExerciseMuscleItem,
-} from "@/types/workout/response/exercise.types";
+import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
 import { Muscle } from "@/types/workout/response/shared.types";
 import {
   WorkoutFocusType,
@@ -36,7 +32,7 @@ import {
   Settings2,
   Trash2,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Alert, View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
@@ -44,7 +40,6 @@ import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
 import { FormErrorMessage } from "../form/FormErrorMessage";
 import FormNumberInput from "../form/FormNumberInput";
-import ExercisePickerModal from "../form/picker/ExercisePickerModal";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
@@ -60,12 +55,9 @@ interface EditPlanContentProps {
 }
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
-  const { colors } = useAppTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
   const toast = useAppToast();
-
-  const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
 
   // Display full exercise details toggle
   const showFullExerciseDetails = useExerciseDisplayStore(
@@ -293,24 +285,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
-  // Add exercise
-  const handleAddExercise = (exercise: Exercise) => {
-    const exists = workoutExercises.some(
-      (item) => item.exercise.id === exercise.id,
-    );
-
-    if (exists) return;
-
-    const nextOrderIndex =
-      workoutExercises.length > 0
-        ? Math.max(...workoutExercises.map((item) => item.orderIndex)) + 1
-        : 1;
-
-    append(
-      mapExerciseToCreateWorkoutExerciseFormItem(exercise, nextOrderIndex),
-    );
-  };
-
   // Remove all exercises
   const handleRemoveAllExercises = () => {
     if (workoutExercises.length === 0) return;
@@ -334,13 +308,23 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
-  // Open manage mode
+  // Open the manage mode page
   const handleOpenManageMode = () => {
-    // Make sure the latest RHF values are in Zustand before navigating
+    // Update Zustand state with the latest form values
     replaceDraft(getValues());
 
     router.push({
-      pathname: "/(pages)/workout/[id]/edit/manage-exercises",
+      pathname: "/(modal)/workout/manage-exercises",
+      params: { id: String(data.id) },
+    });
+  };
+
+  // Open the add exercise page
+  const handleOpenAddExercise = () => {
+    replaceDraft(getValues());
+
+    router.push({
+      pathname: "/(modal)/workout/add-exercise",
       params: { id: String(data.id) },
     });
   };
@@ -361,7 +345,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         variant="secondary"
         icon={Plus}
         className="h-12 w-12"
-        onPress={() => setIsExercisePickerOpen(true)}
+        onPress={handleOpenAddExercise}
       />
     </>
   );
@@ -647,7 +631,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         />
 
         {fields.length === 0 ? (
-          <View className="gap-2 py-4">
+          <View className="gap-2 py-2">
             <ThemedText type="default" variant="secondary">
               No exercises added yet
             </ThemedText>
@@ -657,29 +641,16 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
             </ThemedText>
           </View>
         ) : (
-          <View className="mt-4">
-            {fields.map((item, index) => (
-              <ExerciseCardEdit
-                key={item.fieldId}
-                form={form}
-                index={index}
-                className={index > 0 ? "mt-4" : ""}
-              />
-            ))}
-          </View>
+          fields.map((item, index) => (
+            <ExerciseCardEdit
+              key={item.fieldId}
+              form={form}
+              index={index}
+              className="mt-2"
+            />
+          ))
         )}
       </View>
-
-      {/* Exercise picker */}
-      <ExercisePickerModal
-        visible={isExercisePickerOpen}
-        onClose={() => setIsExercisePickerOpen(false)}
-        onDone={(selectedExercises) => {
-          selectedExercises.forEach(handleAddExercise);
-          setIsExercisePickerOpen(false);
-        }}
-        selectedExerciseIds={workoutExercises.map((item) => item.exercise.id)}
-      />
     </PageLayout>
   );
 }

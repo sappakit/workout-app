@@ -1,37 +1,42 @@
 import { exerciseApi } from "@/app/api/exercise.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import Thumbnail from "@/components/custom-ui/Thumbnail";
+import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { ThemedText } from "@/components/themed-text";
 import { DifficultyBadge } from "@/components/workout/exercise-card/base/DifficultyBadge";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
+import { mapExerciseToCreateWorkoutExerciseFormItem } from "@/lib/workout/mappers";
+import { EditPlanForm } from "@/schemas/edit-plan.schema";
+import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
 import {
   DifficultyLabel,
   Exercise,
   ExerciseTypeLabel,
 } from "@/types/workout/response/exercise.types";
+import { useRouter } from "expo-router";
 import { CircleCheck, Info, SlidersHorizontal } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
-import FullScreenPickerModal from "./FullScreenPickerModal";
 
-interface ExercisePickerModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onDone: (selectedExercises: Exercise[]) => void;
-  selectedExerciseIds?: number[];
-}
+type WorkoutExerciseDraftItem = EditPlanForm["workoutExercises"][number];
 
-export default function ExercisePickerModal({
-  visible,
-  onClose,
-  onDone,
-  selectedExerciseIds = [],
-}: ExercisePickerModalProps) {
+export default function AddExercisesPage() {
+  const router = useRouter();
+
+  const draftWorkoutId = useEditPlanDraftStore((state) => state.workoutId);
+  const draft = useEditPlanDraftStore((state) => state.draft);
+  const replaceDraft = useEditPlanDraftStore((state) => state.replaceDraft);
+
   const [search, setSearch] = useState("");
   const [tempSelectedExercises, setTempSelectedExercises] = useState<
     Exercise[]
   >([]);
+
+  const selectedExerciseIds = useMemo(
+    () => draft?.workoutExercises.map((item) => item.exercise.id) ?? [],
+    [draft],
+  );
 
   const {
     data,
@@ -53,7 +58,6 @@ export default function ExercisePickerModal({
     [data],
   );
 
-  // Keep selected ids memoized so row props stay simpler.
   const tempSelectedExerciseIds = useMemo(
     () => tempSelectedExercises.map((exercise) => exercise.id),
     [tempSelectedExercises],
@@ -78,25 +82,72 @@ export default function ExercisePickerModal({
     });
   };
 
-  const resetPickerState = () => {
-    setTempSelectedExercises([]);
-    setSearch("");
-  };
-
   const handleDone = () => {
-    onDone(tempSelectedExercises);
-    resetPickerState();
+    if (!draft || !draftWorkoutId) {
+      router.back();
+      return;
+    }
+
+    const currentExercises = draft.workoutExercises ?? [];
+
+    const nextItems: WorkoutExerciseDraftItem[] = [...currentExercises];
+    let nextOrderIndex =
+      currentExercises.length > 0
+        ? Math.max(...currentExercises.map((item) => item.orderIndex)) + 1
+        : 1;
+
+    tempSelectedExercises.forEach((exercise) => {
+      const exists = currentExercises.some(
+        (item) => item.exercise.id === exercise.id,
+      );
+
+      if (exists) return;
+
+      nextItems.push(
+        mapExerciseToCreateWorkoutExerciseFormItem(exercise, nextOrderIndex),
+      );
+
+      nextOrderIndex += 1;
+    });
+
+    replaceDraft({
+      ...draft,
+      workoutExercises: nextItems,
+    });
+
+    router.back();
   };
 
   const handleClose = () => {
-    resetPickerState();
-    onClose();
+    router.back();
   };
 
+  if (!draft) {
+    return (
+      <FullScreenPicker
+        title="Add Exercise"
+        onClose={handleClose}
+        onDone={handleClose}
+        doneText="Back"
+        closeText="Back"
+        doneDisabled={false}
+        searchValue=""
+        onSearchChange={() => {}}
+        isError={false}
+      >
+        <View className="flex-1 items-center justify-center px-6">
+          <ThemedText type="default" variant="secondary">
+            No edit draft found.
+          </ThemedText>
+        </View>
+      </FullScreenPicker>
+    );
+  }
+
   return (
-    <FullScreenPickerModal
-      visible={visible}
+    <FullScreenPicker
       title="Add Exercise"
+      description="Select one or more exercises to add to this workout plan."
       onClose={handleClose}
       onDone={handleDone}
       doneDisabled={tempSelectedExercises.length === 0}
@@ -122,7 +173,7 @@ export default function ExercisePickerModal({
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{
           paddingHorizontal: 16,
-          // paddingVertical: 16,
+          paddingBottom: 16,
           gap: 8,
         }}
         onEndReached={loadMore}
@@ -150,7 +201,7 @@ export default function ExercisePickerModal({
           />
         )}
       />
-    </FullScreenPickerModal>
+    </FullScreenPicker>
   );
 }
 

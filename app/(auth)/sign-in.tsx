@@ -192,7 +192,7 @@ export default function SignInScreen() {
                   style={{
                     color: colors.app.brand,
                   }}
-                  onPress={() => router.push("/sign-up")}
+                  onPress={() => router.push("/(auth)/sign-up")}
                 >
                   Sign Up
                 </ThemedText>

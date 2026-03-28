@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     await AuthStorage.clearTokens();
     setUser(null);
-    router.replace("/sign-in");
+    router.replace("/(auth)/sign-in");
   }
 
   // Re-fetch user

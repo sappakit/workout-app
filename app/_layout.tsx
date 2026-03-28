@@ -42,14 +42,7 @@ export default function RootLayout() {
                         animation: "slide_from_right",
                       }}
                     >
-                      <Stack.Screen
-                        name="(tabs)"
-                        options={{ headerShown: false }}
-                      />
-                      <Stack.Screen
-                        name="modal"
-                        options={{ presentation: "modal", title: "Modal" }}
-                      />
+                      <Stack.Screen name="(tabs)" />
                     </Stack>
 
                     <StatusBar
