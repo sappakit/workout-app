@@ -3,7 +3,6 @@ import { workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
 import { api } from "@/lib/api";
 import { invalidateQueryKeys } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -26,13 +25,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import {
-  PanelTopOpen,
-  Plus,
-  Save,
-  Settings2,
-  Trash2,
-} from "lucide-react-native";
+import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Alert, View } from "react-native";
@@ -44,12 +37,8 @@ import FormNumberInput from "../form/FormNumberInput";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
-import {
-  DropdownItem,
-  MenuSectionLabel,
-  OptionsMenu,
-} from "../options-menu/OptionsMenu";
 import { ExerciseCardEdit } from "../workout/exercise-card/ExerciseCardEdit";
+import { ExerciseListMenu } from "./ExerciseListMenu";
 
 interface EditPlanContentProps {
   data: WorkoutResponse;
@@ -109,7 +98,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     formState: { errors, isDirty },
   } = form;
 
-  const { fields, append, replace } = useFieldArray({
+  const { fields, replace } = useFieldArray({
     control,
     name: "workoutExercises",
     keyName: "fieldId",
@@ -352,20 +341,17 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
 
   return (
     <PageLayout
+      headerProps={{
+        variant: "title",
+        title: "Edit Plan",
+        showBackButton: true,
+        onBackPress: handleCancelEdit,
+      }}
       stickyFooter={{
         content: footer,
         options: { addBottomInset: true },
       }}
     >
-      {/* TODO: remove this */}
-      <View className="my-4">
-        <AppButton
-          title="Back (Cancel Edit)"
-          variant="secondary"
-          onPress={handleCancelEdit}
-        />
-      </View>
-
       {/* Title */}
       <ThemedText type="title" variant="accent">
         Edit Plan
@@ -645,55 +631,5 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         )}
       </View>
     </PageLayout>
-  );
-}
-
-type ExerciseListMenuProps = {
-  showFullExerciseDetails: boolean;
-  actions: {
-    toggleShowFullExerciseDetails: () => void;
-    handleOpenManageMode: () => void;
-    handleRemoveAllExercises: () => void;
-  };
-  isDisabled?: boolean;
-};
-
-function ExerciseListMenu({
-  isDisabled,
-  showFullExerciseDetails,
-  actions,
-}: ExerciseListMenuProps) {
-  const { colors } = useAppTheme();
-
-  return (
-    <OptionsMenu isDisabled={isDisabled}>
-      <MenuSectionLabel label="View" />
-
-      <DropdownItem
-        label="Show full details"
-        icon={PanelTopOpen}
-        checked={showFullExerciseDetails}
-        onSelect={() => {
-          actions.toggleShowFullExerciseDetails();
-
-          return false;
-        }}
-      />
-
-      <MenuSectionLabel label="Actions" />
-
-      <DropdownItem
-        label="Manage exercises"
-        icon={Settings2}
-        onSelect={actions.handleOpenManageMode}
-      />
-
-      <DropdownItem
-        label="Remove all"
-        color={colors.app.error}
-        icon={Trash2}
-        onSelect={actions.handleRemoveAllExercises}
-      />
-    </OptionsMenu>
   );
 }

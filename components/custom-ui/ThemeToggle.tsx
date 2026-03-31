@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { colors } = useAppTheme();
 
   const colorScheme = useThemeStore((s) => s.colorScheme);
@@ -34,7 +34,11 @@ export function ThemeToggle() {
   }));
 
   return (
-    <TouchableOpacity onPress={toggleTheme} activeOpacity={0.8}>
+    <TouchableOpacity
+      onPress={toggleTheme}
+      activeOpacity={0.8}
+      className={className}
+    >
       <Animated.View
         className="items-center justify-center rounded-full p-2"
         style={animatedStyle}

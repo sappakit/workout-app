@@ -1,4 +1,4 @@
-import PageHeader from "@/components/layout/PageHeader";
+import PageHeader, { PageHeaderProps } from "@/components/layout/PageHeader";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { ReactNode, useState } from "react";
@@ -6,9 +6,10 @@ import { ScrollView, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
 
-type ScreenLayoutProps = {
+type PageLayoutProps = {
   children: ReactNode;
   showHeader?: boolean;
+  headerProps?: PageHeaderProps;
   scrollable?: boolean;
   className?: string;
   topInset?: number;
@@ -22,6 +23,7 @@ type ScreenLayoutProps = {
 export function PageLayout({
   children,
   showHeader = true,
+  headerProps,
   scrollable = true,
   className,
   topInset = 12,
@@ -30,7 +32,7 @@ export function PageLayout({
   containerStyle,
   showsVerticalScrollIndicator = false,
   stickyFooter,
-}: ScreenLayoutProps) {
+}: PageLayoutProps) {
   const insets = useSafeAreaInsets();
   const [footerHeight, setFooterHeight] = useState(0);
 
@@ -50,7 +52,7 @@ export function PageLayout({
         containerStyle,
       ]}
     >
-      {showHeader && <PageHeader />}
+      {showHeader && headerProps && <PageHeader {...headerProps} />}
 
       {scrollable ? (
         <ScrollView

@@ -56,6 +56,7 @@ interface DropdownItemProps extends MenuOptionProps {
   label: string;
   color?: string;
   icon?: LucideIcon;
+  isToggleItem?: boolean;
   checked?: boolean;
 }
 
@@ -63,16 +64,25 @@ export function DropdownItem({
   label,
   color,
   icon: Icon,
+  isToggleItem,
   checked,
   onSelect,
   ...props
 }: DropdownItemProps) {
   const { colors } = useAppTheme();
 
+  const handleSelect: MenuOptionProps["onSelect"] = (...args) => {
+    onSelect?.(...args);
+
+    if (isToggleItem) {
+      return false;
+    }
+  };
+
   return (
     <MenuOption
       {...props}
-      onSelect={onSelect}
+      onSelect={handleSelect}
       customStyles={{ optionWrapper: { padding: 0 } }}
     >
       <View

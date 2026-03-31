@@ -38,7 +38,12 @@ export default function HomeScreen() {
   if (isError || !data) return null;
 
   return (
-    <PageLayout>
+    <PageLayout
+      headerProps={{
+        variant: "home",
+        userName: "Tae",
+      }}
+    >
       {/* TODO: remove */}
       <AppButton
         title="Log out"

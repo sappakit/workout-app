@@ -3,6 +3,7 @@ import {
   calculateWorkoutCalories,
   calculateWorkoutDuration,
 } from "@/lib/workout/utils";
+import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import clsx from "clsx";
 import {
@@ -13,6 +14,7 @@ import {
   PanelTopOpen,
   Pencil,
   Repeat,
+  Settings2,
   Timer,
   Trash2,
   UserPlus,
@@ -45,6 +47,15 @@ type WorkoutStatItem = {
 
 export function WorkoutPlanCard({ data }: WorkoutPlanCardProps) {
   const { colors } = useAppTheme();
+
+  // Display full exercise details toggle
+  const showFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.showFullExerciseDetails,
+  );
+  const toggleShowFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.toggleShowFullExerciseDetails,
+  );
+
   const totalExercises = data.workoutExercises.length;
   const duration = calculateWorkoutDuration(data);
   const calories = calculateWorkoutCalories(data);
@@ -77,7 +88,12 @@ export function WorkoutPlanCard({ data }: WorkoutPlanCardProps) {
     >
       {/* Options menu */}
       <View className="absolute right-4 top-4">
-        <WorkoutCardMenu />
+        <WorkoutCardMenu
+          showFullExerciseDetails={showFullExerciseDetails}
+          actions={{
+            toggleShowFullExerciseDetails,
+          }}
+        />
       </View>
 
       <ThemedText type="default" variant="primary" className="text-sm">
@@ -147,7 +163,45 @@ function WorkoutDetail({
   );
 }
 
-export function WorkoutCardMenu() {
+type WorkoutCardMenuProps = {
+  showFullExerciseDetails: boolean;
+  actions: {
+    toggleShowFullExerciseDetails: () => void;
+  };
+  isDisabled?: boolean;
+};
+
+function WorkoutCardMenu({
+  isDisabled,
+  showFullExerciseDetails,
+  actions,
+}: WorkoutCardMenuProps) {
+  return (
+    <OptionsMenu isDisabled={isDisabled}>
+      <MenuSectionLabel label="View" />
+
+      <DropdownItem
+        isToggleItem
+        label="Show full details"
+        icon={PanelTopOpen}
+        checked={showFullExerciseDetails}
+        onSelect={actions.toggleShowFullExerciseDetails}
+      />
+
+      <MenuSectionLabel label="Actions" />
+
+      <DropdownItem label="Quick edit" icon={Settings2} />
+      <DropdownItem label="Switch plan" icon={Repeat} />
+    </OptionsMenu>
+  );
+}
+
+// TODO: remove
+function WorkoutCardMenuTest({
+  isDisabled,
+  showFullExerciseDetails,
+  actions,
+}: WorkoutCardMenuProps) {
   const { colors } = useAppTheme();
   const [expanded, setExpanded] = useState(false);
 

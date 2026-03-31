@@ -1,40 +1,96 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
 import { View } from "react-native";
+import { AppButton } from "../custom-ui/AppButton";
 import { ThemeToggle } from "../custom-ui/ThemeToggle";
 import { UserIcon } from "../custom-ui/UserIcon";
 import { ThemedText } from "../themed-text";
 
-export default function PageHeader() {
+type HomeHeaderProps = {
+  variant: "home";
+  userName: string;
+  greeting?: string;
+};
+
+type TitleHeaderProps = {
+  variant: "title";
+  title: string;
+  subtitle?: string;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+};
+
+export type PageHeaderProps = HomeHeaderProps | TitleHeaderProps;
+
+export default function PageHeader(props: PageHeaderProps) {
   const { colors } = useAppTheme();
+  const router = useRouter();
+
+  const handleBackPress =
+    props.variant === "title" ? (props.onBackPress ?? router.back) : undefined;
 
   return (
     <View
-      className="z-50 flex-row items-center justify-between p-4"
+      className="relative z-50 h-20 flex-row items-center justify-between px-4"
       style={{
         backgroundColor: colors.app.pageHeaderBackground,
         boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.05)",
       }}
     >
-      <View className="flex-row items-center">
+      {props.variant === "title" && props.showBackButton && (
+        <AppButton
+          variant="option"
+          icon={ArrowLeft}
+          className="z-10 h-10 w-10"
+          onPress={handleBackPress}
+        />
+      )}
+
+      <PageHeaderMain {...props} />
+
+      <ThemeToggle className="z-10 ml-auto" />
+    </View>
+  );
+}
+
+function PageHeaderMain(props: PageHeaderProps) {
+  if (props.variant === "home") {
+    return (
+      <View className="flex-row items-center gap-4">
         <UserIcon />
 
-        <View className="ml-4">
-          {/* Title line */}
+        <View>
           <ThemedText type="default" variant="accent">
             Welcome back,{" "}
             <ThemedText type="defaultSemiBold" variant="accent">
-              Tae
+              {props.userName}
             </ThemedText>
           </ThemedText>
 
-          {/* Subtitle line */}
           <ThemedText className="text-xs" variant="primary">
-            Ready to work out?
+            {props.greeting ?? "Ready to work out?"}
           </ThemedText>
         </View>
       </View>
+    );
+  }
 
-      <ThemeToggle />
+  return (
+    <View className="absolute left-0 right-0 flex-1 items-center">
+      <ThemedText
+        type="default"
+        variant="accent"
+        className="text-xl font-medium"
+      >
+        {props.title}
+      </ThemedText>
+
+      {props.subtitle && (
+        <ThemedText className="text-xs" variant="primary">
+          {props.subtitle}
+        </ThemedText>
+      )}
     </View>
   );
 }
