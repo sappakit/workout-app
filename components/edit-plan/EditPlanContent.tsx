@@ -4,6 +4,7 @@ import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { api } from "@/lib/api";
 import { invalidateQueryKeys } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
@@ -47,7 +48,7 @@ import {
   DropdownItem,
   MenuSectionLabel,
   OptionsMenu,
-} from "../optionsMenu/OptionsMenu";
+} from "../options-menu/OptionsMenu";
 import { ExerciseCardEdit } from "../workout/exercise-card/ExerciseCardEdit";
 
 interface EditPlanContentProps {
@@ -145,9 +146,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       const url = workoutApi.update(data.id);
       const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
 
-      console.log(payload);
-
-      // return await api.patch(url, payload);
+      return await api.patch(url, payload);
     },
     onSuccess: async (_, values) => {
       form.reset(values);
@@ -313,20 +312,14 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     // Update Zustand state with the latest form values
     replaceDraft(getValues());
 
-    router.push({
-      pathname: "/(modal)/workout/manage-exercises",
-      params: { id: String(data.id) },
-    });
+    router.push("/(modal)/workout/manage-exercises");
   };
 
   // Open the add exercise page
   const handleOpenAddExercise = () => {
     replaceDraft(getValues());
 
-    router.push({
-      pathname: "/(modal)/workout/add-exercise",
-      params: { id: String(data.id) },
-    });
+    router.push("/(modal)/workout/add-exercise");
   };
 
   const footer = (
@@ -646,7 +639,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
               key={item.fieldId}
               form={form}
               index={index}
-              className="mt-2"
+              className="mt-2 rounded-3xl"
             />
           ))
         )}

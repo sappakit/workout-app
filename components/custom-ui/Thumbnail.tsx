@@ -1,38 +1,31 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { ImageIcon } from "lucide-react-native";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
 interface ThumbnailProps {
   image?: any;
-  width?: number;
-  aspectRatio?: number;
-  borderRadius?: number;
+  style?: StyleProp<ViewStyle>;
   iconSize?: number;
   iconColor?: string;
 }
 
 export default function Thumbnail({
   image,
-  width = 112,
-  aspectRatio = 4 / 3,
-  borderRadius = 16,
+  style,
   iconSize = 28,
   iconColor,
 }: ThumbnailProps) {
   const { colors } = useAppTheme();
-  const finalIconColor = iconColor ?? colors.app.textPrimary;
 
   return (
     <View
       style={[
         styles.imageWrapper,
         {
-          width,
-          aspectRatio,
-          borderRadius,
           borderColor: colors.app.borderPrimary,
           backgroundColor: colors.app.cardSecondary,
         },
+        style,
       ]}
     >
       {image ? (
@@ -45,7 +38,10 @@ export default function Thumbnail({
         <View
           style={[styles.image, { backgroundColor: colors.app.cardSecondary }]}
         >
-          <ImageIcon size={iconSize} color={finalIconColor} />
+          <ImageIcon
+            size={iconSize}
+            color={iconColor ?? colors.app.textPrimary}
+          />
         </View>
       )}
     </View>
@@ -56,10 +52,11 @@ const styles = StyleSheet.create({
   imageWrapper: {
     overflow: "hidden",
     borderWidth: 1,
+    borderRadius: 14,
+    width: 112,
   },
   image: {
-    width: "100%",
-    height: "100%",
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },

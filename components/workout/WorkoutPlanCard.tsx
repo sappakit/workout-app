@@ -25,7 +25,7 @@ import {
   DropdownItem,
   MenuSectionLabel,
   OptionsMenu,
-} from "../optionsMenu/OptionsMenu";
+} from "../options-menu/OptionsMenu";
 import { ThemedText } from "../themed-text";
 
 type WorkoutPlanCardProps = {

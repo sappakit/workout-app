@@ -1,7 +1,13 @@
-import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
+import { AppButton } from "@/components/custom-ui/AppButton";
+import { ExpandableToggle } from "@/components/custom-ui/ExpandableToggle";
+import { useExerciseCardExpandedState } from "@/hooks/useExerciseCardExpandedState";
+import { buildWorkoutExerciseDisplayModel } from "@/lib/workout/utils";
 import { WorkoutExerciseItem } from "@/types/workout/response/workout.types";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { Info } from "lucide-react-native";
+import { useMemo } from "react";
 import ExerciseCardBase from "./base/ExerciseCardBase";
+import WorkoutExerciseDetailsSection from "./sections/WorkoutExerciseDetailsSection";
 
 interface ExerciseCardReadonlyProps {
   data: WorkoutExerciseItem;
@@ -12,32 +18,58 @@ export function ExerciseCardReadonly({
   data,
   className,
 }: ExerciseCardReadonlyProps) {
+  const router = useRouter();
+
   // Exercise card expansion state
-  const showFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.showFullExerciseDetails,
-  );
-  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(
-    null,
-  );
-  const expanded = expandedOverride ?? showFullExerciseDetails;
+  const { expanded, toggleExpanded } = useExerciseCardExpandedState();
 
-  useEffect(() => {
-    setExpandedOverride(null);
-  }, [showFullExerciseDetails]);
+  const display = useMemo(() => buildWorkoutExerciseDisplayModel(data), [data]);
 
-  const handleToggleExpanded = () => {
-    setExpandedOverride((prev) => {
-      const current = prev ?? showFullExerciseDetails;
-      return !current;
-    });
-  };
+  const expandedContent = (
+    <WorkoutExerciseDetailsSection
+      infoData={display.infoData}
+      equipment={display.equipment}
+      onPressMoreDetail={() =>
+        router.push({
+          pathname: "/(pages)/exercise/[id]",
+          params: { id: data.exercise.id },
+        })
+      }
+    />
+  );
+  const shouldShowExpandToggle = !!expandedContent;
 
   return (
     <ExerciseCardBase
-      data={data}
+      exercise={data.exercise}
       expanded={expanded}
-      onToggleExpanded={handleToggleExpanded}
       className={className}
+      stats={display.stats}
+      footerContent={
+        shouldShowExpandToggle && (
+          <ExpandableToggle
+            expanded={expanded}
+            onToggleExpanded={toggleExpanded}
+            className="mt-3"
+          />
+        )
+      }
+      bottomRightContent={
+        !expanded && (
+          <AppButton
+            variant="option"
+            icon={Info}
+            className="h-8 w-8 self-end rounded-full"
+            onPress={() =>
+              router.push({
+                pathname: "/(pages)/exercise/[id]",
+                params: { id: data.exercise.id },
+              })
+            }
+          />
+        )
+      }
+      expandedContent={expandedContent}
     />
   );
 }

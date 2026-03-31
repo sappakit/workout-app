@@ -1,17 +1,22 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
+import { ExpandableToggle } from "@/components/custom-ui/ExpandableToggle";
+import { ThemedText } from "@/components/themed-text";
+import { useExerciseCardExpandedState } from "@/hooks/useExerciseCardExpandedState";
 import {
   exerciseTypeFieldConfig,
   getExerciseFieldNames,
 } from "@/lib/workout/config";
 import { mapEditPlanExerciseToWorkoutExerciseItem } from "@/lib/workout/mappers";
+import { buildWorkoutExerciseDisplayModel } from "@/lib/workout/utils";
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
-import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
-import { Pencil, X } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { Info, Pencil, X } from "lucide-react-native";
+import { useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { Alert } from "react-native";
 import ExerciseCardBase from "./base/ExerciseCardBase";
 import ExerciseCardEditFields from "./edit/ExerciseCardEditFields";
+import WorkoutExerciseDetailsSection from "./sections/WorkoutExerciseDetailsSection";
 
 interface ExerciseCardEditProps {
   form: UseFormReturn<EditPlanForm>;
@@ -24,6 +29,7 @@ export function ExerciseCardEdit({
   index,
   className,
 }: ExerciseCardEditProps) {
+  const router = useRouter();
   const { control, setValue, getValues, trigger } = form;
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -33,19 +39,10 @@ export function ExerciseCardEdit({
   >(null);
 
   // Exercise card expansion state
-  const showFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.showFullExerciseDetails,
-  );
-  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(
-    null,
-  );
-  const expanded = expandedOverride ?? showFullExerciseDetails;
+  const { expanded, toggleExpanded, setExpanded } =
+    useExerciseCardExpandedState();
 
-  useEffect(() => {
-    setExpandedOverride(null);
-  }, [showFullExerciseDetails]);
-
-  // Data
+  // Current form item
   const data = useWatch({
     control,
     name: `workoutExercises.${index}`,
@@ -54,19 +51,22 @@ export function ExerciseCardEdit({
   if (!data) return null;
 
   const typeConfig = exerciseTypeFieldConfig[data.exercise.exerciseType];
-  const cardData = mapEditPlanExerciseToWorkoutExerciseItem(data);
 
-  const handleToggleExpanded = () => {
-    setExpandedOverride((prev) => {
-      const current = prev ?? showFullExerciseDetails;
-      return !current;
-    });
-  };
+  // Convert edit-form shape to the same shape used by readonly workout exercise UI
+  const cardData = useMemo(
+    () => mapEditPlanExerciseToWorkoutExerciseItem(data),
+    [data],
+  );
+
+  const display = useMemo(
+    () => buildWorkoutExerciseDisplayModel(cardData),
+    [cardData],
+  );
 
   const handleStartEdit = () => {
     setDraftSnapshot(getValues(`workoutExercises.${index}`));
     setHasTriedSave(false);
-    setExpandedOverride(true);
+    setExpanded(true);
     setIsEditMode(true);
   };
 
@@ -113,22 +113,68 @@ export function ExerciseCardEdit({
     setIsEditMode(false);
   };
 
+  const expandedContent = (
+    <WorkoutExerciseDetailsSection
+      infoData={display.infoData}
+      equipment={display.equipment}
+      onPressMoreDetail={() =>
+        router.push({
+          pathname: "/(pages)/exercise/[id]",
+          params: { id: data.exercise.id },
+        })
+      }
+    />
+  );
+  const shouldShowExpandToggle = !!expandedContent;
+
   return (
     <ExerciseCardBase
-      data={cardData}
+      exercise={data.exercise}
       expanded={expanded}
-      onToggleExpanded={handleToggleExpanded}
       className={className}
       isEditMode={isEditMode}
-      bottomRightContent={
-        <AppButton
-          variant="option"
-          icon={isEditMode ? X : Pencil}
-          iconSize={isEditMode ? 16 : 14}
-          className="h-8 w-8 self-end rounded-full"
-          onPress={handleEditMode}
-        />
+      stats={display.stats}
+      footerContent={
+        isEditMode ? (
+          <ThemedText type="default" variant="primary" className="mt-3 text-xs">
+            Editing ...
+          </ThemedText>
+        ) : (
+          shouldShowExpandToggle && (
+            <ExpandableToggle
+              expanded={expanded}
+              onToggleExpanded={toggleExpanded}
+              className="mt-3"
+            />
+          )
+        )
       }
+      bottomRightContent={
+        <>
+          {!expanded && (
+            <AppButton
+              variant="option"
+              icon={Info}
+              className="h-8 w-8 self-end rounded-full"
+              onPress={() =>
+                router.push({
+                  pathname: "/(pages)/exercise/[id]",
+                  params: { id: data.exercise.id },
+                })
+              }
+            />
+          )}
+
+          <AppButton
+            variant="option"
+            icon={isEditMode ? X : Pencil}
+            iconSize={isEditMode ? 16 : 14}
+            className="h-8 w-8 self-end rounded-full"
+            onPress={handleEditMode}
+          />
+        </>
+      }
+      expandedContent={expandedContent}
       editContent={
         <ExerciseCardEditFields
           form={form}

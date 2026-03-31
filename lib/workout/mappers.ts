@@ -173,7 +173,7 @@ export function mapEditPlanFormToUpdateWorkoutPayload(
   };
 }
 
-// Form -> WorkoutExerciseItem (for ExerciseCardBase ui)
+// Form -> WorkoutExerciseItem (for ExerciseCard ui)
 export function mapEditPlanExerciseToWorkoutExerciseItem(
   item: EditPlanForm["workoutExercises"][number],
 ): WorkoutExerciseItem {

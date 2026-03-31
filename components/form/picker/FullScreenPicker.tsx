@@ -2,7 +2,7 @@ import { AppButton } from "@/components/custom-ui/AppButton";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { Search } from "lucide-react-native";
+import { Check, Search, X } from "lucide-react-native";
 import React from "react";
 import { ActivityIndicator, StyleProp, View, ViewStyle } from "react-native";
 
@@ -59,6 +59,7 @@ export default function FullScreenPicker({
       <AppButton
         title={doneText}
         variant="primary"
+        icon={Check}
         className="flex-1"
         textClassName="font-medium"
         onPress={onDone}
@@ -68,6 +69,7 @@ export default function FullScreenPicker({
       <AppButton
         title={closeText}
         variant="secondary"
+        icon={X}
         className="w-36"
         onPress={onClose}
       />

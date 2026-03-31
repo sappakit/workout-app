@@ -1,6 +1,19 @@
-import { ExerciseType } from "@/types/workout/response/exercise.types";
-import { WorkoutResponse } from "@/types/workout/response/workout.types";
-import { hmsToSeconds } from "./mappers";
+import {
+  Exercise,
+  ExerciseType,
+} from "@/types/workout/response/exercise.types";
+import {
+  WorkoutExerciseItem,
+  WorkoutResponse,
+} from "@/types/workout/response/workout.types";
+import { Clock, Dumbbell, LucideIcon } from "lucide-react-native";
+import { exerciseTypeFieldConfig, getVisibleFields } from "./config";
+import {
+  formatRepsRange,
+  hmsToSeconds,
+  parseRepsRange,
+  secondsToHMS,
+} from "./mappers";
 
 /* Duration */
 type DurationOptions = {
@@ -137,4 +150,206 @@ export function calculateWorkoutCalories(workout: WorkoutResponse): number {
   });
 
   return Math.round(totalCalories);
+}
+
+// UI
+export type ExerciseCardInfoItem = {
+  key: string;
+  label: string;
+  value: string;
+};
+
+export type ExerciseCardStatItem = {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+export interface WorkoutExerciseDisplayModel {
+  stats: ExerciseCardStatItem[];
+  infoData: ExerciseCardInfoItem[];
+  equipment: string[];
+}
+
+export interface ExercisePreviewDisplayModel {
+  stats: ExerciseCardStatItem[];
+  infoData: ExerciseCardInfoItem[];
+  equipment: string[];
+}
+
+export function buildWorkoutExerciseDisplayModel(
+  data: WorkoutExerciseItem,
+): WorkoutExerciseDisplayModel {
+  const typeConfig = exerciseTypeFieldConfig[data.exercise.exerciseType];
+  const visibleFields = getVisibleFields(typeConfig);
+
+  // Sets
+  const sets = data.plannedSets ?? data.exercise.defaultSets ?? 0;
+
+  // Reps range
+  const fallbackReps = parseRepsRange(data.exercise.defaultRepsRange ?? null);
+  const parsedPlannedReps = parseRepsRange(data.plannedRepsRange ?? null);
+
+  const repsMin = parsedPlannedReps.minReps ?? fallbackReps.minReps;
+  const repsMax = parsedPlannedReps.maxReps ?? fallbackReps.maxReps;
+  const reps = formatRepsRange({ minReps: repsMin, maxReps: repsMax });
+
+  // Rest time
+  const totalRestSeconds =
+    data.plannedRestTime ?? data.exercise.defaultRestTime ?? 0;
+  const rest = secondsToHMS(totalRestSeconds);
+
+  // Duration
+  const duration = calculateExerciseDuration(data);
+
+  // Equipment
+  const equipment = (data.exercise.equipmentLinks ?? []).map(
+    (link) => link.equipment.name,
+  );
+
+  const infoData: ExerciseCardInfoItem[] = [
+    ...(visibleFields.has("plannedSets")
+      ? [{ key: "sets", label: "Total Sets", value: `${sets}` }]
+      : []),
+
+    ...(visibleFields.has("plannedRepsRange")
+      ? [{ key: "reps", label: "Reps per Set", value: reps ?? "-" }]
+      : []),
+
+    ...(visibleFields.has("plannedWeight")
+      ? [
+          {
+            key: "weight",
+            label: "Load",
+            value:
+              data.plannedWeight != null ? `${data.plannedWeight} kg` : "-",
+          },
+        ]
+      : []),
+
+    ...(visibleFields.has("plannedDistance")
+      ? [
+          {
+            key: "distance",
+            label: "Target Distance",
+            value:
+              data.plannedDistance != null ? `${data.plannedDistance}` : "-",
+          },
+        ]
+      : []),
+
+    ...(visibleFields.has("plannedRestTime")
+      ? [
+          {
+            key: "rest",
+            label: "Rest Between Sets",
+            value: `${rest.minutes} min ${rest.seconds} sec`,
+          },
+        ]
+      : []),
+
+    {
+      key: "time",
+      label: "Estimated Duration",
+      value: `${duration} min`,
+    },
+  ];
+
+  const stats: ExerciseCardStatItem[] = [
+    ...(visibleFields.has("plannedSets")
+      ? [
+          {
+            key: "sets",
+            label: `${sets} ${sets !== 1 ? "Sets" : "Set"}`,
+            icon: Dumbbell,
+          },
+        ]
+      : []),
+    {
+      key: "duration",
+      label: `${duration} min`,
+      icon: Clock,
+    },
+  ];
+
+  return {
+    stats,
+    infoData,
+    equipment,
+  };
+}
+
+export function buildExercisePreviewDisplayModel(
+  exercise: Exercise,
+): ExercisePreviewDisplayModel {
+  const typeConfig = exerciseTypeFieldConfig[exercise.exerciseType];
+  const visibleFields = getVisibleFields(typeConfig);
+
+  const defaultSets = exercise.defaultSets ?? 0;
+  const defaultReps = exercise.defaultRepsRange ?? "-";
+  const defaultRest = secondsToHMS(exercise.defaultRestTime ?? 0);
+  const defaultDurationMinutes = Math.ceil(
+    (exercise.defaultDuration ?? 0) / 60,
+  );
+
+  const equipment = (exercise.equipmentLinks ?? []).map(
+    (link) => link.equipment.name,
+  );
+
+  const infoData: ExerciseCardInfoItem[] = [
+    ...(visibleFields.has("plannedSets")
+      ? [{ key: "sets", label: "Default Sets", value: `${defaultSets}` }]
+      : []),
+
+    ...(visibleFields.has("plannedRepsRange")
+      ? [{ key: "reps", label: "Default Reps", value: defaultReps }]
+      : []),
+
+    ...(visibleFields.has("plannedRestTime")
+      ? [
+          {
+            key: "rest",
+            label: "Default Rest",
+            value: `${defaultRest.minutes} min ${defaultRest.seconds} sec`,
+          },
+        ]
+      : []),
+
+    ...(visibleFields.has("plannedDuration")
+      ? [
+          {
+            key: "duration",
+            label: "Default Duration",
+            value: `${defaultDurationMinutes} min`,
+          },
+        ]
+      : []),
+  ];
+
+  const stats: ExerciseCardStatItem[] = [
+    ...(visibleFields.has("plannedSets")
+      ? [
+          {
+            key: "sets",
+            label: `${defaultSets} ${defaultSets !== 1 ? "Sets" : "Set"}`,
+            icon: Dumbbell,
+          },
+        ]
+      : []),
+    ...(visibleFields.has("plannedDuration")
+      ? [
+          {
+            key: "duration",
+            label: `${defaultDurationMinutes} min`,
+            icon: Clock,
+          },
+        ]
+      : []),
+  ];
+
+  return {
+    stats,
+    infoData,
+    equipment,
+  };
 }

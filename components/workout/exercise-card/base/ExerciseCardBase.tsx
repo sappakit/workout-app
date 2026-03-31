@@ -1,290 +1,145 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
 import Thumbnail from "@/components/custom-ui/Thumbnail";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
-  exerciseTypeFieldConfig,
-  getVisibleFields,
-} from "@/lib/workout/config";
-import {
-  formatRepsRange,
-  parseRepsRange,
-  secondsToHMS,
-} from "@/lib/workout/mappers";
-import { calculateExerciseDuration } from "@/lib/workout/utils";
-import {
   DifficultyLabel,
+  Exercise,
   ExerciseTypeLabel,
 } from "@/types/workout/response/exercise.types";
-import { WorkoutExerciseItem } from "@/types/workout/response/workout.types";
 import clsx from "clsx";
-import {
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Dumbbell,
-  FileText,
-  Info,
-  LucideIcon,
-} from "lucide-react-native";
+import { LucideIcon } from "lucide-react-native";
 import { ReactNode } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { DifficultyBadge } from "./DifficultyBadge";
-import {
-  ExerciseInfoCard,
-  ExerciseInfoCardEquipment,
-} from "./ExerciseInfoCard";
 import { ExerciseStat } from "./ExerciseStat";
 
-type ExerciseInfoItem = {
-  key: string;
-  label: string;
-  value: string;
-};
-
-type ExerciseStatItem = {
+export type ExerciseCardStatItem = {
   key: string;
   label: string;
   icon: LucideIcon;
 };
 
 interface ExerciseCardBaseProps {
-  data: WorkoutExerciseItem;
-  expanded: boolean;
-  onToggleExpanded: () => void;
+  exercise: Exercise;
   className?: string;
+  style?: StyleProp<ViewStyle>;
+  expanded?: boolean;
   isEditMode?: boolean;
   editContent?: ReactNode;
+  expandedContent?: ReactNode;
+  footerContent?: ReactNode;
   bottomRightContent?: ReactNode;
+  stats?: ExerciseCardStatItem[];
+  showDifficultyBadge?: boolean;
+  onPress?: () => void;
+  disabled?: boolean;
 }
 
 export default function ExerciseCardBase({
-  data,
-  expanded,
-  onToggleExpanded,
+  exercise,
   className,
+  style,
+  expanded,
   isEditMode = false,
   editContent,
+  expandedContent,
+  footerContent,
   bottomRightContent,
+  stats = [],
+  showDifficultyBadge,
+  onPress,
+  disabled = false,
 }: ExerciseCardBaseProps) {
   const { colors } = useAppTheme();
 
-  const typeConfig = exerciseTypeFieldConfig[data.exercise.exerciseType];
-  const visibleFields = getVisibleFields(typeConfig);
+  const showEditContent = isEditMode && editContent;
+  const showExpandedContent = expanded && expandedContent;
 
-  // Sets
-  const sets = data.plannedSets ?? data.exercise.defaultSets ?? 0;
+  const content = (
+    <>
+      {showDifficultyBadge && (
+        <View className="absolute right-0 top-0 z-10 flex-row gap-2 px-4">
+          <DifficultyBadge label={DifficultyLabel[exercise.difficultyLevel]} />
+        </View>
+      )}
 
-  // Reps range
-  const fallbackReps = parseRepsRange(data.exercise.defaultRepsRange ?? null);
-  const parsedPlannedReps = parseRepsRange(data.plannedRepsRange ?? null);
-
-  const repsMin = parsedPlannedReps.minReps ?? fallbackReps.minReps;
-  const repsMax = parsedPlannedReps.maxReps ?? fallbackReps.maxReps;
-  const reps = formatRepsRange({ minReps: repsMin, maxReps: repsMax });
-
-  // Rest time
-  const totalRestSeconds =
-    data.plannedRestTime ?? data.exercise.defaultRestTime ?? 0;
-  const rest = secondsToHMS(totalRestSeconds);
-
-  // Duration
-  const duration = calculateExerciseDuration(data);
-
-  // Equipment
-  const equipment = (data.exercise.equipmentLinks ?? []).map(
-    (link) => link.equipment.name,
-  );
-
-  const infoData: ExerciseInfoItem[] = [
-    ...(visibleFields.has("plannedSets")
-      ? [{ key: "sets", label: "Total Sets", value: `${sets}` }]
-      : []),
-
-    ...(visibleFields.has("plannedRepsRange")
-      ? [{ key: "reps", label: "Reps per Set", value: reps ?? "-" }]
-      : []),
-
-    ...(visibleFields.has("plannedWeight")
-      ? [
-          {
-            key: "weight",
-            label: "Load",
-            value:
-              data.plannedWeight != null ? `${data.plannedWeight} kg` : "-",
-          },
-        ]
-      : []),
-
-    ...(visibleFields.has("plannedDistance")
-      ? [
-          {
-            key: "distance",
-            label: "Target Distance",
-            value:
-              data.plannedDistance != null ? `${data.plannedDistance}` : "-",
-          },
-        ]
-      : []),
-
-    ...(visibleFields.has("plannedRestTime")
-      ? [
-          {
-            key: "rest",
-            label: "Rest Between Sets",
-            value: `${rest.minutes} min ${rest.seconds} sec`,
-          },
-        ]
-      : []),
-
-    {
-      key: "time",
-      label: "Estimated Duration",
-      value: `${duration} min`,
-    },
-  ];
-
-  const stats: ExerciseStatItem[] = [
-    ...(visibleFields.has("plannedSets")
-      ? [
-          {
-            key: "sets",
-            label: `${sets} ${sets !== 1 ? "Sets" : "Set"}`,
-            icon: Dumbbell,
-          },
-        ]
-      : []),
-    {
-      key: "duration",
-      label: `${duration} min`,
-      icon: Clock,
-    },
-  ];
-
-  return (
-    <View
-      className={twMerge(clsx("overflow-hidden rounded-3xl border", className))}
-      style={{
-        backgroundColor: colors.app.cardPrimary,
-        borderColor: colors.app.borderPrimary,
-      }}
-    >
-      {/* Top right */}
-      <View className="absolute right-0 top-0 z-10 flex-row gap-2 px-4">
-        <DifficultyBadge
-          label={DifficultyLabel[data.exercise.difficultyLevel]}
-        />
-      </View>
-
-      <View className="flex-row gap-2 p-2">
-        {/* TODO: add image */}
-        {/* <Thumbnail image={data.image} /> */}
+      <View className="flex-row gap-3 p-2">
         <Thumbnail />
 
-        {/* Main content */}
         <View className="flex-1 justify-between">
-          <View>
-            {/* Subtitle */}
+          <View className="items-start">
             <ThemedText type="default" variant="accent" className="text-xs">
-              {ExerciseTypeLabel[data.exercise.exerciseType]}
+              {ExerciseTypeLabel[exercise.exerciseType]}
             </ThemedText>
 
-            {/* Title */}
             <ThemedText
               type="default"
               variant="brand"
               className="text-lg font-semibold"
               numberOfLines={1}
             >
-              {data.exercise.name}
+              {exercise.name}
             </ThemedText>
 
-            {/* Exercise stats */}
-            <View className="flex-row gap-2">
-              {stats.map((item) => (
-                <ExerciseStat
-                  key={item.key}
-                  label={item.label}
-                  icon={item.icon}
-                />
-              ))}
-            </View>
+            {stats.length > 0 && (
+              <View className="flex-row gap-2">
+                {stats.map((item) => (
+                  <ExerciseStat
+                    key={item.key}
+                    label={item.label}
+                    icon={item.icon}
+                  />
+                ))}
+              </View>
+            )}
           </View>
 
-          {/* Expand / edit state */}
-          {isEditMode ? (
-            <ThemedText type="default" variant="primary" className="text-xs">
-              Editing ...
-            </ThemedText>
-          ) : (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={onToggleExpanded}
-              className="flex-row items-center gap-1"
-            >
-              <ThemedText type="default" variant="primary" className="text-xs">
-                {expanded ? "Show less" : "Show more"}
-              </ThemedText>
-
-              {expanded ? (
-                <ChevronUp size={12} color={colors.app.textPrimary} />
-              ) : (
-                <ChevronDown size={12} color={colors.app.textPrimary} />
-              )}
-            </TouchableOpacity>
-          )}
+          {footerContent}
         </View>
 
         <View className="absolute bottom-0 right-0 z-10 flex-row gap-2 p-2">
-          {!expanded && (
-            <AppButton
-              variant="option"
-              icon={Info}
-              className="h-8 w-8 self-end rounded-full"
-              // onPress={handleEditMode}
-            />
-          )}
-
           {bottomRightContent}
         </View>
       </View>
 
-      {/* Bottom content */}
-      {isEditMode ? (
+      {showEditContent ? (
         <View style={{ padding: 8, paddingTop: 0 }}>{editContent}</View>
       ) : (
-        expanded && (
-          <View style={{ padding: 8, paddingTop: 0 }}>
-            <FlatList
-              data={infoData}
-              numColumns={3}
-              keyExtractor={(item) => item.key}
-              scrollEnabled={false}
-              columnWrapperStyle={{ gap: 8 }}
-              contentContainerStyle={{ gap: 8 }}
-              renderItem={({ item }) => (
-                <View style={{ flex: 1 }}>
-                  <ExerciseInfoCard label={item.label} value={item.value} />
-                </View>
-              )}
-            />
-
-            {/* Equipment card */}
-            <ExerciseInfoCardEquipment equipment={equipment} className="mt-2" />
-
-            {/* More detail button */}
-            <AppButton
-              title="More detail"
-              variant="secondary"
-              icon={FileText}
-              className="mt-2 rounded-md"
-              textClassName="font-medium"
-              // onPress={}
-            />
-          </View>
+        showExpandedContent && (
+          <View style={{ padding: 8, paddingTop: 0 }}>{expandedContent}</View>
         )
       )}
+    </>
+  );
+
+  const sharedClassName = twMerge(
+    clsx("overflow-hidden rounded-3xl border", className),
+  );
+
+  const sharedStyle = [
+    {
+      backgroundColor: colors.app.cardPrimary,
+      borderColor: colors.app.borderPrimary,
+    },
+    style,
+  ];
+
+  if (onPress && !disabled) {
+    return (
+      <Pressable
+        onPress={onPress}
+        className={sharedClassName}
+        style={sharedStyle}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+
+  return (
+    <View className={sharedClassName} style={sharedStyle}>
+      {content}
     </View>
   );
 }
