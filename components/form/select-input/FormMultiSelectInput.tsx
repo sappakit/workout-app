@@ -1,6 +1,7 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import {
   BottomSheetBackdrop,
   BottomSheetFlatList,
@@ -62,6 +63,7 @@ export default function FormMultiSelectInput({
   const insets = useSafeAreaInsets();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
+  const animationConfigs = useDefaultBottomSheetAnimation();
 
   const selectedValues = value ?? [];
 
@@ -275,6 +277,7 @@ export default function FormMultiSelectInput({
         enableDynamicSizing={false}
         enablePanDownToClose
         enableOverDrag
+        animationConfigs={animationConfigs}
         enableContentPanningGesture
         backdropComponent={renderBackdrop}
         backgroundStyle={{
@@ -316,7 +319,6 @@ export default function FormMultiSelectInput({
               onEndReached={onEndReached}
               onEndReachedThreshold={0.4}
               keyboardShouldPersistTaps="handled"
-              bounces={false}
               onScrollToIndexFailed={onScrollToIndexFailed}
               ListFooterComponent={listFooterComponent}
               contentContainerStyle={{

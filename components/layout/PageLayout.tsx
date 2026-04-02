@@ -39,39 +39,34 @@ export function PageLayout({
   const { colors } = useAppTheme();
   const bg = backgroundColor ?? colors.app.background;
   const paddingBottom = stickyFooter ? footerHeight : bottomInset;
-  const mainContainerClassName = className ?? "px-4";
+  const bodyContainerStyle = {
+    paddingTop: topInset,
+    paddingBottom: paddingBottom,
+    paddingHorizontal: 16,
+  };
 
   return (
     <View
       className="flex-1"
-      style={[
-        {
-          backgroundColor: bg,
-          paddingTop: insets.top,
-        },
-        containerStyle,
-      ]}
+      style={{
+        backgroundColor: bg,
+        paddingTop: insets.top,
+      }}
     >
       {showHeader && headerProps && <PageHeader {...headerProps} />}
 
       {scrollable ? (
         <ScrollView
-          className={mainContainerClassName}
+          className={className}
           showsVerticalScrollIndicator={showsVerticalScrollIndicator}
-          contentContainerStyle={{
-            paddingTop: topInset,
-            paddingBottom: paddingBottom,
-          }}
+          contentContainerStyle={[bodyContainerStyle, containerStyle]}
         >
           {children}
         </ScrollView>
       ) : (
         <View
-          className={twMerge(clsx("flex-1", mainContainerClassName))}
-          style={{
-            paddingTop: topInset,
-            paddingBottom: paddingBottom,
-          }}
+          className={twMerge(clsx("flex-1", className))}
+          style={[bodyContainerStyle, containerStyle]}
         >
           {children}
         </View>

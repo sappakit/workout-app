@@ -21,6 +21,16 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.app.cardPrimary,
           borderTopColor: colors.border,
+
+          // Disable library shadow
+          shadowColor: "transparent",
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0,
+          shadowRadius: 0,
+          elevation: 0,
+
+          // remove separator line
+          borderTopWidth: 0,
         },
       }}
     >

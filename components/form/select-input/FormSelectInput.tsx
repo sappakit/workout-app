@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import {
   BottomSheetBackdrop,
   BottomSheetFlatList,
@@ -52,6 +53,7 @@ export default function FormSelectInput({
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const animationConfigs = useDefaultBottomSheetAnimation();
 
   const selectedLabel = options.find((o) => o.value === value)?.label;
 
@@ -182,6 +184,7 @@ export default function FormSelectInput({
         enableDynamicSizing={false}
         enablePanDownToClose
         enableOverDrag
+        animationConfigs={animationConfigs}
         enableContentPanningGesture
         backdropComponent={renderBackdrop}
         backgroundStyle={{
@@ -217,7 +220,6 @@ export default function FormSelectInput({
             onEndReached={onEndReached}
             onEndReachedThreshold={0.4}
             keyboardShouldPersistTaps="handled"
-            bounces={false}
             onScrollToIndexFailed={onScrollToIndexFailed}
             ListFooterComponent={listFooterComponent}
             contentContainerStyle={{
