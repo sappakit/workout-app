@@ -1,6 +1,6 @@
-const BASE = "/workout";
+const BASE = "/exercises";
 
 export const exerciseApi = {
-  getAll: () => `${BASE}/exercises`,
-  getById: (id: string | number) => `${BASE}/exercises/${id}`,
+  getAll: () => BASE,
+  getById: (id: string | number) => `${BASE}/${id}`,
 };

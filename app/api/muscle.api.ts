@@ -1,5 +1,5 @@
-const BASE = "/workout";
+const BASE = "/muscles";
 
 export const muscleApi = {
-  getAll: () => `${BASE}/muscles`,
+  getAll: () => BASE,
 };

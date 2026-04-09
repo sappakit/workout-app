@@ -12,8 +12,10 @@
   Fix: disable button or alert user when leaving page or replace edit WorkoutExercise ui field with bottomSheet
 
 - Three column input (Estimated duration) too small on ios making it show as '...'
+- Allow duplicate exercise in one workout
 
 # OPTIONAL
 
 - Migrate ExerciseTypeFieldConfig from frontend to db
 - Tabs: Home, Workout, Stats, History, Profile
+- Allow > 1 workout schedule per day

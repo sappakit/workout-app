@@ -1,9 +1,12 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
+import clsx from "clsx";
 import { ImageIcon } from "lucide-react-native";
 import { Image, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { twMerge } from "tailwind-merge";
 
 interface ThumbnailProps {
   image?: any;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   iconSize?: number;
   iconColor?: string;
@@ -11,6 +14,7 @@ interface ThumbnailProps {
 
 export default function Thumbnail({
   image,
+  className,
   style,
   iconSize = 28,
   iconColor,
@@ -19,6 +23,7 @@ export default function Thumbnail({
 
   return (
     <View
+      className={twMerge(clsx("rounded-xl border", className))}
       style={[
         styles.imageWrapper,
         {
@@ -51,8 +56,8 @@ export default function Thumbnail({
 const styles = StyleSheet.create({
   imageWrapper: {
     overflow: "hidden",
-    borderWidth: 1,
-    borderRadius: 14,
+    // borderWidth: 1,
+    // borderRadius: 14,
     width: 112,
   },
   image: {

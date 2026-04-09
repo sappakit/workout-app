@@ -1,4 +1,10 @@
+import { workoutApi } from "@/app/api/workout.api";
+import { api } from "@/lib/api";
+import { invalidateQueryKeys } from "@/lib/query/utils";
+import { useAppToast } from "@/lib/toast/useAppToast";
+import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutSchedule } from "@/types/workout/response/workout.types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Dumbbell, SquarePen } from "lucide-react-native";
 import { AppButton } from "../custom-ui/AppButton";
@@ -12,6 +18,26 @@ interface WorkoutContentProps {
 
 export function WorkoutContent({ data }: WorkoutContentProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const toast = useAppToast();
+
+  const { mutate: startWorkout, isPending } = useMutation({
+    mutationKey: workoutMutationKeys.startSession,
+    mutationFn: async () => {
+      const { data } = await api.post(workoutApi.startSession());
+      return data;
+    },
+    onSuccess: async () => {
+      // refresh current state
+      await invalidateQueryKeys(queryClient, [workoutQueryKeys.current]);
+    },
+    onError: (_err: unknown) => {
+      toast.error({
+        title: "Failed to start workout",
+        message: "Please try again.",
+      });
+    },
+  });
 
   const footer = (
     <>
@@ -21,8 +47,8 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
         icon={Dumbbell}
         className="flex-1"
         textClassName="font-medium"
-        // onPress={handleSubmit(onSubmit)}
-        // loading={loading}
+        onPress={() => startWorkout()}
+        loading={isPending}
       />
 
       <AppButton
@@ -48,24 +74,6 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
       }}
       stickyFooter={{ content: footer }}
     >
-      {/* TODO: for working in progress */}
-      {/* <View className="flex-row gap-2">
-          <AppButton
-            title="Complete set"
-            variant="primary"
-            icon={Check}
-            className="flex-1"
-            textClassName="font-medium"
-          />
-          <AppButton variant="tertiary" icon={Pause} className="h-12 w-12" />
-          <AppButton
-            title="Cancel workout"
-            variant="secondary"
-            icon={X}
-            className="flex-1"
-          />
-        </View> */}
-
       {/* Workout plan card */}
       <WorkoutPlanCard data={data.workout} />
 

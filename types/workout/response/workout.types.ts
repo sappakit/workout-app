@@ -14,18 +14,24 @@ export enum WorkoutSessionStatus {
   CANCELLED = "cancelled",
 }
 
-export interface WorkoutExerciseItem {
-  id: number | null;
+export enum WorkoutCurrentMode {
+  IN_PROGRESS = "in_progress",
+  SCHEDULED = "scheduled",
+  REST_DAY = "rest_day",
+}
 
-  orderIndex: number;
-
+interface PlannedWorkoutExerciseConfig {
   plannedSets: number | null;
   plannedRepsRange: string | null;
   plannedWeight: number | null;
   plannedRestTime: number | null;
   plannedDuration: number | null;
   plannedDistance: number | null;
+}
 
+export interface WorkoutExerciseItem extends PlannedWorkoutExerciseConfig {
+  id: number | null;
+  orderIndex: number;
   exercise: Exercise;
 }
 
@@ -56,4 +62,43 @@ export interface WorkoutSchedule {
   scheduledDate: string; // ISO string from backend
   status: WorkoutScheduleStatus;
   workout: WorkoutResponse;
+}
+
+export interface WorkoutSessionExerciseSet {
+  id: number;
+  setNumber: number;
+  reps: number | null;
+  weight: number | null;
+  distance: number | null;
+  duration: number | null; // seconds
+  performedAt: string | null;
+  completedAt: string | null;
+}
+
+export interface WorkoutSessionExercise extends PlannedWorkoutExerciseConfig {
+  id: number;
+  orderIndex: number;
+  startedAt: string | null;
+  completedAt: string | null;
+  isSkipped: boolean;
+  exercise: Exercise;
+  sets: WorkoutSessionExerciseSet[];
+}
+
+export interface WorkoutSession {
+  id: number;
+  status: WorkoutSessionStatus;
+  startedAt: string | null;
+  pausedAt: string | null;
+  endedAt: string | null;
+  totalDuration: number | null;
+  caloriesBurned: number | null;
+  workoutSchedule: WorkoutSchedule;
+  sessionExercises: WorkoutSessionExercise[];
+}
+
+export interface WorkoutCurrent {
+  mode: WorkoutCurrentMode;
+  session: WorkoutSession | null;
+  schedule: WorkoutSchedule | null;
 }
