@@ -1,11 +1,13 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { createClientId } from "@/lib/id/utils";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import {
-  WorkoutSession,
-  WorkoutSessionExercise,
-} from "@/types/workout/response/workout.types";
+  WorkoutSessionExerciseModel,
+  WorkoutSessionExerciseSetModel,
+} from "@/types/workout/model/workout.types";
+import { WorkoutSession } from "@/types/workout/response/workout.types";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   BicepsFlexed,
@@ -15,6 +17,7 @@ import {
   Plus,
   Timer,
   Trash2,
+  X,
 } from "lucide-react-native";
 import { useEffect } from "react";
 import {
@@ -27,8 +30,8 @@ import {
   View,
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import { AppButton } from "../custom-ui/AppButton";
 import Thumbnail from "../custom-ui/Thumbnail";
-import WorkoutTimerBottomSheet from "../workout/WorkoutTimerBottomSheet";
 
 type WorkoutInProgressContentProps = {
   session: WorkoutSession;
@@ -49,6 +52,11 @@ export function WorkoutInProgressContent({
     (state) => state.initializeSession,
   );
 
+  const updateSession = useWorkoutSessionStore((state) => state.updateSession);
+  const updateSessionSet = useWorkoutSessionStore(
+    (state) => state.updateSessionSet,
+  );
+
   // Initialize session state
   useEffect(() => {
     if (!hydrated) return;
@@ -56,25 +64,90 @@ export function WorkoutInProgressContent({
     initializeSession(session);
   }, [hydrated, session, initializeSession]);
 
-  // If store already contains session for this workout, use it instead
-  const activeSession =
-    hydrated && storedSession?.id === session.id ? storedSession : session;
+  // Ensure store is hydrated and contains the current session
+  const isActiveSessionReady = hydrated && storedSession?.id === session.id;
 
+  if (!isActiveSessionReady) {
+    return null;
+  }
+
+  // Use storedSession as the single source of truth
+  const activeSession = storedSession;
   const currentExercise = activeSession.sessionExercises.find(
     (exercise) => !exercise.isSkipped && !exercise.completedAt,
   );
+  const setItems = currentExercise?.sets ?? [];
 
-  const baseSetItems = buildWorkoutSetItems(currentExercise);
+  /* Function */
+  // Add set
+  const handleAddSet = () => {
+    if (!currentExercise) return;
 
-  // const currentExerciseIndex = currentExercise
-  //   ? session.sessionExercises.indexOf(currentExercise) + 1
-  //   : session.sessionExercises.length;
+    updateSession((prev) => ({
+      ...prev,
+      sessionExercises: prev.sessionExercises.map((exercise) => {
+        if (exercise.id !== currentExercise.id) return exercise;
 
-  // const totalExercises = session.sessionExercises.length;
+        const lastSet = exercise.sets[exercise.sets.length - 1];
+        const nextSetNumber = lastSet ? lastSet.setNumber + 1 : 1;
 
-  const handleDeleteSet = (setId: number) => {
-    console.log("Delete set:", setId);
+        const newSet: WorkoutSessionExerciseSetModel = {
+          id: null,
+          clientId: createClientId("new"),
+          setNumber: nextSetNumber,
+          reps: null,
+          weight: null,
+          distance: null,
+          duration: null,
+          performedAt: null,
+          completedAt: null,
+        };
+
+        return {
+          ...exercise,
+          sets: [...exercise.sets, newSet],
+        };
+      }),
+    }));
   };
+
+  // Delete set
+  const handleDeleteSet = (clientId: string) => {
+    if (!currentExercise) return;
+
+    updateSession((prev) => ({
+      ...prev,
+      sessionExercises: prev.sessionExercises.map((exercise) => {
+        if (exercise.id !== currentExercise.id) return exercise;
+
+        const filteredSets = exercise.sets
+          .filter((set) => set.clientId !== clientId)
+          .map((set, index) => ({
+            ...set,
+            setNumber: index + 1,
+          }));
+
+        return {
+          ...exercise,
+          sets: filteredSets,
+        };
+      }),
+    }));
+  };
+
+  const handleToggleSetCompleted = (clientId: string) => {
+    if (!currentExercise) return;
+
+    updateSessionSet(currentExercise.id, clientId, (set) => ({
+      ...set,
+      completedAt: set.completedAt ? null : new Date().toISOString(),
+    }));
+  };
+
+  // TODO: remove
+  useEffect(() => {
+    console.log(currentExercise?.sets);
+  }, [currentExercise]);
 
   return (
     <PageLayout
@@ -125,21 +198,18 @@ export function WorkoutInProgressContent({
         </View>
       </ImageBackground>
 
+      {/* TODO: remove */}
+      <AppButton
+        title="Cancel Workout"
+        variant="primary"
+        icon={X}
+        textClassName="font-medium"
+        // onPress={handleSubmit(onSubmit)}
+        // loading={isPending}
+      />
+
       {/* Progress */}
       <View className="gap-4 px-4">
-        {/* <View className="flex-row items-center justify-between">
-          <ThemedText type="default" variant="accent">
-            In progress ...
-          </ThemedText>
-
-          <ThemedText type="default" variant="primary">
-            <ThemedText type="defaultSemiBold" variant="primary">
-              Exercise {currentExerciseIndex}
-            </ThemedText>{" "}
-            of {totalExercises}
-          </ThemedText>
-        </View> */}
-
         <View
           className="rounded-2xl border"
           style={{
@@ -197,16 +267,17 @@ export function WorkoutInProgressContent({
           </View>
 
           <FlatList
-            data={baseSetItems}
-            keyExtractor={(item) => String(item.id)}
+            data={setItems}
+            keyExtractor={(item) => item.clientId}
             renderItem={({ item }) => (
               <WorkoutSetCard
                 item={item}
-                onDelete={() => handleDeleteSet(item.id)}
+                onDelete={() => handleDeleteSet(item.clientId)}
+                onToggleComplete={() => handleToggleSetCompleted(item.clientId)}
               />
             )}
             ListHeaderComponent={<WorkoutSetHeader />}
-            ListFooterComponent={<WorkoutSetFooter />}
+            ListFooterComponent={<WorkoutSetFooter onPress={handleAddSet} />}
             ListFooterComponentStyle={{
               borderTopWidth: 1,
               borderColor: colors.app.borderPrimary,
@@ -216,25 +287,9 @@ export function WorkoutInProgressContent({
         </View>
       </View>
 
-      <WorkoutTimerBottomSheet />
+      {/* <WorkoutTimerBottomSheet /> */}
     </PageLayout>
   );
-}
-
-function buildWorkoutSetItems(
-  currentExercise?: WorkoutSessionExercise,
-): WorkoutSetItem[] {
-  if (!currentExercise) return [];
-
-  const plannedSets = currentExercise.plannedSets ?? 0;
-
-  return Array.from({ length: plannedSets }, (_, index) => ({
-    id: index + 1,
-    label: `Set ${index + 1}`,
-    reps: currentExercise.plannedRepsRange ?? "-",
-    completed: false,
-    active: index === 0,
-  }));
 }
 
 function WorkoutSetHeader() {
@@ -267,25 +322,18 @@ function WorkoutSetHeader() {
   );
 }
 
-type WorkoutSetItem = {
-  id: number;
-  label: string;
-  reps: string;
-  completed?: boolean;
-  active?: boolean;
-};
-
 function WorkoutSetCard({
   item,
   onDelete,
+  onToggleComplete,
 }: {
-  item: WorkoutSetItem;
+  item: WorkoutSessionExerciseModel["sets"][number];
   onDelete: () => void;
+  onToggleComplete: () => void;
 }) {
   const { colors } = useAppTheme();
 
-  const isCompleted = !!item.completed;
-  const isActive = !!item.active;
+  const isCompleted = !!item.completedAt;
 
   return (
     <Swipeable
@@ -300,24 +348,24 @@ function WorkoutSetCard({
       >
         <View className="w-16 items-center">
           <ThemedText type="default" variant="primary">
-            {item.id}
+            {item.setNumber}
           </ThemedText>
         </View>
 
         <View className="flex-1 items-center">
           <ThemedText type="default" variant="primary" className="text-center">
-            -
+            {item.weight ?? "-"}
           </ThemedText>
         </View>
 
         <View className="flex-1 items-center">
           <ThemedText type="default" variant="primary" className="text-center">
-            {item.reps}
+            {item.reps ?? "-"}
           </ThemedText>
         </View>
 
         <View className="w-16 items-center">
-          <CircleCheckButton checked={isCompleted} />
+          <CheckButton checked={isCompleted} onPress={onToggleComplete} />
         </View>
       </View>
     </Swipeable>
@@ -340,11 +388,14 @@ function DeleteSetAction({ onPress }: { onPress: () => void }) {
   );
 }
 
-function WorkoutSetFooter() {
+function WorkoutSetFooter({ onPress }: { onPress: () => void }) {
   const { colors } = useAppTheme();
 
   return (
-    <TouchableOpacity className="flex-row items-center justify-center gap-2 py-2">
+    <TouchableOpacity
+      className="flex-row items-center justify-center gap-2 py-2"
+      onPress={onPress}
+    >
       <Plus size={16} color={colors.app.brand} />
 
       <ThemedText type="default" variant="brand">
@@ -354,17 +405,17 @@ function WorkoutSetFooter() {
   );
 }
 
-interface CircleCheckButtonProps extends TouchableOpacityProps {
+interface CheckButtonProps extends TouchableOpacityProps {
   checked: boolean;
 }
 
-function CircleCheckButton({
+function CheckButton({
   checked,
   style,
   disabled,
   onPress,
   ...props
-}: CircleCheckButtonProps) {
+}: CheckButtonProps) {
   const { colors } = useAppTheme();
 
   const baseStyle = {
