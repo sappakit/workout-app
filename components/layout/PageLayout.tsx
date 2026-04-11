@@ -2,9 +2,15 @@ import PageHeader, { PageHeaderProps } from "@/components/layout/PageHeader";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { ReactNode, useState } from "react";
-import { ScrollView, View, ViewStyle } from "react-native";
+import { RefreshControl, ScrollView, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
+
+export type PullToRefreshProps = {
+  refreshing: boolean;
+  onRefresh: () => void | Promise<void>;
+  enabled?: boolean;
+};
 
 type PageLayoutProps = {
   children: ReactNode;
@@ -18,6 +24,7 @@ type PageLayoutProps = {
   containerStyle?: ViewStyle;
   showsVerticalScrollIndicator?: boolean;
   stickyFooter?: { content: ReactNode; options?: { addBottomInset: boolean } };
+  pullToRefresh?: PullToRefreshProps;
 };
 
 export function PageLayout({
@@ -32,11 +39,13 @@ export function PageLayout({
   containerStyle,
   showsVerticalScrollIndicator = false,
   stickyFooter,
+  pullToRefresh,
 }: PageLayoutProps) {
+  const { colors } = useAppTheme();
+
   const insets = useSafeAreaInsets();
   const [footerHeight, setFooterHeight] = useState(0);
 
-  const { colors } = useAppTheme();
   const bg = backgroundColor ?? colors.app.background;
   const paddingBottom = stickyFooter ? footerHeight : bottomInset;
   const bodyContainerStyle = {
@@ -44,6 +53,19 @@ export function PageLayout({
     paddingBottom: paddingBottom,
     paddingHorizontal: 16,
   };
+
+  // Pull to refresh
+  const shouldEnablePullToRefresh =
+    scrollable &&
+    pullToRefresh?.enabled !== false &&
+    !!pullToRefresh?.onRefresh;
+
+  const refreshControl = shouldEnablePullToRefresh ? (
+    <RefreshControl
+      refreshing={pullToRefresh.refreshing}
+      onRefresh={pullToRefresh.onRefresh}
+    />
+  ) : undefined;
 
   return (
     <View
@@ -60,6 +82,7 @@ export function PageLayout({
           className={className}
           showsVerticalScrollIndicator={showsVerticalScrollIndicator}
           contentContainerStyle={[bodyContainerStyle, containerStyle]}
+          refreshControl={refreshControl}
         >
           {children}
         </ScrollView>

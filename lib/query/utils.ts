@@ -1,4 +1,4 @@
-import { QueryClient, QueryKey } from "@tanstack/react-query";
+import { QueryClient, QueryKey, useQueryClient } from "@tanstack/react-query";
 
 export const invalidateQueryKeys = async (
   queryClient: QueryClient,
@@ -7,4 +7,14 @@ export const invalidateQueryKeys = async (
   await Promise.all(
     keys.map((key) => queryClient.invalidateQueries({ queryKey: key })),
   );
+};
+
+export const useInvalidateQueries = () => {
+  const queryClient = useQueryClient();
+
+  return async (keys: readonly QueryKey[]) => {
+    await Promise.all(
+      keys.map((key) => queryClient.invalidateQueries({ queryKey: key })),
+    );
+  };
 };

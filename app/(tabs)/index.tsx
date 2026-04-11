@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { AuthStorage } from "@/lib/api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
+import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutSchedule } from "@/types/workout/response/workout.types";
@@ -22,16 +23,20 @@ export default function HomeScreen() {
   const { colors } = useAppTheme();
   const { signOut, loading, user } = useAuth();
 
+  const invalidateQueries = useInvalidateQueries();
+
   // TODO: remove
   const toast = useAppToast();
 
   // Today workout data
   const url = workoutApi.getSchedule();
 
-  const { data, isLoading, isError, isSuccess } = useGetQuery<WorkoutSchedule>(
-    workoutQueryKeys.schedule,
-    url,
-  );
+  const { data, isLoading, isError, isSuccess, isFetching } =
+    useGetQuery<WorkoutSchedule>(workoutQueryKeys.schedule, url);
+
+  const handleRefresh = async () => {
+    await invalidateQueries([workoutQueryKeys.schedule]);
+  };
 
   // TODO: add loading/error
   if (isLoading) return null;
@@ -43,6 +48,7 @@ export default function HomeScreen() {
         variant: "home",
         userName: "Tae",
       }}
+      pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
     >
       {/* TODO: remove */}
       <AppButton

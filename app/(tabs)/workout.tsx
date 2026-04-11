@@ -1,6 +1,7 @@
 import { WorkoutInProgressContent } from "@/components/workout-in-progress/WorkoutInProgressContent";
 import { WorkoutContent } from "@/components/workout/WorkoutContent";
 import { useGetQuery } from "@/lib/query/useGetQuery";
+import { useInvalidateQueries } from "@/lib/query/utils";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
   WorkoutCurrent,
@@ -9,9 +10,10 @@ import {
 import { workoutApi } from "../api/workout.api";
 
 export default function WorkoutScreen() {
+  const invalidateQueries = useInvalidateQueries();
   const url = workoutApi.getCurrent();
 
-  const { data, isLoading, isError } = useGetQuery<WorkoutCurrent>(
+  const { data, isLoading, isError, isFetching } = useGetQuery<WorkoutCurrent>(
     workoutQueryKeys.current,
     url,
     {
@@ -19,7 +21,9 @@ export default function WorkoutScreen() {
     },
   );
 
-  console.log("data:", data);
+  const handleRefresh = async () => {
+    await invalidateQueries([workoutQueryKeys.current]);
+  };
 
   // TODO: add loading/error
   if (isLoading) return null;
@@ -34,7 +38,12 @@ export default function WorkoutScreen() {
 
     // Scheduled workout
     case WorkoutCurrentMode.SCHEDULED:
-      return data.schedule ? <WorkoutContent data={data.schedule} /> : null;
+      return data.schedule ? (
+        <WorkoutContent
+          data={data.schedule}
+          pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
+        />
+      ) : null;
 
     // TODO: add scrren for Rest day
     // Rest day

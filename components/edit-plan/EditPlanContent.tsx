@@ -4,7 +4,7 @@ import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { api } from "@/lib/api";
-import { invalidateQueryKeys } from "@/lib/query/utils";
+import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
 import {
@@ -23,7 +23,7 @@ import {
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
@@ -46,7 +46,7 @@ interface EditPlanContentProps {
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
 
   // Display full exercise details toggle
@@ -141,7 +141,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       form.reset(values);
       replaceDraft(values);
 
-      await invalidateQueryKeys(queryClient, [
+      await invalidateQueries([
         workoutQueryKeys.detail(data.id),
         workoutQueryKeys.schedule,
       ]);

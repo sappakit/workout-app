@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { api } from "@/lib/api";
 import { createClientId } from "@/lib/id/utils";
-import { invalidateQueryKeys } from "@/lib/query/utils";
+import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
@@ -13,7 +13,7 @@ import {
   WorkoutSessionExerciseSetModel,
 } from "@/types/workout/model/workout.types";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   BicepsFlexed,
@@ -51,8 +51,7 @@ export function WorkoutInProgressContent({
   session,
 }: WorkoutInProgressContentProps) {
   const { colors } = useAppTheme();
-
-  const queryClient = useQueryClient();
+  const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
 
   // Workout session store
@@ -91,7 +90,7 @@ export function WorkoutInProgressContent({
     onSuccess: async () => {
       clearSession();
 
-      await invalidateQueryKeys(queryClient, [workoutQueryKeys.current]);
+      await invalidateQueries([workoutQueryKeys.current]);
 
       toast.success({
         title: "Workout cancelled",

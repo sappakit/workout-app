@@ -1,24 +1,25 @@
 import { workoutApi } from "@/app/api/workout.api";
 import { api } from "@/lib/api";
-import { invalidateQueryKeys } from "@/lib/query/utils";
+import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutSchedule } from "@/types/workout/response/workout.types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Dumbbell, SquarePen } from "lucide-react-native";
 import { AppButton } from "../custom-ui/AppButton";
-import { PageLayout } from "../layout/PageLayout";
+import { PageLayout, PullToRefreshProps } from "../layout/PageLayout";
 import { WorkoutPlanCard } from "./WorkoutPlanCard";
 import { ExerciseCardReadonly } from "./exercise-card/ExerciseCardReadonly";
 
 interface WorkoutContentProps {
   data: WorkoutSchedule;
+  pullToRefresh?: PullToRefreshProps;
 }
 
-export function WorkoutContent({ data }: WorkoutContentProps) {
+export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
 
   const { mutate: startWorkout, isPending } = useMutation({
@@ -26,7 +27,7 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
     mutationFn: () => api.post(workoutApi.startSession()),
     onSuccess: async () => {
       // refresh current state
-      await invalidateQueryKeys(queryClient, [workoutQueryKeys.current]);
+      await invalidateQueries([workoutQueryKeys.current]);
     },
     onError: (_err: unknown) => {
       toast.error({
@@ -70,6 +71,7 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
         title: "Workout",
       }}
       stickyFooter={{ content: footer }}
+      pullToRefresh={pullToRefresh}
     >
       {/* Workout plan card */}
       <WorkoutPlanCard data={data.workout} />
