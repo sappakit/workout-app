@@ -1,13 +1,19 @@
+import { workoutApi } from "@/app/api/workout.api";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { api } from "@/lib/api";
 import { createClientId } from "@/lib/id/utils";
+import { invalidateQueryKeys } from "@/lib/query/utils";
+import { useAppToast } from "@/lib/toast/useAppToast";
+import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
 } from "@/types/workout/model/workout.types";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   BicepsFlexed,
@@ -21,6 +27,7 @@ import {
 } from "lucide-react-native";
 import { useEffect } from "react";
 import {
+  Alert,
   FlatList,
   ImageBackground,
   Pressable,
@@ -45,6 +52,9 @@ export function WorkoutInProgressContent({
 }: WorkoutInProgressContentProps) {
   const { colors } = useAppTheme();
 
+  const queryClient = useQueryClient();
+  const toast = useAppToast();
+
   // Workout session store
   const hydrated = useWorkoutSessionStore((state) => state.hydrated);
   const storedSession = useWorkoutSessionStore((state) => state.session);
@@ -56,6 +66,7 @@ export function WorkoutInProgressContent({
   const updateSessionSet = useWorkoutSessionStore(
     (state) => state.updateSessionSet,
   );
+  const clearSession = useWorkoutSessionStore((state) => state.clearSession);
 
   // Initialize session state
   useEffect(() => {
@@ -67,16 +78,33 @@ export function WorkoutInProgressContent({
   // Ensure store is hydrated and contains the current session
   const isActiveSessionReady = hydrated && storedSession?.id === session.id;
 
-  if (!isActiveSessionReady) {
-    return null;
-  }
-
   // Use storedSession as the single source of truth
-  const activeSession = storedSession;
-  const currentExercise = activeSession.sessionExercises.find(
+  const currentExercise = storedSession?.sessionExercises.find(
     (exercise) => !exercise.isSkipped && !exercise.completedAt,
   );
   const setItems = currentExercise?.sets ?? [];
+
+  // Cancel workout mutation
+  const cancelWorkoutMutation = useMutation({
+    mutationKey: workoutMutationKeys.cancelSession,
+    mutationFn: () => api.post(workoutApi.cancelSession()),
+    onSuccess: async () => {
+      clearSession();
+
+      await invalidateQueryKeys(queryClient, [workoutQueryKeys.current]);
+
+      toast.success({
+        title: "Workout cancelled",
+        message: "Your workout was discarded.",
+      });
+    },
+    onError: () => {
+      toast.error({
+        title: "Cancel failed",
+        message: "Could not cancel workout session.",
+      });
+    },
+  });
 
   /* Function */
   // Add set
@@ -135,6 +163,7 @@ export function WorkoutInProgressContent({
     }));
   };
 
+  // Complete set
   const handleToggleSetCompleted = (clientId: string) => {
     if (!currentExercise) return;
 
@@ -144,10 +173,34 @@ export function WorkoutInProgressContent({
     }));
   };
 
+  // Cancel workout
+  const handleCancelWorkout = () => {
+    Alert.alert(
+      "Cancel workout?",
+      "All progress from this session will be lost.",
+      [
+        {
+          text: "Keep Workout",
+          style: "cancel",
+        },
+        {
+          text: "Discard Workout",
+          style: "destructive",
+          onPress: () => cancelWorkoutMutation.mutate(),
+        },
+      ],
+    );
+  };
+
   // TODO: remove
   useEffect(() => {
     console.log(currentExercise?.sets);
   }, [currentExercise]);
+
+  // TODO: add loading
+  if (!isActiveSessionReady) {
+    return null;
+  }
 
   return (
     <PageLayout
@@ -185,7 +238,7 @@ export function WorkoutInProgressContent({
 
         <View className="flex-1 items-center justify-end pb-4">
           <ThemedText type="default" variant="accent">
-            {activeSession.workoutSchedule.workout.name}
+            {storedSession.workoutSchedule.workout.name}
           </ThemedText>
 
           <ThemedText
@@ -204,8 +257,8 @@ export function WorkoutInProgressContent({
         variant="primary"
         icon={X}
         textClassName="font-medium"
-        // onPress={handleSubmit(onSubmit)}
-        // loading={isPending}
+        onPress={handleCancelWorkout}
+        loading={cancelWorkoutMutation.isPending}
       />
 
       {/* Progress */}

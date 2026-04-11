@@ -70,8 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign in
   async function signIn(values: SignInForm) {
-    const { data } = await api.post("/auth/login", values);
-    const { accessToken, refreshToken, user } = data as AuthResponse;
+    const { data } = await api.post<AuthResponse>("/auth/login", values);
+    const { accessToken, refreshToken, user } = data;
 
     await AuthStorage.setTokens(accessToken, refreshToken);
     setUser(user);

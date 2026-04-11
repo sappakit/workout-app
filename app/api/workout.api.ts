@@ -7,9 +7,10 @@ export const workoutApi = {
   getTypes: () => `${BASE}/types`,
   getCurrent: () => `${BASE}/current`,
 
-  // Post
+  // Create
   startSession: () => `${BASE}/sessions/start`,
+  cancelSession: () => `${BASE}/sessions/cancel`,
 
-  // Patch
+  // Update
   update: (id: string | number) => `${BASE}/${id}`,
 };

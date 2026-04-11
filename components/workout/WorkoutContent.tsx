@@ -23,10 +23,7 @@ export function WorkoutContent({ data }: WorkoutContentProps) {
 
   const { mutate: startWorkout, isPending } = useMutation({
     mutationKey: workoutMutationKeys.startSession,
-    mutationFn: async () => {
-      const { data } = await api.post(workoutApi.startSession());
-      return data;
-    },
+    mutationFn: () => api.post(workoutApi.startSession()),
     onSuccess: async () => {
       // refresh current state
       await invalidateQueryKeys(queryClient, [workoutQueryKeys.current]);
