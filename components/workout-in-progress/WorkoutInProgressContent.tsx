@@ -39,6 +39,7 @@ import {
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { AppButton } from "../custom-ui/AppButton";
 import Thumbnail from "../custom-ui/Thumbnail";
+import FormTextInput from "../form/FormTextInput";
 
 type WorkoutInProgressContentProps = {
   session: WorkoutSession;
@@ -191,6 +192,21 @@ export function WorkoutInProgressContent({
     );
   };
 
+  // Update set weight/reps
+  const handleUpdateSetValue = (
+    clientId: string,
+    field: "weight" | "reps",
+    value: string,
+  ) => {
+    if (!currentExercise) return;
+
+    // TODO: non number charater cause NaN
+    updateSessionSet(currentExercise.id, clientId, (set) => ({
+      ...set,
+      [field]: value === "" ? null : Number(value),
+    }));
+  };
+
   // TODO: remove
   useEffect(() => {
     console.log(currentExercise?.sets);
@@ -250,20 +266,10 @@ export function WorkoutInProgressContent({
         </View>
       </ImageBackground>
 
-      {/* TODO: remove */}
-      <AppButton
-        title="Cancel Workout"
-        variant="primary"
-        icon={X}
-        textClassName="font-medium"
-        onPress={handleCancelWorkout}
-        loading={cancelWorkoutMutation.isPending}
-      />
-
       {/* Progress */}
-      <View className="gap-4 px-4">
+      <View className="flex-1 gap-4 px-4">
         <View
-          className="rounded-2xl border"
+          className="flex-1 rounded-2xl border"
           style={{
             backgroundColor: colors.app.cardPrimary,
             borderColor: colors.app.borderPrimary,
@@ -318,6 +324,9 @@ export function WorkoutInProgressContent({
             </TouchableOpacity>
           </View>
 
+          {/* FlatList header */}
+          <WorkoutSetHeader />
+
           <FlatList
             data={setItems}
             keyExtractor={(item) => item.clientId}
@@ -326,17 +335,37 @@ export function WorkoutInProgressContent({
                 item={item}
                 onDelete={() => handleDeleteSet(item.clientId)}
                 onToggleComplete={() => handleToggleSetCompleted(item.clientId)}
+                onChangeWeight={(value) =>
+                  handleUpdateSetValue(item.clientId, "weight", value)
+                }
+                onChangeReps={(value) =>
+                  handleUpdateSetValue(item.clientId, "reps", value)
+                }
               />
             )}
-            ListHeaderComponent={<WorkoutSetHeader />}
-            ListFooterComponent={<WorkoutSetFooter onPress={handleAddSet} />}
-            ListFooterComponentStyle={{
+            showsVerticalScrollIndicator={true}
+          />
+
+          {/* FlatList footer */}
+          <View
+            style={{
               borderTopWidth: 1,
               borderColor: colors.app.borderPrimary,
             }}
-            showsVerticalScrollIndicator={false}
-          />
+          >
+            <WorkoutSetFooter onPress={handleAddSet} />
+          </View>
         </View>
+
+        {/* TODO: remove */}
+        <AppButton
+          title="Cancel Workout"
+          variant="primary"
+          icon={X}
+          textClassName="font-medium"
+          onPress={handleCancelWorkout}
+          loading={cancelWorkoutMutation.isPending}
+        />
       </View>
 
       {/* <WorkoutTimerBottomSheet /> */}
@@ -346,7 +375,7 @@ export function WorkoutInProgressContent({
 
 function WorkoutSetHeader() {
   return (
-    <View className="flex-row items-center py-2">
+    <View className="flex-row items-center gap-4 py-2">
       <View className="w-16 items-center">
         <ThemedText type="default" variant="accent">
           SET
@@ -374,15 +403,21 @@ function WorkoutSetHeader() {
   );
 }
 
+interface WorkoutSetCardProps {
+  item: WorkoutSessionExerciseModel["sets"][number];
+  onDelete: () => void;
+  onToggleComplete: () => void;
+  onChangeWeight: (value: string) => void;
+  onChangeReps: (value: string) => void;
+}
+
 function WorkoutSetCard({
   item,
   onDelete,
   onToggleComplete,
-}: {
-  item: WorkoutSessionExerciseModel["sets"][number];
-  onDelete: () => void;
-  onToggleComplete: () => void;
-}) {
+  onChangeWeight,
+  onChangeReps,
+}: WorkoutSetCardProps) {
   const { colors } = useAppTheme();
 
   const isCompleted = !!item.completedAt;
@@ -395,7 +430,7 @@ function WorkoutSetCard({
       renderRightActions={() => <DeleteSetAction onPress={onDelete} />}
     >
       <View
-        className="flex-row items-center py-4"
+        className="flex-row items-center gap-4 py-2"
         style={{ backgroundColor: colors.app.cardPrimary }}
       >
         <View className="w-16 items-center">
@@ -404,16 +439,24 @@ function WorkoutSetCard({
           </ThemedText>
         </View>
 
-        <View className="flex-1 items-center">
-          <ThemedText type="default" variant="primary" className="text-center">
-            {item.weight ?? "-"}
-          </ThemedText>
+        <View className="flex-1">
+          <FormTextInput
+            value={item.weight?.toString() ?? ""}
+            onChangeText={onChangeWeight}
+            keyboardType="numeric"
+            placeholder="-"
+            inputClassName="text-center"
+          />
         </View>
 
-        <View className="flex-1 items-center">
-          <ThemedText type="default" variant="primary" className="text-center">
-            {item.reps ?? "-"}
-          </ThemedText>
+        <View className="flex-1">
+          <FormTextInput
+            value={item.reps?.toString() ?? ""}
+            onChangeText={onChangeReps}
+            keyboardType="numeric"
+            placeholder="-"
+            inputClassName="text-center"
+          />
         </View>
 
         <View className="w-16 items-center">
