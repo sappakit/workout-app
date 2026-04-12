@@ -14,8 +14,10 @@ export interface WorkoutSessionExerciseSetModel extends Omit<
 
 export interface WorkoutSessionExerciseModel extends Omit<
   WorkoutSessionExercise,
-  "sets"
+  "id" | "sets"
 > {
+  id: number | null;
+  clientId: string;
   sets: WorkoutSessionExerciseSetModel[];
 }
 

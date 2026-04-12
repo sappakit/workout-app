@@ -32,8 +32,8 @@ interface WorkoutSessionStore {
 
   // Update session set (add, remove, complete set, etc.)
   updateSessionSet: (
-    exerciseId: number,
-    clientId: string,
+    exerciseClientId: string,
+    setClientId: string,
     updater: (
       set: WorkoutSessionExerciseSetModel,
     ) => WorkoutSessionExerciseSetModel,
@@ -71,7 +71,7 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
 
       setHydrated: (value) => set({ hydrated: value }),
 
-      updateSessionSet: (exerciseId, clientId, updater) => {
+      updateSessionSet: (exerciseClientId, setClientId, updater) => {
         const current = get().session;
         if (!current) return;
 
@@ -79,12 +79,12 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
           session: {
             ...current,
             sessionExercises: current.sessionExercises.map((exercise) => {
-              if (exercise.id !== exerciseId) return exercise;
+              if (exercise.clientId !== exerciseClientId) return exercise;
 
               return {
                 ...exercise,
                 sets: exercise.sets.map((set) =>
-                  set.clientId === clientId ? updater(set) : set,
+                  set.clientId === setClientId ? updater(set) : set,
                 ),
               };
             }),
@@ -112,6 +112,7 @@ export const mapWorkoutSessiontoWorkoutSessionModel = (
   ...session,
   sessionExercises: session.sessionExercises.map((exercise) => ({
     ...exercise,
+    clientId: `existing-${exercise.id}`,
     sets: exercise.sets.map((set) => ({
       ...set,
       clientId: `existing-${set.id}`,

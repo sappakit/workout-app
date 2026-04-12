@@ -82,7 +82,8 @@ export function WorkoutInProgressContent({
   const currentExercise = storedSession?.sessionExercises.find(
     (exercise) => !exercise.isSkipped && !exercise.completedAt,
   );
-  const setItems = currentExercise?.sets ?? [];
+
+  const exerciseItems = storedSession?.sessionExercises ?? [];
 
   // Cancel workout mutation
   const cancelWorkoutMutation = useMutation({
@@ -108,13 +109,11 @@ export function WorkoutInProgressContent({
 
   /* Function */
   // Add set
-  const handleAddSet = () => {
-    if (!currentExercise) return;
-
+  const handleAddSet = (exerciseClientId: string) => {
     updateSession((prev) => ({
       ...prev,
       sessionExercises: prev.sessionExercises.map((exercise) => {
-        if (exercise.id !== currentExercise.id) return exercise;
+        if (exercise.clientId !== exerciseClientId) return exercise;
 
         const lastSet = exercise.sets[exercise.sets.length - 1];
         const nextSetNumber = lastSet ? lastSet.setNumber + 1 : 1;
@@ -140,16 +139,14 @@ export function WorkoutInProgressContent({
   };
 
   // Delete set
-  const handleDeleteSet = (clientId: string) => {
-    if (!currentExercise) return;
-
+  const handleDeleteSet = (exerciseClientId: string, setClientId: string) => {
     updateSession((prev) => ({
       ...prev,
       sessionExercises: prev.sessionExercises.map((exercise) => {
-        if (exercise.id !== currentExercise.id) return exercise;
+        if (exercise.clientId !== exerciseClientId) return exercise;
 
         const filteredSets = exercise.sets
-          .filter((set) => set.clientId !== clientId)
+          .filter((set) => set.clientId !== setClientId)
           .map((set, index) => ({
             ...set,
             setNumber: index + 1,
@@ -164,12 +161,27 @@ export function WorkoutInProgressContent({
   };
 
   // Complete set
-  const handleToggleSetCompleted = (clientId: string) => {
-    if (!currentExercise) return;
-
-    updateSessionSet(currentExercise.id, clientId, (set) => ({
+  const handleToggleSetCompleted = (
+    exerciseClientId: string,
+    setClientId: string,
+  ) => {
+    updateSessionSet(exerciseClientId, setClientId, (set) => ({
       ...set,
       completedAt: set.completedAt ? null : new Date().toISOString(),
+    }));
+  };
+
+  // Update set weight/reps
+  const handleUpdateSetValue = (
+    exerciseClientId: string,
+    setClientId: string,
+    field: "weight" | "reps",
+    value: string,
+  ) => {
+    // TODO: non number charater cause NaN
+    updateSessionSet(exerciseClientId, setClientId, (set) => ({
+      ...set,
+      [field]: value === "" ? null : Number(value),
     }));
   };
 
@@ -192,21 +204,6 @@ export function WorkoutInProgressContent({
     );
   };
 
-  // Update set weight/reps
-  const handleUpdateSetValue = (
-    clientId: string,
-    field: "weight" | "reps",
-    value: string,
-  ) => {
-    if (!currentExercise) return;
-
-    // TODO: non number charater cause NaN
-    updateSessionSet(currentExercise.id, clientId, (set) => ({
-      ...set,
-      [field]: value === "" ? null : Number(value),
-    }));
-  };
-
   // TODO: remove
   useEffect(() => {
     console.log(currentExercise?.sets);
@@ -223,7 +220,7 @@ export function WorkoutInProgressContent({
         variant: "title",
         title: "Workout",
       }}
-      scrollable={false}
+      // scrollable={false}
       containerStyle={{ paddingHorizontal: 0, paddingTop: 0 }}
     >
       {/* Hero */}
@@ -268,94 +265,28 @@ export function WorkoutInProgressContent({
 
       {/* Progress */}
       <View className="flex-1 gap-4 px-4">
-        <View
-          className="flex-1 rounded-2xl border"
-          style={{
-            backgroundColor: colors.app.cardPrimary,
-            borderColor: colors.app.borderPrimary,
-          }}
-        >
-          {/* Top section */}
-          <View className="gap-4 p-4">
-            <View
-              className="flex-row items-center gap-3"
-              style={{
-                borderColor: colors.app.borderPrimary,
-              }}
-            >
-              <View
-                className="h-14 w-14 items-center justify-center rounded-full"
-                style={{
-                  backgroundColor: colors.app.brand + 20,
-                }}
-              >
-                <BicepsFlexed size={28} color={colors.app.brand} />
-              </View>
-
-              <View>
-                <ThemedText
-                  type="default"
-                  variant="accent"
-                  className="text-base"
-                >
-                  In progress ...
-                </ThemedText>
-
-                <ThemedText
-                  type="default"
-                  variant="primary"
-                  className="text-xs"
-                >
-                  Set 2 of 4
-                </ThemedText>
-              </View>
-
-              <TouchableOpacity className="ml-auto self-start p-1">
-                <MoreVertical size={20} color={colors.app.textPrimary} />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity className="flex-row items-center gap-1">
-              <Timer size={20} color={colors.app.brand} />
-
-              <ThemedText type="default" variant="brand">
-                1 min rest
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-
-          {/* FlatList header */}
-          <WorkoutSetHeader />
-
-          <FlatList
-            data={setItems}
-            keyExtractor={(item) => item.clientId}
-            renderItem={({ item }) => (
-              <WorkoutSetCard
-                item={item}
-                onDelete={() => handleDeleteSet(item.clientId)}
-                onToggleComplete={() => handleToggleSetCompleted(item.clientId)}
-                onChangeWeight={(value) =>
-                  handleUpdateSetValue(item.clientId, "weight", value)
-                }
-                onChangeReps={(value) =>
-                  handleUpdateSetValue(item.clientId, "reps", value)
-                }
-              />
-            )}
-            showsVerticalScrollIndicator={true}
+        {/* TODO: add expand/collapse */}
+        {exerciseItems.map((exerciseItem) => (
+          <WorkoutExerciseSection
+            key={exerciseItem.clientId}
+            exercise={exerciseItem}
+            onAddSet={() => handleAddSet(exerciseItem.clientId)}
+            onDeleteSet={(setClientId) =>
+              handleDeleteSet(exerciseItem.clientId, setClientId)
+            }
+            onToggleSetCompleted={(setClientId) =>
+              handleToggleSetCompleted(exerciseItem.clientId, setClientId)
+            }
+            onChangeSetValue={(setClientId, field, value) =>
+              handleUpdateSetValue(
+                exerciseItem.clientId,
+                setClientId,
+                field,
+                value,
+              )
+            }
           />
-
-          {/* FlatList footer */}
-          <View
-            style={{
-              borderTopWidth: 1,
-              borderColor: colors.app.borderPrimary,
-            }}
-          >
-            <WorkoutSetFooter onPress={handleAddSet} />
-          </View>
-        </View>
+        ))}
 
         {/* TODO: remove */}
         <AppButton
@@ -371,6 +302,128 @@ export function WorkoutInProgressContent({
       {/* <WorkoutTimerBottomSheet /> */}
     </PageLayout>
   );
+}
+
+interface WorkoutExerciseSectionProps {
+  exercise: WorkoutSessionExerciseModel;
+  onAddSet: () => void;
+  onDeleteSet: (setClientId: string) => void;
+  onToggleSetCompleted: (setClientId: string) => void;
+  onChangeSetValue: (
+    setClientId: string,
+    field: "weight" | "reps",
+    value: string,
+  ) => void;
+  onPressMore?: () => void;
+}
+
+function WorkoutExerciseSection({
+  exercise,
+  onAddSet,
+  onDeleteSet,
+  onToggleSetCompleted,
+  onChangeSetValue,
+  onPressMore,
+}: WorkoutExerciseSectionProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View
+      className="rounded-2xl border"
+      style={{
+        backgroundColor: colors.app.cardPrimary,
+        borderColor: colors.app.borderPrimary,
+      }}
+    >
+      {/* Top section */}
+      <View className="gap-4 p-4">
+        <View className="flex-row items-center gap-3">
+          <View
+            className="h-14 w-14 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: colors.app.brand + "20",
+            }}
+          >
+            <BicepsFlexed size={28} color={colors.app.brand} />
+          </View>
+
+          <View>
+            <ThemedText type="default" variant="accent" className="text-base">
+              {exercise.exercise.name}
+            </ThemedText>
+
+            <ThemedText type="default" variant="primary" className="text-xs">
+              {getExerciseProgressText(exercise)}
+            </ThemedText>
+          </View>
+
+          <TouchableOpacity
+            className="ml-auto self-start p-1"
+            onPress={onPressMore}
+          >
+            <MoreVertical size={20} color={colors.app.textPrimary} />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity className="flex-row items-center gap-1">
+          <Timer size={20} color={colors.app.brand} />
+
+          <ThemedText type="default" variant="brand">
+            1 min rest
+          </ThemedText>
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={exercise.sets}
+        keyExtractor={(item) => item.clientId}
+        scrollEnabled={false}
+        renderItem={({ item: setItem }) => (
+          <WorkoutSetCard
+            item={setItem}
+            onDelete={() => onDeleteSet(setItem.clientId)}
+            onToggleComplete={() => onToggleSetCompleted(setItem.clientId)}
+            onChangeWeight={(value) =>
+              onChangeSetValue(setItem.clientId, "weight", value)
+            }
+            onChangeReps={(value) =>
+              onChangeSetValue(setItem.clientId, "reps", value)
+            }
+          />
+        )}
+        ListEmptyComponent={
+          <View className="items-center gap-1 py-4">
+            <ThemedText type="default" variant="secondary">
+              No sets yet
+            </ThemedText>
+
+            <ThemedText type="default" variant="primary" className="text-xs">
+              Tap "Add Set" to start tracking
+            </ThemedText>
+          </View>
+        }
+        ListHeaderComponent={<WorkoutSetHeader />}
+        ListFooterComponent={<WorkoutSetFooter onPress={onAddSet} />}
+        ListFooterComponentStyle={{
+          borderTopWidth: 1,
+          borderColor: colors.app.borderPrimary,
+        }}
+      />
+    </View>
+  );
+}
+
+function getExerciseProgressText(exercise: WorkoutSessionExerciseModel) {
+  const completedCount = exercise.sets.filter(
+    (set) => !!set.completedAt,
+  ).length;
+  const totalCount = exercise.sets.length;
+
+  if (totalCount === 0) return "No sets yet";
+  if (completedCount === totalCount)
+    return `Completed • ${completedCount}/${totalCount} sets`;
+
+  return `In progress • ${completedCount}/${totalCount} sets`;
 }
 
 function WorkoutSetHeader() {

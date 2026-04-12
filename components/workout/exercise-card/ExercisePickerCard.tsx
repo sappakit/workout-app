@@ -1,11 +1,9 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { buildExercisePreviewDisplayModel } from "@/lib/workout/utils";
 import { Exercise } from "@/types/workout/response/exercise.types";
 import { useRouter } from "expo-router";
 import { Check, CircleCheck, Info, Plus } from "lucide-react-native";
-import { useMemo } from "react";
 import { View } from "react-native";
 import ExerciseCardBase from "./base/ExerciseCardBase";
 
@@ -25,10 +23,10 @@ export function ExercisePickerCard({
   const router = useRouter();
   const { colors } = useAppTheme();
 
-  const display = useMemo(
-    () => buildExercisePreviewDisplayModel(exercise),
-    [exercise],
-  );
+  // const display = useMemo(
+  //   () => buildExercisePreviewDisplayModel(exercise),
+  //   [exercise],
+  // );
 
   const selected = status === "selected";
   const alreadyAdded = status === "already-added";
