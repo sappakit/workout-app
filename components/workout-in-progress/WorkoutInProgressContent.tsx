@@ -18,14 +18,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import {
   BicepsFlexed,
   Check,
-  ChevronRight,
+  ChevronDown,
+  ChevronUp,
   MoreVertical,
   Plus,
   Timer,
   Trash2,
   X,
 } from "lucide-react-native";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -38,7 +39,6 @@ import {
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { AppButton } from "../custom-ui/AppButton";
-import Thumbnail from "../custom-ui/Thumbnail";
 import FormTextInput from "../form/FormTextInput";
 
 type WorkoutInProgressContentProps = {
@@ -79,10 +79,6 @@ export function WorkoutInProgressContent({
   const isActiveSessionReady = hydrated && storedSession?.id === session.id;
 
   // Use storedSession as the single source of truth
-  const currentExercise = storedSession?.sessionExercises.find(
-    (exercise) => !exercise.isSkipped && !exercise.completedAt,
-  );
-
   const exerciseItems = storedSession?.sessionExercises ?? [];
 
   // Cancel workout mutation
@@ -206,8 +202,8 @@ export function WorkoutInProgressContent({
 
   // TODO: remove
   useEffect(() => {
-    console.log(currentExercise?.sets);
-  }, [currentExercise]);
+    console.log(storedSession);
+  }, [storedSession]);
 
   // TODO: add loading
   if (!isActiveSessionReady) {
@@ -229,19 +225,6 @@ export function WorkoutInProgressContent({
         resizeMode="cover"
         style={{ height: 240 }}
       >
-        {/* Next exercise */}
-        <View className="absolute right-0 top-0 z-10 items-center justify-center p-2">
-          <Thumbnail image={fallbackImage} style={{ height: 56, width: 56 }} />
-
-          <View className="flex-row items-center gap-1">
-            <ThemedText type="default" variant="accent" className="text-xs">
-              Next exercise
-            </ThemedText>
-
-            <ChevronRight size={12} color={colors.app.textAccent} />
-          </View>
-        </View>
-
         <LinearGradient
           colors={["transparent", colors.app.background]}
           locations={[0.4, 1]}
@@ -250,7 +233,7 @@ export function WorkoutInProgressContent({
 
         <View className="flex-1 items-center justify-end pb-4">
           <ThemedText type="default" variant="accent">
-            {storedSession.workoutSchedule.workout.name}
+            {storedSession.workoutSchedule.workout.workoutFocusType.name}
           </ThemedText>
 
           <ThemedText
@@ -258,7 +241,7 @@ export function WorkoutInProgressContent({
             variant="brand"
             className="mt-1 text-center text-4xl font-bold"
           >
-            {currentExercise?.exercise.name ?? "Workout Complete"}
+            {storedSession.workoutSchedule.workout.name}
           </ThemedText>
         </View>
       </ImageBackground>
@@ -327,6 +310,9 @@ function WorkoutExerciseSection({
 }: WorkoutExerciseSectionProps) {
   const { colors } = useAppTheme();
 
+  const [expanded, setExpanded] = useState(true);
+  const ExpansionIcon = expanded ? ChevronUp : ChevronDown;
+
   return (
     <View
       className="rounded-2xl border"
@@ -336,79 +322,96 @@ function WorkoutExerciseSection({
       }}
     >
       {/* Top section */}
-      <View className="gap-4 p-4">
-        <View className="flex-row items-center gap-3">
-          <View
-            className="h-14 w-14 items-center justify-center rounded-full"
-            style={{
-              backgroundColor: colors.app.brand + "20",
-            }}
-          >
-            <BicepsFlexed size={28} color={colors.app.brand} />
-          </View>
-
-          <View>
-            <ThemedText type="default" variant="accent" className="text-base">
-              {exercise.exercise.name}
-            </ThemedText>
-
-            <ThemedText type="default" variant="primary" className="text-xs">
-              {getExerciseProgressText(exercise)}
-            </ThemedText>
-          </View>
-
-          <TouchableOpacity
-            className="ml-auto self-start p-1"
-            onPress={onPressMore}
-          >
-            <MoreVertical size={20} color={colors.app.textPrimary} />
-          </TouchableOpacity>
+      <View className="flex-row items-center gap-3 p-4">
+        {/* Image */}
+        <View
+          className="h-14 w-14 items-center justify-center rounded-full"
+          style={{
+            backgroundColor: colors.app.brand + "20",
+          }}
+        >
+          <BicepsFlexed size={28} color={colors.app.brand} />
         </View>
 
-        <TouchableOpacity className="flex-row items-center gap-1">
-          <Timer size={20} color={colors.app.brand} />
-
-          <ThemedText type="default" variant="brand">
-            1 min rest
+        {/* Title/subtitle */}
+        <View>
+          <ThemedText type="default" variant="accent" className="text-base">
+            {exercise.exercise.name}
           </ThemedText>
-        </TouchableOpacity>
+
+          <ThemedText type="default" variant="primary" className="text-xs">
+            {getExerciseProgressText(exercise)}
+          </ThemedText>
+        </View>
+
+        {/* Button */}
+        <View className="ml-auto flex-row items-center gap-3 self-start p-1">
+          <TouchableOpacity onPress={onPressMore}>
+            <MoreVertical size={18} color={colors.app.textPrimary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
+            <ExpansionIcon size={24} color={colors.app.textPrimary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <FlatList
-        data={exercise.sets}
-        keyExtractor={(item) => item.clientId}
-        scrollEnabled={false}
-        renderItem={({ item: setItem }) => (
-          <WorkoutSetCard
-            item={setItem}
-            onDelete={() => onDeleteSet(setItem.clientId)}
-            onToggleComplete={() => onToggleSetCompleted(setItem.clientId)}
-            onChangeWeight={(value) =>
-              onChangeSetValue(setItem.clientId, "weight", value)
-            }
-            onChangeReps={(value) =>
-              onChangeSetValue(setItem.clientId, "reps", value)
-            }
-          />
-        )}
-        ListEmptyComponent={
-          <View className="items-center gap-1 py-4">
-            <ThemedText type="default" variant="secondary">
-              No sets yet
-            </ThemedText>
+      {/* Content section */}
+      {expanded && (
+        <View>
+          {exercise.sets.length > 0 && (
+            <TouchableOpacity className="flex-row items-center gap-1 px-4 pb-4">
+              <Timer size={20} color={colors.app.brand} />
 
-            <ThemedText type="default" variant="primary" className="text-xs">
-              Tap "Add Set" to start tracking
-            </ThemedText>
-          </View>
-        }
-        ListHeaderComponent={<WorkoutSetHeader />}
-        ListFooterComponent={<WorkoutSetFooter onPress={onAddSet} />}
-        ListFooterComponentStyle={{
-          borderTopWidth: 1,
-          borderColor: colors.app.borderPrimary,
-        }}
-      />
+              <ThemedText type="default" variant="brand">
+                1 min rest
+              </ThemedText>
+            </TouchableOpacity>
+          )}
+
+          <FlatList
+            data={exercise.sets}
+            keyExtractor={(item) => item.clientId}
+            scrollEnabled={false}
+            renderItem={({ item: setItem }) => (
+              <WorkoutSetCard
+                item={setItem}
+                onDelete={() => onDeleteSet(setItem.clientId)}
+                onToggleComplete={() => onToggleSetCompleted(setItem.clientId)}
+                onChangeWeight={(value) =>
+                  onChangeSetValue(setItem.clientId, "weight", value)
+                }
+                onChangeReps={(value) =>
+                  onChangeSetValue(setItem.clientId, "reps", value)
+                }
+              />
+            )}
+            ListEmptyComponent={
+              <View className="items-center gap-1 pb-4">
+                <ThemedText type="default" variant="secondary">
+                  No sets yet
+                </ThemedText>
+
+                <ThemedText
+                  type="default"
+                  variant="primary"
+                  className="text-xs"
+                >
+                  Tap "Add Set" to start tracking
+                </ThemedText>
+              </View>
+            }
+            ListHeaderComponent={
+              exercise.sets.length > 0 ? <WorkoutSetHeader /> : null
+            }
+            ListFooterComponent={<WorkoutSetFooter onPress={onAddSet} />}
+            ListFooterComponentStyle={{
+              borderTopWidth: 1,
+              borderColor: colors.app.borderPrimary,
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 }
