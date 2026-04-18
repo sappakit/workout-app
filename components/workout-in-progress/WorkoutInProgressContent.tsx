@@ -7,7 +7,10 @@ import { createClientId } from "@/lib/id/utils";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
-import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
+import {
+  mapWorkoutSessionModelToFinishPayload,
+  useWorkoutSessionStore,
+} from "@/stores/workoutSessionStore";
 import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
@@ -63,6 +66,9 @@ export function WorkoutInProgressContent({
   );
 
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
+  const updateSessionExercise = useWorkoutSessionStore(
+    (state) => state.updateSessionExercise,
+  );
   const updateSessionSet = useWorkoutSessionStore(
     (state) => state.updateSessionSet,
   );
@@ -81,7 +87,8 @@ export function WorkoutInProgressContent({
   // Use storedSession as the single source of truth
   const exerciseItems = storedSession?.sessionExercises ?? [];
 
-  // Cancel workout mutation
+  /* Mutation */
+  // Cancel workout
   const cancelWorkoutMutation = useMutation({
     mutationKey: workoutMutationKeys.cancelSession,
     mutationFn: () => api.post(workoutApi.cancelSession()),
@@ -99,6 +106,34 @@ export function WorkoutInProgressContent({
       toast.error({
         title: "Cancel failed",
         message: "Could not cancel workout session.",
+      });
+    },
+  });
+
+  // Finish workout
+  const finishWorkoutSessionMutation = useMutation({
+    mutationKey: workoutMutationKeys.finishSession,
+    mutationFn: async () => {
+      if (!storedSession) throw new Error("No active session");
+
+      const payload = mapWorkoutSessionModelToFinishPayload(storedSession);
+      console.log("storedSession:", storedSession);
+      console.log("payload:", payload);
+
+      return api.patch(workoutApi.finishSession(storedSession.id), payload);
+    },
+    onSuccess: async () => {
+      await invalidateQueries([workoutQueryKeys.current]);
+
+      toast.success({
+        title: "Workout completed",
+        message: "Your workout has been saved successfully.",
+      });
+    },
+    onError: () => {
+      toast.error({
+        title: "Save failed",
+        message: "Something went wrong while saving your session.",
       });
     },
   });
@@ -126,10 +161,10 @@ export function WorkoutInProgressContent({
           completedAt: null,
         };
 
-        return {
+        return syncSessionExerciseCompletion({
           ...exercise,
           sets: [...exercise.sets, newSet],
-        };
+        });
       }),
     }));
   };
@@ -148,10 +183,10 @@ export function WorkoutInProgressContent({
             setNumber: index + 1,
           }));
 
-        return {
+        return syncSessionExerciseCompletion({
           ...exercise,
           sets: filteredSets,
-        };
+        });
       }),
     }));
   };
@@ -161,10 +196,23 @@ export function WorkoutInProgressContent({
     exerciseClientId: string,
     setClientId: string,
   ) => {
-    updateSessionSet(exerciseClientId, setClientId, (set) => ({
-      ...set,
-      completedAt: set.completedAt ? null : new Date().toISOString(),
-    }));
+    const now = new Date().toISOString();
+
+    updateSessionExercise(exerciseClientId, (exercise) => {
+      const updatedSets = exercise.sets.map((set) =>
+        set.clientId === setClientId
+          ? {
+              ...set,
+              completedAt: set.completedAt ? null : now,
+            }
+          : set,
+      );
+
+      return syncSessionExerciseCompletion({
+        ...exercise,
+        sets: updatedSets,
+      });
+    });
   };
 
   // Update set weight/reps
@@ -179,6 +227,23 @@ export function WorkoutInProgressContent({
       ...set,
       [field]: value === "" ? null : Number(value),
     }));
+  };
+
+  // Update sessionExercise completedAt
+  // when set changes (add/delete/completed)
+  const syncSessionExerciseCompletion = (
+    exercise: WorkoutSessionExerciseModel,
+  ): WorkoutSessionExerciseModel => {
+    const allSetsCompleted =
+      exercise.sets.length > 0 &&
+      exercise.sets.every((set) => !!set.completedAt);
+
+    return {
+      ...exercise,
+      completedAt: allSetsCompleted
+        ? (exercise.completedAt ?? new Date().toISOString())
+        : null,
+    };
   };
 
   // Cancel workout
@@ -200,9 +265,16 @@ export function WorkoutInProgressContent({
     );
   };
 
+  // finish workout session
+  const handleFinishWorkoutSession = async () => {
+    if (!storedSession) return;
+
+    await finishWorkoutSessionMutation.mutateAsync();
+  };
+
   // TODO: remove
   useEffect(() => {
-    console.log(storedSession);
+    console.log(storedSession?.sessionExercises[0]);
   }, [storedSession]);
 
   // TODO: add loading
@@ -248,7 +320,6 @@ export function WorkoutInProgressContent({
 
       {/* Progress */}
       <View className="flex-1 gap-4 px-4">
-        {/* TODO: add expand/collapse */}
         {exerciseItems.map((exerciseItem) => (
           <WorkoutExerciseSection
             key={exerciseItem.clientId}
@@ -273,8 +344,17 @@ export function WorkoutInProgressContent({
 
         {/* TODO: remove */}
         <AppButton
-          title="Cancel Workout"
+          title="Save Progress"
           variant="primary"
+          textClassName="font-medium"
+          onPress={handleFinishWorkoutSession}
+          loading={finishWorkoutSessionMutation.isPending}
+        />
+
+        {/* TODO: remove */}
+        <AppButton
+          title="Cancel Workout"
+          variant="secondary"
           icon={X}
           textClassName="font-medium"
           onPress={handleCancelWorkout}

@@ -151,7 +151,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         message: "Your workout plan has been saved.",
       });
     },
-    onError: (_err: unknown) => {
+    onError: () => {
       toast.error({
         title: "Update failed",
         message: "Unable to save workout plan.",

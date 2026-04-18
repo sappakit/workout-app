@@ -8,7 +8,10 @@ export const workoutQueryKeys = {
 
 export const workoutMutationKeys = {
   startSession: ["workout", "sessions", "start"] as const,
+
+  // TODO: add id
   cancelSession: ["workout", "sessions", "cancel"] as const,
+  finishSession: ["workout", "sessions", "finish"] as const,
 
   update: (id: number) => ["workout", "update", id] as const,
 };

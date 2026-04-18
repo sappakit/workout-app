@@ -13,4 +13,5 @@ export const workoutApi = {
 
   // Update
   update: (id: string | number) => `${BASE}/${id}`,
+  finishSession: (sessionId: number) => `${BASE}/sessions/${sessionId}/finish`,
 };
