@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { createClientId } from "@/lib/id/utils";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
+import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
   mapWorkoutSessionModelToFinishPayload,
   useWorkoutSessionStore,
@@ -91,8 +91,11 @@ export function WorkoutInProgressContent({
   /* Mutation */
   // Cancel workout
   const cancelWorkoutMutation = useMutation({
-    mutationKey: workoutMutationKeys.cancelSession,
-    mutationFn: () => api.post(workoutApi.cancelSession()),
+    mutationFn: () => {
+      if (!storedSession) throw new Error("No active session");
+
+      return api.post(workoutApi.cancelSession(storedSession.id));
+    },
     onSuccess: async () => {
       clearSession();
 
@@ -113,13 +116,10 @@ export function WorkoutInProgressContent({
 
   // Finish workout
   const finishWorkoutSessionMutation = useMutation({
-    mutationKey: workoutMutationKeys.finishSession,
     mutationFn: async () => {
       if (!storedSession) throw new Error("No active session");
 
       const payload = mapWorkoutSessionModelToFinishPayload(storedSession);
-      console.log("storedSession:", storedSession);
-      console.log("payload:", payload);
 
       return api.patch(workoutApi.finishSession(storedSession.id), payload);
     },
@@ -275,7 +275,7 @@ export function WorkoutInProgressContent({
 
   // TODO: remove
   useEffect(() => {
-    console.log(storedSession?.sessionExercises[0]);
+    console.log(storedSession);
   }, [storedSession]);
 
   // TODO: add loading
@@ -306,7 +306,7 @@ export function WorkoutInProgressContent({
 
         <View className="flex-1 items-center justify-end pb-4">
           <ThemedText type="default" variant="accent">
-            {storedSession.workoutSchedule.workout.workoutFocusType.name}
+            {storedSession.workout.workoutFocusType.name}
           </ThemedText>
 
           <ThemedText
@@ -314,7 +314,7 @@ export function WorkoutInProgressContent({
             variant="brand"
             className="mt-1 text-center text-4xl font-bold"
           >
-            {storedSession.workoutSchedule.workout.name}
+            {storedSession.workout.name}
           </ThemedText>
         </View>
       </ImageBackground>

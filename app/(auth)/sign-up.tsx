@@ -42,7 +42,6 @@ export default function SignUpScreen() {
   });
 
   const { mutate, isPending } = useMutation({
-    mutationKey: ["auth", "sign-up"],
     mutationFn: (values: SignUpRequest) => signUp(values),
     onSuccess: () => {
       toast.success({

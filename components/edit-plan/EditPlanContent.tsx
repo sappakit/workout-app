@@ -6,7 +6,7 @@ import { ThemedText } from "@/components/themed-text";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
+import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
   mapEditPlanFormToUpdateWorkoutPayload,
   mapWorkoutResponseToEditPlanForm,
@@ -130,7 +130,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   }, [draftWorkoutId, draft, data.id, reset]);
 
   const { mutate, isPending } = useMutation({
-    mutationKey: workoutMutationKeys.update(data.id),
     mutationFn: async (values: EditPlanForm) => {
       const url = workoutApi.update(data.id);
       const payload = mapEditPlanFormToUpdateWorkoutPayload(values);

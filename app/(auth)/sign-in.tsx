@@ -37,7 +37,6 @@ export default function SignInScreen() {
   });
 
   const { mutate, isPending } = useMutation({
-    mutationKey: ["auth", "sign-in"],
     mutationFn: (values: SignInForm) => signIn(values),
     onSuccess: () => {
       toast.success({

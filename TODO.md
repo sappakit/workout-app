@@ -13,10 +13,6 @@
 
 - Three column input (Estimated duration) too small on ios making it show as '...'
 - Allow duplicate exercise in one workout
-- after passing the day that start workout_session, its status will still be 'active'
-  but user can start new workout_session
-  Fix: should make user work on the old session till user cancel themselves
-
 - Right now, star/cancel session is getting session from today schedule only - so user can't choose other program to work
 
 # OPTIONAL

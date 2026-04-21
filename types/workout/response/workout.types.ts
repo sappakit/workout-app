@@ -93,7 +93,7 @@ export interface WorkoutSession {
   endedAt: string | null;
   totalDuration: number | null;
   caloriesBurned: number | null;
-  workoutSchedule: WorkoutSchedule;
+  workout: WorkoutResponse;
   sessionExercises: WorkoutSessionExercise[];
 }
 

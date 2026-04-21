@@ -2,7 +2,7 @@ import { workoutApi } from "@/app/api/workout.api";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { workoutMutationKeys, workoutQueryKeys } from "@/lib/workout/keys";
+import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutSchedule } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -23,8 +23,7 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
   const toast = useAppToast();
 
   const { mutate: startWorkout, isPending } = useMutation({
-    mutationKey: workoutMutationKeys.startSession,
-    mutationFn: () => api.post(workoutApi.startSession()),
+    mutationFn: () => api.post(workoutApi.startSession(data.workout.id)),
     onSuccess: async () => {
       // refresh current state
       await invalidateQueries([workoutQueryKeys.current]);

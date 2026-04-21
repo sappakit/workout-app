@@ -8,8 +8,9 @@ export const workoutApi = {
   getCurrent: () => `${BASE}/current`,
 
   // Create
-  startSession: () => `${BASE}/sessions/start`,
-  cancelSession: () => `${BASE}/sessions/cancel`,
+  startSession: (workoutId: string | number) =>
+    `${BASE}/${workoutId}/sessions/start`,
+  cancelSession: (id: string | number) => `${BASE}/sessions/${id}/cancel`,
 
   // Update
   update: (id: string | number) => `${BASE}/${id}`,
