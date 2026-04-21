@@ -25,7 +25,6 @@ import {
   ChevronUp,
   MoreVertical,
   Plus,
-  Timer,
   Trash2,
   X,
 } from "lucide-react-native";
@@ -43,6 +42,8 @@ import {
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { AppButton } from "../custom-ui/AppButton";
 import FormTextInput from "../form/FormTextInput";
+import { DurationBottomSheetPicker } from "./duration-picker/DurationPickerSheet";
+import { DurationValue } from "./duration-picker/DurationWheelPicker";
 
 type WorkoutInProgressContentProps = {
   session: WorkoutSession;
@@ -391,6 +392,12 @@ function WorkoutExerciseSection({
   const { colors } = useAppTheme();
 
   const [expanded, setExpanded] = useState(true);
+  const [restTimer, setRestTimer] = useState<DurationValue>({
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
   const ExpansionIcon = expanded ? ChevronUp : ChevronDown;
 
   return (
@@ -439,7 +446,7 @@ function WorkoutExerciseSection({
       {/* Content section */}
       {expanded && (
         <View>
-          {exercise.sets.length > 0 && (
+          {/* {exercise.sets.length > 0 && (
             <TouchableOpacity className="flex-row items-center gap-1 px-4 pb-4">
               <Timer size={20} color={colors.app.brand} />
 
@@ -447,6 +454,16 @@ function WorkoutExerciseSection({
                 1 min rest
               </ThemedText>
             </TouchableOpacity>
+          )} */}
+
+          {exercise.sets.length > 0 && (
+            <View className="px-4 pb-4">
+              <DurationBottomSheetPicker
+                title="Select Rest Timer"
+                value={restTimer}
+                onChange={setRestTimer}
+              />
+            </View>
           )}
 
           <FlatList
