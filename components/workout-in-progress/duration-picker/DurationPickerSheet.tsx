@@ -2,83 +2,51 @@ import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
+import { hmsToSeconds, secondsToHMS } from "@/lib/workout/mappers";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import clsx from "clsx";
-import { Timer } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { Pressable, View, ViewStyle } from "react-native";
+import { Check, Timer, X } from "lucide-react-native";
+import { useCallback, useRef, useState } from "react";
+import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
 import { DurationValue, DurationWheelPicker } from "./DurationWheelPicker";
 
-
 type DurationBottomSheetPickerProps = {
-  title?: string;
-  value?: DurationValue;
-  onChange?: (value: DurationValue) => void;
-  placeholder?: string;
+  value: number;
+  title: string;
+  onChange: (value: number) => void;
   className?: string;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   disabled?: boolean;
-  snapPoints?: (string | number)[];
 };
-
-const DEFAULT_VALUE: DurationValue = {
-  hours: 0,
-  minutes: 1,
-  seconds: 0,
-};
-
-function formatDuration(value: DurationValue) {
-  const { hours, minutes, seconds } = value;
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${seconds}s`;
-  }
-
-  if (minutes > 0) {
-    return `${minutes}m ${seconds}s`;
-  }
-
-  return `${seconds}s`;
-}
-
-function isSameDuration(a: DurationValue, b: DurationValue) {
-  return (
-    a.hours === b.hours && a.minutes === b.minutes && a.seconds === b.seconds
-  );
-}
 
 export function DurationBottomSheetPicker({
+  value,
   title,
-  value = DEFAULT_VALUE,
   onChange,
-  placeholder = "Select duration",
   className,
   style,
   disabled,
-  snapPoints,
 }: DurationBottomSheetPickerProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const animationConfigs = useDefaultBottomSheetAnimation();
 
-  const [draftValue, setDraftValue] = useState<DurationValue>(value);
-
-  const selectedLabel = useMemo(() => formatDuration(value), [value]);
-  const hasChanges = useMemo(
-    () => !isSameDuration(draftValue, value),
-    [draftValue, value],
+  const [draftValue, setDraftValue] = useState<DurationValue>(
+    secondsToDuration(value),
   );
+
+  const hasChanges = durationToSeconds(draftValue) !== value;
 
   const openSheet = () => {
     if (disabled) return;
-    setDraftValue(value);
+    setDraftValue(secondsToDuration(value));
     bottomSheetModalRef.current?.present();
   };
 
@@ -87,12 +55,12 @@ export function DurationBottomSheetPicker({
   };
 
   const handleCancel = () => {
-    setDraftValue(value);
+    setDraftValue(secondsToDuration(value));
     closeSheet();
   };
 
   const handleDone = () => {
-    onChange?.(draftValue);
+    onChange?.(durationToSeconds(draftValue));
     closeSheet();
   };
 
@@ -118,7 +86,7 @@ export function DurationBottomSheetPicker({
         <Timer size={20} color={colors.app.brand} />
 
         <ThemedText type="default" variant="brand">
-          1 min rest
+          {formatRestTime(value)}
         </ThemedText>
       </Pressable>
 
@@ -137,30 +105,25 @@ export function DurationBottomSheetPicker({
         handleIndicatorStyle={{
           backgroundColor: colors.app.borderSecondary,
         }}
-        onDismiss={() => {
-          setDraftValue(value);
-        }}
+        onDismiss={() => setDraftValue(secondsToDuration(value))}
       >
         <BottomSheetView>
           <View className="px-6 py-3">
             <ThemedText type="title" variant="accent">
               {title}
             </ThemedText>
-
-            {/* <ThemedText type="default" variant="primary" className="mt-1">
-              {formatDuration(draftValue)}
-            </ThemedText> */}
           </View>
 
           <DurationWheelPicker value={draftValue} onChange={setDraftValue} />
 
           <View
-            className="flex-row gap-3 px-4 py-2"
+            className="flex-row gap-3 px-4 pt-3"
             style={{ paddingBottom: insets.bottom }}
           >
             <AppButton
               title="Cancel"
               variant="secondary"
+              icon={X}
               className="flex-1"
               onPress={handleCancel}
             />
@@ -168,6 +131,7 @@ export function DurationBottomSheetPicker({
             <AppButton
               title="Done"
               variant="primary"
+              icon={Check}
               className="flex-1"
               onPress={handleDone}
               disabled={!hasChanges}
@@ -177,4 +141,35 @@ export function DurationBottomSheetPicker({
       </BottomSheetModal>
     </>
   );
+}
+
+function secondsToDuration(totalSeconds: number): DurationValue {
+  const { hours, minutes, seconds } = secondsToHMS(totalSeconds);
+
+  return {
+    hours: hours ?? 0,
+    minutes: minutes ?? 0,
+    seconds: seconds ?? 0,
+  };
+}
+
+function durationToSeconds(value: DurationValue) {
+  return hmsToSeconds(value.hours, value.minutes, value.seconds) ?? 0;
+}
+
+function formatRestTime(totalSeconds: number) {
+  if (totalSeconds <= 0) return "No rest";
+
+  const { hours, minutes, seconds } = secondsToDuration(totalSeconds);
+
+  const paddedMinutes = minutes.toString().padStart(2, "0");
+  const paddedSeconds = seconds.toString().padStart(2, "0");
+
+  // H:MM:SS
+  if (hours > 0) {
+    return `Rest ${hours}:${paddedMinutes}:${paddedSeconds}`;
+  }
+
+  // M:SS
+  return `Rest ${minutes}:${paddedSeconds}`;
 }

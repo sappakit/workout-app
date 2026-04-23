@@ -288,7 +288,7 @@ export default function FormMultiSelectInput({
         }}
       >
         {/* Header */}
-        <View className="px-6 pb-3 pt-3">
+        <View className="px-6 py-3">
           {title && (
             <ThemedText type="title" variant="accent">
               {title}
@@ -327,10 +327,15 @@ export default function FormMultiSelectInput({
             />
 
             <View
-              className="px-4 py-2"
+              className="px-4 pt-2"
               style={{ paddingBottom: insets.bottom }}
             >
-              <AppButton title="Done" variant="primary" onPress={closeSheet} />
+              <AppButton
+                title="Done"
+                variant="primary"
+                onPress={closeSheet}
+                icon={Check}
+              />
             </View>
           </View>
         )}

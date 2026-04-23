@@ -146,9 +146,6 @@ export const mapWorkoutSessiontoWorkoutSessionModel = (
   })),
 });
 
-// TODO: WORK ON THIS TOMORROW
-// TODO: check what we actually want
-
 // Workout Session UI -> API payload
 export const mapWorkoutSessionModelToFinishPayload = (
   session: WorkoutSessionModel,
@@ -160,6 +157,7 @@ export const mapWorkoutSessionModelToFinishPayload = (
     id: sessionExercise.id ?? null,
     exerciseId: sessionExercise.exercise.id,
     orderIndex: sessionExercise.orderIndex,
+    plannedRestTime: sessionExercise.plannedRestTime,
     startedAt: sessionExercise.startedAt,
     completedAt: sessionExercise.completedAt,
     isSkipped: sessionExercise.isSkipped,
@@ -175,45 +173,3 @@ export const mapWorkoutSessionModelToFinishPayload = (
     })),
   })),
 });
-
-// export const mapWorkoutSessionModelToApiPayload = (
-//   session: WorkoutSessionModel,
-// ) => ({
-//   // id: session.id,
-//   // status: session.status,
-//   // startedAt: session.startedAt,
-//   endedAt: session.endedAt,
-//   // pausedAt: session.pausedAt,
-//   totalDuration: session.totalDuration,
-//   caloriesBurned: session.caloriesBurned,
-//   // workoutSchedule: session.workoutSchedule
-//   //   ? {
-//   //       id: session.workoutSchedule.id,
-//   //       // status: session.workoutSchedule.status,
-//   //     }
-//   //   : null,
-//   sessionExercises: session.sessionExercises.map((exercise) => ({
-//     id: exercise.id,
-//     orderIndex: exercise.orderIndex,
-//     // plannedSets: exercise.plannedSets,
-//     // plannedRepsRange: exercise.plannedRepsRange,
-//     // plannedWeight: exercise.plannedWeight,
-//     // plannedRestTime: exercise.plannedRestTime,
-//     // plannedDuration: exercise.plannedDuration,
-//     // plannedDistance: exercise.plannedDistance,
-//     startedAt: exercise.startedAt,
-//     completedAt: exercise.completedAt,
-//     isSkipped: exercise.isSkipped,
-//     exercise: exercise.exercise.id,
-//     sets: exercise.sets.map((set) => ({
-//       id: set.id,
-//       setNumber: set.setNumber,
-//       reps: set.reps,
-//       weight: set.weight,
-//       distance: set.distance,
-//       duration: set.duration,
-//       performedAt: set.performedAt,
-//       completedAt: set.completedAt,
-//     })),
-//   })),
-// });

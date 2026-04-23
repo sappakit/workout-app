@@ -42,8 +42,8 @@ import {
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { AppButton } from "../custom-ui/AppButton";
 import FormTextInput from "../form/FormTextInput";
+import WorkoutTimerBottomSheet from "../workout/WorkoutTimerBottomSheet";
 import { DurationBottomSheetPicker } from "./duration-picker/DurationPickerSheet";
-import { DurationValue } from "./duration-picker/DurationWheelPicker";
 
 type WorkoutInProgressContentProps = {
   session: WorkoutSession;
@@ -230,6 +230,16 @@ export function WorkoutInProgressContent({
     }));
   };
 
+  const handleUpdateExerciseRestTime = (
+    exerciseClientId: string,
+    value: number,
+  ) => {
+    updateSessionExercise(exerciseClientId, (exercise) => ({
+      ...exercise,
+      plannedRestTime: value,
+    }));
+  };
+
   // Update sessionExercise completedAt
   // when set changes (add/delete/completed)
   const syncSessionExerciseCompletion = (
@@ -284,87 +294,96 @@ export function WorkoutInProgressContent({
   }
 
   return (
-    <PageLayout
-      headerProps={{
-        variant: "title",
-        title: "Workout",
-      }}
-      // scrollable={false}
-      containerStyle={{ paddingHorizontal: 0, paddingTop: 0 }}
-    >
-      {/* Hero */}
-      <ImageBackground
-        source={{ uri: fallbackImage }}
-        resizeMode="cover"
-        style={{ height: 240 }}
+    <>
+      <PageLayout
+        headerProps={{
+          variant: "title",
+          title: "Workout",
+        }}
+        // scrollable={false}
+        containerStyle={{
+          paddingHorizontal: 0,
+          paddingTop: 0,
+          paddingBottom: 200,
+        }}
       >
-        <LinearGradient
-          colors={["transparent", colors.app.background]}
-          locations={[0.4, 1]}
-          style={StyleSheet.absoluteFillObject}
-        />
-
-        <View className="flex-1 items-center justify-end pb-4">
-          <ThemedText type="default" variant="accent">
-            {storedSession.workout.workoutFocusType.name}
-          </ThemedText>
-
-          <ThemedText
-            type="default"
-            variant="brand"
-            className="mt-1 text-center text-4xl font-bold"
-          >
-            {storedSession.workout.name}
-          </ThemedText>
-        </View>
-      </ImageBackground>
-
-      {/* Progress */}
-      <View className="flex-1 gap-4 px-4">
-        {exerciseItems.map((exerciseItem) => (
-          <WorkoutExerciseSection
-            key={exerciseItem.clientId}
-            exercise={exerciseItem}
-            onAddSet={() => handleAddSet(exerciseItem.clientId)}
-            onDeleteSet={(setClientId) =>
-              handleDeleteSet(exerciseItem.clientId, setClientId)
-            }
-            onToggleSetCompleted={(setClientId) =>
-              handleToggleSetCompleted(exerciseItem.clientId, setClientId)
-            }
-            onChangeSetValue={(setClientId, field, value) =>
-              handleUpdateSetValue(
-                exerciseItem.clientId,
-                setClientId,
-                field,
-                value,
-              )
-            }
+        {/* Hero */}
+        <ImageBackground
+          source={{ uri: fallbackImage }}
+          resizeMode="cover"
+          style={{ height: 240 }}
+        >
+          <LinearGradient
+            colors={["transparent", colors.app.background]}
+            locations={[0.4, 1]}
+            style={StyleSheet.absoluteFillObject}
           />
-        ))}
 
-        {/* TODO: remove */}
-        <AppButton
-          title="Save Progress"
-          variant="primary"
-          textClassName="font-medium"
-          onPress={handleFinishWorkoutSession}
-          loading={finishWorkoutSessionMutation.isPending}
-        />
+          <View className="flex-1 items-center justify-end pb-4">
+            <ThemedText type="default" variant="accent">
+              {storedSession.workout.workoutFocusType.name}
+            </ThemedText>
 
-        {/* TODO: remove */}
-        <AppButton
-          title="Cancel Workout"
-          variant="secondary"
-          icon={X}
-          textClassName="font-medium"
-          onPress={handleCancelWorkout}
-          loading={cancelWorkoutMutation.isPending}
-        />
-      </View>
+            <ThemedText
+              type="default"
+              variant="brand"
+              className="mt-1 text-center text-4xl font-bold"
+            >
+              {storedSession.workout.name}
+            </ThemedText>
+          </View>
+        </ImageBackground>
 
-      {/* <WorkoutTimerBottomSheet /> */}
-    </PageLayout>
+        {/* Progress */}
+        <View className="flex-1 gap-4 px-4">
+          {exerciseItems.map((exerciseItem) => (
+            <WorkoutExerciseSection
+              key={exerciseItem.clientId}
+              exercise={exerciseItem}
+              onAddSet={() => handleAddSet(exerciseItem.clientId)}
+              onDeleteSet={(setClientId) =>
+                handleDeleteSet(exerciseItem.clientId, setClientId)
+              }
+              onToggleSetCompleted={(setClientId) =>
+                handleToggleSetCompleted(exerciseItem.clientId, setClientId)
+              }
+              onChangeSetValue={(setClientId, field, value) =>
+                handleUpdateSetValue(
+                  exerciseItem.clientId,
+                  setClientId,
+                  field,
+                  value,
+                )
+              }
+              onChangeRestTime={(value) =>
+                handleUpdateExerciseRestTime(exerciseItem.clientId, value)
+              }
+            />
+          ))}
+
+          {/* TODO: remove */}
+          <AppButton
+            title="Save Progress"
+            variant="primary"
+            textClassName="font-medium"
+            onPress={handleFinishWorkoutSession}
+            loading={finishWorkoutSessionMutation.isPending}
+          />
+
+          {/* TODO: remove */}
+          <AppButton
+            title="Cancel Workout"
+            variant="secondary"
+            icon={X}
+            textClassName="font-medium"
+            onPress={handleCancelWorkout}
+            loading={cancelWorkoutMutation.isPending}
+          />
+        </View>
+      </PageLayout>
+
+      <WorkoutTimerBottomSheet />
+    </>
   );
 }
 
@@ -378,6 +397,7 @@ interface WorkoutExerciseSectionProps {
     field: "weight" | "reps",
     value: string,
   ) => void;
+  onChangeRestTime: (value: number) => void;
   onPressMore?: () => void;
 }
 
@@ -387,16 +407,12 @@ function WorkoutExerciseSection({
   onDeleteSet,
   onToggleSetCompleted,
   onChangeSetValue,
+  onChangeRestTime,
   onPressMore,
 }: WorkoutExerciseSectionProps) {
   const { colors } = useAppTheme();
 
   const [expanded, setExpanded] = useState(true);
-  const [restTimer, setRestTimer] = useState<DurationValue>({
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
 
   const ExpansionIcon = expanded ? ChevronUp : ChevronDown;
 
@@ -446,22 +462,12 @@ function WorkoutExerciseSection({
       {/* Content section */}
       {expanded && (
         <View>
-          {/* {exercise.sets.length > 0 && (
-            <TouchableOpacity className="flex-row items-center gap-1 px-4 pb-4">
-              <Timer size={20} color={colors.app.brand} />
-
-              <ThemedText type="default" variant="brand">
-                1 min rest
-              </ThemedText>
-            </TouchableOpacity>
-          )} */}
-
           {exercise.sets.length > 0 && (
             <View className="px-4 pb-4">
               <DurationBottomSheetPicker
                 title="Select Rest Timer"
-                value={restTimer}
-                onChange={setRestTimer}
+                value={exercise.plannedRestTime ?? 0}
+                onChange={onChangeRestTime}
               />
             </View>
           )}
