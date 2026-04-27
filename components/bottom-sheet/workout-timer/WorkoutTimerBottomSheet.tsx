@@ -7,12 +7,14 @@ import {
   WorkoutTimerAction,
   WorkoutTimerPauseAction,
   WorkoutTimerRestAction,
+  WorkoutTimerStats,
 } from "./model/workoutTimerDisplay";
 import { WorkoutTimerSheetContent } from "./ui/WorkoutTimerSheetContent";
 
 type WorkoutTimerBottomSheetProps = {
   startedAt: string | Date;
   remainingRestSeconds?: number;
+  stats: WorkoutTimerStats;
   restAction: WorkoutTimerRestAction;
   finishAction: WorkoutTimerAction;
   discardAction: WorkoutTimerAction;
@@ -21,6 +23,7 @@ type WorkoutTimerBottomSheetProps = {
 export default function WorkoutTimerBottomSheet({
   startedAt,
   remainingRestSeconds = 0,
+  stats,
   restAction,
   finishAction,
   discardAction,
@@ -66,6 +69,7 @@ export default function WorkoutTimerBottomSheet({
         sessionElapsedSeconds={sessionTimer.elapsedSeconds}
         remainingRestSeconds={remainingRestSeconds}
         activeIndex={activeIndex}
+        stats={stats}
         restAction={restAction}
         finishAction={finishAction}
         discardAction={discardAction}

@@ -10,6 +10,7 @@ import {
   WorkoutTimerAction,
   WorkoutTimerPauseAction,
   WorkoutTimerRestAction,
+  WorkoutTimerStats,
 } from "../model/workoutTimerDisplay";
 import {
   CollapsedTimerContent,
@@ -20,6 +21,7 @@ type WorkoutTimerContentProps = {
   sessionElapsedSeconds: number;
   remainingRestSeconds: number;
   activeIndex: number;
+  stats: WorkoutTimerStats;
   restAction: WorkoutTimerRestAction;
   finishAction: WorkoutTimerAction;
   discardAction: WorkoutTimerAction;
@@ -30,6 +32,7 @@ export function WorkoutTimerSheetContent({
   sessionElapsedSeconds,
   remainingRestSeconds,
   activeIndex,
+  stats,
   restAction,
   finishAction,
   discardAction,
@@ -46,6 +49,7 @@ export function WorkoutTimerSheetContent({
     isResting,
     isPaused: pauseAction.isPaused,
     displaySeconds,
+    stats,
   });
 
   const collapsedAnimatedStyle = useAnimatedStyle(() => {

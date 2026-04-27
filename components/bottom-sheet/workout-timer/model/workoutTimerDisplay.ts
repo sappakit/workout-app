@@ -1,4 +1,5 @@
 import { formatDuration } from "@/components/form/picker/duration-picker/utils";
+import { WorkoutSessionModel } from "@/types/workout/model/workout.types";
 
 export const SessionStatus = {
   TRAINING: "training",
@@ -30,14 +31,64 @@ export type WorkoutTimerRestAction = {
   onDecrease: (seconds?: number) => void;
 };
 
+export type WorkoutTimerStats = {
+  completedSets: number;
+  totalSets: number;
+  completedExercises: number;
+  totalExercises: number;
+  volume: number;
+};
+
+export function getWorkoutTimerStats(
+  session: WorkoutSessionModel,
+): WorkoutTimerStats {
+  const sessionExercises = session.sessionExercises ?? [];
+
+  const sets = sessionExercises.flatMap((exercise) => exercise.sets ?? []);
+  const completedSetsList = sets.filter((set) => !!set.completedAt);
+  const completedSets = completedSetsList.length;
+  const totalSets = sets.length;
+
+  const completedExercises = sessionExercises.filter(
+    (exercise) => !!exercise.completedAt,
+  ).length;
+
+  const totalExercises = sessionExercises.length;
+
+  const volume = completedSetsList.reduce((total, set) => {
+    const reps = set.reps ?? 0;
+    const weight = set.weight ?? 0;
+
+    return total + reps * weight;
+  }, 0);
+
+  return {
+    completedSets,
+    totalSets,
+    completedExercises,
+    totalExercises,
+    volume,
+  };
+}
+
+export const INITIAL_TIMER_STATS: WorkoutTimerStats = {
+  completedSets: 0,
+  totalSets: 0,
+  completedExercises: 0,
+  totalExercises: 0,
+  volume: 0,
+};
+
 export function getWorkoutTimerDisplay({
   isResting,
   isPaused,
   displaySeconds,
+  stats,
 }: {
   isResting: boolean;
   isPaused: boolean;
   displaySeconds: number;
+  stats: WorkoutTimerStats;
 }) {
   let status: SessionStatus;
 
@@ -58,15 +109,15 @@ export function getWorkoutTimerDisplay({
     },
     sets: {
       label: "Sets",
-      value: "2 / 12",
+      value: `${stats.completedSets} / ${stats.totalSets}`,
     },
     exercises: {
       label: "Exercises",
-      value: "1 / 4",
+      value: `${stats.completedExercises} / ${stats.totalExercises}`,
     },
     volume: {
       label: "Volume",
-      value: "20 kg",
+      value: `${stats.volume} kg`,
     },
     status: {
       label: "Status",
@@ -76,10 +127,8 @@ export function getWorkoutTimerDisplay({
   };
 }
 
-type WorkoutTimerDisplay = ReturnType<typeof getWorkoutTimerDisplay>;
-
 export type WorkoutTimerDisplayProps = {
-  display: WorkoutTimerDisplay;
+  display: ReturnType<typeof getWorkoutTimerDisplay>;
   restAction: WorkoutTimerRestAction;
   finishAction: WorkoutTimerAction;
   discardAction: WorkoutTimerAction;

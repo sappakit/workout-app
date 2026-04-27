@@ -16,6 +16,10 @@ import { useMutation } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
 import { Alert, ImageBackground, StyleSheet, View } from "react-native";
+import {
+  getWorkoutTimerStats,
+  INITIAL_TIMER_STATS,
+} from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
 import WorkoutTimerBottomSheet from "../bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import {
   addSessionSet,
@@ -68,6 +72,11 @@ export function WorkoutInProgressContent({
 
   // Use storedSession as the single source of truth
   const exerciseItems = storedSession?.sessionExercises ?? [];
+
+  // Stats for bottom sheet timer
+  const timerStats = storedSession
+    ? getWorkoutTimerStats(storedSession)
+    : INITIAL_TIMER_STATS;
 
   /* Mutations */
   // Cancel workout
@@ -125,7 +134,7 @@ export function WorkoutInProgressContent({
   });
 
   /* Functions */
-  // Delete set
+  // Add set
   const handleAddSet = (exerciseClientId: string) => {
     updateSession((prev) => addSessionSet(prev, exerciseClientId));
   };
@@ -301,6 +310,7 @@ export function WorkoutInProgressContent({
       <WorkoutTimerBottomSheet
         startedAt={storedSession.startedAt ?? new Date()}
         remainingRestSeconds={restTimer.remainingSeconds}
+        stats={timerStats}
         restAction={{
           onSkip: restTimer.stop,
           onIncrease: restTimer.increase,
