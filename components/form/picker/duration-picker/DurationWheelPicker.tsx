@@ -2,8 +2,9 @@ import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import WheelPicker from "@quidone/react-native-wheel-picker";
 import { View } from "react-native";
+import { buildNumberData } from "./utils";
 
-type PickerItem = {
+export type PickerItem = {
   label: string;
   value: number;
 };
@@ -109,15 +110,4 @@ function DurationColumn({
       </View>
     </View>
   );
-}
-
-function buildNumberData(min: number, max: number): PickerItem[] {
-  return Array.from({ length: max - min + 1 }, (_, index) => {
-    const itemValue = min + index;
-
-    return {
-      label: String(itemValue),
-      value: itemValue,
-    };
-  });
 }

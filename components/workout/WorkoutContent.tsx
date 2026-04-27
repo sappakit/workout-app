@@ -9,8 +9,8 @@ import { useRouter } from "expo-router";
 import { Dumbbell, SquarePen } from "lucide-react-native";
 import { AppButton } from "../custom-ui/AppButton";
 import { PageLayout, PullToRefreshProps } from "../layout/PageLayout";
-import { WorkoutPlanCard } from "./WorkoutPlanCard";
-import { ExerciseCardReadonly } from "./exercise-card/ExerciseCardReadonly";
+import { WorkoutPlanCard } from "./ui/WorkoutPlanCard";
+import { ExerciseCardReadonly } from "./ui/exercise-card/ExerciseCardReadonly";
 
 interface WorkoutContentProps {
   data: WorkoutSchedule;

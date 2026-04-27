@@ -5,7 +5,7 @@ import { WeekCalendar } from "@/components/custom-ui/WeekCalendar";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
-import { ExerciseCardReadonly } from "@/components/workout/exercise-card/ExerciseCardReadonly";
+import { ExerciseCardReadonly } from "@/components/workout/ui/exercise-card/ExerciseCardReadonly";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { AuthStorage } from "@/lib/api";

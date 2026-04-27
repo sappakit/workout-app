@@ -1,3 +1,10 @@
+import { Separator } from "@/components/custom-ui/Separator";
+import {
+  DropdownItem,
+  MenuSectionLabel,
+  OptionsMenu,
+} from "@/components/options-menu/OptionsMenu";
+import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   calculateWorkoutCalories,
@@ -22,13 +29,6 @@ import {
 import { Fragment, useState } from "react";
 import { View } from "react-native";
 import { twMerge } from "tailwind-merge";
-import { Separator } from "../custom-ui/Separator";
-import {
-  DropdownItem,
-  MenuSectionLabel,
-  OptionsMenu,
-} from "../options-menu/OptionsMenu";
-import { ThemedText } from "../themed-text";
 
 type WorkoutPlanCardProps = {
   data: WorkoutResponse;

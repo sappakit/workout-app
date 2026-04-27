@@ -2,7 +2,7 @@ import { exerciseApi } from "@/app/api/exercise.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { ThemedText } from "@/components/themed-text";
-import { ExercisePickerCard } from "@/components/workout/exercise-card/ExercisePickerCard";
+import { ExercisePickerCard } from "@/components/workout/ui/exercise-card/ExercisePickerCard";
 import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { mapExerciseToCreateWorkoutExerciseFormItem } from "@/lib/workout/mappers";

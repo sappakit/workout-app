@@ -37,7 +37,7 @@ import FormNumberInput from "../form/FormNumberInput";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
-import { ExerciseCardEdit } from "../workout/exercise-card/ExerciseCardEdit";
+import { ExerciseCardEdit } from "../workout/ui/exercise-card/ExerciseCardEdit";
 import { ExerciseListMenu } from "./ExerciseListMenu";
 
 interface EditPlanContentProps {
