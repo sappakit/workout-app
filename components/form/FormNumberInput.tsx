@@ -1,7 +1,7 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { Minus, Plus } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleProp, TextInput, View, ViewStyle } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { Separator } from "../custom-ui/Separator";
@@ -15,9 +15,12 @@ export interface FormNumberInputProps {
   step?: number;
   error?: boolean;
   className?: string;
+  inputClassName?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
   allowDecimal?: boolean;
+  showStepper?: boolean;
+  centerText?: boolean;
 }
 
 export default function FormNumberInput({
@@ -29,21 +32,21 @@ export default function FormNumberInput({
   step = 1,
   error,
   className,
+  inputClassName,
   style,
   disabled,
   allowDecimal = false,
+  showStepper = true,
+  centerText = false,
 }: FormNumberInputProps) {
   const { colors } = useAppTheme();
+
+  const inputRef = useRef<TextInput>(null);
+
   const [inputValue, setInputValue] = useState(
     value != null ? String(value) : "",
   );
   const [isFocused, setIsFocused] = useState(false);
-
-  const borderColor = error
-    ? colors.app.error || "red"
-    : colors.app.borderPrimary;
-
-  const keyboardType = allowDecimal ? "decimal-pad" : "numeric";
 
   useEffect(() => {
     if (!isFocused) {
@@ -57,26 +60,45 @@ export default function FormNumberInput({
     return num;
   };
 
-  const handleTextChange = (text: string) => {
+  const sanitizeInput = (text: string) => {
     let clean = allowDecimal
       ? text.replace(/[^0-9.]/g, "")
       : text.replace(/[^0-9]/g, "");
 
     if (allowDecimal) {
       const parts = clean.split(".");
+
       if (parts.length > 2) {
         clean = `${parts[0]}.${parts.slice(1).join("")}`;
       }
     }
 
+    return clean;
+  };
+
+  const adjustValue = (change: number) => {
+    if (disabled) return;
+
+    const current = value ?? 0;
+    const newValue = clamp(current + change);
+
+    setInputValue(String(newValue));
+    onChange?.(newValue);
+  };
+
+  const handleTextChange = (text: string) => {
+    const clean = sanitizeInput(text);
+
     setInputValue(clean);
 
-    if (clean === "") {
+    if (clean === "" || clean === ".") {
       onChange?.(null);
       return;
     }
 
-    const num = Number(clean);
+    // Keep temporary decimal input visible while typing.
+    const num = allowDecimal ? Number(clean) : parseInt(clean, 10);
+
     if (!Number.isNaN(num)) {
       onChange?.(clamp(num));
     }
@@ -91,62 +113,82 @@ export default function FormNumberInput({
       return;
     }
 
-    if (inputValue.endsWith(".")) {
-      const normalized = String(value ?? "");
-      setInputValue(normalized);
+    const num = allowDecimal ? Number(inputValue) : parseInt(inputValue, 10);
+
+    if (Number.isNaN(num)) {
+      setInputValue("");
+      onChange?.(null);
+      return;
     }
-  };
 
-  const adjustValue = (change: number) => {
-    if (disabled) return;
+    const clampedValue = clamp(num);
 
-    const current = value ?? 0;
-    const newValue = clamp(current + change);
-
-    setInputValue(String(newValue));
-    onChange?.(newValue);
+    setInputValue(String(clampedValue));
+    onChange?.(clampedValue);
   };
 
   return (
-    <View
+    <Pressable
       className={twMerge(
-        clsx("h-12 flex-row items-center rounded-lg border px-2", className),
+        clsx(
+          "h-12 flex-row items-center justify-center rounded-lg border px-4",
+          className,
+        ),
       )}
       style={[
         {
           backgroundColor: colors.app.cardSecondary,
-          borderColor,
+          borderColor: error ? colors.app.error : colors.app.borderPrimary,
           opacity: disabled ? 0.5 : 1,
         },
         style,
       ]}
+      onPress={() => {
+        // focus on TextInput when click on wrapper
+        if (!disabled) {
+          inputRef.current?.focus();
+        }
+      }}
     >
       <TextInput
-        value={inputValue}
-        placeholder={placeholder}
-        keyboardType={keyboardType}
-        onChangeText={handleTextChange}
-        onFocus={() => setIsFocused(true)}
-        onBlur={handleBlur}
-        className="min-w-0 flex-1 px-2"
-        placeholderTextColor={colors.app.textPrimary}
+        ref={inputRef}
+        className={twMerge(
+          clsx("min-w-0", !centerText && "flex-1", inputClassName),
+        )}
         style={{
           color: colors.app.textAccent,
         }}
+        value={inputValue}
+        placeholder={placeholder}
+        keyboardType={allowDecimal ? "decimal-pad" : "number-pad"}
+        onChangeText={handleTextChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleBlur}
+        placeholderTextColor={colors.app.textPrimary}
         editable={!disabled}
       />
 
-      <View className="flex-row items-center gap-2">
-        <Pressable onPress={() => adjustValue(-step)} className="p-1">
-          <Minus size={18} color={colors.app.textAccent} />
-        </Pressable>
+      {showStepper && (
+        <View className="flex-row items-center gap-2">
+          <Pressable
+            onPress={() => adjustValue(-step)}
+            className="p-1"
+            disabled={disabled}
+          >
+            <Minus size={18} color={colors.app.textAccent} />
+          </Pressable>
 
-        <Separator className="h-6" />
+          <Separator className="h-6" />
 
-        <Pressable onPress={() => adjustValue(+step)} className="p-1">
-          <Plus size={18} color={colors.app.textAccent} />
-        </Pressable>
-      </View>
-    </View>
+          <Pressable
+            onPress={() => adjustValue(+step)}
+            className="p-1"
+            disabled={disabled}
+          >
+            <Plus size={18} color={colors.app.textAccent} />
+          </Pressable>
+        </View>
+      )}
+    </Pressable>
   );
 }

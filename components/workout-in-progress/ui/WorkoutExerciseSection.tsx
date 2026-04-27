@@ -22,7 +22,7 @@ interface WorkoutExerciseSectionProps {
   onChangeSetValue: (
     setClientId: string,
     field: "weight" | "reps",
-    value: string,
+    value: number | null,
   ) => void;
   onChangeRestTime: (value: number) => void;
   onPressMore?: () => void;

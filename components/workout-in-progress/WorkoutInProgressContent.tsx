@@ -189,12 +189,11 @@ export function WorkoutInProgressContent({
     exerciseClientId: string,
     setClientId: string,
     field: "weight" | "reps",
-    value: string,
+    value: number | null,
   ) => {
-    // TODO: non number charater cause NaN
     updateSessionSet(exerciseClientId, setClientId, (set) => ({
       ...set,
-      [field]: value === "" ? null : Number(value),
+      [field]: value,
     }));
   };
 

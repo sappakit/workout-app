@@ -1,4 +1,4 @@
-import FormTextInput from "@/components/form/FormTextInput";
+import FormNumberInput from "@/components/form/FormNumberInput";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
@@ -45,8 +45,8 @@ interface WorkoutSetRowProps {
   item: WorkoutSessionExerciseModel["sets"][number];
   onDelete: () => void;
   onToggleComplete: () => void;
-  onChangeWeight: (value: string) => void;
-  onChangeReps: (value: string) => void;
+  onChangeWeight: (value: number | null) => void;
+  onChangeReps: (value: number | null) => void;
 }
 
 export function WorkoutSetRow({
@@ -78,22 +78,25 @@ export function WorkoutSetRow({
         </View>
 
         <View className="flex-1">
-          <FormTextInput
-            value={item.weight?.toString() ?? ""}
-            onChangeText={onChangeWeight}
-            keyboardType="numeric"
+          <FormNumberInput
+            allowDecimal
+            centerText
+            value={item.weight}
+            onChange={onChangeWeight}
             placeholder="-"
-            inputClassName="text-center"
+            showStepper={false}
+            min={0}
           />
         </View>
 
         <View className="flex-1">
-          <FormTextInput
-            value={item.reps?.toString() ?? ""}
-            onChangeText={onChangeReps}
-            keyboardType="numeric"
+          <FormNumberInput
+            centerText
+            value={item.reps}
+            onChange={onChangeReps}
             placeholder="-"
-            inputClassName="text-center"
+            showStepper={false}
+            min={0}
           />
         </View>
 
