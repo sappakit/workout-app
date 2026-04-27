@@ -13,7 +13,8 @@
 
 - Three column input (Estimated duration) too small on ios making it show as '...'
 - Allow duplicate exercise in one workout
-- Right now, star/cancel session is getting session from today schedule only - so user can't choose other program to work
+- session pause just pause on the frontend but session time still calculate from startedAt
+- make WorkoutTimerBottomSheet show on every page
 
 # OPTIONAL
 

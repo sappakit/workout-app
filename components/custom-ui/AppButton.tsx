@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { LucideIcon } from "lucide-react-native";
 import {
   ActivityIndicator,
+  ColorValue,
   StyleProp,
   TextStyle,
   TouchableOpacity,
@@ -12,17 +13,19 @@ import {
 import { twMerge } from "tailwind-merge";
 import { ThemedText } from "../themed-text";
 
-type ButtonVariant = "primary" | "secondary" | "tertiary" | "option";
+type ButtonVariant = "primary" | "secondary" | "tertiary" | "option" | "ghost";
 type ButtonVariantStyles = {
-  container: ViewStyle;
-  text: TextStyle;
+  container?: ViewStyle;
+  containerClassName?: string;
+  text?: TextStyle;
+  textClassName?: string;
 };
 
 interface BaseButtonProps extends TouchableOpacityProps {
   variant?: ButtonVariant;
   loading?: boolean;
   iconSize?: number;
-  iconColor?: string;
+  iconColor?: ColorValue;
   iconStyle?: StyleProp<ViewStyle>;
   className?: string;
   textClassName?: string;
@@ -57,6 +60,7 @@ export function AppButton({
   // Variant Styles
   const variantStyles: Record<ButtonVariant, ButtonVariantStyles> = {
     primary: {
+      textClassName: "font-medium",
       container: {
         backgroundColor: colors.app.brand,
       },
@@ -65,20 +69,20 @@ export function AppButton({
       },
     },
     secondary: {
+      containerClassName: "border",
       container: {
         backgroundColor: colors.app.cardSecondary,
         borderColor: colors.app.borderSecondary,
-        borderWidth: 1,
       },
       text: {
         color: colors.app.textAccent,
       },
     },
     tertiary: {
+      containerClassName: "border",
       container: {
         backgroundColor: colors.app.background,
         borderColor: colors.app.textAccent,
-        borderWidth: 1,
       },
       text: {
         color: colors.app.textAccent,
@@ -88,6 +92,11 @@ export function AppButton({
       container: {
         backgroundColor: colors.app.cardSecondary,
       },
+      text: {
+        color: colors.app.textPrimary,
+      },
+    },
+    ghost: {
       text: {
         color: colors.app.textPrimary,
       },
@@ -104,6 +113,7 @@ export function AppButton({
       className={twMerge(
         clsx(
           "h-12 flex-row items-center justify-center rounded-full opacity-100",
+          currentVariant.containerClassName,
           className,
         ),
       )}
@@ -114,20 +124,22 @@ export function AppButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={currentVariant.text.color} />
+        <ActivityIndicator color={iconColor ?? currentVariant?.text?.color} />
       ) : (
         <>
           {Icon && (
             <Icon
               size={iconSize}
-              color={iconColor ?? currentVariant.text.color}
+              color={iconColor ?? currentVariant?.text?.color}
               style={[title && { marginRight: 8 }, iconStyle]}
             />
           )}
 
           {title && (
             <ThemedText
-              className={textClassName}
+              className={twMerge(
+                clsx(currentVariant.textClassName, textClassName),
+              )}
               style={[currentVariant.text, textStyle]}
             >
               {title}

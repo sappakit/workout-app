@@ -2,6 +2,7 @@ import { workoutApi } from "@/app/api/workout.api";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useCountdownTimer } from "@/hooks/useCountdownTimer";
 import { api } from "@/lib/api";
 import { createClientId } from "@/lib/id/utils";
 import { useInvalidateQueries } from "@/lib/query/utils";
@@ -26,7 +27,6 @@ import {
   MoreVertical,
   Plus,
   Trash2,
-  X,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -40,7 +40,6 @@ import {
   View,
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-import { AppButton } from "../custom-ui/AppButton";
 import FormTextInput from "../form/FormTextInput";
 import WorkoutTimerBottomSheet from "../workout/WorkoutTimerBottomSheet";
 import { DurationBottomSheetPicker } from "./duration-picker/DurationPickerSheet";
@@ -56,8 +55,10 @@ export function WorkoutInProgressContent({
   session,
 }: WorkoutInProgressContentProps) {
   const { colors } = useAppTheme();
-  const invalidateQueries = useInvalidateQueries();
+
   const toast = useAppToast();
+  const invalidateQueries = useInvalidateQueries();
+  const restTimer = useCountdownTimer();
 
   // Workout session store
   const hydrated = useWorkoutSessionStore((state) => state.hydrated);
@@ -97,9 +98,10 @@ export function WorkoutInProgressContent({
       return api.post(workoutApi.cancelSession(storedSession.id));
     },
     onSuccess: async () => {
-      clearSession();
-
       await invalidateQueries([workoutQueryKeys.current]);
+
+      restTimer.stop();
+      clearSession();
 
       toast.success({
         title: "Workout cancelled",
@@ -125,6 +127,9 @@ export function WorkoutInProgressContent({
     },
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current]);
+
+      restTimer.stop();
+      clearSession();
 
       toast.success({
         title: "Workout completed",
@@ -197,14 +202,24 @@ export function WorkoutInProgressContent({
     exerciseClientId: string,
     setClientId: string,
   ) => {
-    const now = new Date().toISOString();
+    const completedAt = new Date().toISOString();
+
+    const targetExercise = storedSession?.sessionExercises.find(
+      (exercise) => exercise.clientId === exerciseClientId,
+    );
+
+    const targetSet = targetExercise?.sets.find(
+      (set) => set.clientId === setClientId,
+    );
+
+    const isCompleting = !targetSet?.completedAt;
 
     updateSessionExercise(exerciseClientId, (exercise) => {
       const updatedSets = exercise.sets.map((set) =>
         set.clientId === setClientId
           ? {
               ...set,
-              completedAt: set.completedAt ? null : now,
+              completedAt: set.completedAt ? null : completedAt,
             }
           : set,
       );
@@ -214,6 +229,10 @@ export function WorkoutInProgressContent({
         sets: updatedSets,
       });
     });
+
+    if (isCompleting) {
+      restTimer.start(targetExercise?.plannedRestTime ?? 0);
+    }
   };
 
   // Update set weight/reps
@@ -230,6 +249,7 @@ export function WorkoutInProgressContent({
     }));
   };
 
+  // Update exercise rest time
   const handleUpdateExerciseRestTime = (
     exerciseClientId: string,
     value: number,
@@ -360,29 +380,26 @@ export function WorkoutInProgressContent({
               }
             />
           ))}
-
-          {/* TODO: remove */}
-          <AppButton
-            title="Save Progress"
-            variant="primary"
-            textClassName="font-medium"
-            onPress={handleFinishWorkoutSession}
-            loading={finishWorkoutSessionMutation.isPending}
-          />
-
-          {/* TODO: remove */}
-          <AppButton
-            title="Cancel Workout"
-            variant="secondary"
-            icon={X}
-            textClassName="font-medium"
-            onPress={handleCancelWorkout}
-            loading={cancelWorkoutMutation.isPending}
-          />
         </View>
       </PageLayout>
 
-      <WorkoutTimerBottomSheet />
+      <WorkoutTimerBottomSheet
+        startedAt={storedSession.startedAt ?? new Date()}
+        remainingRestSeconds={restTimer.remainingSeconds}
+        restAction={{
+          onSkip: restTimer.stop,
+          onIncrease: restTimer.increase,
+          onDecrease: restTimer.decrease,
+        }}
+        finishAction={{
+          onPress: handleFinishWorkoutSession,
+          loading: finishWorkoutSessionMutation.isPending,
+        }}
+        discardAction={{
+          onPress: handleCancelWorkout,
+          loading: cancelWorkoutMutation.isPending,
+        }}
+      />
     </>
   );
 }
@@ -448,7 +465,7 @@ function WorkoutExerciseSection({
         </View>
 
         {/* Button */}
-        <View className="ml-auto flex-row items-center gap-3 self-start p-1">
+        <View className="ml-auto flex-row items-center gap-3">
           <TouchableOpacity onPress={onPressMore}>
             <MoreVertical size={18} color={colors.app.textPrimary} />
           </TouchableOpacity>

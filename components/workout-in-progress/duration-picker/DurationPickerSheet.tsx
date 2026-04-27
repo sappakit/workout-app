@@ -86,7 +86,7 @@ export function DurationBottomSheetPicker({
         <Timer size={20} color={colors.app.brand} />
 
         <ThemedText type="default" variant="brand">
-          {formatRestTime(value)}
+          {value ? `Rest: ${formatDuration(value)}` : `No rest`}
         </ThemedText>
       </Pressable>
 
@@ -157,9 +157,7 @@ function durationToSeconds(value: DurationValue) {
   return hmsToSeconds(value.hours, value.minutes, value.seconds) ?? 0;
 }
 
-function formatRestTime(totalSeconds: number) {
-  if (totalSeconds <= 0) return "No rest";
-
+export function formatDuration(totalSeconds: number) {
   const { hours, minutes, seconds } = secondsToDuration(totalSeconds);
 
   const paddedMinutes = minutes.toString().padStart(2, "0");
@@ -167,9 +165,9 @@ function formatRestTime(totalSeconds: number) {
 
   // H:MM:SS
   if (hours > 0) {
-    return `Rest ${hours}:${paddedMinutes}:${paddedSeconds}`;
+    return `${hours}:${paddedMinutes}:${paddedSeconds}`;
   }
 
   // M:SS
-  return `Rest ${minutes}:${paddedSeconds}`;
+  return `${minutes}:${paddedSeconds}`;
 }
