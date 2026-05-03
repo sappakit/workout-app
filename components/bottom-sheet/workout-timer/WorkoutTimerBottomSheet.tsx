@@ -12,19 +12,25 @@ import {
 import { WorkoutTimerSheetContent } from "./ui/WorkoutTimerSheetContent";
 
 type WorkoutTimerBottomSheetProps = {
-  startedAt: string | Date;
+  startedAt: string | Date | null;
+  pausedAt: string | Date | null;
+  totalPausedDuration: number;
   remainingRestSeconds?: number;
   stats: WorkoutTimerStats;
   restAction: WorkoutTimerRestAction;
+  pauseAction: WorkoutTimerPauseAction;
   finishAction: WorkoutTimerAction;
   discardAction: WorkoutTimerAction;
 };
 
 export default function WorkoutTimerBottomSheet({
   startedAt,
+  pausedAt,
+  totalPausedDuration,
   remainingRestSeconds = 0,
   stats,
   restAction,
+  pauseAction,
   finishAction,
   discardAction,
 }: WorkoutTimerBottomSheetProps) {
@@ -36,12 +42,11 @@ export default function WorkoutTimerBottomSheet({
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const sessionTimer = usePausableElapsedSeconds(startedAt);
-
-  const pauseAction: WorkoutTimerPauseAction = {
-    isPaused: sessionTimer.isPaused,
-    onPress: sessionTimer.togglePause,
-  };
+  const sessionTimer = usePausableElapsedSeconds({
+    startedAt,
+    pausedAt,
+    totalPausedDuration,
+  });
 
   return (
     <BottomSheet
@@ -73,7 +78,10 @@ export default function WorkoutTimerBottomSheet({
         restAction={restAction}
         finishAction={finishAction}
         discardAction={discardAction}
-        pauseAction={pauseAction}
+        pauseAction={{
+          ...pauseAction,
+          isPaused: sessionTimer.isPaused,
+        }}
       />
     </BottomSheet>
   );

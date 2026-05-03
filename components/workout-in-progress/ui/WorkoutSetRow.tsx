@@ -80,7 +80,6 @@ export function WorkoutSetRow({
         <View className="flex-1">
           <FormNumberInput
             allowDecimal
-            centerText
             value={item.weight}
             onChange={onChangeWeight}
             placeholder="-"
@@ -91,7 +90,6 @@ export function WorkoutSetRow({
 
         <View className="flex-1">
           <FormNumberInput
-            centerText
             value={item.reps}
             onChange={onChangeReps}
             placeholder="-"

@@ -208,7 +208,7 @@ export function WorkoutInProgressContent({
     }));
   };
 
-  // Cancel workout
+  // Cancel session
   const handleCancelWorkout = () => {
     Alert.alert(
       "Cancel workout?",
@@ -227,11 +227,38 @@ export function WorkoutInProgressContent({
     );
   };
 
-  // finish workout session
-  const handleFinishWorkoutSession = async () => {
+  // finish session
+  const handleFinishWorkoutSession = () => {
     if (!storedSession) return;
 
-    await finishWorkoutSessionMutation.mutateAsync();
+    finishWorkoutSessionMutation.mutate();
+  };
+
+  // Pause/resume session
+  const handleTogglePauseWorkout = () => {
+    updateSession((prev) => {
+      const now = new Date();
+
+      // Resume
+      if (prev.pausedAt) {
+        const pausedSeconds = Math.floor(
+          (now.getTime() - new Date(prev.pausedAt).getTime()) / 1000,
+        );
+
+        return {
+          ...prev,
+          pausedAt: null,
+          totalPausedDuration:
+            prev.totalPausedDuration + Math.max(0, pausedSeconds),
+        };
+      }
+
+      // Pause
+      return {
+        ...prev,
+        pausedAt: now.toISOString(),
+      };
+    });
   };
 
   // TODO: add loading
@@ -307,13 +334,19 @@ export function WorkoutInProgressContent({
       </PageLayout>
 
       <WorkoutTimerBottomSheet
-        startedAt={storedSession.startedAt ?? new Date()}
+        startedAt={storedSession.startedAt}
+        pausedAt={storedSession.pausedAt}
+        totalPausedDuration={storedSession.totalPausedDuration}
         remainingRestSeconds={restTimer.remainingSeconds}
         stats={timerStats}
         restAction={{
           onSkip: restTimer.stop,
           onIncrease: restTimer.increase,
           onDecrease: restTimer.decrease,
+        }}
+        pauseAction={{
+          onPress: handleTogglePauseWorkout,
+          isPaused: storedSession.pausedAt != null,
         }}
         finishAction={{
           onPress: handleFinishWorkoutSession,

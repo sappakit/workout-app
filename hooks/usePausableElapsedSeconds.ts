@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 
-export function usePausableElapsedSeconds(startedAt: string | Date) {
+type UsePausableElapsedSecondsParams = {
+  startedAt: string | Date | null;
+  pausedAt: string | Date | null;
+  totalPausedDuration: number;
+};
+
+export function usePausableElapsedSeconds({
+  startedAt,
+  pausedAt,
+  totalPausedDuration,
+}: UsePausableElapsedSecondsParams) {
   const [now, setNow] = useState(Date.now());
-  const [isPaused, setIsPaused] = useState(false);
-  const [pausedAt, setPausedAt] = useState<number | null>(null);
-  const [totalPausedMs, setTotalPausedMs] = useState(0);
+
+  const isPaused = pausedAt != null;
 
   useEffect(() => {
     if (isPaused) return;
@@ -18,74 +27,53 @@ export function usePausableElapsedSeconds(startedAt: string | Date) {
 
   const elapsedSeconds = getPausableElapsedSeconds({
     startedAt,
-    now,
-    totalPausedMs,
     pausedAt,
-    isPaused,
+    // avoid stale 'now' on the first resumed render
+    now: isPaused ? now : Date.now(),
+    totalPausedDuration,
   });
-
-  const pause = () => {
-    if (isPaused) return;
-
-    const currentTime = Date.now();
-    setNow(currentTime);
-    setPausedAt(currentTime);
-    setIsPaused(true);
-  };
-
-  const resume = () => {
-    if (!isPaused || pausedAt == null) return;
-
-    const currentTime = Date.now();
-
-    setTotalPausedMs((prev) => prev + (currentTime - pausedAt));
-    setPausedAt(null);
-    setNow(currentTime);
-    setIsPaused(false);
-  };
-
-  const togglePause = () => {
-    if (isPaused) {
-      resume();
-      return;
-    }
-
-    pause();
-  };
 
   return {
     elapsedSeconds,
     isPaused,
-    pause,
-    resume,
-    togglePause,
   };
 }
 
-function getPausableElapsedSeconds({
-  startedAt,
-  now,
-  totalPausedMs,
-  pausedAt,
-  isPaused,
-}: {
-  startedAt: string | Date;
+type GetPausableElapsedSecondsParams = {
+  startedAt: string | Date | null;
+  pausedAt: string | Date | null;
   now: number;
-  totalPausedMs: number;
-  pausedAt: number | null;
-  isPaused: boolean;
-}) {
-  const startedAtTime =
-    typeof startedAt === "string"
-      ? new Date(startedAt).getTime()
-      : startedAt.getTime();
+  totalPausedDuration: number;
+};
 
-  if (Number.isNaN(startedAtTime)) return 0;
+export function getPausableElapsedSeconds({
+  startedAt,
+  pausedAt,
+  now,
+  totalPausedDuration,
+}: GetPausableElapsedSecondsParams) {
+  const startedAtTime = getTime(startedAt);
 
-  const currentTime = isPaused && pausedAt != null ? pausedAt : now;
+  if (!startedAtTime) return 0;
 
-  return Math.max(
-    0,
-    Math.floor((currentTime - startedAtTime - totalPausedMs) / 1000),
-  );
+  const pausedAtTime = getTime(pausedAt);
+
+  // If paused -> freeze time at pausedAt
+  // If active -> use current time (now)
+  const currentTime = pausedAtTime ?? now;
+
+  // Calculate elapsed seconds
+  const elapsedMs = currentTime - startedAtTime;
+  const elapsedSeconds = Math.floor(elapsedMs / 1000) - totalPausedDuration;
+
+  return Math.max(0, elapsedSeconds);
+}
+
+function getTime(value: string | Date | null) {
+  if (!value) return null;
+
+  const time =
+    typeof value === "string" ? new Date(value).getTime() : value.getTime();
+
+  return Number.isNaN(time) ? null : time;
 }

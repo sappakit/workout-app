@@ -13,15 +13,14 @@ interface FinishWorkoutSessionExercisePayload {
   id: number | null;
   exerciseId: number;
   orderIndex: number;
-  startedAt: string | null;
   completedAt: string | null;
-  isSkipped: boolean;
   sets: FinishWorkoutSessionSetPayload[];
 }
 
 export interface FinishWorkoutSessionPayload {
-  endedAt: string | null;
+  endedAt: string;
   totalDuration: number | null;
+  totalPausedDuration: number;
   caloriesBurned: number | null;
   sessionExercises: FinishWorkoutSessionExercisePayload[];
 }

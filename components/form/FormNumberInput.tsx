@@ -1,7 +1,7 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { Minus, Plus } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleProp, TextInput, View, ViewStyle } from "react-native";
 import { twMerge } from "tailwind-merge";
 import { Separator } from "../custom-ui/Separator";
@@ -20,7 +20,6 @@ export interface FormNumberInputProps {
   disabled?: boolean;
   allowDecimal?: boolean;
   showStepper?: boolean;
-  centerText?: boolean;
 }
 
 export default function FormNumberInput({
@@ -37,11 +36,8 @@ export default function FormNumberInput({
   disabled,
   allowDecimal = false,
   showStepper = true,
-  centerText = false,
 }: FormNumberInputProps) {
   const { colors } = useAppTheme();
-
-  const inputRef = useRef<TextInput>(null);
 
   const [inputValue, setInputValue] = useState(
     value != null ? String(value) : "",
@@ -128,10 +124,10 @@ export default function FormNumberInput({
   };
 
   return (
-    <Pressable
+    <View
       className={twMerge(
         clsx(
-          "h-12 flex-row items-center justify-center rounded-lg border px-4",
+          "h-12 flex-row items-center justify-center rounded-lg border px-2",
           className,
         ),
       )}
@@ -143,18 +139,9 @@ export default function FormNumberInput({
         },
         style,
       ]}
-      onPress={() => {
-        // focus on TextInput when click on wrapper
-        if (!disabled) {
-          inputRef.current?.focus();
-        }
-      }}
     >
       <TextInput
-        ref={inputRef}
-        className={twMerge(
-          clsx("min-w-0", !centerText && "flex-1", inputClassName),
-        )}
+        className={twMerge(clsx("min-w-0 flex-1 text-center", inputClassName))}
         style={{
           color: colors.app.textAccent,
         }}
@@ -166,6 +153,8 @@ export default function FormNumberInput({
         onBlur={handleBlur}
         placeholderTextColor={colors.app.textPrimary}
         editable={!disabled}
+        multiline={true}
+        numberOfLines={1}
       />
 
       {showStepper && (
@@ -189,6 +178,6 @@ export default function FormNumberInput({
           </Pressable>
         </View>
       )}
-    </Pressable>
+    </View>
   );
 }

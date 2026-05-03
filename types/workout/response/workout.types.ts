@@ -78,9 +78,7 @@ export interface WorkoutSessionExerciseSet {
 export interface WorkoutSessionExercise extends PlannedWorkoutExerciseConfig {
   id: number;
   orderIndex: number;
-  startedAt: string | null;
   completedAt: string | null;
-  isSkipped: boolean;
   exercise: Exercise;
   sets: WorkoutSessionExerciseSet[];
 }
@@ -91,6 +89,7 @@ export interface WorkoutSession {
   startedAt: string | null;
   pausedAt: string | null;
   endedAt: string | null;
+  totalPausedDuration: number;
   totalDuration: number | null;
   caloriesBurned: number | null;
   workout: WorkoutResponse;
