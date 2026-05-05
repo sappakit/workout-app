@@ -1,6 +1,6 @@
 import { api, AuthStorage } from "@/lib/api";
 import { SignInForm } from "@/schemas/auth.schema";
-import { SignUpRequest, User } from "@/types/auth.types";
+import { SignUpRequest, UserAuth } from "@/types/auth.types";
 import { useRouter } from "expo-router";
 import {
   createContext,
@@ -14,12 +14,12 @@ import {
 type AuthResponse = {
   accessToken: string;
   refreshToken: string;
-  user: User;
+  user: UserAuth;
 };
 
 type AuthContextType = {
   loading: boolean;
-  user: User | null;
+  user: UserAuth | null;
   isAuthenticated: boolean;
   signUp: (values: SignUpRequest) => Promise<void>;
   signIn: (values: SignInForm) => Promise<void>;
@@ -31,7 +31,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserAuth | null>(null);
 
   const router = useRouter();
 
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Token exists -> get user from backend
         const { data } = await api.get("/auth/me");
-        setUser(data as User);
+        setUser(data as UserAuth);
       } catch {
         setUser(null);
         await AuthStorage.clearTokens();
@@ -96,8 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Re-fetch user
   async function loadUser() {
-    const { data } = await api.get("/auth/me");
-    setUser(data as User);
+    const { data } = await api.get<UserAuth>("/auth/me");
+    setUser(data);
   }
 
   const value = useMemo(

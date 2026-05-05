@@ -6,7 +6,6 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
 import { ExerciseCardReadonly } from "@/components/workout/ui/exercise-card/ExerciseCardReadonly";
-import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { AuthStorage } from "@/lib/api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
@@ -21,7 +20,6 @@ import { workoutApi } from "../api/workout.api";
 
 export default function HomeScreen() {
   const { colors } = useAppTheme();
-  const { signOut, loading, user } = useAuth();
 
   const invalidateQueries = useInvalidateQueries();
 
@@ -50,15 +48,6 @@ export default function HomeScreen() {
       }}
       pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
     >
-      {/* TODO: remove */}
-      <AppButton
-        title="Log out"
-        variant="primary"
-        textClassName="font-medium"
-        onPress={signOut}
-        className="mb-4"
-      />
-
       {/* TODO: remove */}
       <AppButton
         title="Toast"

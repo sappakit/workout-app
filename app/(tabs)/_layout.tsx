@@ -1,7 +1,7 @@
 import { HapticTab } from "@/components/haptic-tab";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Tabs } from "expo-router";
-import { Dumbbell, Home } from "lucide-react-native";
+import { Dumbbell, Home, User } from "lucide-react-native";
 import React from "react";
 
 export default function TabLayout() {
@@ -48,6 +48,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Dumbbell color={color} size={size} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
       />
     </Tabs>

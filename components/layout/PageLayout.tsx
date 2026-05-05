@@ -34,7 +34,7 @@ export function PageLayout({
   scrollable = true,
   className,
   topInset = 12,
-  bottomInset = 12,
+  bottomInset = 32,
   backgroundColor,
   containerStyle,
   showsVerticalScrollIndicator = false,

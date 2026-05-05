@@ -11,7 +11,7 @@ type Role = {
   naame: string;
 };
 
-export type User = {
+export type UserAuth = {
   id: number;
   username: string;
   email: string;
