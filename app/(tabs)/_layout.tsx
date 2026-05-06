@@ -1,7 +1,12 @@
 import { HapticTab } from "@/components/haptic-tab";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Tabs } from "expo-router";
-import { Dumbbell, Home, User } from "lucide-react-native";
+import {
+  ChartNoAxesColumnIncreasing,
+  Dumbbell,
+  Home,
+  User,
+} from "lucide-react-native";
 import React from "react";
 
 export default function TabLayout() {
@@ -47,6 +52,15 @@ export default function TabLayout() {
           title: "Workout",
           tabBarIcon: ({ color, size }) => (
             <Dumbbell color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: "Progress",
+          tabBarIcon: ({ color, size }) => (
+            <ChartNoAxesColumnIncreasing color={color} size={size} />
           ),
         }}
       />

@@ -6,6 +6,7 @@ export const workoutApi = {
   getSchedule: () => `${BASE}/schedule`,
   getTypes: () => `${BASE}/types`,
   getCurrent: () => `${BASE}/current`,
+  getSessionHistory: () => `${BASE}/sessions/history`,
 
   // Create
   startSession: (workoutId: string | number) =>
