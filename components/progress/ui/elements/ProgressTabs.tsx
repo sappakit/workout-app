@@ -21,7 +21,7 @@ export function ProgressTabs({ activeTab, onChangeTab }: ProgressTabsProps) {
     <View
       className="flex-row overflow-hidden rounded-xl border"
       style={{
-        backgroundColor: colors.app.cardPrimary,
+        backgroundColor: colors.app.cardSecondary,
         borderColor: colors.app.borderPrimary,
       }}
     >

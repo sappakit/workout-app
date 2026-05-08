@@ -1,6 +1,7 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
+import { ReactNode } from "react";
 import { View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
 import { ThemeToggle } from "../custom-ui/ThemeToggle";
@@ -23,7 +24,11 @@ type TitleHeaderProps = {
 
 export type PageHeaderProps = HomeHeaderProps | TitleHeaderProps;
 
-export default function PageHeader(props: PageHeaderProps) {
+type PageHeaderRootProps = PageHeaderProps & {
+  headerBottom?: ReactNode;
+};
+
+export default function PageHeader(props: PageHeaderRootProps) {
   const { colors } = useAppTheme();
   const router = useRouter();
 
@@ -32,24 +37,30 @@ export default function PageHeader(props: PageHeaderProps) {
 
   return (
     <View
-      className="relative z-50 h-20 flex-row items-center justify-between px-4"
+      className="relative z-50"
       style={{
         backgroundColor: colors.app.pageHeaderBackground,
         boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.05)",
       }}
     >
-      {props.variant === "title" && props.showBackButton && (
-        <AppButton
-          variant="option"
-          icon={ArrowLeft}
-          className="z-10 h-10 w-10"
-          onPress={handleBackPress}
-        />
-      )}
+      <View className="h-16 flex-row items-center justify-between px-4">
+        {props.variant === "title" && props.showBackButton && (
+          <AppButton
+            variant="option"
+            icon={ArrowLeft}
+            className="z-10 h-10 w-10"
+            onPress={handleBackPress}
+          />
+        )}
 
-      <PageHeaderMain {...props} />
+        <PageHeaderMain {...props} />
 
-      <ThemeToggle className="z-10 ml-auto" />
+        <ThemeToggle className="z-10 ml-auto" />
+      </View>
+
+      {props.headerBottom ? (
+        <View className="px-4 pb-2">{props.headerBottom}</View>
+      ) : null}
     </View>
   );
 }

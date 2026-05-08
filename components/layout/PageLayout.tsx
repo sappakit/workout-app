@@ -16,12 +16,14 @@ type PageLayoutProps = {
   children: ReactNode;
   showHeader?: boolean;
   headerProps?: PageHeaderProps;
+  headerBottom?: ReactNode;
   scrollable?: boolean;
   className?: string;
   topInset?: number;
   bottomInset?: number;
   backgroundColor?: string;
   containerStyle?: ViewStyle;
+  disableContentPadding?: boolean;
   showsVerticalScrollIndicator?: boolean;
   stickyFooter?: { content: ReactNode; options?: { addBottomInset: boolean } };
   pullToRefresh?: PullToRefreshProps;
@@ -31,12 +33,14 @@ export function PageLayout({
   children,
   showHeader = true,
   headerProps,
+  headerBottom,
   scrollable = true,
   className,
   topInset = 12,
   bottomInset = 32,
   backgroundColor,
   containerStyle,
+  disableContentPadding = false,
   showsVerticalScrollIndicator = false,
   stickyFooter,
   pullToRefresh,
@@ -48,11 +52,13 @@ export function PageLayout({
 
   const bg = backgroundColor ?? colors.app.background;
   const paddingBottom = stickyFooter ? footerHeight : bottomInset;
-  const bodyContainerStyle = {
-    paddingTop: topInset,
-    paddingBottom: paddingBottom,
-    paddingHorizontal: 16,
-  };
+  const bodyContainerStyle = disableContentPadding
+    ? undefined
+    : {
+        paddingTop: topInset,
+        paddingBottom: paddingBottom,
+        paddingHorizontal: 16,
+      };
 
   // Pull to refresh
   const shouldEnablePullToRefresh =
@@ -75,7 +81,9 @@ export function PageLayout({
         paddingTop: insets.top,
       }}
     >
-      {showHeader && headerProps && <PageHeader {...headerProps} />}
+      {showHeader && headerProps && (
+        <PageHeader {...headerProps} headerBottom={headerBottom} />
+      )}
 
       {scrollable ? (
         <ScrollView

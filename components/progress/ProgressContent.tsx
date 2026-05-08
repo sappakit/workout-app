@@ -1,7 +1,9 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
+import clsx from "clsx";
 import React from "react";
 import { View } from "react-native";
+import { twMerge } from "tailwind-merge";
 import { ProgressMetricCardItem } from "./ui/elements/ProgressMetricCard";
 import { ProgressTabs } from "./ui/elements/ProgressTabs";
 import { ProgressHistorySection } from "./ui/sections/ProgressHistorySection";
@@ -19,6 +21,9 @@ export type ProgressHistoryState = {
   data: ProgressMetricCardItem[];
   isLoading: boolean;
   isError: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
+  onLoadMore: () => void;
 };
 
 interface ProgressContentProps {
@@ -34,20 +39,30 @@ export default function ProgressContent({
   overviewState,
   historyState,
 }: ProgressContentProps) {
+  const isHistoryTab = activeTab === "history";
+
   return (
     <PageLayout
+      scrollable={!isHistoryTab}
+      disableContentPadding={isHistoryTab}
       headerProps={{
         variant: "title",
         title: "Progress",
       }}
-    >
-      <View className="gap-3">
+      headerBottom={
         <ProgressTabs activeTab={activeTab} onChangeTab={onChangeTab} />
-
+      }
+      containerStyle={
+        isHistoryTab ? { paddingBottom: 0, paddingTop: 0 } : undefined
+      }
+    >
+      <View className={twMerge(clsx("gap-3", isHistoryTab && "flex-1"))}>
         {activeTab === "overview" ? (
           <ProgressOverviewContent state={overviewState} />
         ) : (
-          <ProgressHistoryContent state={historyState} />
+          <View className="flex-1">
+            <ProgressHistoryContent state={historyState} />
+          </View>
         )}
       </View>
     </PageLayout>
@@ -65,5 +80,11 @@ function ProgressHistoryContent({ state }: { state: ProgressHistoryState }) {
   if (state.isLoading) return null;
   if (state.isError) return null;
 
-  return <ProgressHistorySection data={state.data} />;
+  return (
+    <ProgressHistorySection
+      data={state.data}
+      isFetchingNextPage={state.isFetchingNextPage}
+      onLoadMore={state.onLoadMore}
+    />
+  );
 }

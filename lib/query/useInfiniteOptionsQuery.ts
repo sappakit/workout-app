@@ -7,6 +7,7 @@ interface UseInfiniteOptionsQueryProps<T> {
   queryKey: readonly unknown[];
   limit?: number;
   search?: string;
+  enabled?: boolean;
 }
 
 export function useInfiniteOptionsQuery<T>({
@@ -14,10 +15,12 @@ export function useInfiniteOptionsQuery<T>({
   queryKey,
   limit = 20,
   search,
+  enabled = true,
 }: UseInfiniteOptionsQueryProps<T>) {
   return useInfiniteQuery<PaginatedResponse<T>>({
     initialPageParam: 1,
-    queryKey: [...queryKey, search],
+    enabled,
+    queryKey: [...queryKey, { search, limit }],
     queryFn: async ({ pageParam }) => {
       const { data } = await api.get<PaginatedResponse<T>>(url, {
         params: {
