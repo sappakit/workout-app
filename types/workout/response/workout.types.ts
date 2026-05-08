@@ -20,6 +20,12 @@ export enum WorkoutCurrentMode {
   REST_DAY = "rest_day",
 }
 
+export enum WorkoutProgressOverviewType {
+  WEEKLY = "weekly",
+  YEARLY = "yearly",
+  ALL_TIME = "all_time",
+}
+
 interface PlannedWorkoutExerciseConfig {
   plannedSets: number | null;
   plannedRepsRange: string | null;
@@ -100,4 +106,32 @@ export interface WorkoutCurrent {
   mode: WorkoutCurrentMode;
   session: WorkoutSession | null;
   schedule: WorkoutSchedule | null;
+}
+
+export interface WorkoutProgressSummary {
+  workoutsCompleted: number;
+  totalVolumeKg: number;
+  completedSets: number;
+  totalDurationSeconds: number;
+}
+
+export interface WorkoutProgressVolumeTrendItem {
+  label: string;
+  volumeKg: number;
+}
+
+export interface WorkoutProgressBestPerformance {
+  exerciseName: string;
+  bestWeightKg: number;
+  bestSetVolumeKg: number;
+  bestSetLabel: string;
+}
+
+export interface WorkoutProgressOverview {
+  type: WorkoutProgressOverviewType;
+  startDate: string;
+  endDate: string;
+  summary: WorkoutProgressSummary;
+  volumeTrend: WorkoutProgressVolumeTrendItem[];
+  bestPerformances: WorkoutProgressBestPerformance[];
 }

@@ -1,47 +1,39 @@
 import { PageLayout } from "@/components/layout/PageLayout";
-import React, { useState } from "react";
+import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
+import React from "react";
 import { View } from "react-native";
+import { ProgressMetricCardItem } from "./ui/elements/ProgressMetricCard";
 import { ProgressTabs } from "./ui/elements/ProgressTabs";
 import { ProgressHistorySection } from "./ui/sections/ProgressHistorySection";
-import { ProgressOverviewSection } from "./ui/sections/ProgressOverviewSection";
-
-export type ProgressPageData = {
-  weeklySummary: {
-    workoutsCompleted: number;
-    totalVolumeKg: number;
-    completedSets: number;
-    totalDurationSeconds: number;
-  };
-  weeklyVolume: {
-    label: string;
-    volumeKg: number;
-  }[];
-  personalRecords: {
-    exerciseName: string;
-    bestWeightKg: number;
-    bestSetVolumeKg: number;
-    bestSetLabel: string;
-  }[];
-  recentWorkouts: {
-    id: number;
-    workoutName: string;
-    completedAt: string;
-    durationSeconds: number;
-    volumeKg: number;
-    completedSets: number;
-    totalSets: number;
-  }[];
-};
+import { ProgressOverviewSection } from "./ui/sections/progress-overview-section/ProgressOverviewSection";
 
 export type ProgressTab = "overview" | "history";
 
+export type ProgressOverviewState = {
+  data?: WorkoutProgressOverview;
+  isLoading: boolean;
+  isError: boolean;
+};
+
+export type ProgressHistoryState = {
+  data: ProgressMetricCardItem[];
+  isLoading: boolean;
+  isError: boolean;
+};
+
 interface ProgressContentProps {
-  data: ProgressPageData;
+  activeTab: ProgressTab;
+  onChangeTab: (tab: ProgressTab) => void;
+  overviewState: ProgressOverviewState;
+  historyState: ProgressHistoryState;
 }
 
-export default function ProgressContent({ data }: ProgressContentProps) {
-  const [activeTab, setActiveTab] = useState<ProgressTab>("overview");
-
+export default function ProgressContent({
+  activeTab,
+  onChangeTab,
+  overviewState,
+  historyState,
+}: ProgressContentProps) {
   return (
     <PageLayout
       headerProps={{
@@ -50,18 +42,28 @@ export default function ProgressContent({ data }: ProgressContentProps) {
       }}
     >
       <View className="gap-3">
-        <ProgressTabs activeTab={activeTab} onChangeTab={setActiveTab} />
+        <ProgressTabs activeTab={activeTab} onChangeTab={onChangeTab} />
 
         {activeTab === "overview" ? (
-          <ProgressOverviewSection
-            weeklySummary={data.weeklySummary}
-            weeklyVolume={data.weeklyVolume}
-            personalRecords={data.personalRecords}
-          />
+          <ProgressOverviewContent state={overviewState} />
         ) : (
-          <ProgressHistorySection recentWorkouts={data.recentWorkouts} />
+          <ProgressHistoryContent state={historyState} />
         )}
       </View>
     </PageLayout>
   );
+}
+
+function ProgressOverviewContent({ state }: { state: ProgressOverviewState }) {
+  if (state.isLoading) return null;
+  if (state.isError || !state.data) return null;
+
+  return <ProgressOverviewSection data={state.data} />;
+}
+
+function ProgressHistoryContent({ state }: { state: ProgressHistoryState }) {
+  if (state.isLoading) return null;
+  if (state.isError) return null;
+
+  return <ProgressHistorySection data={state.data} />;
 }

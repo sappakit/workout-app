@@ -15,11 +15,11 @@ export function useInfiniteOptionsQuery<T>({
   limit = 20,
   search,
 }: UseInfiniteOptionsQueryProps<T>) {
-  return useInfiniteQuery<PaginatedResponse<T[]>>({
+  return useInfiniteQuery<PaginatedResponse<T>>({
     initialPageParam: 1,
     queryKey: [...queryKey, search],
     queryFn: async ({ pageParam }) => {
-      const { data } = await api.get<PaginatedResponse<T[]>>(url, {
+      const { data } = await api.get<PaginatedResponse<T>>(url, {
         params: {
           page: pageParam,
           limit,

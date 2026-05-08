@@ -30,11 +30,11 @@ export default function FormInfiniteSelectInput<T>({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedResponse<T[]>>({
+  } = useInfiniteQuery<PaginatedResponse<T>>({
     initialPageParam: 1,
     queryKey,
     queryFn: async ({ pageParam }) => {
-      const { data } = await api.get<PaginatedResponse<T[]>>(url, {
+      const { data } = await api.get<PaginatedResponse<T>>(url, {
         params: { page: pageParam, limit: 20 },
       });
 
