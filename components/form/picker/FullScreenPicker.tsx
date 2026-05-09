@@ -100,6 +100,7 @@ export default function FullScreenPicker({
         {shouldShowSearch ? (
           <View className="mt-4 flex-row items-center gap-2">
             <FormTextInput
+              clearable
               className="flex-1 rounded-full"
               value={searchValue}
               onChangeText={onSearchChange}

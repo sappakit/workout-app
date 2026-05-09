@@ -3,6 +3,7 @@ import { AppButton } from "@/components/custom-ui/AppButton";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { ThemedText } from "@/components/themed-text";
 import { ExercisePickerCard } from "@/components/workout/ui/exercise-card/ExercisePickerCard";
+import { useDebounce } from "@/hooks/useDebounce";
 import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { mapExerciseToCreateWorkoutExerciseFormItem } from "@/lib/workout/mappers";
@@ -23,10 +24,11 @@ export default function AddExercisesPage() {
   const draft = useEditPlanDraftStore((state) => state.draft);
   const replaceDraft = useEditPlanDraftStore((state) => state.replaceDraft);
 
-  const [search, setSearch] = useState("");
   const [tempSelectedExercises, setTempSelectedExercises] = useState<
     Exercise[]
   >([]);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
 
   const selectedExerciseIds = new Set(
     draft?.workoutExercises.map((item) => item.exercise.id) ?? [],
@@ -43,7 +45,7 @@ export default function AddExercisesPage() {
   } = useInfiniteOptionsQuery<Exercise>({
     url: exerciseApi.getAll(),
     queryKey: exerciseQueryKeys.all,
-    search,
+    search: debouncedSearch,
     limit: 20,
   });
 
