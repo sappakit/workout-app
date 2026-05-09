@@ -38,6 +38,7 @@ export interface Exercise {
   id: number;
   name: string;
   description?: string | null;
+  imageUrl?: string | null;
 
   exerciseType: ExerciseType;
   difficultyLevel: DifficultyLevel;

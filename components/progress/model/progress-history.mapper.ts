@@ -14,7 +14,7 @@ export function mapWorkoutSessionsToProgressHistoryItems(
     return {
       id: session.id,
       title: session.workout?.name ?? "Workout",
-      subtitle: "Strength Programs",
+      subtitle: session.workout?.workoutFocusType?.name,
       rightText: formatHistoryDate(session.endedAt ?? session.startedAt),
       icon: BicepsFlexed,
       list: [

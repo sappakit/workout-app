@@ -5,7 +5,7 @@ import { Image, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { twMerge } from "tailwind-merge";
 
 interface ThumbnailProps {
-  image?: any;
+  imageUri?: string | null;
   className?: string;
   style?: StyleProp<ViewStyle>;
   iconSize?: number;
@@ -13,7 +13,7 @@ interface ThumbnailProps {
 }
 
 export default function Thumbnail({
-  image,
+  imageUri,
   className,
   style,
   iconSize = 28,
@@ -33,9 +33,9 @@ export default function Thumbnail({
         style,
       ]}
     >
-      {image ? (
+      {imageUri ? (
         <Image
-          source={{ uri: image }}
+          source={{ uri: imageUri }}
           style={styles.image}
           resizeMode="cover"
         />

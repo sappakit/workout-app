@@ -65,7 +65,7 @@ export default function ExerciseCardBase({
       )}
 
       <View className="flex-row gap-3 p-2">
-        <Thumbnail />
+        <Thumbnail imageUri={exercise.imageUrl} />
 
         <View className="flex-1 justify-between">
           <View className="items-start">
