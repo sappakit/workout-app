@@ -47,7 +47,13 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
   };
 
   const handleChooseWorkout = () => {
-    router.push("/(modal)/workout/choose-workout");
+    router.push({
+      pathname: "/(modal)/workout/choose-workout",
+      params: {
+        scheduleId: data.id,
+        workoutId: data.workout.id,
+      },
+    });
   };
 
   const handleCreateWorkout = () => {
@@ -90,7 +96,11 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
         />
 
         <View>
-          <WorkoutPlanCard data={data.workout} onEditPlan={handleEditPlan} />
+          <WorkoutPlanCard
+            data={data.workout}
+            onEditPlan={handleEditPlan}
+            onSwitchPlan={handleChooseWorkout}
+          />
 
           {/* Exercise preview */}
           <View className="mt-2">

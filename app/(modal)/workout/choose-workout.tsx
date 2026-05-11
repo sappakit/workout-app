@@ -4,22 +4,35 @@ import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDebounce } from "@/hooks/useDebounce";
+import { api } from "@/lib/api";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
+import { useInvalidateQueries } from "@/lib/query/utils";
+import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
-import clsx from "clsx";
-import { useRouter } from "expo-router";
-import { Check, SlidersHorizontal } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { SlidersHorizontal } from "lucide-react-native";
+import { useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
-import { twMerge } from "tailwind-merge";
 
 export default function ChooseWorkoutPage() {
   const router = useRouter();
   const { colors } = useAppTheme();
+  const toast = useAppToast();
+  const invalidateQueries = useInvalidateQueries();
 
-  const [selectedWorkout, setSelectedWorkout] =
-    useState<WorkoutResponse | null>(null);
+  const params = useLocalSearchParams<{
+    scheduleId?: string;
+    workoutId?: string;
+  }>();
+
+  const scheduleId = params.scheduleId ? Number(params.scheduleId) : null;
+  const currentWorkoutId = params.workoutId ? Number(params.workoutId) : null;
+
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(
+    currentWorkoutId,
+  );
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
@@ -39,10 +52,37 @@ export default function ChooseWorkoutPage() {
     limit: 20,
   });
 
-  const workouts = useMemo(
-    () => data?.pages.flatMap((page) => page.data) ?? [],
-    [data],
-  );
+  const { mutate: updateScheduleWorkout, isPending } = useMutation({
+    mutationFn: async (workoutId: number) => {
+      if (!scheduleId) {
+        throw new Error("Missing schedule id");
+      }
+
+      return api.patch(workoutApi.updateScheduleWorkout(scheduleId), {
+        workoutId,
+      });
+    },
+    onSuccess: async () => {
+      await invalidateQueries([workoutQueryKeys.current]);
+
+      toast.success({
+        title: "Workout updated",
+        message: "Today's workout has been changed.",
+      });
+
+      router.back();
+    },
+    onError: (_err: unknown) => {
+      toast.error({
+        title: "Failed to update workout",
+        message: "Please try again.",
+      });
+    },
+  });
+
+  const workouts = data?.pages.flatMap((page) => page.data) ?? [];
+
+  const isSameWorkout = selectedWorkoutId === currentWorkoutId;
 
   const loadMore = () => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -50,20 +90,13 @@ export default function ChooseWorkoutPage() {
   };
 
   const handleSelectWorkout = (workout: WorkoutResponse) => {
-    setSelectedWorkout((prev) => {
-      if (prev?.id === workout.id) return null;
-      return workout;
-    });
+    setSelectedWorkoutId(workout.id);
   };
 
   const handleDone = () => {
-    if (!selectedWorkout) return;
+    if (!selectedWorkoutId || !scheduleId) return;
 
-    // TODO: later connect this to Zustand / draft state.
-    // Example:
-    // setSelectedWorkoutDraft(selectedWorkout);
-
-    router.back();
+    updateScheduleWorkout(selectedWorkoutId);
   };
 
   const handleClose = () => {
@@ -73,10 +106,13 @@ export default function ChooseWorkoutPage() {
   return (
     <FullScreenPicker
       title="Choose Workout"
-      description="Select one workout to use."
+      description="Select one workout to use for today's plan."
       onClose={handleClose}
       onDone={handleDone}
-      doneDisabled={!selectedWorkout}
+      doneText="Use Workout"
+      doneDisabled={
+        !selectedWorkoutId || !scheduleId || isSameWorkout || isPending
+      }
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search workout"
@@ -90,7 +126,6 @@ export default function ChooseWorkoutPage() {
           icon={SlidersHorizontal}
           className="h-12 w-12 rounded-full"
           iconSize={18}
-          // TODO: connect filter action later.
         />
       }
     >
@@ -115,34 +150,22 @@ export default function ChooseWorkoutPage() {
           ) : null
         }
         renderItem={({ item }) => {
-          const isSelected = selectedWorkout?.id === item.id;
+          const isSelected = selectedWorkoutId === item.id;
 
           return (
             <Pressable
               onPress={() => handleSelectWorkout(item)}
-              className={twMerge(
-                clsx(
-                  "flex-row items-center justify-between rounded-2xl border px-4 py-4",
-                  isSelected
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-card",
-                ),
-              )}
-              style={{ backgroundColor: colors.app.cardPrimary }}
+              className="flex-row items-center justify-between rounded-2xl border px-4 py-4"
+              style={{
+                backgroundColor: colors.app.cardPrimary,
+                borderColor: isSelected
+                  ? colors.app.brand
+                  : colors.app.borderPrimary,
+              }}
             >
-              <View className="flex-1 pr-3">
-                <ThemedText type="defaultSemiBold" variant="primary">
-                  {item.name}
-                </ThemedText>
-              </View>
-
-              {isSelected ? (
-                <View className="bg-primary h-7 w-7 items-center justify-center rounded-full">
-                  <Check size={16} color="white" />
-                </View>
-              ) : (
-                <View className="border-border h-7 w-7 rounded-full border" />
-              )}
+              <ThemedText type="default" variant="primary">
+                {item.name}
+              </ThemedText>
             </Pressable>
           );
         }}

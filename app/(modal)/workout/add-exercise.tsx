@@ -12,7 +12,7 @@ import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
 import { Exercise } from "@/types/workout/response/exercise.types";
 import { useRouter } from "expo-router";
 import { SlidersHorizontal } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 
 type WorkoutExerciseDraftItem = EditPlanForm["workoutExercises"][number];
@@ -49,10 +49,7 @@ export default function AddExercisesPage() {
     limit: 20,
   });
 
-  const exercises = useMemo(
-    () => data?.pages.flatMap((page) => page.data) ?? [],
-    [data],
-  );
+  const exercises = data?.pages.flatMap((page) => page.data) ?? [];
 
   const tempSelectedExerciseIds = new Set(
     tempSelectedExercises.map((e) => e.id),
