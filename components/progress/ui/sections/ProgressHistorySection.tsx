@@ -1,5 +1,5 @@
+import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ProgressMetricCard } from "@/components/progress/ui/elements/ProgressMetricCard";
-import { ThemedText } from "@/components/themed-text";
 import { ActivityIndicator, FlatList, View } from "react-native";
 import { ProgressMetricCardItem } from "../elements/ProgressMetricCard";
 
@@ -22,15 +22,10 @@ export function ProgressHistorySection({
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.3}
       ListHeaderComponent={
-        <View>
-          <ThemedText type="title" variant="accent">
-            Recent Workouts
-          </ThemedText>
-
-          <ThemedText type="default" variant="primary" className="text-sm">
-            Your completed workout history
-          </ThemedText>
-        </View>
+        <SectionHeader
+          title="Recent Workouts"
+          subtitle="Your completed workout history"
+        />
       }
       ListFooterComponent={
         isFetchingNextPage ? (

@@ -166,11 +166,7 @@ export default function AddExercisesPage() {
       <FlatList
         data={exercises}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingBottom: 16,
-          gap: 8,
-        }}
+        contentContainerClassName="gap-2"
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         ListEmptyComponent={

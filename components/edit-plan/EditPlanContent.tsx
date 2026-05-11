@@ -351,13 +351,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         options: { addBottomInset: true },
       }}
     >
-      {/* Title */}
-      <ThemedText type="title" variant="accent">
-        Edit Plan
-      </ThemedText>
-
       {/* Plan Name */}
-      <View className="mt-4">
+      <View>
         <ThemedText type="subtitle" variant="accent" className="mb-2">
           Plan Name
         </ThemedText>
@@ -609,8 +604,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         />
 
         {fields.length === 0 ? (
-          <View className="gap-2 py-2">
-            <ThemedText type="default" variant="secondary">
+          <View className="py-2">
+            <ThemedText type="default" variant="accent">
               No exercises added yet
             </ThemedText>
 

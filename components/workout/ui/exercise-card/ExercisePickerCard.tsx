@@ -47,7 +47,7 @@ export function ExercisePickerCard({
       className={alreadyAdded ? "opacity-60" : undefined}
       style={{
         opacity: alreadyAdded ? 0.6 : 1,
-        borderColor: selected ? colors.app.brand : undefined,
+        borderColor: selected ? colors.app.brand : colors.app.borderPrimary,
       }}
       // stats={display.stats}
       showDifficultyBadge={true}

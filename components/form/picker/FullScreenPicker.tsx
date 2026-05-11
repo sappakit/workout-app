@@ -78,7 +78,6 @@ export default function FullScreenPicker({
 
   return (
     <PageLayout
-      className="px-0"
       scrollable={false}
       showHeader={false}
       stickyFooter={{
@@ -86,61 +85,63 @@ export default function FullScreenPicker({
         options: { addBottomInset: true },
       }}
     >
-      <View className="px-4">
-        <ThemedText type="title" variant="accent">
-          {title}
-        </ThemedText>
-
-        {description ? (
-          <ThemedText type="default" variant="primary" className="mt-2">
-            {description}
+      <>
+        <View>
+          <ThemedText type="title" variant="accent">
+            {title}
           </ThemedText>
-        ) : null}
 
-        {shouldShowSearch ? (
-          <View className="mt-4 flex-row items-center gap-2">
-            <FormTextInput
-              clearable
-              className="flex-1 rounded-full"
-              value={searchValue}
-              onChangeText={onSearchChange}
-              placeholder={searchPlaceholder}
-              icon={Search}
-            />
-
-            {searchRight}
-          </View>
-        ) : null}
-
-        {footerExtra}
-      </View>
-
-      <View className="mt-4 flex-1" style={contentContainerStyle}>
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator />
-          </View>
-        ) : isError ? (
-          <View className="flex-1 items-center justify-center px-6">
-            <ThemedText type="default" variant="secondary">
-              {errorText}
+          {description ? (
+            <ThemedText type="default" variant="primary">
+              {description}
             </ThemedText>
+          ) : null}
 
-            {onRetry ? (
-              <View className="mt-4">
-                <AppButton
-                  title="Try Again"
-                  variant="secondary"
-                  className="px-10"
-                  onPress={onRetry}
-                />
-              </View>
-            ) : null}
-          </View>
-        ) : (
-          children
-        )}
-      </View>
+          {shouldShowSearch ? (
+            <View className="mt-4 flex-row items-center gap-2">
+              <FormTextInput
+                clearable
+                className="flex-1 rounded-full"
+                value={searchValue}
+                onChangeText={onSearchChange}
+                placeholder={searchPlaceholder}
+                icon={Search}
+              />
+
+              {searchRight}
+            </View>
+          ) : null}
+
+          {footerExtra}
+        </View>
+
+        <View className="mt-4 flex-1" style={contentContainerStyle}>
+          {isLoading ? (
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator />
+            </View>
+          ) : isError ? (
+            <View className="flex-1 items-center justify-center px-6">
+              <ThemedText type="default" variant="secondary">
+                {errorText}
+              </ThemedText>
+
+              {onRetry ? (
+                <View className="mt-4">
+                  <AppButton
+                    title="Try Again"
+                    variant="secondary"
+                    className="px-10"
+                    onPress={onRetry}
+                  />
+                </View>
+              ) : null}
+            </View>
+          ) : (
+            children
+          )}
+        </View>
+      </>
     </PageLayout>
   );
 }

@@ -32,6 +32,8 @@ import { twMerge } from "tailwind-merge";
 
 type WorkoutPlanCardProps = {
   data: WorkoutResponse;
+  onEditPlan: () => void;
+  onSwitchPlan?: () => void;
 };
 
 type BaseDisplayProps = {
@@ -45,7 +47,11 @@ type WorkoutStatItem = {
   icon: LucideIcon;
 };
 
-export function WorkoutPlanCard({ data }: WorkoutPlanCardProps) {
+export function WorkoutPlanCard({
+  data,
+  onEditPlan,
+  onSwitchPlan,
+}: WorkoutPlanCardProps) {
   const { colors } = useAppTheme();
 
   // Display full exercise details toggle
@@ -92,6 +98,7 @@ export function WorkoutPlanCard({ data }: WorkoutPlanCardProps) {
           showFullExerciseDetails={showFullExerciseDetails}
           actions={{
             toggleShowFullExerciseDetails,
+            onEditPlan,
           }}
         />
       </View>
@@ -167,6 +174,7 @@ type WorkoutCardMenuProps = {
   showFullExerciseDetails: boolean;
   actions: {
     toggleShowFullExerciseDetails: () => void;
+    onEditPlan: () => void;
   };
   isDisabled?: boolean;
 };
@@ -190,7 +198,11 @@ function WorkoutCardMenu({
 
       <MenuSectionLabel label="Actions" />
 
-      <DropdownItem label="Quick edit" icon={Settings2} />
+      <DropdownItem
+        label="Edit plan"
+        icon={Settings2}
+        onSelect={actions.onEditPlan}
+      />
       <DropdownItem label="Switch plan" icon={Repeat} />
     </OptionsMenu>
   );

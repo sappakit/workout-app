@@ -1,10 +1,9 @@
+import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
-import clsx from "clsx";
-import React from "react";
+import { ReactNode } from "react";
 import { View } from "react-native";
-import { twMerge } from "tailwind-merge";
 
 interface ProgressVolumeTrendSectionProps {
   data: WorkoutProgressOverview["volumeTrend"];
@@ -21,6 +20,7 @@ export function ProgressVolumeTrendSection({
       <SectionHeader
         title="Volume Trend"
         subtitle="Total completed volume by day"
+        size="small"
       />
 
       <View className="mt-5 h-40 flex-row items-end justify-between gap-2">
@@ -58,7 +58,7 @@ export function ProgressVolumeTrendSection({
   );
 }
 
-function ProgressSection({ children }: { children: React.ReactNode }) {
+function ProgressSection({ children }: { children: ReactNode }) {
   const { colors } = useAppTheme();
 
   return (
@@ -70,40 +70,6 @@ function ProgressSection({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-    </View>
-  );
-}
-
-function SectionHeader({
-  title,
-  subtitle,
-  titleClassName,
-  subtitleClassName,
-}: {
-  title: string;
-  subtitle?: string;
-  titleClassName?: string;
-  subtitleClassName?: string;
-}) {
-  return (
-    <View>
-      <ThemedText
-        type="defaultSemiBold"
-        variant="accent"
-        className={twMerge(clsx("text-lg", titleClassName))}
-      >
-        {title}
-      </ThemedText>
-
-      {subtitle && (
-        <ThemedText
-          type="default"
-          variant="primary"
-          className={twMerge(clsx("text-sm", subtitleClassName))}
-        >
-          {subtitle}
-        </ThemedText>
-      )}
     </View>
   );
 }

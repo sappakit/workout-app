@@ -8,6 +8,7 @@ import {
   TextStyle,
   TouchableOpacity,
   TouchableOpacityProps,
+  View,
   ViewStyle,
 } from "react-native";
 import { twMerge } from "tailwind-merge";
@@ -58,8 +59,9 @@ export function AppButton({
   const isDisabled = disabled || loading;
 
   // Variant Styles
-  const variantStyles: Record<ButtonVariant, ButtonVariantStyles> = {
+  const variantStyles = {
     primary: {
+      containerClassName: undefined,
       textClassName: "font-medium",
       container: {
         backgroundColor: colors.app.brand,
@@ -70,6 +72,7 @@ export function AppButton({
     },
     secondary: {
       containerClassName: "border",
+      textClassName: undefined,
       container: {
         backgroundColor: colors.app.cardSecondary,
         borderColor: colors.app.borderSecondary,
@@ -80,6 +83,7 @@ export function AppButton({
     },
     tertiary: {
       containerClassName: "border",
+      textClassName: undefined,
       container: {
         backgroundColor: colors.app.background,
         borderColor: colors.app.textAccent,
@@ -89,6 +93,8 @@ export function AppButton({
       },
     },
     option: {
+      containerClassName: undefined,
+      textClassName: undefined,
       container: {
         backgroundColor: colors.app.cardSecondary,
       },
@@ -97,11 +103,14 @@ export function AppButton({
       },
     },
     ghost: {
+      containerClassName: undefined,
+      textClassName: undefined,
+      container: undefined,
       text: {
         color: colors.app.textPrimary,
       },
     },
-  };
+  } satisfies Record<ButtonVariant, ButtonVariantStyles>;
 
   const currentVariant = variantStyles[variant];
 
@@ -112,7 +121,7 @@ export function AppButton({
       activeOpacity={0.8}
       className={twMerge(
         clsx(
-          "h-12 flex-row items-center justify-center rounded-full opacity-100",
+          "h-12 flex-row items-center justify-center rounded-2xl",
           currentVariant.containerClassName,
           className,
         ),
@@ -124,14 +133,14 @@ export function AppButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={iconColor ?? currentVariant?.text?.color} />
+        <ActivityIndicator color={iconColor ?? currentVariant.text.color} />
       ) : (
-        <>
+        <View className="flex-row items-center justify-center gap-2">
           {Icon && (
             <Icon
               size={iconSize}
-              color={iconColor ?? currentVariant?.text?.color}
-              style={[title && { marginRight: 8 }, iconStyle]}
+              color={iconColor ?? currentVariant.text.color}
+              style={iconStyle}
             />
           )}
 
@@ -145,7 +154,7 @@ export function AppButton({
               {title}
             </ThemedText>
           )}
-        </>
+        </View>
       )}
     </TouchableOpacity>
   );

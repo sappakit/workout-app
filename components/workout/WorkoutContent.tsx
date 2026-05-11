@@ -1,4 +1,6 @@
 import { workoutApi } from "@/app/api/workout.api";
+import { AppButton } from "@/components/custom-ui/AppButton";
+import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -6,9 +8,11 @@ import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutSchedule } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Dumbbell, SquarePen } from "lucide-react-native";
-import { AppButton } from "../custom-ui/AppButton";
-import { PageLayout, PullToRefreshProps } from "../layout/PageLayout";
+import { Dumbbell, Plus, Search, Zap } from "lucide-react-native";
+import { useState } from "react";
+import { View } from "react-native";
+import { ExpandableToggle } from "../custom-ui/ExpandableToggle";
+import { SectionHeader } from "../layout/SectionHeader";
 import { WorkoutPlanCard } from "./ui/WorkoutPlanCard";
 import { ExerciseCardReadonly } from "./ui/exercise-card/ExerciseCardReadonly";
 
@@ -22,10 +26,11 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
   const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const { mutate: startWorkout, isPending } = useMutation({
     mutationFn: () => api.post(workoutApi.startSession(data.workout.id)),
     onSuccess: async () => {
-      // refresh current state
       await invalidateQueries([workoutQueryKeys.current]);
     },
     onError: (_err: unknown) => {
@@ -36,32 +41,26 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
     },
   });
 
-  const footer = (
-    <>
-      <AppButton
-        title="Start Workout"
-        variant="primary"
-        icon={Dumbbell}
-        className="flex-1"
-        textClassName="font-medium"
-        onPress={() => startWorkout()}
-        loading={isPending}
-      />
+  const handleStartEmptyWorkout = () => {
+    // TODO: start session without workout plan
+    // router.push("/(pages)/workout/session");
+  };
 
-      <AppButton
-        title="Edit Plan"
-        variant="secondary"
-        icon={SquarePen}
-        className="w-36"
-        onPress={() =>
-          router.push({
-            pathname: "/(pages)/workout/[id]/edit",
-            params: { id: data.workout.id },
-          })
-        }
-      />
-    </>
-  );
+  const handleChooseWorkout = () => {
+    router.push("/(modal)/workout/choose-workout");
+  };
+
+  const handleCreateWorkout = () => {
+    // TODO: route to create workout page
+    // router.push("/(pages)/workout/create");
+  };
+
+  const handleEditPlan = () => {
+    router.push({
+      pathname: "/(pages)/workout/[id]/edit",
+      params: { id: data.workout.id },
+    });
+  };
 
   return (
     <PageLayout
@@ -69,16 +68,86 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
         variant: "title",
         title: "Workout",
       }}
-      stickyFooter={{ content: footer }}
+      stickyFooter={{
+        content: (
+          <AppButton
+            title="Start Today's Workout"
+            variant="primary"
+            icon={Dumbbell}
+            className="flex-1"
+            onPress={() => startWorkout()}
+            loading={isPending}
+          />
+        ),
+      }}
       pullToRefresh={pullToRefresh}
     >
-      {/* Workout plan card */}
-      <WorkoutPlanCard data={data.workout} />
+      <View className="gap-3">
+        {/* Today's scheduled workout */}
+        <SectionHeader
+          title="Today's Plan"
+          subtitle="Your scheduled workout for today"
+        />
 
-      {/* Exercise card */}
-      {data.workout.workoutExercises.map((item) => (
-        <ExerciseCardReadonly key={item.id} data={item} className="mt-2" />
-      ))}
+        <View>
+          <WorkoutPlanCard data={data.workout} onEditPlan={handleEditPlan} />
+
+          {/* Exercise preview */}
+          <View className="mt-2">
+            <ExpandableToggle
+              expandedLabel="Hide exercises"
+              collapsedLabel="Show exercises"
+              expanded={isExpanded}
+              onToggleExpanded={() => setIsExpanded((prev) => !prev)}
+            />
+
+            {isExpanded && (
+              <View>
+                {data.workout.workoutExercises.map((item) => (
+                  <ExerciseCardReadonly
+                    key={item.id}
+                    data={item}
+                    className="mt-2"
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Other workout options */}
+        <SectionHeader
+          title="Other Options"
+          subtitle="Choose a different way to train today"
+        />
+
+        <View className="gap-2">
+          <View className="flex-row gap-2">
+            <AppButton
+              className="flex-1"
+              title="New Plan"
+              variant="option"
+              icon={Plus}
+              onPress={handleCreateWorkout}
+            />
+
+            <AppButton
+              className="flex-1"
+              title="Browse Plans"
+              variant="option"
+              icon={Search}
+              onPress={handleChooseWorkout}
+            />
+          </View>
+
+          <AppButton
+            title="Start Empty Workout"
+            variant="option"
+            icon={Zap}
+            onPress={handleStartEmptyWorkout}
+          />
+        </View>
+      </View>
     </PageLayout>
   );
 }
