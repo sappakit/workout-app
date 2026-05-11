@@ -28,7 +28,8 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { mutate: startWorkout, isPending } = useMutation({
+  // Start plan workout
+  const { mutate: startWorkout, isPending: isStarting } = useMutation({
     mutationFn: () => api.post(workoutApi.startSession(data.workout.id)),
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current]);
@@ -41,9 +42,24 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
     },
   });
 
+  // Start empty workout
+  const { mutate: startEmptyWorkout, isPending: isStartingEmpty } = useMutation(
+    {
+      mutationFn: () => api.post(workoutApi.startEmptySession()),
+      onSuccess: async () => {
+        await invalidateQueries([workoutQueryKeys.current]);
+      },
+      onError: () => {
+        toast.error({
+          title: "Failed to start empty workout",
+          message: "Please try again.",
+        });
+      },
+    },
+  );
+
   const handleStartEmptyWorkout = () => {
-    // TODO: start session without workout plan
-    // router.push("/(pages)/workout/session");
+    startEmptyWorkout();
   };
 
   const handleChooseWorkout = () => {
@@ -82,7 +98,7 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
             icon={Dumbbell}
             className="flex-1"
             onPress={() => startWorkout()}
-            loading={isPending}
+            loading={isStarting}
           />
         ),
       }}

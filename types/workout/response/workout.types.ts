@@ -98,7 +98,7 @@ export interface WorkoutSession {
   totalPausedDuration: number;
   totalDuration: number | null;
   caloriesBurned: number | null;
-  workout: WorkoutResponse;
+  workout: WorkoutResponse | null;
   sessionExercises: WorkoutSessionExercise[];
 }
 

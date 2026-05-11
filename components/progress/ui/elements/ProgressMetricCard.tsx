@@ -7,7 +7,7 @@ import { FlatList, View } from "react-native";
 export interface ProgressMetricCardItem {
   id: number | string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   rightText?: string;
   icon: LucideIcon;
   list: { label: string; value: string }[];

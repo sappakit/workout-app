@@ -12,6 +12,7 @@ export const workoutApi = {
   // Create
   startSession: (workoutId: string | number) =>
     `${BASE}/${workoutId}/sessions/start`,
+  startEmptySession: () => `${BASE}/sessions/start/empty`,
   cancelSession: (id: string | number) => `${BASE}/sessions/${id}/cancel`,
 
   // Update

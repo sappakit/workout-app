@@ -291,16 +291,18 @@ export function WorkoutInProgressContent({
           />
 
           <View className="flex-1 items-center justify-end pb-4">
-            <ThemedText type="default" variant="accent">
-              {storedSession.workout.workoutFocusType.name}
-            </ThemedText>
+            {storedSession?.workout?.workoutFocusType?.name && (
+              <ThemedText type="default" variant="accent">
+                {storedSession.workout.workoutFocusType.name}
+              </ThemedText>
+            )}
 
             <ThemedText
               type="default"
               variant="brand"
               className="mt-1 text-center text-4xl font-bold"
             >
-              {storedSession.workout.name}
+              {storedSession?.workout?.name ?? "Workout"}
             </ThemedText>
           </View>
         </ImageBackground>
