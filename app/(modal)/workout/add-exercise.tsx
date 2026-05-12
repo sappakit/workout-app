@@ -8,7 +8,7 @@ import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { mapExerciseToCreateWorkoutExerciseFormItem } from "@/lib/workout/mappers";
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
-import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
+import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { Exercise } from "@/types/workout/response/exercise.types";
 import { useRouter } from "expo-router";
 import { SlidersHorizontal } from "lucide-react-native";
@@ -20,9 +20,8 @@ type WorkoutExerciseDraftItem = EditPlanForm["workoutExercises"][number];
 export default function AddExercisesPage() {
   const router = useRouter();
 
-  const draftWorkoutId = useEditPlanDraftStore((state) => state.workoutId);
-  const draft = useEditPlanDraftStore((state) => state.draft);
-  const replaceDraft = useEditPlanDraftStore((state) => state.replaceDraft);
+  const draft = usePlanFormDraftStore((state) => state.draft);
+  const replaceDraft = usePlanFormDraftStore((state) => state.replaceDraft);
 
   const [tempSelectedExercises, setTempSelectedExercises] = useState<
     Exercise[]
@@ -75,7 +74,7 @@ export default function AddExercisesPage() {
   };
 
   const handleDone = () => {
-    if (!draft || !draftWorkoutId) {
+    if (!draft) {
       router.back();
       return;
     }
@@ -129,7 +128,7 @@ export default function AddExercisesPage() {
       >
         <View className="flex-1 items-center justify-center px-6">
           <ThemedText type="default" variant="secondary">
-            No edit draft found.
+            No plan draft found.
           </ThemedText>
         </View>
       </FullScreenPicker>

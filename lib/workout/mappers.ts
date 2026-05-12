@@ -104,7 +104,7 @@ export function mapWorkoutResponseToEditPlanForm(
 
   return {
     name: data.name,
-    workoutFocusTypeId: data.workoutFocusType.id,
+    workoutFocusTypeId: data.workoutFocusType?.id ?? null,
     targetMuscles: data.muscles.map((item) => item.muscle.id),
 
     // plannedDuration

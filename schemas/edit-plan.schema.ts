@@ -217,9 +217,7 @@ export const workoutExerciseFormSchema = z
 export const editPlanFormSchema = z
   .object({
     name: z.string().min(1, "Plan name is required"),
-    workoutFocusTypeId: z.number({
-      error: "Workout type is required",
-    }),
+    workoutFocusTypeId: z.number().nullable(),
     targetMuscles: z
       .array(z.number())
       .min(1, "Select target muscle groups or enable Auto-fill"),

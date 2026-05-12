@@ -3,7 +3,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
-import { useEditPlanDraftStore } from "@/stores/editPlanDraftStore";
+import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { useRouter } from "expo-router";
 import { Check, GripVertical, Trash2, X } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -19,9 +19,8 @@ type WorkoutExerciseDraftItem = EditPlanForm["workoutExercises"][number];
 export default function ManageExercisesPage() {
   const router = useRouter();
 
-  const draftWorkoutId = useEditPlanDraftStore((state) => state.workoutId);
-  const draft = useEditPlanDraftStore((state) => state.draft);
-  const replaceDraft = useEditPlanDraftStore((state) => state.replaceDraft);
+  const draft = usePlanFormDraftStore((state) => state.draft);
+  const replaceDraft = usePlanFormDraftStore((state) => state.replaceDraft);
 
   const initialItems = useMemo(
     () => normalizeOrderIndex(draft?.workoutExercises ?? []),
@@ -48,7 +47,7 @@ export default function ManageExercisesPage() {
   };
 
   const handleDone = () => {
-    if (!draft || !draftWorkoutId) {
+    if (!draft) {
       router.back();
       return;
     }
@@ -109,7 +108,7 @@ export default function ManageExercisesPage() {
         </ThemedText>
 
         <ThemedText type="default" variant="secondary" className="mt-4">
-          No edit draft found.
+          No plan draft found.
         </ThemedText>
       </PageLayout>
     );

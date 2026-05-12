@@ -12,7 +12,7 @@ export interface UpdateWorkoutExercisePayload {
 
 export interface UpdateWorkoutPayload {
   name: string;
-  workoutFocusTypeId: number;
+  workoutFocusTypeId: number | null;
   targetMuscles: number[];
   duration: number;
   workoutExercises: UpdateWorkoutExercisePayload[];

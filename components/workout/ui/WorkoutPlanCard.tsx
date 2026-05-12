@@ -104,11 +104,13 @@ export function WorkoutPlanCard({
         />
       </View>
 
-      <ThemedText type="default" variant="primary" className="text-sm">
-        {data.workoutFocusType.name}
-      </ThemedText>
+      {data.workoutFocusType?.name && (
+        <ThemedText type="default" variant="primary" className="text-sm">
+          {data.workoutFocusType.name}
+        </ThemedText>
+      )}
 
-      <ThemedText type="title" variant="brand" className="mt-1">
+      <ThemedText type="title" variant="brand">
         {data.name}
       </ThemedText>
 

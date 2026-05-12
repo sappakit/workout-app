@@ -9,7 +9,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import clsx from "clsx";
 import { Check, ChevronDown } from "lucide-react-native";
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { ListRenderItem, Pressable, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
@@ -19,10 +19,17 @@ export interface SelectOption {
   value: string | number;
 }
 
+type FormSelectValue = SelectOption["value"] | null;
+
+type DisplaySelectOption = {
+  label: string;
+  value: FormSelectValue;
+};
+
 export interface FormSelectInputProps {
   options: SelectOption[];
-  value?: string | number;
-  onChange?: (value: string | number | undefined) => void;
+  value?: FormSelectValue;
+  onChange?: (value: FormSelectValue) => void;
   placeholder?: string;
   validationError?: boolean;
   className?: string;
@@ -33,6 +40,8 @@ export interface FormSelectInputProps {
   isFetchingNextPage?: boolean;
   onEndReached?: () => void;
   snapPoints?: (string | number)[];
+  allowEmpty?: boolean;
+  emptySelectionLabel?: string;
 }
 
 export default function FormSelectInput({
@@ -49,17 +58,34 @@ export default function FormSelectInput({
   isFetchingNextPage,
   onEndReached,
   snapPoints,
+  allowEmpty = false,
+  emptySelectionLabel = "No selection",
 }: FormSelectInputProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const animationConfigs = useDefaultBottomSheetAnimation();
 
-  const selectedLabel = options.find((o) => o.value === value)?.label;
+  const displayOptions = useMemo<DisplaySelectOption[]>(() => {
+    if (!allowEmpty) return options;
+
+    return [
+      {
+        label: emptySelectionLabel,
+        value: null,
+      },
+      ...options,
+    ];
+  }, [allowEmpty, emptySelectionLabel, options]);
+
+  const selectedLabel =
+    value !== null && value !== undefined
+      ? displayOptions.find((o) => o.value === value)?.label
+      : undefined;
 
   const listRef = useRef<BottomSheetFlatListMethods>(null);
-  const selectedIndex =
-    value !== undefined ? options.findIndex((o) => o.value === value) : -1;
+
+  const selectedIndex = displayOptions.findIndex((o) => o.value === value);
 
   const openSheet = () => {
     bottomSheetModalRef.current?.present();
@@ -86,7 +112,12 @@ export default function FormSelectInput({
     }, 200);
   };
 
-  const handleSelect = (optionValue: string | number) => {
+  const handleSelect = (optionValue: FormSelectValue) => {
+    if (optionValue === value) {
+      closeSheet();
+      return;
+    }
+
     onChange?.(optionValue);
     closeSheet();
   };
@@ -107,12 +138,13 @@ export default function FormSelectInput({
     content = "Loading options...";
   } else if (isError) {
     content = "Failed to load options.";
-  } else if (options.length === 0) {
+  } else if (displayOptions.length === 0) {
     content = "No options available.";
   }
 
-  const renderItem: ListRenderItem<SelectOption> = ({ item, index }) => {
+  const renderItem: ListRenderItem<DisplaySelectOption> = ({ item, index }) => {
     const isSelected = item.value === value;
+    const isEmptySelection = item.value === null;
 
     return (
       <View className={twMerge(clsx("px-2", index > 0 && "pt-1"))}>
@@ -125,7 +157,12 @@ export default function FormSelectInput({
               : "transparent",
           }}
         >
-          <ThemedText type="default" variant={isSelected ? "brand" : "accent"}>
+          <ThemedText
+            type="default"
+            variant={
+              isSelected ? "brand" : isEmptySelection ? "primary" : "accent"
+            }
+          >
             {item.label}
           </ThemedText>
 
@@ -202,7 +239,7 @@ export default function FormSelectInput({
         )}
 
         {/* Options display */}
-        {isLoading || isError || options.length === 0 ? (
+        {isLoading || isError || displayOptions.length === 0 ? (
           <View
             className={clsx("px-2")}
             style={{ paddingBottom: insets.bottom + 16 }}
@@ -214,8 +251,10 @@ export default function FormSelectInput({
         ) : (
           <BottomSheetFlatList
             ref={listRef}
-            data={options}
-            keyExtractor={(item: SelectOption) => item.value.toString()}
+            data={displayOptions}
+            keyExtractor={(item: DisplaySelectOption) =>
+              item.value === null ? "__empty__" : item.value.toString()
+            }
             renderItem={renderItem}
             onEndReached={onEndReached}
             onEndReachedThreshold={0.4}

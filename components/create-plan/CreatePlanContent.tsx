@@ -1,27 +1,33 @@
+// components/create-plan/CreatePlanContent.tsx
+
 import { muscleApi } from "@/app/api/muscle.api";
 import { workoutApi } from "@/app/api/workout.api";
+import { AppButton } from "@/components/custom-ui/AppButton";
+import { Separator } from "@/components/custom-ui/Separator";
+import FormCheckbox from "@/components/form/FormCheckbox";
+import { FormErrorMessage } from "@/components/form/FormErrorMessage";
+import FormNumberInput from "@/components/form/FormNumberInput";
 import FormTextInput from "@/components/form/FormTextInput";
+import FormInfiniteMultiSelectInput from "@/components/form/select-input/FormInfiniteMultiSelectInput";
+import FormInfiniteSelectInput from "@/components/form/select-input/FormInfiniteSelectInput";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
+import { ExerciseCardEdit } from "@/components/workout/ui/exercise-card/ExerciseCardEdit";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
   mapEditPlanFormToUpdateWorkoutPayload,
-  mapWorkoutResponseToEditPlanForm,
   secondsToHMS,
 } from "@/lib/workout/mappers";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
-import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
 import { Muscle } from "@/types/workout/response/shared.types";
-import {
-  WorkoutFocusType,
-  WorkoutResponse,
-} from "@/types/workout/response/workout.types";
+import { WorkoutFocusType } from "@/types/workout/response/workout.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -29,22 +35,22 @@ import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Alert, View } from "react-native";
-import { AppButton } from "../custom-ui/AppButton";
-import { Separator } from "../custom-ui/Separator";
-import FormCheckbox from "../form/FormCheckbox";
-import { FormErrorMessage } from "../form/FormErrorMessage";
-import FormNumberInput from "../form/FormNumberInput";
-import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
-import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
-import { SectionHeader } from "../layout/SectionHeader";
-import { ExerciseCardEdit } from "../workout/ui/exercise-card/ExerciseCardEdit";
-import { ExerciseListMenu } from "./ExerciseListMenu";
+import { ExerciseListMenu } from "../edit-plan/ExerciseListMenu";
+import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 
-interface EditPlanContentProps {
-  data: WorkoutResponse;
-}
+const CREATE_PLAN_DEFAULT_VALUES: EditPlanForm = {
+  name: "",
+  workoutFocusTypeId: null,
+  targetMuscles: [],
+  autoFillMuscles: false,
+  autoFillDuration: false,
+  durationHours: null,
+  durationMinutes: null,
+  durationSeconds: null,
+  workoutExercises: [],
+};
 
-export default function EditPlanContent({ data }: EditPlanContentProps) {
+export default function CreatePlanContent() {
   const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
@@ -59,7 +65,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
 
   // Draft store
   const draftMode = usePlanFormDraftStore((state) => state.mode);
-  const draftWorkoutId = usePlanFormDraftStore((state) => state.workoutId);
   const draft = usePlanFormDraftStore((state) => state.draft);
   const initializeDraft = usePlanFormDraftStore(
     (state) => state.initializeDraft,
@@ -67,20 +72,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   const replaceDraft = usePlanFormDraftStore((state) => state.replaceDraft);
   const resetDraft = usePlanFormDraftStore((state) => state.resetDraft);
 
-  // Base values from API response
-  const mappedDefaultValues = useMemo(
-    () => mapWorkoutResponseToEditPlanForm(data),
-    [data],
-  );
-
-  // If store already contains draft for this workout, use it instead
   const initialFormValues = useMemo(() => {
-    if (draftMode === "edit" && draftWorkoutId === data.id && draft) {
+    if (draftMode === "create" && draft) {
       return draft;
     }
 
-    return mappedDefaultValues;
-  }, [draftMode, draftWorkoutId, draft, data.id, mappedDefaultValues]);
+    return CREATE_PLAN_DEFAULT_VALUES;
+  }, [draftMode, draft]);
 
   const form = useForm<EditPlanForm>({
     resolver: zodResolver(editPlanFormSchema),
@@ -111,21 +109,19 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       name: "workoutExercises",
     }) ?? [];
 
-  // Initialize Zustand draft once for this workout
+  // Initialize Zustand draft once for create mode
   useEffect(() => {
     initializeDraft({
-      mode: "edit",
-      workoutId: data.id,
+      mode: "create",
       values: initialFormValues,
     });
-  }, [data.id, initialFormValues, initializeDraft]);
+  }, [initialFormValues, initializeDraft]);
 
-  // When draft changes from another page (like manage mode),
+  // When draft changes from another page, like add/manage exercises,
   // refresh RHF so this screen reflects the latest shared draft.
   useEffect(() => {
-    if (draftMode !== "edit" || draftWorkoutId !== data.id || !draft) return;
+    if (draftMode !== "create" || !draft) return;
 
-    // Wait for the page to fully mount
     const frame = requestAnimationFrame(() => {
       reset(draft, {
         keepDefaultValues: true,
@@ -133,33 +129,37 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [draftMode, draftWorkoutId, draft, data.id, reset]);
+  }, [draftMode, draft, reset]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: EditPlanForm) => {
-      const url = workoutApi.update(data.id);
+      const url = workoutApi.create();
+
+      // You can rename this later to mapPlanFormToWorkoutPayload
+      // if create and update use the same payload shape.
       const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
 
-      return await api.patch(url, payload);
+      return await api.post(url, payload);
     },
-    onSuccess: async (_, values) => {
-      form.reset(values);
-      replaceDraft(values);
+    onSuccess: async () => {
+      resetDraft();
 
       await invalidateQueries([
-        workoutQueryKeys.detail(data.id),
         workoutQueryKeys.schedule,
+        workoutQueryKeys.current,
       ]);
 
       toast.success({
-        title: "Plan updated",
-        message: "Your workout plan has been saved.",
+        title: "Plan created",
+        message: "Your workout plan has been created.",
       });
+
+      router.back();
     },
     onError: () => {
       toast.error({
-        title: "Update failed",
-        message: "Unable to save workout plan.",
+        title: "Create failed",
+        message: "Unable to create workout plan.",
       });
     },
   });
@@ -249,8 +249,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     }
   }, [hasExercises, getValues, setValue]);
 
-  // Cancel edit
-  const handleCancelEdit = () => {
+  // Cancel create
+  const handleCancelCreate = () => {
     const resetFormAndBack = () => {
       resetDraft();
       router.back();
@@ -262,8 +262,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     }
 
     Alert.alert(
-      "Discard changes?",
-      "You have unsaved changes. If you go back, your edits will be lost.",
+      "Discard new plan?",
+      "You have unsaved changes. If you go back, this workout plan will be lost.",
       [
         {
           text: "Cancel",
@@ -303,7 +303,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
 
   // Open the manage mode page
   const handleOpenManageMode = () => {
-    // Update Zustand state with the latest form values
     replaceDraft(getValues());
 
     router.push("/(modal)/workout/manage-exercises");
@@ -319,7 +318,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   const footer = (
     <>
       <AppButton
-        title="Save Changes"
+        title="Create Plan"
         variant="primary"
         icon={Save}
         className="flex-1"
@@ -341,9 +340,9 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     <PageLayout
       headerProps={{
         variant: "title",
-        title: "Edit Plan",
+        title: "Create Plan",
         showBackButton: true,
-        onBackPress: handleCancelEdit,
+        onBackPress: handleCancelCreate,
       }}
       stickyFooter={{
         content: footer,
@@ -386,8 +385,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           render={({ field, fieldState }) => (
             <>
               <FormInfiniteSelectInput<WorkoutFocusType>
-                allowEmpty
-                emptySelectionLabel="No workout type"
                 url={workoutApi.getTypes()}
                 queryKey={["workout-types"]}
                 mapOption={(item) => ({ label: item.name, value: item.id })}
@@ -397,12 +394,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                 validationError={!!fieldState.error}
                 title="Select Workout Type"
                 snapPoints={["70%"]}
-                selectedOption={
-                  data.workoutFocusType && {
-                    label: data.workoutFocusType.name,
-                    value: data.workoutFocusType.id,
-                  }
-                }
+                allowEmpty
+                emptySelectionLabel="No workout type"
               />
 
               <FormErrorMessage message={fieldState.error?.message} />
@@ -417,7 +410,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           Target Muscle Groups
         </ThemedText>
 
-        {/* Auto-filed */}
+        {/* Auto-filled */}
         <View className="my-2">
           <Controller
             control={control}
@@ -451,10 +444,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                 mapOption={(item) => ({ label: item.name, value: item.id })}
                 value={field.value}
                 onChange={field.onChange}
-                selectedOptions={data.muscles.map((item) => ({
-                  label: item.muscle.name,
-                  value: item.muscle.id,
-                }))}
+                selectedOptions={[]}
                 placeholder="Select target muscle group"
                 validationError={!!fieldState.error}
                 title="Select Target Muscles"

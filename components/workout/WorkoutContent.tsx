@@ -73,8 +73,7 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
   };
 
   const handleCreateWorkout = () => {
-    // TODO: route to create workout page
-    // router.push("/(pages)/workout/create");
+    router.push("/(pages)/workout/create");
   };
 
   const handleEditPlan = () => {

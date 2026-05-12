@@ -10,6 +10,7 @@ export const workoutApi = {
   getSessionHistory: () => `${BASE}/sessions/history`,
 
   // Create
+  create: () => BASE,
   startSession: (workoutId: string | number) =>
     `${BASE}/${workoutId}/sessions/start`,
   startEmptySession: () => `${BASE}/sessions/start/empty`,
