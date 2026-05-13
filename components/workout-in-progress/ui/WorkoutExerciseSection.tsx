@@ -1,4 +1,9 @@
 import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
+import {
+  DropdownItem,
+  MenuSectionLabel,
+  OptionsMenu,
+} from "@/components/options-menu/OptionsMenu";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
@@ -7,7 +12,10 @@ import {
   ChevronDown,
   ChevronUp,
   MoreVertical,
+  PanelTopOpen,
   Plus,
+  Repeat,
+  Trash2,
 } from "lucide-react-native";
 import { useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
@@ -17,6 +25,8 @@ import { WorkoutSetHeader, WorkoutSetRow } from "./WorkoutSetRow";
 interface WorkoutExerciseSectionProps {
   exercise: WorkoutSessionExerciseModel;
   onAddSet: () => void;
+  onDeleteExercise: () => void;
+  onReplaceExercise: () => void;
   onDeleteSet: (setClientId: string) => void;
   onToggleSetCompleted: (setClientId: string) => void;
   onChangeSetValue: (
@@ -25,17 +35,17 @@ interface WorkoutExerciseSectionProps {
     value: number | null,
   ) => void;
   onChangeRestTime: (value: number) => void;
-  onPressMore?: () => void;
 }
 
 export function WorkoutExerciseSection({
   exercise,
   onAddSet,
+  onDeleteExercise,
+  onReplaceExercise,
   onDeleteSet,
   onToggleSetCompleted,
   onChangeSetValue,
   onChangeRestTime,
-  onPressMore,
 }: WorkoutExerciseSectionProps) {
   const { colors } = useAppTheme();
 
@@ -72,9 +82,10 @@ export function WorkoutExerciseSection({
         </View>
 
         <View className="ml-auto flex-row items-center gap-3">
-          <TouchableOpacity onPress={onPressMore}>
-            <MoreVertical size={18} color={colors.app.textPrimary} />
-          </TouchableOpacity>
+          <WorkoutExerciseSectionMenu
+            onReplaceExercise={onReplaceExercise}
+            onDeleteExercise={onDeleteExercise}
+          />
 
           <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
             <ExpansionIcon size={24} color={colors.app.textPrimary} />
@@ -155,5 +166,48 @@ function WorkoutSetFooter({ onPress }: { onPress: () => void }) {
         Add Set
       </ThemedText>
     </TouchableOpacity>
+  );
+}
+
+type WorkoutExerciseSectionMenuProps = {
+  onReplaceExercise: () => void;
+  onDeleteExercise: () => void;
+};
+
+function WorkoutExerciseSectionMenu({
+  onReplaceExercise,
+  onDeleteExercise,
+}: WorkoutExerciseSectionMenuProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <OptionsMenu
+      menuTrigger={() => (
+        <MoreVertical size={18} color={colors.app.textPrimary} />
+      )}
+    >
+      <MenuSectionLabel label="View" />
+
+      <DropdownItem
+        isToggleItem
+        label="Show full details"
+        icon={PanelTopOpen}
+      />
+
+      <MenuSectionLabel label="Actions" />
+
+      <DropdownItem
+        label="Replace exercise"
+        icon={Repeat}
+        onSelect={onReplaceExercise}
+      />
+
+      <DropdownItem
+        label="Remove exercise"
+        color={colors.app.error}
+        icon={Trash2}
+        onSelect={onDeleteExercise}
+      />
+    </OptionsMenu>
   );
 }

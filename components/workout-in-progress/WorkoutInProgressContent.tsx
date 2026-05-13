@@ -7,13 +7,12 @@ import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import {
-  mapWorkoutSessionModelToFinishPayload,
-  useWorkoutSessionStore,
-} from "@/stores/workoutSessionStore";
+import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { Plus } from "lucide-react-native";
 import { useEffect } from "react";
 import { Alert, ImageBackground, StyleSheet, View } from "react-native";
 import {
@@ -21,9 +20,12 @@ import {
   INITIAL_TIMER_STATS,
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
 import WorkoutTimerBottomSheet from "../bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
+import { AppButton } from "../custom-ui/AppButton";
 import {
   addSessionSet,
+  deleteSessionExercise,
   deleteSessionSet,
+  mapWorkoutSessionModelToFinishPayload,
   syncSessionExerciseCompletion,
 } from "./model/helpers";
 import { WorkoutExerciseSection } from "./ui/WorkoutExerciseSection";
@@ -43,6 +45,7 @@ export function WorkoutInProgressContent({
   const toast = useAppToast();
   const invalidateQueries = useInvalidateQueries();
   const restTimer = useCountdownTimer();
+  const router = useRouter();
 
   // Workout session store
   const hydrated = useWorkoutSessionStore((state) => state.hydrated);
@@ -208,6 +211,45 @@ export function WorkoutInProgressContent({
     }));
   };
 
+  // Add exercise
+  const handleAddExercise = () => {
+    router.push("/(modal)/workout/session/add-session-exercise");
+  };
+
+  // Replace exercise
+  const handleReplaceExercise = (exerciseClientId: string) => {
+    router.push({
+      pathname: "/(modal)/workout/session/add-session-exercise",
+      params: {
+        mode: "replace",
+        exerciseClientId,
+      },
+    });
+  };
+
+  // Delete exercise
+  const handleDeleteExercise = (exerciseClientId: string) => {
+    Alert.alert(
+      "Remove exercise?",
+      "This exercise and all of its sets will be removed from this workout session.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () => {
+            updateSession((prev) =>
+              deleteSessionExercise(prev, exerciseClientId),
+            );
+          },
+        },
+      ],
+    );
+  };
+
   // Cancel session
   const handleCancelWorkout = () => {
     Alert.alert(
@@ -269,13 +311,12 @@ export function WorkoutInProgressContent({
   return (
     <>
       <PageLayout
+        disableContentPadding
         headerProps={{
           variant: "title",
           title: "Workout",
         }}
         containerStyle={{
-          paddingHorizontal: 0,
-          paddingTop: 0,
           paddingBottom: 200,
         }}
       >
@@ -300,19 +341,25 @@ export function WorkoutInProgressContent({
             <ThemedText
               type="default"
               variant="brand"
-              className="mt-1 text-center text-4xl font-bold"
+              className="text-center text-4xl font-bold"
             >
               {storedSession?.workout?.name ?? "Workout"}
             </ThemedText>
           </View>
         </ImageBackground>
 
-        <View className="flex-1 gap-4 px-4">
+        <View className="flex-1 gap-3 px-4">
           {exerciseItems.map((exerciseItem) => (
             <WorkoutExerciseSection
               key={exerciseItem.clientId}
               exercise={exerciseItem}
               onAddSet={() => handleAddSet(exerciseItem.clientId)}
+              onDeleteExercise={() =>
+                handleDeleteExercise(exerciseItem.clientId)
+              }
+              onReplaceExercise={() =>
+                handleReplaceExercise(exerciseItem.clientId)
+              }
               onDeleteSet={(setClientId) =>
                 handleDeleteSet(exerciseItem.clientId, setClientId)
               }
@@ -332,6 +379,15 @@ export function WorkoutInProgressContent({
               }
             />
           ))}
+        </View>
+
+        <View className="mt-3 px-4">
+          <AppButton
+            title="Add exercise"
+            variant="primary"
+            icon={Plus}
+            onPress={handleAddExercise}
+          />
         </View>
       </PageLayout>
 

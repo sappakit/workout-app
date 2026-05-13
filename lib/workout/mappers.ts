@@ -207,7 +207,7 @@ export function mapExerciseToCreateWorkoutExerciseFormItem(
 
   return {
     id: null, // new workoutExercise item
-    clientId: createClientId("new"),
+    clientId: createClientId("new-workout-exercise"),
     orderIndex,
     plannedSets: exercise.defaultSets ?? null,
 

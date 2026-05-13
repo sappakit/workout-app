@@ -1,10 +1,9 @@
-import { getPausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
+import { mapWorkoutSessiontoWorkoutSessionModel } from "@/components/workout-in-progress/model/helpers";
 import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
   WorkoutSessionModel,
 } from "@/types/workout/model/workout.types";
-import { FinishWorkoutSessionPayload } from "@/types/workout/payload/finish-workout-session.types";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
@@ -131,68 +130,3 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
     },
   ),
 );
-
-// API payload -> Workout Session UI
-export const mapWorkoutSessiontoWorkoutSessionModel = (
-  session: WorkoutSession,
-): WorkoutSessionModel => ({
-  ...session,
-  sessionExercises: session.sessionExercises.map((exercise) => ({
-    ...exercise,
-    clientId: `existing-${exercise.id}`,
-    sets: exercise.sets.map((set) => ({
-      ...set,
-      clientId: `existing-${set.id}`,
-    })),
-  })),
-});
-
-// Workout Session UI -> API payload
-export const mapWorkoutSessionModelToFinishPayload = (
-  session: WorkoutSessionModel,
-): FinishWorkoutSessionPayload => {
-  const endedAt = new Date();
-
-  // If currently paused, calculate how long this pause has lasted
-  const currentPausedSeconds = session.pausedAt
-    ? Math.floor(
-        (endedAt.getTime() - new Date(session.pausedAt).getTime()) / 1000,
-      )
-    : 0;
-
-  // Combine past pauses + current pause
-  const totalPausedDuration =
-    session.totalPausedDuration + currentPausedSeconds;
-
-  // Calculate total active workout time (excluding all pauses)
-  const totalDuration = getPausableElapsedSeconds({
-    startedAt: session.startedAt,
-    pausedAt: null,
-    now: endedAt.getTime(),
-    totalPausedDuration,
-  });
-
-  return {
-    endedAt: endedAt.toISOString(),
-    totalDuration,
-    totalPausedDuration,
-    caloriesBurned: session.caloriesBurned,
-    sessionExercises: session.sessionExercises.map((sessionExercise) => ({
-      id: sessionExercise.id ?? null,
-      exerciseId: sessionExercise.exercise.id,
-      orderIndex: sessionExercise.orderIndex,
-      plannedRestTime: sessionExercise.plannedRestTime,
-      completedAt: sessionExercise.completedAt,
-      sets: sessionExercise.sets.map((set) => ({
-        id: set.id,
-        setNumber: set.setNumber,
-        reps: set.reps,
-        weight: set.weight,
-        distance: set.distance,
-        duration: set.duration,
-        performedAt: set.performedAt,
-        completedAt: set.completedAt,
-      })),
-    })),
-  };
-};

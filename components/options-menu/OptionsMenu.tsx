@@ -11,19 +11,27 @@ import {
 } from "react-native-popup-menu";
 import { ThemedText } from "../themed-text";
 
+interface OptionsMenuProps {
+  children: ReactNode;
+  isDisabled?: boolean;
+  menuTrigger?: (props: { isDisabled?: boolean }) => ReactNode;
+}
+
 export function OptionsMenu({
   children,
   isDisabled,
-}: {
-  children: ReactNode;
-  isDisabled?: boolean;
-}) {
+  menuTrigger,
+}: OptionsMenuProps) {
   const { colors } = useAppTheme();
 
   return (
     <Menu>
       <MenuTrigger disabled={isDisabled}>
-        <OptionsButton isDisabled={isDisabled} />
+        {menuTrigger ? (
+          menuTrigger({ isDisabled })
+        ) : (
+          <OptionsButton isDisabled={isDisabled} />
+        )}
       </MenuTrigger>
 
       <MenuOptions
