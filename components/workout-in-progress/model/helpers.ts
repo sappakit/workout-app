@@ -1,0 +1,286 @@
+import { getPausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
+import { createClientId } from "@/lib/id/utils";
+import {
+  WorkoutSessionExerciseModel,
+  WorkoutSessionExerciseSetModel,
+  WorkoutSessionModel,
+} from "@/types/workout/model/workout.types";
+import { FinishWorkoutSessionPayload } from "@/types/workout/payload/finish-workout-session.types";
+import { Exercise } from "@/types/workout/response/exercise.types";
+import { WorkoutSession } from "@/types/workout/response/workout.types";
+
+// State update helpers
+// Add set to exercise
+export function addSessionSet(
+  session: WorkoutSessionModel,
+  exerciseClientId: string,
+): WorkoutSessionModel {
+  return {
+    ...session,
+    sessionExercises: session.sessionExercises.map((exercise) => {
+      if (exercise.clientId !== exerciseClientId) return exercise;
+
+      const lastSet = exercise.sets[exercise.sets.length - 1];
+      const nextSetNumber = lastSet ? lastSet.setNumber + 1 : 1;
+
+      const newSet = createEmptySessionSet(nextSetNumber);
+
+      return syncSessionExerciseCompletion({
+        ...exercise,
+        sets: [...exercise.sets, newSet],
+      });
+    }),
+  };
+}
+
+// Delete set from exercise
+export function deleteSessionSet(
+  session: WorkoutSessionModel,
+  exerciseClientId: string,
+  setClientId: string,
+): WorkoutSessionModel {
+  return {
+    ...session,
+    sessionExercises: session.sessionExercises.map((exercise) => {
+      if (exercise.clientId !== exerciseClientId) return exercise;
+
+      const filteredSets = exercise.sets
+        .filter((set) => set.clientId !== setClientId)
+        .map((set, index) => ({
+          ...set,
+          setNumber: index + 1,
+        }));
+
+      return syncSessionExerciseCompletion({
+        ...exercise,
+        sets: filteredSets,
+      });
+    }),
+  };
+}
+
+// Sync exercise completedAt when sets change
+export function syncSessionExerciseCompletion(
+  exercise: WorkoutSessionExerciseModel,
+): WorkoutSessionExerciseModel {
+  const allSetsCompleted =
+    exercise.sets.length > 0 && exercise.sets.every((set) => !!set.completedAt);
+
+  return {
+    ...exercise,
+    completedAt: allSetsCompleted
+      ? (exercise.completedAt ?? new Date().toISOString())
+      : null,
+  };
+}
+
+// Delete exercise
+export function deleteSessionExercise(
+  session: WorkoutSessionModel,
+  exerciseClientId: string,
+): WorkoutSessionModel {
+  return {
+    ...session,
+    sessionExercises: session.sessionExercises
+      .filter((exercise) => exercise.clientId !== exerciseClientId)
+      .map((exercise, index) => ({
+        ...exercise,
+        orderIndex: index + 1,
+      })),
+  };
+}
+
+// Add session exercises
+export function addSessionExercise(
+  session: WorkoutSessionModel,
+  exercises: Exercise[],
+): WorkoutSessionModel {
+  const currentExercises = session.sessionExercises ?? [];
+
+  const nextSessionExercises: WorkoutSessionExerciseModel[] = [
+    ...currentExercises,
+  ];
+
+  let nextOrderIndex =
+    currentExercises.length > 0
+      ? Math.max(...currentExercises.map((item) => item.orderIndex)) + 1
+      : 1;
+
+  exercises.forEach((exercise) => {
+    const exists = currentExercises.some(
+      (item) => item.exercise.id === exercise.id,
+    );
+
+    if (exists) return;
+
+    nextSessionExercises.push(
+      mapExerciseToSessionExerciseModel(exercise, nextOrderIndex),
+    );
+
+    nextOrderIndex += 1;
+  });
+
+  return {
+    ...session,
+    sessionExercises: nextSessionExercises,
+  };
+}
+
+// Replace one session exercise
+export function replaceSessionExercise(
+  session: WorkoutSessionModel,
+  targetExerciseClientId: string,
+  selectedExercise: Exercise,
+): WorkoutSessionModel {
+  return {
+    ...session,
+    sessionExercises: session.sessionExercises.map((sessionExercise) => {
+      if (sessionExercise.clientId !== targetExerciseClientId) {
+        return sessionExercise;
+      }
+
+      return {
+        ...sessionExercise,
+        exercise: selectedExercise,
+        completedAt: null,
+        plannedRestTime: selectedExercise.defaultRestTime ?? 0,
+        sets:
+          sessionExercise.sets.length > 0
+            ? sessionExercise.sets.map((set) => ({
+                ...set,
+                completedAt: null,
+              }))
+            : [createEmptySessionSet(1)],
+      };
+    }),
+  };
+}
+
+// UI helpers
+// Get progress label for exercise
+export function getExerciseProgressText(exercise: WorkoutSessionExerciseModel) {
+  const completedCount = exercise.sets.filter(
+    (set) => !!set.completedAt,
+  ).length;
+
+  const totalCount = exercise.sets.length;
+
+  if (totalCount === 0) return "No sets yet";
+
+  if (completedCount === totalCount) {
+    return `Completed • ${completedCount}/${totalCount} sets`;
+  }
+
+  return `In progress • ${completedCount}/${totalCount} sets`;
+}
+
+// Mappers
+function createEmptySessionSet(setNumber = 1): WorkoutSessionExerciseSetModel {
+  return {
+    id: null,
+    clientId: createClientId("new-session-set"),
+    setNumber,
+    reps: null,
+    weight: null,
+    distance: null,
+    duration: null,
+    performedAt: null,
+    completedAt: null,
+  };
+}
+
+// API payload -> Workout Session UI
+export const mapWorkoutSessiontoWorkoutSessionModel = (
+  session: WorkoutSession,
+): WorkoutSessionModel => ({
+  ...session,
+  sessionExercises: session.sessionExercises.map((exercise) => {
+    const mappedSets: WorkoutSessionExerciseSetModel[] = exercise.sets.map(
+      (set) => ({
+        ...set,
+        clientId: `existing-session-set-${set.id}`,
+      }),
+    );
+
+    return {
+      ...exercise,
+      clientId: `existing-session-exercise-${exercise.id}`,
+      sets: mappedSets.length > 0 ? mappedSets : [createEmptySessionSet(1)],
+    };
+  }),
+});
+
+// Exercise -> Workout Session Exercise UI
+function mapExerciseToSessionExerciseModel(
+  exercise: Exercise,
+  orderIndex: number,
+): WorkoutSessionExerciseModel {
+  const firstSet = createEmptySessionSet(1);
+
+  return {
+    id: null,
+    clientId: createClientId("new-session-exercise"),
+    orderIndex,
+
+    plannedSets: null,
+    plannedRepsRange: null,
+    plannedWeight: null,
+    plannedRestTime: null,
+    plannedDuration: null,
+    plannedDistance: null,
+
+    completedAt: null,
+    exercise,
+    sets: [firstSet],
+  };
+}
+
+// Workout Session UI -> API payload
+export const mapWorkoutSessionModelToFinishPayload = (
+  session: WorkoutSessionModel,
+): FinishWorkoutSessionPayload => {
+  const endedAt = new Date();
+
+  // If currently paused, calculate how long this pause has lasted
+  const currentPausedSeconds = session.pausedAt
+    ? Math.floor(
+        (endedAt.getTime() - new Date(session.pausedAt).getTime()) / 1000,
+      )
+    : 0;
+
+  // Combine past pauses + current pause
+  const totalPausedDuration =
+    session.totalPausedDuration + currentPausedSeconds;
+
+  // Calculate total active workout time (excluding all pauses)
+  const totalDuration = getPausableElapsedSeconds({
+    startedAt: session.startedAt,
+    pausedAt: null,
+    now: endedAt.getTime(),
+    totalPausedDuration,
+  });
+
+  return {
+    endedAt: endedAt.toISOString(),
+    totalDuration,
+    totalPausedDuration,
+    caloriesBurned: session.caloriesBurned,
+    sessionExercises: session.sessionExercises.map((sessionExercise) => ({
+      id: sessionExercise.id ?? null,
+      exerciseId: sessionExercise.exercise.id,
+      orderIndex: sessionExercise.orderIndex,
+      plannedRestTime: sessionExercise.plannedRestTime,
+      completedAt: sessionExercise.completedAt,
+      sets: sessionExercise.sets.map((set) => ({
+        id: set.id,
+        setNumber: set.setNumber,
+        reps: set.reps,
+        weight: set.weight,
+        distance: set.distance,
+        duration: set.duration,
+        performedAt: set.performedAt,
+        completedAt: set.completedAt,
+      })),
+    })),
+  };
+};
