@@ -99,7 +99,7 @@ export function WorkoutExerciseSection({
             <View className="px-4 pb-4">
               <DurationBottomSheetPicker
                 title="Select Rest Timer"
-                value={exercise.plannedRestTime ?? 0}
+                value={exercise.restTime ?? 0}
                 onChange={onChangeRestTime}
               />
             </View>

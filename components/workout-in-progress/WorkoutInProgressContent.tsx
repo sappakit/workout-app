@@ -183,7 +183,7 @@ export function WorkoutInProgressContent({
     });
 
     if (isCompleting) {
-      restTimer.start(targetExercise?.plannedRestTime ?? 0);
+      restTimer.start(targetExercise?.restTime ?? 0);
     }
   };
 
@@ -207,7 +207,7 @@ export function WorkoutInProgressContent({
   ) => {
     updateSessionExercise(exerciseClientId, (exercise) => ({
       ...exercise,
-      plannedRestTime: value,
+      restTime: value,
     }));
   };
 
