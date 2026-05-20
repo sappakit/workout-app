@@ -36,8 +36,8 @@ import FormNumberInput from "../form/FormNumberInput";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
-import { EditPlanWorkoutExerciseSection } from "./EditPlanWorkoutExerciseSection";
-import { ExerciseListMenu } from "./ExerciseListMenu";
+import { ExerciseListMenu } from "./ui/ExerciseListMenu";
+import { EditPlanWorkoutExerciseSection } from "./ui/WorkoutExerciseSection/EditPlanWorkoutExerciseSection";
 
 interface EditPlanContentProps {
   data: WorkoutResponse;

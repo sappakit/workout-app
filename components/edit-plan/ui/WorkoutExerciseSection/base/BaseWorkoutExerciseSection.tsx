@@ -6,7 +6,6 @@ import {
 } from "@/components/options-menu/OptionsMenu";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
 import {
   BicepsFlexed,
   ChevronDown,
@@ -17,38 +16,51 @@ import {
   Repeat,
   Trash2,
 } from "lucide-react-native";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
-import { getExerciseProgressText } from "../model/helpers";
-import { WorkoutSetHeader, WorkoutSetRow } from "./WorkoutSetRow";
 
-interface WorkoutExerciseSectionProps {
-  exercise: WorkoutSessionExerciseModel;
+type BaseSetItem = {
+  clientId: string;
+};
+
+type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
+  exerciseName: string;
+  subtitle: string;
+  sets: TSet[];
+
+  restTime?: number | null;
+  restTimerTitle?: string;
+  onChangeRestTime?: (seconds: number) => void;
+
   onAddSet: () => void;
   onDeleteExercise: () => void;
-  onReplaceExercise: () => void;
-  onDeleteSet: (setClientId: string) => void;
-  onToggleSetCompleted: (setClientId: string) => void;
-  onChangeSetValue: (
-    setClientId: string,
-    field: "weight" | "reps",
-    value: number | null,
-  ) => void;
-  onChangeRestTime: (value: number) => void;
-}
+  onReplaceExercise?: () => void;
 
-export function WorkoutExerciseSection({
-  exercise,
+  addSetLabel?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+
+  renderSetHeader?: () => ReactElement | null;
+  renderSetRow: (item: TSet, index: number) => ReactElement | null;
+};
+
+export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
+  exerciseName,
+  subtitle,
+  sets,
+  restTime = 0,
+  restTimerTitle = "Select Rest Timer",
+  onChangeRestTime,
   onAddSet,
   onDeleteExercise,
   onReplaceExercise,
-  onDeleteSet,
-  onToggleSetCompleted,
-  onChangeSetValue,
-  onChangeRestTime,
-}: WorkoutExerciseSectionProps) {
+  addSetLabel = "Add Set",
+  emptyTitle = "No sets yet",
+  emptyDescription = "Tap Add Set to start",
+  renderSetHeader,
+  renderSetRow,
+}: BaseWorkoutExerciseSectionProps<TSet>) {
   const { colors } = useAppTheme();
-
   const [expanded, setExpanded] = useState(true);
 
   const ExpansionIcon = expanded ? ChevronUp : ChevronDown;
@@ -71,18 +83,18 @@ export function WorkoutExerciseSection({
           <BicepsFlexed size={28} color={colors.app.brand} />
         </View>
 
-        <View>
+        <View className="flex-1">
           <ThemedText type="default" variant="accent" className="text-base">
-            {exercise.exercise.name}
+            {exerciseName}
           </ThemedText>
 
           <ThemedText type="default" variant="primary" className="text-xs">
-            {getExerciseProgressText(exercise)}
+            {subtitle}
           </ThemedText>
         </View>
 
         <View className="ml-auto flex-row items-center gap-3">
-          <WorkoutExerciseSectionMenu
+          <BaseWorkoutExerciseSectionMenu
             onReplaceExercise={onReplaceExercise}
             onDeleteExercise={onDeleteExercise}
           />
@@ -95,37 +107,25 @@ export function WorkoutExerciseSection({
 
       {expanded && (
         <View>
-          {exercise.sets.length > 0 && (
+          {sets.length > 0 && onChangeRestTime && (
             <View className="px-4 pb-4">
               <DurationBottomSheetPicker
-                title="Select Rest Timer"
-                value={exercise.restTime ?? 0}
+                title={restTimerTitle}
+                value={restTime ?? 0}
                 onChange={onChangeRestTime}
               />
             </View>
           )}
 
           <FlatList
-            data={exercise.sets}
+            data={sets}
             keyExtractor={(item) => item.clientId}
             scrollEnabled={false}
-            renderItem={({ item: setItem }) => (
-              <WorkoutSetRow
-                item={setItem}
-                onDelete={() => onDeleteSet(setItem.clientId)}
-                onToggleComplete={() => onToggleSetCompleted(setItem.clientId)}
-                onChangeWeight={(value) =>
-                  onChangeSetValue(setItem.clientId, "weight", value)
-                }
-                onChangeReps={(value) =>
-                  onChangeSetValue(setItem.clientId, "reps", value)
-                }
-              />
-            )}
+            renderItem={({ item, index }) => renderSetRow(item, index)}
             ListEmptyComponent={
               <View className="items-center gap-1 pb-4">
                 <ThemedText type="default" variant="secondary">
-                  No sets yet
+                  {emptyTitle}
                 </ThemedText>
 
                 <ThemedText
@@ -133,14 +133,16 @@ export function WorkoutExerciseSection({
                   variant="primary"
                   className="text-xs"
                 >
-                  Tap "Add Set" to start tracking
+                  {emptyDescription}
                 </ThemedText>
               </View>
             }
             ListHeaderComponent={
-              exercise.sets.length > 0 ? <WorkoutSetHeader /> : null
+              sets.length > 0 && renderSetHeader ? renderSetHeader() : null
             }
-            ListFooterComponent={<WorkoutSetFooter onPress={onAddSet} />}
+            ListFooterComponent={
+              <WorkoutSetFooter label={addSetLabel} onPress={onAddSet} />
+            }
             ListFooterComponentStyle={{
               borderTopWidth: 1,
               borderColor: colors.app.borderPrimary,
@@ -152,7 +154,13 @@ export function WorkoutExerciseSection({
   );
 }
 
-function WorkoutSetFooter({ onPress }: { onPress: () => void }) {
+function WorkoutSetFooter({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
   const { colors } = useAppTheme();
 
   return (
@@ -163,21 +171,21 @@ function WorkoutSetFooter({ onPress }: { onPress: () => void }) {
       <Plus size={16} color={colors.app.brand} />
 
       <ThemedText type="default" variant="brand">
-        Add Set
+        {label}
       </ThemedText>
     </TouchableOpacity>
   );
 }
 
-type WorkoutExerciseSectionMenuProps = {
-  onReplaceExercise: () => void;
+type BaseWorkoutExerciseSectionMenuProps = {
+  onReplaceExercise?: () => void;
   onDeleteExercise: () => void;
 };
 
-function WorkoutExerciseSectionMenu({
+function BaseWorkoutExerciseSectionMenu({
   onReplaceExercise,
   onDeleteExercise,
-}: WorkoutExerciseSectionMenuProps) {
+}: BaseWorkoutExerciseSectionMenuProps) {
   const { colors } = useAppTheme();
 
   return (
@@ -196,11 +204,13 @@ function WorkoutExerciseSectionMenu({
 
       <MenuSectionLabel label="Actions" />
 
-      <DropdownItem
-        label="Replace exercise"
-        icon={Repeat}
-        onSelect={onReplaceExercise}
-      />
+      {onReplaceExercise && (
+        <DropdownItem
+          label="Replace exercise"
+          icon={Repeat}
+          onSelect={onReplaceExercise}
+        />
+      )}
 
       <DropdownItem
         label="Remove exercise"

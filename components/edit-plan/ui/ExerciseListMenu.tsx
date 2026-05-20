@@ -1,10 +1,10 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { PanelTopOpen, Settings2, Trash2 } from "lucide-react-native";
 import {
   DropdownItem,
   MenuSectionLabel,
   OptionsMenu,
-} from "../options-menu/OptionsMenu";
+} from "@/components/options-menu/OptionsMenu";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { PanelTopOpen, Settings2, Trash2 } from "lucide-react-native";
 
 type ExerciseListMenuProps = {
   showFullExerciseDetails: boolean;

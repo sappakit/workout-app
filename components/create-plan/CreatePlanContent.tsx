@@ -25,6 +25,7 @@ import {
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
+import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
 import { Muscle } from "@/types/workout/response/shared.types";
 import { WorkoutFocusType } from "@/types/workout/response/workout.types";
@@ -35,8 +36,7 @@ import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Alert, View } from "react-native";
-import { ExerciseListMenu } from "../edit-plan/ExerciseListMenu";
-import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
+import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
 
 const CREATE_PLAN_DEFAULT_VALUES: EditPlanForm = {
   name: "",
