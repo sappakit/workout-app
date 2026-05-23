@@ -67,10 +67,7 @@ export default function HomeScreen() {
 
   return (
     <PageLayout
-      headerProps={{
-        variant: "home",
-        userName: "Tae",
-      }}
+      headerProps={{ variant: "home" }}
       // pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
     >
       <View className="gap-4">
