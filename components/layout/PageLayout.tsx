@@ -1,8 +1,15 @@
 import PageHeader, { PageHeaderProps } from "@/components/layout/PageHeader";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
+import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode, useState } from "react";
-import { RefreshControl, ScrollView, View, ViewStyle } from "react-native";
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
 
@@ -77,10 +84,17 @@ export function PageLayout({
     <View
       className="flex-1"
       style={{
-        backgroundColor: bg,
+        // backgroundColor: bg,
         paddingTop: insets.top,
       }}
     >
+      <LinearGradient
+        colors={[colors.app.background, colors.app.backgroundDark]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
       {showHeader && headerProps && (
         <PageHeader {...headerProps} headerBottom={headerBottom} />
       )}

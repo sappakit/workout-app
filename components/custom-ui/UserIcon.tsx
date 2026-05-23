@@ -9,11 +9,11 @@ export function UserIcon() {
     <View
       className="items-center justify-center rounded-full border p-2"
       style={{
-        backgroundColor: colors.app.cardSecondary,
-        borderColor: colors.app.borderTertiary,
+        backgroundColor: colors.app.cardPrimary,
+        borderColor: colors.app.borderPrimary,
       }}
     >
-      <User className="size-8" color={colors.app.borderTertiary} />
+      <User className="size-8" color={colors.app.borderPrimary} />
     </View>
   );
 }

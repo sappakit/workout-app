@@ -14,7 +14,20 @@ import {
 import { twMerge } from "tailwind-merge";
 import { ThemedText } from "../themed-text";
 
-type ButtonVariant = "primary" | "secondary" | "tertiary" | "option" | "ghost";
+type ButtonShape = "square" | "rounded" | "pill";
+const buttonShapeClassMap = {
+  square: "rounded-none",
+  rounded: "rounded-2xl",
+  pill: "rounded-full",
+} satisfies Record<ButtonShape, string>;
+
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "option"
+  | "ghost"
+  | "white";
 type ButtonVariantStyles = {
   container?: ViewStyle;
   containerClassName?: string;
@@ -24,6 +37,7 @@ type ButtonVariantStyles = {
 
 interface BaseButtonProps extends TouchableOpacityProps {
   variant?: ButtonVariant;
+  shape?: ButtonShape;
   loading?: boolean;
   iconSize?: number;
   iconColor?: ColorValue;
@@ -42,6 +56,7 @@ export type ButtonProps = BaseButtonProps & ButtonContent;
 export function AppButton({
   title,
   variant = "primary",
+  shape = "rounded",
   loading,
   disabled,
   icon: Icon,
@@ -71,21 +86,20 @@ export function AppButton({
       },
     },
     secondary: {
-      containerClassName: "border",
+      containerClassName: undefined,
       textClassName: undefined,
       container: {
-        backgroundColor: colors.app.cardSecondary,
-        borderColor: colors.app.borderSecondary,
+        backgroundColor: colors.app.cardPrimary,
       },
       text: {
         color: colors.app.textAccent,
       },
     },
     tertiary: {
-      containerClassName: "border",
+      containerClassName: undefined,
       textClassName: undefined,
       container: {
-        backgroundColor: colors.app.background,
+        backgroundColor: colors.app.cardTertiary,
         borderColor: colors.app.textAccent,
       },
       text: {
@@ -110,9 +124,20 @@ export function AppButton({
         color: colors.app.textPrimary,
       },
     },
+    white: {
+      containerClassName: undefined,
+      textClassName: "font-medium",
+      container: {
+        backgroundColor: colors.app.backgroundWhite,
+      },
+      text: {
+        color: colors.app.textBlack,
+      },
+    },
   } satisfies Record<ButtonVariant, ButtonVariantStyles>;
 
   const currentVariant = variantStyles[variant];
+  const currentShape = buttonShapeClassMap[shape];
 
   return (
     <TouchableOpacity
@@ -121,8 +146,9 @@ export function AppButton({
       activeOpacity={0.8}
       className={twMerge(
         clsx(
-          "h-12 flex-row items-center justify-center rounded-2xl",
+          "h-12 flex-row items-center justify-center",
           currentVariant.containerClassName,
+          currentShape,
           className,
         ),
       )}
@@ -146,6 +172,7 @@ export function AppButton({
 
           {title && (
             <ThemedText
+              type="small"
               className={twMerge(
                 clsx(currentVariant.textClassName, textClassName),
               )}

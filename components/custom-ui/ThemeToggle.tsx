@@ -16,6 +16,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   const rotation = useSharedValue(0);
   const isDark = colorScheme === "dark";
+  const Icon = isDark ? Moon : Sun;
 
   const toggleTheme = () => {
     rotation.value = withTiming(isDark ? 180 : 0, {
@@ -43,11 +44,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         className="items-center justify-center rounded-full p-2"
         style={animatedStyle}
       >
-        {isDark ? (
-          <Moon size={24} color={colors.app.textPrimary} />
-        ) : (
-          <Sun size={24} color={colors.app.textPrimary} />
-        )}
+        <Icon size={24} color={colors.app.borderPrimary} />
       </Animated.View>
     </TouchableOpacity>
   );

@@ -38,10 +38,10 @@ export default function PageHeader(props: PageHeaderRootProps) {
   return (
     <View
       className="relative z-50"
-      style={{
-        backgroundColor: colors.app.pageHeaderBackground,
-        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.05)",
-      }}
+      // style={{
+      //   backgroundColor: colors.app.pageHeaderBackground,
+      //   boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.05)",
+      // }}
     >
       <View className="h-16 flex-row items-center justify-between px-4">
         {props.variant === "title" && props.showBackButton && (
