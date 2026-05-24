@@ -13,7 +13,6 @@ import FormInfiniteSelectInput from "@/components/form/select-input/FormInfinite
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
-import { ExerciseCardEdit } from "@/components/workout/ui/exercise-card/ExerciseCardEdit";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -25,6 +24,7 @@ import {
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
+import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
 import { Muscle } from "@/types/workout/response/shared.types";
 import { WorkoutFocusType } from "@/types/workout/response/workout.types";
@@ -35,8 +35,8 @@ import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Alert, View } from "react-native";
-import { ExerciseListMenu } from "../edit-plan/ExerciseListMenu";
-import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
+import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
+import { PlanWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/PlanWorkoutExerciseSection";
 
 const CREATE_PLAN_DEFAULT_VALUES: EditPlanForm = {
   name: "",
@@ -97,7 +97,7 @@ export default function CreatePlanContent() {
     formState: { errors, isDirty },
   } = form;
 
-  const { fields, replace } = useFieldArray({
+  const { fields, replace, remove } = useFieldArray({
     control,
     name: "workoutExercises",
     keyName: "fieldId",
@@ -301,6 +301,43 @@ export default function CreatePlanContent() {
     );
   };
 
+  // Remove one exercise
+  const handleRemoveExercise = (index: number) => {
+    const targetExercise = workoutExercises[index];
+
+    Alert.alert(
+      "Remove exercise?",
+      targetExercise
+        ? `${targetExercise.exercise.name} will be removed from this workout plan.`
+        : "This exercise will be removed from this workout plan.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () => {
+            remove(index);
+
+            const nextExercises = getValues("workoutExercises").map(
+              (exercise, exerciseIndex) => ({
+                ...exercise,
+                orderIndex: exerciseIndex + 1,
+              }),
+            );
+
+            setValue("workoutExercises", nextExercises, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+          },
+        },
+      ],
+    );
+  };
+
   // Open the manage mode page
   const handleOpenManageMode = () => {
     replaceDraft(getValues());
@@ -313,6 +350,19 @@ export default function CreatePlanContent() {
     replaceDraft(getValues());
 
     router.push("/(modal)/workout/add-exercise");
+  };
+
+  // Replace exercise
+  const handleReplaceExercise = (index: number) => {
+    replaceDraft(getValues());
+
+    router.push({
+      pathname: "/(modal)/workout/add-exercise",
+      params: {
+        mode: "replace",
+        exerciseIndex: index,
+      },
+    });
   };
 
   const footer = (
@@ -606,12 +656,14 @@ export default function CreatePlanContent() {
           </View>
         ) : (
           fields.map((item, index) => (
-            <ExerciseCardEdit
-              key={item.fieldId}
-              form={form}
-              index={index}
-              className="mt-2 rounded-3xl"
-            />
+            <View key={item.fieldId} className="mt-2">
+              <PlanWorkoutExerciseSection
+                form={form}
+                index={index}
+                onDeleteExercise={() => handleRemoveExercise(index)}
+                onReplaceExercise={() => handleReplaceExercise(index)}
+              />
+            </View>
           ))
         )}
       </View>

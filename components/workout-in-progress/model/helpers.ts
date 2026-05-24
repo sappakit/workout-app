@@ -141,13 +141,15 @@ export function replaceSessionExercise(
 
       return {
         ...sessionExercise,
+        workoutExerciseId: null,
         exercise: selectedExercise,
+        restTime: selectedExercise.defaultRestTime ?? null,
         completedAt: null,
-        plannedRestTime: selectedExercise.defaultRestTime ?? 0,
         sets:
           sessionExercise.sets.length > 0
             ? sessionExercise.sets.map((set) => ({
                 ...set,
+                workoutExerciseSetId: null,
                 completedAt: null,
               }))
             : [createEmptySessionSet(1)],
@@ -179,6 +181,7 @@ function createEmptySessionSet(setNumber = 1): WorkoutSessionExerciseSetModel {
   return {
     id: null,
     clientId: createClientId("new-session-set"),
+    workoutExerciseSetId: null,
     setNumber,
     reps: null,
     weight: null,
@@ -220,15 +223,9 @@ function mapExerciseToSessionExerciseModel(
   return {
     id: null,
     clientId: createClientId("new-session-exercise"),
+    workoutExerciseId: null,
     orderIndex,
-
-    plannedSets: null,
-    plannedRepsRange: null,
-    plannedWeight: null,
-    plannedRestTime: null,
-    plannedDuration: null,
-    plannedDistance: null,
-
+    restTime: exercise.defaultRestTime ?? null,
     completedAt: null,
     exercise,
     sets: [firstSet],
@@ -267,12 +264,14 @@ export const mapWorkoutSessionModelToFinishPayload = (
     caloriesBurned: session.caloriesBurned,
     sessionExercises: session.sessionExercises.map((sessionExercise) => ({
       id: sessionExercise.id ?? null,
+      workoutExerciseId: sessionExercise.workoutExerciseId ?? null,
       exerciseId: sessionExercise.exercise.id,
       orderIndex: sessionExercise.orderIndex,
-      plannedRestTime: sessionExercise.plannedRestTime,
+      restTime: sessionExercise.restTime ?? null,
       completedAt: sessionExercise.completedAt,
       sets: sessionExercise.sets.map((set) => ({
-        id: set.id,
+        id: set.id ?? null,
+        workoutExerciseSetId: set.workoutExerciseSetId ?? null,
         setNumber: set.setNumber,
         reps: set.reps,
         weight: set.weight,

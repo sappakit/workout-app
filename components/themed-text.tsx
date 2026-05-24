@@ -3,7 +3,13 @@ import clsx from "clsx";
 import { Text, type TextProps } from "react-native";
 import { twMerge } from "tailwind-merge";
 
-type TextType = "default" | "defaultSemiBold" | "title" | "subtitle";
+type TextType =
+  | "default"
+  | "extraSmall"
+  | "small"
+  | "defaultSemiBold"
+  | "title"
+  | "subtitle";
 
 type Variant =
   | "primary"
@@ -12,7 +18,8 @@ type Variant =
   | "brand"
   | "success"
   | "warning"
-  | "error";
+  | "error"
+  | "white";
 
 export type ThemedTextProps = TextProps & {
   type?: TextType;
@@ -21,10 +28,12 @@ export type ThemedTextProps = TextProps & {
 };
 
 const typeClassMap = {
-  default: "",
+  default: "text-base",
+  extraSmall: "text-xs",
+  small: "text-sm",
   defaultSemiBold: "font-semibold",
   title: "text-2xl font-semibold",
-  subtitle: "text-lg",
+  subtitle: "text-lg font-medium",
 } satisfies Record<TextType, string>;
 
 export function ThemedText({
@@ -44,6 +53,7 @@ export function ThemedText({
     success: colors.app.success,
     warning: colors.app.warning,
     error: colors.app.error,
+    white: colors.app.textWhite,
   } satisfies Record<Variant, string>;
 
   return (

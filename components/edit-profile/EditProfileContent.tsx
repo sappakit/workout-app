@@ -2,6 +2,7 @@ import { userApi } from "@/app/api/user.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -26,6 +27,8 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
   const router = useRouter();
   const toast = useAppToast();
   const invalidateQueries = useInvalidateQueries();
+
+  const { loadUser } = useAuth();
 
   const form = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
@@ -55,7 +58,9 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
     onSuccess: async (_, values) => {
       reset(values);
 
+      // Re-fetch user info
       await invalidateQueries([userQueryKeys.me]);
+      await loadUser();
 
       toast.success({
         title: "Profile updated",

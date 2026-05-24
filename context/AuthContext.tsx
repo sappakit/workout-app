@@ -48,8 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Token exists -> get user from backend
-        const { data } = await api.get("/auth/me");
-        setUser(data as UserAuth);
+        const { data } = await api.get<UserAuth>("/auth/me");
+        setUser(data);
       } catch {
         setUser(null);
         await AuthStorage.clearTokens();
@@ -61,8 +61,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign up
   async function signUp(values: SignUpRequest) {
-    const { data } = await api.post("/auth/register", values);
-    const { accessToken, refreshToken, user } = data as AuthResponse;
+    const { data } = await api.post<AuthResponse>("/auth/register", values);
+    const { accessToken, refreshToken, user } = data;
 
     await AuthStorage.setTokens(accessToken, refreshToken);
     setUser(user);

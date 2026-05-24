@@ -170,6 +170,7 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
             variant="option"
             icon={Zap}
             onPress={handleStartEmptyWorkout}
+            loading={isStartingEmpty}
           />
         </View>
       </View>

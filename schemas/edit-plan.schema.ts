@@ -1,29 +1,9 @@
-import { exerciseTypeFieldConfig } from "@/lib/workout/config";
 import {
   DifficultyLevel,
   ExerciseType,
 } from "@/types/workout/response/exercise.types";
 import { EquipmentCategory } from "@/types/workout/response/shared.types";
 import { z } from "zod";
-
-// helper: add validation error based on exercise-type
-function addRequiredIssueIfMissing(
-  ctx: z.RefinementCtx,
-  config: { requiredFields: string[] },
-  field: string,
-  value: unknown,
-  message: string,
-) {
-  const isMissing = value == null || value === "";
-
-  if (config.requiredFields.includes(field) && isMissing) {
-    ctx.addIssue({
-      code: "custom",
-      path: [field],
-      message,
-    });
-  }
-}
 
 const muscleSchema = z.object({
   id: z.number(),
@@ -50,6 +30,7 @@ export const exerciseSchema = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().nullish(),
+  imageUrl: z.string().nullish(),
 
   exerciseType: z.enum(ExerciseType),
   difficultyLevel: z.enum(DifficultyLevel),
@@ -67,152 +48,38 @@ export const exerciseSchema = z.object({
   equipmentLinks: z.array(exerciseEquipmentLinkSchema).nullish(),
 });
 
-export const workoutExerciseFormSchema = z
-  .object({
-    id: z.number().nullable(),
-    clientId: z.string(), // for manage exercises page
-    orderIndex: z.number(),
+export const workoutExerciseSetFormSchema = z.object({
+  id: z.number().nullable(),
+  clientId: z.string(),
 
-    plannedSets: z.number().min(1, "Sets must be at least 1").nullable(),
+  setNumber: z.number().min(1, "Set number must be at least 1"),
 
-    // plannedRepsRange
-    plannedRepsMin: z.number().min(0, "Min reps cannot be negative").nullable(),
-    plannedRepsMax: z.number().min(0, "Max reps cannot be negative").nullable(),
+  reps: z.number().min(0, "Reps cannot be negative").nullable(),
+  weight: z.number().min(0, "Weight cannot be negative").nullable(),
 
-    plannedWeight: z.number().min(0, "Weight cannot be negative").nullable(),
+  distance: z.number().min(0, "Distance cannot be negative").nullable(),
 
-    // plannedRest
-    plannedRestMinutes: z
-      .number()
-      .min(0, "Minutes cannot be negative")
-      .nullable(),
-    plannedRestSeconds: z
-      .number()
-      .min(0, "Seconds cannot be negative")
-      .max(59, "Seconds must be between 0 and 59")
-      .nullable(),
+  durationMinutes: z.number().min(0, "Minutes cannot be negative").nullable(),
+  durationSeconds: z
+    .number()
+    .min(0, "Seconds cannot be negative")
+    .max(59, "Seconds must be between 0 and 59")
+    .nullable(),
+});
 
-    // plannedDuration
-    plannedDurationMinutes: z
-      .number()
-      .min(0, "Minutes cannot be negative")
-      .nullable(),
-    plannedDurationSeconds: z
-      .number()
-      .min(0, "Seconds cannot be negative")
-      .max(59, "Seconds must be between 0 and 59")
-      .nullable(),
+export const workoutExerciseFormSchema = z.object({
+  id: z.number().nullable(),
+  clientId: z.string(),
+  orderIndex: z.number(),
 
-    plannedDistance: z.number().nullable(),
+  // exercise-level rest time, seconds
+  restTime: z.number().min(0, "Rest time cannot be negative").nullable(),
 
-    exercise: exerciseSchema,
-  })
-  .superRefine((value, ctx) => {
-    const type = value.exercise.exerciseType;
-    const config = exerciseTypeFieldConfig[type];
+  exercise: exerciseSchema,
 
-    // plannedSets
-    addRequiredIssueIfMissing(
-      ctx,
-      config,
-      "plannedSets",
-      value.plannedSets,
-      "Sets is required",
-    );
-
-    // plannedWeight
-    addRequiredIssueIfMissing(
-      ctx,
-      config,
-      "plannedWeight",
-      value.plannedWeight,
-      "Weight is required",
-    );
-
-    // plannedDistance
-    addRequiredIssueIfMissing(
-      ctx,
-      config,
-      "plannedDistance",
-      value.plannedDistance,
-      "Distance is required",
-    );
-
-    // plannedRepsRange (split fields)
-    if (config.requiredFields.includes("plannedRepsRange")) {
-      if (value.plannedRepsMin == null) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedRepsMin"],
-          message: "Enter minimum reps",
-        });
-      }
-
-      if (value.plannedRepsMax == null) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedRepsMax"],
-          message: "Enter maximum reps",
-        });
-      }
-    }
-
-    if (
-      value.plannedRepsMin != null &&
-      value.plannedRepsMax != null &&
-      value.plannedRepsMin > value.plannedRepsMax
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["plannedRepsMin"],
-        message: "Min reps cannot be greater than max reps",
-      });
-
-      ctx.addIssue({
-        code: "custom",
-        path: ["plannedRepsMax"],
-        message: "Max reps must be at least min reps",
-      });
-    }
-
-    // plannedRestTime (split fields)
-    if (config.requiredFields.includes("plannedRestTime")) {
-      if (value.plannedRestMinutes == null) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedRestMinutes"],
-          message: "Enter rest minutes (0 if none)",
-        });
-      }
-
-      if (value.plannedRestSeconds == null) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedRestSeconds"],
-          message: "Enter rest seconds (0 if none)",
-        });
-      }
-    }
-
-    // plannedDuration (split fields)
-    if (config.requiredFields.includes("plannedDuration")) {
-      if (value.plannedDurationMinutes == null) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedDurationMinutes"],
-          message: "Enter duration minutes (0 if none)",
-        });
-      }
-
-      if (value.plannedDurationSeconds == null) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["plannedDurationSeconds"],
-          message: "Enter duration seconds (0 if none)",
-        });
-      }
-    }
-  });
+  // set-level config
+  sets: z.array(workoutExerciseSetFormSchema).min(1, "Add at least one set"),
+});
 
 export const editPlanFormSchema = z
   .object({

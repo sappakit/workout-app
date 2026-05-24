@@ -19,9 +19,9 @@ const appColors = {
 
   // Brand
   // #FD8036, #FA3469, #DB4B4B, #E37531, #F36840
-  brand: "#FD8036",
-  brandLight: "#FFA552",
-  brandDark: "#C45818",
+  brand: "#EF6131",
+  brandLight: "#FA7E49",
+  brandDark: "#BF4F28",
   brandAccent: "#246CD1",
 
   // Status
@@ -58,7 +58,8 @@ export const Colors = {
     ...appColors,
 
     // Base
-    background: "#F5F5F5",
+    background: "#F1F1F1",
+    backgroundDark: "#EFEFEF",
     backgroundWhite: "#FFFFFF",
     backgroundBlack: "#000000",
     shadow: "rgba(0, 0, 0, 0.1)",
@@ -67,19 +68,20 @@ export const Colors = {
     pageHeaderBackground: "#F8F8FA",
 
     // Text
-    textPrimary: "#8C8C8C",
+    textPrimary: "#323232",
     textSecondary: "#D9D9D9",
     textAccent: "#2D2D2D",
 
     // Border
-    borderPrimary: "#D7D7D7",
+    borderPrimary: "#D3D3D3",
     borderSecondary: "#C3C3C3",
     borderTertiary: "#AAAAAA",
 
     // Card
     cardPrimary: "#FFFFFF",
-    cardSecondary: "#E3E3E3",
-    cardTertiary: "#2D2D2D",
+    cardPrimaryDark: "#F8F8F8",
+    cardSecondary: "#F0F0F0",
+    cardTertiary: "#EFEFEF",
 
     // Toast
     toastBackground: "#FFFFFF",
@@ -89,7 +91,8 @@ export const Colors = {
     ...appColors,
 
     // Base
-    background: "#090909",
+    background: "#1D1D1D",
+    backgroundDark: "#171717",
     backgroundWhite: "#FFFFFF",
     backgroundBlack: "#000000",
     shadow: "rgba(0, 0, 0, 0.1)",
@@ -98,19 +101,20 @@ export const Colors = {
     pageHeaderBackground: "#0D0D0D",
 
     // Text
-    textPrimary: "#8F8F8F",
+    textPrimary: "#9C9C9C",
     textSecondary: "#D9D9D9",
     textAccent: "#FFFFFF",
 
     // Border
-    borderPrimary: "#1D1D1D",
+    borderPrimary: "#3B3B3B",
     borderSecondary: "#8F8F8F",
     borderTertiary: "#3B3B3B",
 
     // Card
-    cardPrimary: "#0F0F0F",
-    cardSecondary: "#1D1D1D",
-    cardTertiary: "#2D2D2D",
+    cardPrimary: "#222222",
+    cardPrimaryDark: "#1D1D1D",
+    cardSecondary: "#323232",
+    cardTertiary: "#323232",
 
     // Toast
     toastBackground: "#1D1D1D",

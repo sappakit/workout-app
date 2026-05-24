@@ -26,19 +26,24 @@ export enum WorkoutProgressOverviewType {
   ALL_TIME = "all_time",
 }
 
-interface PlannedWorkoutExerciseConfig {
-  plannedSets: number | null;
-  plannedRepsRange: string | null;
-  plannedWeight: number | null;
-  plannedRestTime: number | null;
-  plannedDuration: number | null;
-  plannedDistance: number | null;
+export interface WorkoutSetValue {
+  reps: number | null;
+  weight: number | null;
+  distance: number | null;
+  duration: number | null; // seconds
 }
 
-export interface WorkoutExerciseItem extends PlannedWorkoutExerciseConfig {
+export interface WorkoutExerciseSet extends WorkoutSetValue {
+  id: number | null;
+  setNumber: number;
+}
+
+export interface WorkoutExerciseItem {
   id: number | null;
   orderIndex: number;
+  restTime: number | null; // seconds
   exercise: Exercise;
+  sets: WorkoutExerciseSet[];
 }
 
 export interface WorkoutMuscleItem {
@@ -55,12 +60,12 @@ export interface WorkoutFocusType {
 export interface WorkoutResponse {
   id: number;
   name: string;
-  description: string;
-  duration: number;
+  description: string | null;
+  duration: number | null;
 
   workoutExercises: WorkoutExerciseItem[];
   muscles: WorkoutMuscleItem[];
-  workoutFocusType: WorkoutFocusType;
+  workoutFocusType: WorkoutFocusType | null;
 }
 
 export interface WorkoutSchedule {
@@ -70,20 +75,19 @@ export interface WorkoutSchedule {
   workout: WorkoutResponse;
 }
 
-export interface WorkoutSessionExerciseSet {
-  id: number;
+export interface WorkoutSessionExerciseSet extends WorkoutSetValue {
+  id: number | null;
+  workoutExerciseSetId?: number | null;
   setNumber: number;
-  reps: number | null;
-  weight: number | null;
-  distance: number | null;
-  duration: number | null; // seconds
   performedAt: string | null;
   completedAt: string | null;
 }
 
-export interface WorkoutSessionExercise extends PlannedWorkoutExerciseConfig {
-  id: number;
+export interface WorkoutSessionExercise {
+  id: number | null;
+  workoutExerciseId?: number | null;
   orderIndex: number;
+  restTime: number | null; // seconds
   completedAt: string | null;
   exercise: Exercise;
   sets: WorkoutSessionExerciseSet[];

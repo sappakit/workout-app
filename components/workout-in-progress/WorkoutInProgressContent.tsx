@@ -6,6 +6,7 @@ import { useCountdownTimer } from "@/hooks/useCountdownTimer";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
+import { ExerciseFieldKey } from "@/lib/workout/config";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
@@ -21,6 +22,7 @@ import {
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
 import WorkoutTimerBottomSheet from "../bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import { AppButton } from "../custom-ui/AppButton";
+import { InProgressWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
 import {
   addSessionSet,
   deleteSessionExercise,
@@ -28,7 +30,6 @@ import {
   mapWorkoutSessionModelToFinishPayload,
   syncSessionExerciseCompletion,
 } from "./model/helpers";
-import { WorkoutExerciseSection } from "./ui/WorkoutExerciseSection";
 
 type WorkoutInProgressContentProps = {
   session: WorkoutSession;
@@ -183,15 +184,15 @@ export function WorkoutInProgressContent({
     });
 
     if (isCompleting) {
-      restTimer.start(targetExercise?.plannedRestTime ?? 0);
+      restTimer.start(targetExercise?.restTime ?? 0);
     }
   };
 
-  // Update set weight/reps
+  // Update set value
   const handleUpdateSetValue = (
     exerciseClientId: string,
     setClientId: string,
-    field: "weight" | "reps",
+    field: ExerciseFieldKey,
     value: number | null,
   ) => {
     updateSessionSet(exerciseClientId, setClientId, (set) => ({
@@ -207,7 +208,7 @@ export function WorkoutInProgressContent({
   ) => {
     updateSessionExercise(exerciseClientId, (exercise) => ({
       ...exercise,
-      plannedRestTime: value,
+      restTime: value,
     }));
   };
 
@@ -269,7 +270,7 @@ export function WorkoutInProgressContent({
     );
   };
 
-  // finish session
+  // Finish session
   const handleFinishWorkoutSession = () => {
     if (!storedSession) return;
 
@@ -350,7 +351,7 @@ export function WorkoutInProgressContent({
 
         <View className="flex-1 gap-3 px-4">
           {exerciseItems.map((exerciseItem) => (
-            <WorkoutExerciseSection
+            <InProgressWorkoutExerciseSection
               key={exerciseItem.clientId}
               exercise={exerciseItem}
               onAddSet={() => handleAddSet(exerciseItem.clientId)}

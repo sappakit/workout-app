@@ -1,6 +1,7 @@
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import {
   UpdateWorkoutExercisePayload,
+  UpdateWorkoutExerciseSetPayload,
   UpdateWorkoutPayload,
 } from "@/types/workout/payload/edit-plan.types";
 import { Exercise } from "@/types/workout/response/exercise.types";
@@ -25,15 +26,7 @@ export function parseRepsRange(repsRange: string | null): RepsRange {
   };
 }
 
-// min/max reps -> repsRange string
-export function formatRepsRange({
-  minReps,
-  maxReps,
-}: RepsRange): string | null {
-  if (minReps == null || maxReps == null) return null;
-  return `${minReps}-${maxReps}`;
-}
-
+// seconds -> { hours, minutes, seconds }
 export function secondsToHMS(totalSeconds: number | null | undefined) {
   if (totalSeconds == null) {
     return { hours: null, minutes: null, seconds: null };
@@ -46,6 +39,7 @@ export function secondsToHMS(totalSeconds: number | null | undefined) {
   return { hours, minutes, seconds };
 }
 
+// (hours, minutes, seconds) -> seconds
 export function hmsToSeconds(
   hours: number | null | undefined,
   minutes: number | null | undefined,
@@ -56,6 +50,7 @@ export function hmsToSeconds(
   return hours * 3600 + minutes * 60 + seconds;
 }
 
+// unknown value -> number or null
 export function toNumberOrNull(value: unknown): number | null {
   if (value == null || value === "") return null;
 
@@ -63,40 +58,42 @@ export function toNumberOrNull(value: unknown): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
-// API payload -> Form
-export function mapWorkoutExerciseToFormItem(
-  item: WorkoutResponse["workoutExercises"][number],
-): EditPlanForm["workoutExercises"][number] {
-  const { minReps, maxReps } = parseRepsRange(item.plannedRepsRange);
-  const rest = secondsToHMS(item.plannedRestTime);
-  const duration = secondsToHMS(item.plannedDuration);
+// API workout exercise set -> Form set
+export function mapWorkoutExerciseSetToFormSet(
+  set: WorkoutExerciseItem["sets"][number],
+): EditPlanForm["workoutExercises"][number]["sets"][number] {
+  const duration = secondsToHMS(set.duration);
 
   return {
-    id: item.id,
-    clientId: `existing-${item.id}`,
-    orderIndex: item.orderIndex,
-    plannedSets: item.plannedSets,
-
-    // plannedRepsRange
-    plannedRepsMin: minReps,
-    plannedRepsMax: maxReps,
-
-    plannedWeight: item.plannedWeight,
-
-    // plannedRestTime
-    plannedRestMinutes: rest.minutes,
-    plannedRestSeconds: rest.seconds,
-
-    // plannedDuration
-    plannedDurationMinutes: duration.minutes,
-    plannedDurationSeconds: duration.seconds,
-
-    plannedDistance: item.plannedDistance,
-
-    exercise: item.exercise,
+    id: set.id,
+    clientId: `existing-workout-exercise-set-${set.id}`,
+    setNumber: set.setNumber,
+    reps: set.reps,
+    weight: set.weight,
+    distance: set.distance,
+    durationMinutes: duration.minutes,
+    durationSeconds: duration.seconds,
   };
 }
 
+// API workout exercise -> Form item
+export function mapWorkoutExerciseToFormItem(
+  item: WorkoutResponse["workoutExercises"][number],
+): EditPlanForm["workoutExercises"][number] {
+  return {
+    id: item.id,
+    clientId: `existing-workout-exercise-${item.id}`,
+    orderIndex: item.orderIndex,
+    restTime: item.restTime,
+    exercise: item.exercise,
+    sets:
+      item.sets.length > 0
+        ? item.sets.map(mapWorkoutExerciseSetToFormSet)
+        : [createEmptyWorkoutExerciseFormSet(1)],
+  };
+}
+
+// API workout response -> Edit plan form
 export function mapWorkoutResponseToEditPlanForm(
   data: WorkoutResponse,
 ): EditPlanForm {
@@ -107,7 +104,6 @@ export function mapWorkoutResponseToEditPlanForm(
     workoutFocusTypeId: data.workoutFocusType?.id ?? null,
     targetMuscles: data.muscles.map((item) => item.muscle.id),
 
-    // plannedDuration
     durationHours: duration.hours ?? 0,
     durationMinutes: duration.minutes ?? 0,
     durationSeconds: duration.seconds ?? 0,
@@ -119,41 +115,34 @@ export function mapWorkoutResponseToEditPlanForm(
   };
 }
 
-// Form -> API payload
+// Form set -> API payload set
+export function mapWorkoutExerciseFormSetToPayload(
+  set: EditPlanForm["workoutExercises"][number]["sets"][number],
+): UpdateWorkoutExerciseSetPayload {
+  return {
+    id: set.id,
+    setNumber: set.setNumber,
+    reps: set.reps,
+    weight: set.weight,
+    distance: set.distance,
+    duration: hmsToSeconds(0, set.durationMinutes, set.durationSeconds),
+  };
+}
+
+// Form workout exercise -> API payload workout exercise
 export function mapWorkoutExerciseFormToPayload(
   item: EditPlanForm["workoutExercises"][number],
 ): UpdateWorkoutExercisePayload {
   return {
     id: item.id,
     orderIndex: item.orderIndex,
-    plannedSets: item.plannedSets,
-
-    plannedRepsRange: formatRepsRange({
-      minReps: item.plannedRepsMin,
-      maxReps: item.plannedRepsMax,
-    }),
-
-    plannedWeight: item.plannedWeight,
-
-    // plannedRestTime
-    plannedRestTime: hmsToSeconds(
-      0,
-      item.plannedRestMinutes,
-      item.plannedRestSeconds,
-    ),
-
-    // plannedDuration
-    plannedDuration: hmsToSeconds(
-      0,
-      item.plannedDurationMinutes,
-      item.plannedDurationSeconds,
-    ),
-
-    plannedDistance: item.plannedDistance,
+    restTime: item.restTime,
     exerciseId: item.exercise.id,
+    sets: item.sets.map(mapWorkoutExerciseFormSetToPayload),
   };
 }
 
+// Edit plan form -> API update workout payload
 export function mapEditPlanFormToUpdateWorkoutPayload(
   values: EditPlanForm,
 ): UpdateWorkoutPayload {
@@ -173,56 +162,83 @@ export function mapEditPlanFormToUpdateWorkoutPayload(
   };
 }
 
-// Form -> WorkoutExerciseItem (for ExerciseCard ui)
+// Form set -> WorkoutExerciseSet response-like item
+export function mapEditPlanSetToWorkoutExerciseSet(
+  set: EditPlanForm["workoutExercises"][number]["sets"][number],
+): WorkoutExerciseItem["sets"][number] {
+  return {
+    id: set.id,
+    setNumber: set.setNumber,
+    reps: set.reps,
+    weight: set.weight,
+    distance: set.distance,
+    duration: hmsToSeconds(0, set.durationMinutes, set.durationSeconds),
+  };
+}
+
+// Form workout exercise -> WorkoutExerciseItem response-like item
 export function mapEditPlanExerciseToWorkoutExerciseItem(
   item: EditPlanForm["workoutExercises"][number],
 ): WorkoutExerciseItem {
   return {
-    ...item,
-    plannedRepsRange: formatRepsRange({
-      minReps: item.plannedRepsMin,
-      maxReps: item.plannedRepsMax,
-    }),
-    plannedRestTime: hmsToSeconds(
-      0,
-      item.plannedRestMinutes,
-      item.plannedRestSeconds,
-    ),
-    plannedDuration: hmsToSeconds(
-      0,
-      item.plannedDurationMinutes,
-      item.plannedDurationSeconds,
-    ),
+    id: item.id,
+    orderIndex: item.orderIndex,
+    restTime: item.restTime,
+    exercise: normalizeExercise(item.exercise),
+    sets: item.sets.map(mapEditPlanSetToWorkoutExerciseSet),
   };
 }
 
-// Exercise (from Add Exercise picker) -> CreateWorkoutExerciseFormItem (for Edit plan ui)
+// Form exercise shape -> normalized Exercise response shape
+function normalizeExercise(
+  exercise: EditPlanForm["workoutExercises"][number]["exercise"],
+): Exercise {
+  return {
+    ...exercise,
+    description: exercise.description ?? null,
+    imageUrl: exercise.imageUrl ?? null,
+
+    defaultCaloriesBurned: exercise.defaultCaloriesBurned ?? null,
+    defaultDuration: exercise.defaultDuration ?? null,
+    defaultRestTime: exercise.defaultRestTime ?? null,
+    defaultRepsRange: exercise.defaultRepsRange ?? null,
+    defaultSets: exercise.defaultSets ?? null,
+
+    demoLink: exercise.demoLink ?? null,
+    howToPerform: exercise.howToPerform ?? null,
+
+    muscles: exercise.muscles ?? null,
+    equipmentLinks: exercise.equipmentLinks ?? null,
+  };
+}
+
+// Create empty workout exercise form set
+export function createEmptyWorkoutExerciseFormSet(
+  setNumber = 1,
+): EditPlanForm["workoutExercises"][number]["sets"][number] {
+  return {
+    id: null,
+    clientId: createClientId("new-workout-exercise-set"),
+    setNumber,
+    reps: null,
+    weight: null,
+    distance: null,
+    durationMinutes: null,
+    durationSeconds: null,
+  };
+}
+
+// Exercise from picker -> new workout exercise form item
 export function mapExerciseToCreateWorkoutExerciseFormItem(
   exercise: Exercise,
   orderIndex: number,
 ): EditPlanForm["workoutExercises"][number] {
-  const reps = parseRepsRange(exercise.defaultRepsRange ?? null);
-  const rest = secondsToHMS(exercise.defaultRestTime);
-  const duration = secondsToHMS(exercise.defaultDuration);
-
   return {
-    id: null, // new workoutExercise item
+    id: null,
     clientId: createClientId("new-workout-exercise"),
     orderIndex,
-    plannedSets: exercise.defaultSets ?? null,
-
-    plannedRepsMin: reps.minReps,
-    plannedRepsMax: reps.maxReps,
-
-    plannedWeight: null,
-
-    plannedRestMinutes: rest.minutes,
-    plannedRestSeconds: rest.seconds,
-
-    plannedDurationMinutes: duration.minutes,
-    plannedDurationSeconds: duration.seconds,
-
-    plannedDistance: null,
+    restTime: null,
     exercise,
+    sets: [createEmptyWorkoutExerciseFormSet(1)],
   };
 }

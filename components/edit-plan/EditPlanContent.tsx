@@ -30,15 +30,14 @@ import { useEffect, useMemo } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Alert, View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
-import { Separator } from "../custom-ui/Separator";
 import FormCheckbox from "../form/FormCheckbox";
 import { FormErrorMessage } from "../form/FormErrorMessage";
 import FormNumberInput from "../form/FormNumberInput";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
-import { ExerciseCardEdit } from "../workout/ui/exercise-card/ExerciseCardEdit";
-import { ExerciseListMenu } from "./ExerciseListMenu";
+import { ExerciseListMenu } from "./ui/ExerciseListMenu";
+import { PlanWorkoutExerciseSection } from "./ui/WorkoutExerciseSection/PlanWorkoutExerciseSection";
 
 interface EditPlanContentProps {
   data: WorkoutResponse;
@@ -99,7 +98,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     formState: { errors, isDirty },
   } = form;
 
-  const { fields, replace } = useFieldArray({
+  const { fields, replace, remove } = useFieldArray({
     control,
     name: "workoutExercises",
     keyName: "fieldId",
@@ -301,6 +300,43 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
+  // Remove one exercise
+  const handleRemoveExercise = (index: number) => {
+    const targetExercise = workoutExercises[index];
+
+    Alert.alert(
+      "Remove exercise?",
+      targetExercise
+        ? `${targetExercise.exercise.name} will be removed from this workout plan.`
+        : "This exercise will be removed from this workout plan.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () => {
+            remove(index);
+
+            const nextExercises = getValues("workoutExercises").map(
+              (exercise, exerciseIndex) => ({
+                ...exercise,
+                orderIndex: exerciseIndex + 1,
+              }),
+            );
+
+            setValue("workoutExercises", nextExercises, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+          },
+        },
+      ],
+    );
+  };
+
   // Open the manage mode page
   const handleOpenManageMode = () => {
     // Update Zustand state with the latest form values
@@ -314,6 +350,19 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     replaceDraft(getValues());
 
     router.push("/(modal)/workout/add-exercise");
+  };
+
+  // Replace exercise
+  const handleReplaceExercise = (index: number) => {
+    replaceDraft(getValues());
+
+    router.push({
+      pathname: "/(modal)/workout/add-exercise",
+      params: {
+        mode: "replace",
+        exerciseIndex: index,
+      },
+    });
   };
 
   const footer = (
@@ -398,10 +447,12 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                 title="Select Workout Type"
                 snapPoints={["70%"]}
                 selectedOption={
-                  data.workoutFocusType && {
-                    label: data.workoutFocusType.name,
-                    value: data.workoutFocusType.id,
-                  }
+                  data.workoutFocusType
+                    ? {
+                        label: data.workoutFocusType.name,
+                        value: data.workoutFocusType.id,
+                      }
+                    : undefined
                 }
               />
 
@@ -417,7 +468,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           Target Muscle Groups
         </ThemedText>
 
-        {/* Auto-filed */}
+        {/* Auto-filled */}
         <View className="my-2">
           <Controller
             control={control}
@@ -585,10 +636,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         <FormErrorMessage message={durationErrorMessage} />
       </View>
 
-      <Separator orientation="horizontal" className="my-6" />
-
       {/* Exercise List */}
-      <View>
+      <View className="mt-6">
         <SectionHeader
           title="Exercise List"
           action={
@@ -616,12 +665,14 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           </View>
         ) : (
           fields.map((item, index) => (
-            <ExerciseCardEdit
-              key={item.fieldId}
-              form={form}
-              index={index}
-              className="mt-2 rounded-3xl"
-            />
+            <View key={item.fieldId} className="mt-2">
+              <PlanWorkoutExerciseSection
+                form={form}
+                index={index}
+                onDeleteExercise={() => handleRemoveExercise(index)}
+                onReplaceExercise={() => handleReplaceExercise(index)}
+              />
+            </View>
           ))
         )}
       </View>
