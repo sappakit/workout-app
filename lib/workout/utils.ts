@@ -1,13 +1,10 @@
-import {
-  Exercise,
-  ExerciseType,
-} from "@/types/workout/response/exercise.types";
+import { ExerciseType } from "@/types/workout/response/exercise.types";
 import {
   WorkoutExerciseItem,
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { Clock, Dumbbell, LucideIcon } from "lucide-react-native";
-import { getExerciseFields } from "./config";
+import { ExerciseFieldKey, getExerciseFields } from "./config";
 import { hmsToSeconds, secondsToHMS } from "./mappers";
 
 /* Duration */
@@ -205,6 +202,8 @@ export function buildWorkoutExerciseDisplayModel(
 ): WorkoutExerciseDisplayModel {
   const fields = getExerciseFields(data.exercise.exerciseType);
 
+  const hasField = (field: ExerciseFieldKey) => fields.includes(field);
+
   // Sets
   const sets = data.sets.length;
 
@@ -223,7 +222,7 @@ export function buildWorkoutExerciseDisplayModel(
 
   const durationValues = data.sets
     .map((set) => set.duration)
-    .filter((value) => value != null);
+    .filter((value): value is number => value != null);
 
   const durationText =
     durationValues.length === 0
@@ -244,22 +243,50 @@ export function buildWorkoutExerciseDisplayModel(
   );
 
   const infoData: ExerciseCardInfoItem[] = [
-    { key: "sets", label: "Total Sets", value: `${sets}` },
+    {
+      key: "sets",
+      label: "Total Sets",
+      value: `${sets}`,
+    },
 
-    ...(fields.has("reps")
-      ? [{ key: "reps", label: "Reps per Set", value: reps }]
+    ...(hasField("reps")
+      ? [
+          {
+            key: "reps",
+            label: "Reps per Set",
+            value: reps,
+          },
+        ]
       : []),
 
-    ...(fields.has("weight")
-      ? [{ key: "weight", label: "Load", value: weight }]
+    ...(hasField("weight")
+      ? [
+          {
+            key: "weight",
+            label: "Load",
+            value: weight,
+          },
+        ]
       : []),
 
-    ...(fields.has("distance")
-      ? [{ key: "distance", label: "Target Distance", value: distance }]
+    ...(hasField("distance")
+      ? [
+          {
+            key: "distance",
+            label: "Target Distance",
+            value: distance,
+          },
+        ]
       : []),
 
-    ...(fields.has("duration")
-      ? [{ key: "duration", label: "Target Duration", value: durationText }]
+    ...(hasField("duration")
+      ? [
+          {
+            key: "duration",
+            label: "Target Duration",
+            value: durationText,
+          },
+        ]
       : []),
 
     {
@@ -286,78 +313,6 @@ export function buildWorkoutExerciseDisplayModel(
       label: `${estimatedDuration} min`,
       icon: Clock,
     },
-  ];
-
-  return {
-    stats,
-    infoData,
-    equipment,
-  };
-}
-
-export function buildExercisePreviewDisplayModel(
-  exercise: Exercise,
-): ExercisePreviewDisplayModel {
-  const fields = getExerciseFields(exercise.exerciseType);
-
-  const defaultSets = exercise.defaultSets ?? 0;
-  const defaultReps = exercise.defaultRepsRange ?? "-";
-  const defaultRest = secondsToHMS(exercise.defaultRestTime ?? 0);
-  const defaultDurationMinutes = Math.ceil(
-    (exercise.defaultDuration ?? 0) / 60,
-  );
-
-  const equipment = (exercise.equipmentLinks ?? []).map(
-    (link) => link.equipment.name,
-  );
-
-  const infoData: ExerciseCardInfoItem[] = [
-    { key: "sets", label: "Default Sets", value: `${defaultSets}` },
-
-    ...(fields.has("reps")
-      ? [{ key: "reps", label: "Default Reps", value: defaultReps }]
-      : []),
-
-    ...(fields.has("weight")
-      ? [{ key: "weight", label: "Default Load", value: "-" }]
-      : []),
-
-    ...(fields.has("distance")
-      ? [{ key: "distance", label: "Default Distance", value: "-" }]
-      : []),
-
-    ...(fields.has("duration")
-      ? [
-          {
-            key: "duration",
-            label: "Default Duration",
-            value: `${defaultDurationMinutes} min`,
-          },
-        ]
-      : []),
-
-    {
-      key: "rest",
-      label: "Default Rest",
-      value: `${defaultRest.minutes} min ${defaultRest.seconds} sec`,
-    },
-  ];
-
-  const stats: ExerciseCardStatItem[] = [
-    {
-      key: "sets",
-      label: `${defaultSets} ${defaultSets !== 1 ? "Sets" : "Set"}`,
-      icon: Dumbbell,
-    },
-    ...(fields.has("duration")
-      ? [
-          {
-            key: "duration",
-            label: `${defaultDurationMinutes} min`,
-            icon: Clock,
-          },
-        ]
-      : []),
   ];
 
   return {

@@ -37,7 +37,7 @@ import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMulti
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
 import { ExerciseListMenu } from "./ui/ExerciseListMenu";
-import { EditPlanWorkoutExerciseSection } from "./ui/WorkoutExerciseSection/EditPlanWorkoutExerciseSection";
+import { PlanWorkoutExerciseSection } from "./ui/WorkoutExerciseSection/PlanWorkoutExerciseSection";
 
 interface EditPlanContentProps {
   data: WorkoutResponse;
@@ -666,7 +666,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         ) : (
           fields.map((item, index) => (
             <View key={item.fieldId} className="mt-2">
-              <EditPlanWorkoutExerciseSection
+              <PlanWorkoutExerciseSection
                 form={form}
                 index={index}
                 onDeleteExercise={() => handleRemoveExercise(index)}

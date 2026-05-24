@@ -11,19 +11,19 @@ import {
   WorkoutSetRow,
 } from "./base/WorkoutSetTable";
 
-type EditPlanWorkoutExerciseSectionProps = {
+type PlanWorkoutExerciseSectionProps = {
   form: UseFormReturn<EditPlanForm>;
   index: number;
   onDeleteExercise: () => void;
   onReplaceExercise?: () => void;
 };
 
-export function EditPlanWorkoutExerciseSection({
+export function PlanWorkoutExerciseSection({
   form,
   index,
   onDeleteExercise,
   onReplaceExercise,
-}: EditPlanWorkoutExerciseSectionProps) {
+}: PlanWorkoutExerciseSectionProps) {
   const { control, getValues, setValue } = form;
 
   const exercise = useWatch({
@@ -100,7 +100,7 @@ export function EditPlanWorkoutExerciseSection({
           columns={columns}
           onDelete={() => handleDeleteSet(setItem.clientId)}
           renderInput={(column) => (
-            <EditPlanWorkoutSetInput
+            <PlanWorkoutSetInput
               control={control}
               column={column}
               exerciseIndex={index}
@@ -113,19 +113,19 @@ export function EditPlanWorkoutExerciseSection({
   );
 }
 
-type EditPlanWorkoutSetInputProps = {
+type PlanWorkoutSetInputProps = {
   control: UseFormReturn<EditPlanForm>["control"];
   column: WorkoutSetColumn;
   exerciseIndex: number;
   setIndex: number;
 };
 
-function EditPlanWorkoutSetInput({
+function PlanWorkoutSetInput({
   control,
   column,
   exerciseIndex,
   setIndex,
-}: EditPlanWorkoutSetInputProps) {
+}: PlanWorkoutSetInputProps) {
   switch (column.key) {
     case "weight":
       return (
