@@ -107,7 +107,9 @@ export const editPlanFormSchema = z
     autoFillMuscles: z.boolean(),
     autoFillDuration: z.boolean(),
 
-    workoutExercises: z.array(workoutExerciseFormSchema),
+    workoutExercises: z
+      .array(workoutExerciseFormSchema)
+      .min(1, "Add at least one exercise"),
   })
   .superRefine((value, ctx) => {
     if (value.durationHours == null) {

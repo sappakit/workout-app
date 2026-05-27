@@ -16,6 +16,7 @@
 - session pause just pause on the frontend but session time still calculate from startedAt
 - make WorkoutTimerBottomSheet show on every page
 - WorkoutTimerBottomSheet buttons don't work if swipe up/down too fast
+- Add error message on exercise with no sets
 
 # OPTIONAL
 

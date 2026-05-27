@@ -100,7 +100,6 @@ export function AppButton({
       textClassName: undefined,
       container: {
         backgroundColor: colors.app.cardTertiary,
-        borderColor: colors.app.textAccent,
       },
       text: {
         color: colors.app.textAccent,
@@ -117,7 +116,7 @@ export function AppButton({
       },
     },
     ghost: {
-      containerClassName: undefined,
+      containerClassName: "h-fit",
       textClassName: undefined,
       container: undefined,
       text: {

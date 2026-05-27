@@ -662,6 +662,8 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
             <ThemedText type="default" variant="primary">
               Tap the + button to add your first exercise
             </ThemedText>
+
+            <FormErrorMessage message={errors.workoutExercises?.message} />
           </View>
         ) : (
           fields.map((item, index) => (

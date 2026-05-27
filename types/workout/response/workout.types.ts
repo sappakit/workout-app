@@ -60,6 +60,7 @@ export interface WorkoutFocusType {
 export interface WorkoutResponse {
   id: number;
   name: string;
+  imageUrl: string | null;
   description: string | null;
   duration: number | null;
 
