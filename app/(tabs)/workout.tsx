@@ -1,47 +1,82 @@
+import { mapWorkoutsToPreviewItems } from "@/components/home/model/workout-preview.mapper";
 import { WorkoutInProgressContent } from "@/components/workout-in-progress/WorkoutInProgressContent";
-import { WorkoutContent } from "@/components/workout/WorkoutContent";
+import WorkoutContent from "@/components/workout/WorkoutContent";
 import { useGetQuery } from "@/lib/query/useGetQuery";
+import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
   WorkoutCurrent,
   WorkoutCurrentMode,
+  WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { workoutApi } from "../api/workout.api";
 
 export default function WorkoutScreen() {
   const invalidateQueries = useInvalidateQueries();
-  const url = workoutApi.getCurrent();
 
-  const { data, isLoading, isError, isFetching } = useGetQuery<WorkoutCurrent>(
+  const {
+    data: currentWorkoutData,
+    isLoading: isCurrentWorkoutLoading,
+    isError: isCurrentWorkoutError,
+    isFetching: isCurrentWorkoutFetching,
+  } = useGetQuery<WorkoutCurrent>(
     workoutQueryKeys.current,
-    url,
+    workoutApi.getCurrent(),
     {
       staleTime: 0,
     },
   );
 
+  const shouldFetchWorkoutPreviews =
+    !!currentWorkoutData &&
+    currentWorkoutData.mode !== WorkoutCurrentMode.IN_PROGRESS;
+
+  const {
+    data: workoutPreviewData,
+    isLoading: isWorkoutPreviewLoading,
+    isError: isWorkoutPreviewError,
+    isFetching: isWorkoutPreviewFetching,
+  } = useInfiniteOptionsQuery<WorkoutResponse>({
+    url: workoutApi.getAll(),
+    queryKey: workoutQueryKeys.all,
+    limit: 4,
+    enabled: shouldFetchWorkoutPreviews,
+  });
+
   const handleRefresh = async () => {
-    await invalidateQueries([workoutQueryKeys.current]);
+    await invalidateQueries([workoutQueryKeys.current, workoutQueryKeys.all]);
   };
 
-  // TODO: add loading/error
-  if (isLoading) return null;
-  if (isError || !data) return null;
+  const workoutPreviews =
+    workoutPreviewData?.pages.flatMap((page) => page.data) ?? [];
+  const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews);
 
-  switch (data.mode) {
+  // TODO: add loading/error
+  if (isCurrentWorkoutLoading) return null;
+  if (isCurrentWorkoutError || !currentWorkoutData) return null;
+
+  switch (currentWorkoutData.mode) {
     // In-progress session
     case WorkoutCurrentMode.IN_PROGRESS:
-      return data.session ? (
-        <WorkoutInProgressContent session={data.session} />
+      return currentWorkoutData.session ? (
+        <WorkoutInProgressContent session={currentWorkoutData.session} />
       ) : null;
 
     // Scheduled workout
     case WorkoutCurrentMode.SCHEDULED:
-      return data.schedule ? (
+      // TODO: add loading/error
+      if (isWorkoutPreviewLoading) return null;
+      if (isWorkoutPreviewError) return null;
+
+      return currentWorkoutData.schedule ? (
         <WorkoutContent
-          data={data.schedule}
-          pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
+          data={currentWorkoutData.schedule}
+          workoutPreviewItems={workoutPreviewItems}
+          pullToRefresh={{
+            refreshing: isCurrentWorkoutFetching || isWorkoutPreviewFetching,
+            onRefresh: handleRefresh,
+          }}
         />
       ) : null;
 

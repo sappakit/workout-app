@@ -80,22 +80,22 @@ export default function HomeContent({
         </View>
 
         <View>
-          <View className="mb-3">
-            <SectionHeader
-              title="Recent workout"
-              action={
-                <AppButton
-                  title="View all"
-                  variant="ghost"
-                  onPress={handleViewAllHistory}
-                />
-              }
-            />
-          </View>
+          <SectionHeader
+            title="Recent workout"
+            action={
+              <AppButton
+                title="View all"
+                variant="ghost"
+                onPress={handleViewAllHistory}
+              />
+            }
+          />
 
-          {historyItems.map((item) => (
-            <RecentWorkoutCard key={item.id} item={item} />
-          ))}
+          <View className="mt-3 gap-4">
+            {historyItems.map((item) => (
+              <RecentWorkoutCard key={item.id} item={item} />
+            ))}
+          </View>
         </View>
       </View>
     </PageLayout>
