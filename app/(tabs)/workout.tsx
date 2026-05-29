@@ -1,5 +1,5 @@
-import { mapWorkoutsToPreviewItems } from "@/components/home/model/workout-preview.mapper";
 import { WorkoutInProgressContent } from "@/components/workout-in-progress/WorkoutInProgressContent";
+import { mapWorkoutsToPreviewItems } from "@/components/workout/model/workout-preview.mapper";
 import WorkoutContent from "@/components/workout/WorkoutContent";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";

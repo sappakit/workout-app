@@ -17,7 +17,7 @@ import { ThemedText } from "../themed-text";
 type ButtonShape = "square" | "rounded" | "pill";
 const buttonShapeClassMap = {
   square: "rounded-none",
-  rounded: "rounded-2xl",
+  rounded: "rounded-xl",
   pill: "rounded-full",
 } satisfies Record<ButtonShape, string>;
 

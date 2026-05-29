@@ -1,10 +1,9 @@
 import { SectionHeader } from "@/components/layout/SectionHeader";
-import { ProgressMetricCard } from "@/components/progress/ui/elements/ProgressMetricCard";
 import { ActivityIndicator, FlatList, View } from "react-native";
-import { ProgressMetricCardItem } from "../elements/ProgressMetricCard";
+import { RecentWorkoutCard, RecentWorkoutCardItem } from "./RecentWorkoutCard";
 
 interface ProgressHistorySectionProps {
-  data: ProgressMetricCardItem[];
+  data: RecentWorkoutCardItem[];
   isFetchingNextPage: boolean;
   onLoadMore: () => void;
 }
@@ -21,6 +20,7 @@ export function ProgressHistorySection({
       contentContainerClassName="gap-3 px-4 pb-8 pt-3"
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.3}
+      showsVerticalScrollIndicator={false}
       ListHeaderComponent={
         <SectionHeader
           title="Recent Workouts"
@@ -34,7 +34,7 @@ export function ProgressHistorySection({
           </View>
         ) : null
       }
-      renderItem={({ item }) => <ProgressMetricCard item={item} />}
+      renderItem={({ item }) => <RecentWorkoutCard item={item} />}
     />
   );
 }

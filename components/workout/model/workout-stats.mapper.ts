@@ -1,15 +1,16 @@
 import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
 
-export type HomeVolumeTrendItem = {
+export type WorkoutVolumeTrendItem = {
   label: string;
   value: number;
 };
 
-export type HomeStatsModel = {
+export type WorkoutStatsModel = {
   totalVolumeText: string;
   workoutsCompletedText: string;
+  completedSetsText: string;
   totalDurationText: string;
-  volumeTrend: HomeVolumeTrendItem[];
+  volumeTrend: WorkoutVolumeTrendItem[];
 };
 
 function formatNumber(value: number) {
@@ -37,12 +38,13 @@ function formatTrendLabel(label: string) {
   return label.slice(0, 1);
 }
 
-export function mapProgressOverviewToHomeStats(
+export function mapProgressOverviewToWorkoutStats(
   overview: WorkoutProgressOverview,
-): HomeStatsModel {
+): WorkoutStatsModel {
   return {
     totalVolumeText: `${formatNumber(overview.summary.totalVolumeKg)} kg`,
     workoutsCompletedText: `${overview.summary.workoutsCompleted}`,
+    completedSetsText: `${overview.summary.completedSets}`,
     totalDurationText: formatDurationMinutes(
       overview.summary.totalDurationSeconds,
     ),

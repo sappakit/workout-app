@@ -1,52 +1,32 @@
-import { HomeStatsModel } from "@/components/home/model/home-stats.mapper";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import clsx from "clsx";
 import { LinearGradient } from "expo-linear-gradient";
-import { ChartBar, Dumbbell, LucideIcon, Timer } from "lucide-react-native";
-import { StyleSheet, View } from "react-native";
-
-interface HomeStatsCardsProps {
-  data: HomeStatsModel;
-}
-
-export function HomeStatsCards({ data }: HomeStatsCardsProps) {
-  return (
-    <View className="flex-row gap-3">
-      <VolumeStatCard
-        value={data.totalVolumeText}
-        volumeTrend={data.volumeTrend}
-      />
-
-      <View className="flex-1 gap-3">
-        <SimpleStatCard
-          icon={Dumbbell}
-          label="Workouts"
-          value={data.workoutsCompletedText}
-        />
-
-        <SimpleStatCard
-          icon={Timer}
-          label="Time"
-          value={data.totalDurationText}
-        />
-      </View>
-    </View>
-  );
-}
+import { ChartBar, LucideIcon } from "lucide-react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { twMerge } from "tailwind-merge";
 
 interface SimpleStatCardProps {
   icon: LucideIcon;
   label: string;
   value: string;
+  className?: string;
+  style?: StyleProp<ViewStyle>;
 }
 
-function SimpleStatCard({ icon: Icon, label, value }: SimpleStatCardProps) {
+export function SimpleStatCard({
+  icon: Icon,
+  label,
+  value,
+  className,
+  style,
+}: SimpleStatCardProps) {
   const { colors } = useAppTheme();
 
   return (
     <View
-      className="rounded-2xl p-4"
-      style={{ backgroundColor: colors.app.cardPrimary }}
+      className={twMerge(clsx("rounded-2xl p-4", className))}
+      style={[{ backgroundColor: colors.app.cardPrimary }, style]}
     >
       <View className="flex-row items-center gap-3">
         <StatIcon icon={Icon} />
@@ -67,34 +47,54 @@ type VolumeStatTrendItem = {
 interface VolumeStatCardProps {
   value: string;
   volumeTrend: VolumeStatTrendItem[];
+  icon?: LucideIcon;
+  label?: string;
+  className?: string;
+  style?: StyleProp<ViewStyle>;
+  barMaxHeight?: number;
+  barWidth?: number;
 }
 
-function VolumeStatCard({ value, volumeTrend }: VolumeStatCardProps) {
+export function VolumeStatCard({
+  value,
+  volumeTrend,
+  icon: Icon = ChartBar,
+  label = "Volume",
+  className,
+  style,
+  barMaxHeight = 36,
+  barWidth = 20,
+}: VolumeStatCardProps) {
   const { colors } = useAppTheme();
 
   const maxValue = Math.max(...volumeTrend.map((item) => item.value), 0);
 
   return (
     <View
-      className="flex-1 justify-between rounded-2xl p-4"
-      style={{ backgroundColor: colors.app.cardPrimary }}
+      className={twMerge(
+        clsx("justify-between gap-4 rounded-2xl p-4", className),
+      )}
+      style={[{ backgroundColor: colors.app.cardPrimary }, style]}
     >
       <View className="flex-row items-center gap-3">
-        <StatIcon icon={ChartBar} />
+        <StatIcon icon={Icon} />
 
-        <StatValue label="Volume" value={value} />
+        <StatValue label={label} value={value} />
       </View>
 
       <View className="flex-row items-end justify-between">
         {volumeTrend.map((item, index) => {
           const height =
-            maxValue > 0 ? Math.max(6, (item.value / maxValue) * 36) : 6;
+            maxValue > 0
+              ? Math.max(6, (item.value / maxValue) * barMaxHeight)
+              : 6;
 
           return (
             <View key={`${item.label}-${index}`} className="items-center gap-2">
               <View
-                className="w-5 rounded-md"
+                className="rounded-md"
                 style={{
+                  width: barWidth,
                   height,
                   backgroundColor: colors.app.brand,
                 }}

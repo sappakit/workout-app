@@ -1,8 +1,7 @@
-import { RecentWorkoutCardItem } from "@/components/home/ui/RecentWorkoutCard";
 import { secondsToHMS } from "@/lib/workout/mappers";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
-import { BarChart3, BicepsFlexed, Dumbbell, Timer } from "lucide-react-native";
-import { ProgressMetricCardItem } from "../ui/elements/ProgressMetricCard";
+import { BarChart3, Dumbbell, Timer } from "lucide-react-native";
+import { RecentWorkoutCardItem } from "../ui/sections/progress-history-section/RecentWorkoutCard";
 
 export function mapWorkoutSessionsToHistoryItems(
   sessions: WorkoutSession[],
@@ -35,39 +34,6 @@ export function mapWorkoutSessionsToHistoryItems(
           label: "Duration",
           value: formatDurationShort(session.totalDuration ?? 0),
           icon: Timer,
-        },
-      ],
-    };
-  });
-}
-
-// TODO: reuse mapWorkoutSessionsToHistoryItems instead of this
-export function mapWorkoutSessionsToProgressHistoryItems(
-  sessions: WorkoutSession[],
-): ProgressMetricCardItem[] {
-  return sessions.map((session) => {
-    const volumeKg = getSessionVolumeKg(session);
-    const completedSets = getCompletedSetCount(session);
-    const totalSets = getTotalSetCount(session);
-
-    return {
-      id: session.id,
-      title: session.workout?.name ?? "Workout",
-      subtitle: session.workout?.workoutFocusType?.name,
-      rightText: formatHistoryDate(session.endedAt ?? session.startedAt),
-      icon: BicepsFlexed,
-      list: [
-        {
-          label: "Duration",
-          value: formatDurationShort(session.totalDuration ?? 0),
-        },
-        {
-          label: "Volume",
-          value: `${formatNumber(volumeKg)} kg`,
-        },
-        {
-          label: "Sets",
-          value: `${completedSets}/${totalSets}`,
         },
       ],
     };

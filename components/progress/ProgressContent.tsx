@@ -4,9 +4,9 @@ import clsx from "clsx";
 import React from "react";
 import { View } from "react-native";
 import { twMerge } from "tailwind-merge";
-import { ProgressMetricCardItem } from "./ui/elements/ProgressMetricCard";
 import { ProgressTabs } from "./ui/elements/ProgressTabs";
-import { ProgressHistorySection } from "./ui/sections/ProgressHistorySection";
+import { ProgressHistorySection } from "./ui/sections/progress-history-section/ProgressHistorySection";
+import { RecentWorkoutCardItem } from "./ui/sections/progress-history-section/RecentWorkoutCard";
 import { ProgressOverviewSection } from "./ui/sections/progress-overview-section/ProgressOverviewSection";
 
 export type ProgressTab = "overview" | "history";
@@ -18,7 +18,7 @@ export type ProgressOverviewState = {
 };
 
 export type ProgressHistoryState = {
-  data: ProgressMetricCardItem[];
+  data: RecentWorkoutCardItem[];
   isLoading: boolean;
   isError: boolean;
   isFetchingNextPage: boolean;

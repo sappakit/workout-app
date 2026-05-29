@@ -1,10 +1,5 @@
 import { workoutApi } from "@/app/api/workout.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
-import { CategoryFilter } from "@/components/home/ui/CategoryFilter";
-import {
-  WorkoutPreviewCard,
-  WorkoutPreviewCardItem,
-} from "@/components/home/ui/WorkoutPreviewCard";
 import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { api } from "@/lib/api";
@@ -17,7 +12,12 @@ import { useRouter } from "expo-router";
 import { Dumbbell } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 import { mapScheduleToWorkoutHeroCardItem } from "./model/workout-content.mapper";
+import { CategoryFilter } from "./ui/CategoryFilter";
 import { WorkoutHeroCard } from "./ui/WorkoutHeroCard";
+import {
+  WorkoutPreviewCard,
+  WorkoutPreviewCardItem,
+} from "./ui/WorkoutPreviewCard";
 import { WorkoutQuickActions } from "./ui/WorkoutQuickActions";
 
 interface WorkoutContentProps {

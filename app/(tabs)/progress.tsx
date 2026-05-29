@@ -1,5 +1,5 @@
 import { workoutApi } from "@/app/api/workout.api";
-import { mapWorkoutSessionsToProgressHistoryItems } from "@/components/progress/model/progress-history.mapper";
+import { mapWorkoutSessionsToHistoryItems } from "@/components/progress/model/progress-history.mapper";
 import ProgressContent, {
   ProgressHistoryState,
   ProgressOverviewState,
@@ -45,11 +45,9 @@ export default function ProgressScreen() {
     enabled: activeTab === "history",
   });
 
-  const historyItems = sessionHistoryData
-    ? mapWorkoutSessionsToProgressHistoryItems(
-        sessionHistoryData.pages.flatMap((page) => page.data),
-      )
-    : [];
+  const sessionHistory =
+    sessionHistoryData?.pages.flatMap((page) => page.data) ?? [];
+  const historyItems = mapWorkoutSessionsToHistoryItems(sessionHistory);
 
   const overviewState: ProgressOverviewState = {
     data: overviewData,

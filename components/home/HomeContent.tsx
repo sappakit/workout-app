@@ -1,30 +1,30 @@
-import { HomeStatsModel } from "@/components/home/model/home-stats.mapper";
-import { CategoryFilter } from "@/components/home/ui/CategoryFilter";
 import { HeroCard } from "@/components/home/ui/HeroCard";
-import {
-  RecentWorkoutCard,
-  RecentWorkoutCardItem,
-} from "@/components/home/ui/RecentWorkoutCard";
-import { HomeStatsCards } from "@/components/home/ui/StatCard";
-import {
-  WorkoutPreviewCard,
-  WorkoutPreviewCardItem,
-} from "@/components/home/ui/WorkoutPreviewCard";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
+import {
+  RecentWorkoutCard,
+  RecentWorkoutCardItem,
+} from "../progress/ui/sections/progress-history-section/RecentWorkoutCard";
+import { WorkoutStatsModel } from "../workout/model/workout-stats.mapper";
+import { CategoryFilter } from "../workout/ui/CategoryFilter";
+import { HomeStatsCards } from "../workout/ui/stats-cards/HomeStatsCards";
+import {
+  WorkoutPreviewCard,
+  WorkoutPreviewCardItem,
+} from "../workout/ui/WorkoutPreviewCard";
 
 interface HomeContentProps {
-  homeStats: HomeStatsModel;
+  workoutStats: WorkoutStatsModel;
   workoutPreviewItems: WorkoutPreviewCardItem[];
   historyItems: RecentWorkoutCardItem[];
 }
 
 export default function HomeContent({
-  homeStats,
+  workoutStats,
   workoutPreviewItems,
   historyItems,
 }: HomeContentProps) {
@@ -50,7 +50,7 @@ export default function HomeContent({
       <View className="gap-4">
         <HeroCard onStartWorkout={handleStartWorkout} />
 
-        <HomeStatsCards data={homeStats} />
+        <HomeStatsCards data={workoutStats} />
 
         <View>
           <View className="mb-3">

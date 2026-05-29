@@ -1,7 +1,7 @@
 import HomeContent from "@/components/home/HomeContent";
-import { mapProgressOverviewToHomeStats } from "@/components/home/model/home-stats.mapper";
-import { mapWorkoutsToPreviewItems } from "@/components/home/model/workout-preview.mapper";
 import { mapWorkoutSessionsToHistoryItems } from "@/components/progress/model/progress-history.mapper";
+import { mapWorkoutsToPreviewItems } from "@/components/workout/model/workout-preview.mapper";
+import { mapProgressOverviewToWorkoutStats } from "@/components/workout/model/workout-stats.mapper";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
@@ -42,16 +42,18 @@ export default function HomeScreen() {
     limit: 3,
   });
 
-  const homeStats = progressOverviewData
-    ? mapProgressOverviewToHomeStats(progressOverviewData)
+  const workoutStats = progressOverviewData
+    ? mapProgressOverviewToWorkoutStats(progressOverviewData)
     : null;
 
   const sessionHistory =
     sessionHistoryData?.pages.flatMap((page) => page.data) ?? [];
+
   const historyItems = mapWorkoutSessionsToHistoryItems(sessionHistory);
 
   const workoutPreviews =
     workoutPreviewData?.pages.flatMap((page) => page.data) ?? [];
+
   const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews);
 
   // TODO: add loading/error UI
@@ -64,22 +66,11 @@ export default function HomeScreen() {
     isProgressOverviewError || isWorkoutPreviewError || isSessionHistoryError;
 
   if (isLoading) return null;
-  if (isError || !homeStats) return null;
-
-  // if (isLoading) return <WorkoutSkeleton />;
-
-  // if (isError || !data)
-  //   return (
-  //     <ErrorState
-  //       title="Failed to Load Workout"
-  //       message="We couldn't load today's workout."
-  //       onRetry={refetch}
-  //     />
-  //   );
+  if (isError || !workoutStats) return null;
 
   return (
     <HomeContent
-      homeStats={homeStats}
+      workoutStats={workoutStats}
       workoutPreviewItems={workoutPreviewItems}
       historyItems={historyItems}
     />
