@@ -108,7 +108,7 @@ export function WorkoutSetRow({
     >
       <View
         className="flex-row items-center gap-4 p-2"
-        style={{ backgroundColor: colors.app.cardPrimary }}
+        style={{ backgroundColor: colors.app.cardPrimaryDark }}
       >
         <View className="w-16 items-center">
           <ThemedText type="default" variant="primary">

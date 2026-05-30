@@ -1,9 +1,10 @@
-import { getExerciseProgressText } from "@/components/workout-in-progress/model/helpers";
-import { ExerciseFieldKey } from "@/lib/workout/config";
 import {
-  WorkoutSessionExerciseModel,
-  WorkoutSessionExerciseSetModel,
-} from "@/types/workout/model/workout.types";
+  getExerciseProgressText,
+  getPreviousSetValue,
+  getWorkoutSessionSetValue,
+} from "@/components/workout-in-progress/model/helpers";
+import { ExerciseFieldKey } from "@/lib/workout/config";
+import { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
 import { useMemo } from "react";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
 import {
@@ -48,6 +49,7 @@ export function InProgressWorkoutExerciseSection({
     <BaseWorkoutExerciseSection
       exerciseName={exercise.exercise.name}
       subtitle={getExerciseProgressText(exercise)}
+      imageUrl={exercise.exercise.imageUrl}
       sets={exercise.sets}
       restTime={exercise.restTime ?? 0}
       onChangeRestTime={onChangeRestTime}
@@ -58,23 +60,38 @@ export function InProgressWorkoutExerciseSection({
       renderSetHeader={() => (
         <WorkoutSetHeader columns={columns} trailingHeaderLabel="DONE" />
       )}
-      renderSetRow={(setItem) => (
+      renderSetRow={(setItem, index) => (
         <WorkoutSetRow
           setNumber={setItem.setNumber}
           columns={columns}
           onDelete={() => onDeleteSet(setItem.clientId)}
-          renderInput={(column) => (
-            <WorkoutSetInput
-              value={getWorkoutSessionSetValue(setItem, column.key)}
-              onChange={(value) =>
-                onChangeSetValue(setItem.clientId, column.key, value)
-              }
-              placeholder={column.placeholder}
-              allowDecimal={column.allowDecimal}
-              min={column.min}
-              max={column.max}
-            />
-          )}
+          renderInput={(column) => {
+            const value = getWorkoutSessionSetValue(setItem, column.key);
+
+            const previousValue = getPreviousSetValue({
+              sets: exercise.sets,
+              currentIndex: index,
+              field: column.key,
+            });
+
+            const placeholder =
+              previousValue != null
+                ? String(previousValue)
+                : column.placeholder;
+
+            return (
+              <WorkoutSetInput
+                value={value}
+                onChange={(value) =>
+                  onChangeSetValue(setItem.clientId, column.key, value)
+                }
+                placeholder={placeholder}
+                allowDecimal={column.allowDecimal}
+                min={column.min}
+                max={column.max}
+              />
+            );
+          }}
           renderTrailingCell={() => (
             <WorkoutSetDoneCheckbox
               checked={!!setItem.completedAt}
@@ -85,26 +102,4 @@ export function InProgressWorkoutExerciseSection({
       )}
     />
   );
-}
-
-function getWorkoutSessionSetValue(
-  set: WorkoutSessionExerciseSetModel,
-  field: ExerciseFieldKey,
-): number | null {
-  switch (field) {
-    case "weight":
-      return set.weight ?? null;
-
-    case "reps":
-      return set.reps ?? null;
-
-    case "distance":
-      return set.distance ?? null;
-
-    case "duration":
-      return set.duration ?? null;
-
-    default:
-      return null;
-  }
 }

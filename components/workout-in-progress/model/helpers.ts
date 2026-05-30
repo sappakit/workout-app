@@ -1,5 +1,6 @@
 import { getPausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
 import { createClientId } from "@/lib/id/utils";
+import { ExerciseFieldKey, getExerciseFields } from "@/lib/workout/config";
 import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
@@ -283,3 +284,88 @@ export const mapWorkoutSessionModelToFinishPayload = (
     })),
   };
 };
+
+// Set input value helpers
+// Commit inherited placeholder values into empty set fields
+export function commitInheritedSetValues({
+  set,
+  sets,
+  currentIndex,
+  exercise,
+}: {
+  set: WorkoutSessionExerciseSetModel;
+  sets: WorkoutSessionExerciseSetModel[];
+  currentIndex: number;
+  exercise: WorkoutSessionExerciseModel;
+}): WorkoutSessionExerciseSetModel {
+  const fields = Array.from(getExerciseFields(exercise.exercise.exerciseType));
+
+  return fields.reduce<WorkoutSessionExerciseSetModel>((updatedSet, field) => {
+    const currentValue = getWorkoutSessionSetValue(updatedSet, field);
+
+    // If user already typed a value, do not overwrite it.
+    if (currentValue != null) {
+      return updatedSet;
+    }
+
+    const inheritedValue = getPreviousSetValue({
+      sets,
+      currentIndex,
+      field,
+    });
+
+    // If there is no previous value, keep it empty.
+    if (inheritedValue == null) {
+      return updatedSet;
+    }
+
+    return updateWorkoutSessionSetValue(updatedSet, field, inheritedValue);
+  }, set);
+}
+
+// Get nearest previous actual value for a set field
+export function getPreviousSetValue({
+  sets,
+  currentIndex,
+  field,
+}: {
+  sets: WorkoutSessionExerciseSetModel[];
+  currentIndex: number;
+  field: ExerciseFieldKey;
+}): number | null {
+  for (let index = currentIndex - 1; index >= 0; index--) {
+    const previousSet = sets[index];
+
+    if (!previousSet) {
+      continue;
+    }
+
+    const previousValue = getWorkoutSessionSetValue(previousSet, field);
+
+    if (previousValue != null) {
+      return previousValue;
+    }
+  }
+
+  return null;
+}
+
+// Get actual value from a session set field
+export function getWorkoutSessionSetValue(
+  set: WorkoutSessionExerciseSetModel,
+  field: ExerciseFieldKey,
+): number | null {
+  return set[field] ?? null;
+}
+
+// Update actual value for a session set field
+function updateWorkoutSessionSetValue(
+  set: WorkoutSessionExerciseSetModel,
+  field: ExerciseFieldKey,
+  value: number | null,
+): WorkoutSessionExerciseSetModel {
+  return {
+    ...set,
+    [field]: value,
+  };
+}

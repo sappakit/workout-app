@@ -1,7 +1,12 @@
 import { createEmptyWorkoutExerciseFormSet } from "@/lib/workout/mappers";
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { useMemo } from "react";
-import { Controller, UseFormReturn, useWatch } from "react-hook-form";
+import {
+  Controller,
+  FieldPath,
+  UseFormReturn,
+  useWatch,
+} from "react-hook-form";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
 import {
   getWorkoutSetColumns,
@@ -86,6 +91,7 @@ export function PlanWorkoutExerciseSection({
       subtitle={`${exercise.sets.length} ${
         exercise.sets.length === 1 ? "set" : "sets"
       }`}
+      imageUrl={exercise.exercise.imageUrl}
       sets={exercise.sets}
       restTime={exercise.restTime ?? 0}
       onChangeRestTime={handleChangeRestTime}
@@ -126,69 +132,15 @@ function PlanWorkoutSetInput({
   exerciseIndex,
   setIndex,
 }: PlanWorkoutSetInputProps) {
+  const baseName =
+    `workoutExercises.${exerciseIndex}.sets.${setIndex}` as const;
+
   switch (column.key) {
-    case "weight":
-      return (
-        <Controller
-          control={control}
-          name={`workoutExercises.${exerciseIndex}.sets.${setIndex}.weight`}
-          render={({ field, fieldState }) => (
-            <WorkoutSetInput
-              value={field.value}
-              onChange={field.onChange}
-              error={!!fieldState.error}
-              placeholder={column.placeholder}
-              allowDecimal={column.allowDecimal}
-              min={column.min}
-              max={column.max}
-            />
-          )}
-        />
-      );
-
-    case "reps":
-      return (
-        <Controller
-          control={control}
-          name={`workoutExercises.${exerciseIndex}.sets.${setIndex}.reps`}
-          render={({ field, fieldState }) => (
-            <WorkoutSetInput
-              value={field.value}
-              onChange={field.onChange}
-              error={!!fieldState.error}
-              placeholder={column.placeholder}
-              allowDecimal={column.allowDecimal}
-              min={column.min}
-              max={column.max}
-            />
-          )}
-        />
-      );
-
-    case "distance":
-      return (
-        <Controller
-          control={control}
-          name={`workoutExercises.${exerciseIndex}.sets.${setIndex}.distance`}
-          render={({ field, fieldState }) => (
-            <WorkoutSetInput
-              value={field.value}
-              onChange={field.onChange}
-              error={!!fieldState.error}
-              placeholder={column.placeholder}
-              allowDecimal={column.allowDecimal}
-              min={column.min}
-              max={column.max}
-            />
-          )}
-        />
-      );
-
     case "duration":
       return (
         <Controller
           control={control}
-          name={`workoutExercises.${exerciseIndex}.sets.${setIndex}.durationMinutes`}
+          name={`${baseName}.durationMinutes`}
           render={({ field, fieldState }) => (
             <WorkoutSetInput
               value={field.value}
@@ -200,10 +152,51 @@ function PlanWorkoutSetInput({
               max={column.max}
             />
           )}
+        />
+      );
+
+    case "weight":
+    case "reps":
+    case "distance":
+      return (
+        <PlanWorkoutNumberSetInput
+          control={control}
+          name={`${baseName}.${column.key}`}
+          column={column}
         />
       );
 
     default:
       return null;
   }
+}
+
+type PlanWorkoutNumberSetInputProps = {
+  control: UseFormReturn<EditPlanForm>["control"];
+  name: FieldPath<EditPlanForm>;
+  column: WorkoutSetColumn;
+};
+
+function PlanWorkoutNumberSetInput({
+  control,
+  name,
+  column,
+}: PlanWorkoutNumberSetInputProps) {
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field, fieldState }) => (
+        <WorkoutSetInput
+          value={field.value as number | null}
+          onChange={field.onChange}
+          error={!!fieldState.error}
+          placeholder={column.placeholder}
+          allowDecimal={column.allowDecimal}
+          min={column.min}
+          max={column.max}
+        />
+      )}
+    />
+  );
 }

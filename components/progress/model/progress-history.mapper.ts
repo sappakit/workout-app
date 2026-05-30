@@ -1,6 +1,6 @@
 import { secondsToHMS } from "@/lib/workout/mappers";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
-import { BarChart3, Dumbbell, Timer } from "lucide-react-native";
+import { Layers, Timer, Weight } from "lucide-react-native";
 import { RecentWorkoutCardItem } from "../ui/sections/progress-history-section/RecentWorkoutCard";
 
 export function mapWorkoutSessionsToHistoryItems(
@@ -23,12 +23,12 @@ export function mapWorkoutSessionsToHistoryItems(
         {
           label: "Sets",
           value: `${completedSets}/${totalSets}`,
-          icon: BarChart3,
+          icon: Layers,
         },
         {
           label: "Volume",
           value: `${formatNumber(volumeKg)} kg`,
-          icon: Dumbbell,
+          icon: Weight,
         },
         {
           label: "Duration",

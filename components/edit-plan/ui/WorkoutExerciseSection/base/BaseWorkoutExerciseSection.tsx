@@ -4,10 +4,10 @@ import {
   MenuSectionLabel,
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
+import { WorkoutImageAvatar } from "@/components/progress/ui/sections/progress-history-section/RecentWorkoutCard";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
-  BicepsFlexed,
   ChevronDown,
   ChevronUp,
   MoreVertical,
@@ -26,6 +26,7 @@ type BaseSetItem = {
 type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
   exerciseName: string;
   subtitle: string;
+  imageUrl?: string | null;
   sets: TSet[];
 
   restTime?: number | null;
@@ -47,6 +48,7 @@ type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
 export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
   exerciseName,
   subtitle,
+  imageUrl,
   sets,
   restTime = 0,
   restTimerTitle = "Select Rest Timer",
@@ -67,21 +69,13 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
 
   return (
     <View
-      className="rounded-2xl border"
+      className="overflow-hidden rounded-2xl"
       style={{
         backgroundColor: colors.app.cardPrimary,
-        borderColor: colors.app.borderPrimary,
       }}
     >
       <View className="flex-row items-center gap-3 p-4">
-        <View
-          className="h-14 w-14 items-center justify-center rounded-full"
-          style={{
-            backgroundColor: colors.app.brand + "20",
-          }}
-        >
-          <BicepsFlexed size={28} color={colors.app.brand} />
-        </View>
+        <WorkoutImageAvatar imageUrl={imageUrl} />
 
         <View className="flex-1">
           <ThemedText type="default" variant="accent" className="text-base">
@@ -106,9 +100,9 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
       </View>
 
       {expanded && (
-        <View>
+        <View style={{ backgroundColor: colors.app.cardPrimaryDark }}>
           {sets.length > 0 && onChangeRestTime && (
-            <View className="px-4 pb-4">
+            <View className="p-4">
               <DurationBottomSheetPicker
                 title={restTimerTitle}
                 value={restTime ?? 0}
@@ -123,7 +117,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
             scrollEnabled={false}
             renderItem={({ item, index }) => renderSetRow(item, index)}
             ListEmptyComponent={
-              <View className="items-center gap-1 pb-4">
+              <View className="items-center gap-1 p-4">
                 <ThemedText type="default" variant="secondary">
                   {emptyTitle}
                 </ThemedText>
@@ -143,10 +137,6 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
             ListFooterComponent={
               <WorkoutSetFooter label={addSetLabel} onPress={onAddSet} />
             }
-            ListFooterComponentStyle={{
-              borderTopWidth: 1,
-              borderColor: colors.app.borderPrimary,
-            }}
           />
         </View>
       )}

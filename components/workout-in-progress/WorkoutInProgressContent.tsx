@@ -1,6 +1,7 @@
 import { workoutApi } from "@/app/api/workout.api";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
+import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useCountdownTimer } from "@/hooks/useCountdownTimer";
 import { api } from "@/lib/api";
@@ -11,20 +12,22 @@ import { workoutQueryKeys } from "@/lib/workout/keys";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Plus } from "lucide-react-native";
+import { Dumbbell, Layers, Plus, Weight } from "lucide-react-native";
 import { useEffect } from "react";
-import { Alert, ImageBackground, StyleSheet, View } from "react-native";
+import { Alert, ImageBackground, View } from "react-native";
 import {
+  getWorkoutTimerMetricDisplay,
   getWorkoutTimerStats,
   INITIAL_TIMER_STATS,
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
 import WorkoutTimerBottomSheet from "../bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import { AppButton } from "../custom-ui/AppButton";
 import { InProgressWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
+import { RecentMetricList } from "../progress/ui/sections/progress-history-section/RecentWorkoutCard";
 import {
   addSessionSet,
+  commitInheritedSetValues,
   deleteSessionExercise,
   deleteSessionSet,
   mapWorkoutSessionModelToFinishPayload,
@@ -34,9 +37,6 @@ import {
 type WorkoutInProgressContentProps = {
   session: WorkoutSession;
 };
-
-const fallbackImage =
-  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80";
 
 export function WorkoutInProgressContent({
   session,
@@ -82,6 +82,27 @@ export function WorkoutInProgressContent({
     ? getWorkoutTimerStats(storedSession)
     : INITIAL_TIMER_STATS;
 
+  // Stats for workout card
+  const timerMetrics = getWorkoutTimerMetricDisplay(timerStats);
+
+  const summaryMetricList = [
+    {
+      label: timerMetrics.exercises.label,
+      value: timerMetrics.exercises.value,
+      icon: Dumbbell,
+    },
+    {
+      label: timerMetrics.sets.label,
+      value: timerMetrics.sets.value,
+      icon: Layers,
+    },
+    {
+      label: timerMetrics.volume.label,
+      value: timerMetrics.volume.value,
+      icon: Weight,
+    },
+  ];
+
   /* Mutations */
   // Cancel workout
   const cancelWorkoutMutation = useMutation({
@@ -119,7 +140,7 @@ export function WorkoutInProgressContent({
       return api.patch(workoutApi.finishSession(storedSession.id), payload);
     },
     onSuccess: async () => {
-      await invalidateQueries([workoutQueryKeys.current]);
+      await invalidateQueries([workoutQueryKeys.all]);
 
       restTimer.stop();
       clearSession();
@@ -168,14 +189,38 @@ export function WorkoutInProgressContent({
     const isCompleting = !targetSet?.completedAt;
 
     updateSessionExercise(exerciseClientId, (exercise) => {
-      const updatedSets = exercise.sets.map((set) =>
-        set.clientId === setClientId
-          ? {
-              ...set,
-              completedAt: set.completedAt ? null : completedAt,
-            }
-          : set,
+      const targetSetIndex = exercise.sets.findIndex(
+        (set) => set.clientId === setClientId,
       );
+
+      if (targetSetIndex === -1) {
+        return exercise;
+      }
+
+      const updatedSets = exercise.sets.map((set, index) => {
+        if (set.clientId !== setClientId) {
+          return set;
+        }
+
+        // Unchecking DONE should only remove completedAt
+        if (set.completedAt) {
+          return {
+            ...set,
+            completedAt: null,
+          };
+        }
+
+        // Checking DONE should commit inherited placeholder values
+        return {
+          ...commitInheritedSetValues({
+            set,
+            sets: exercise.sets,
+            currentIndex: index,
+            exercise,
+          }),
+          completedAt,
+        };
+      });
 
       return syncSessionExerciseCompletion({
         ...exercise,
@@ -322,34 +367,54 @@ export function WorkoutInProgressContent({
         }}
       >
         <ImageBackground
-          source={{ uri: fallbackImage }}
+          source={{
+            uri: storedSession?.workout?.imageUrl ?? FALLBACK_WORKOUT_IMAGE,
+          }}
           resizeMode="cover"
+          className="relative justify-end"
           style={{ height: 240 }}
+          imageStyle={{
+            borderBottomLeftRadius: 16,
+            borderBottomRightRadius: 16,
+          }}
+        />
+
+        {/* <LinearGradient
+          colors={["transparent", colors.app.background]}
+          locations={[0.4, 1]}
+          style={StyleSheet.absoluteFillObject}
+        /> */}
+
+        <View
+          className="px-4"
+          style={{
+            marginTop: -76, // cardHeight / 2
+          }}
         >
-          <LinearGradient
-            colors={["transparent", colors.app.background]}
-            locations={[0.4, 1]}
-            style={StyleSheet.absoluteFillObject}
-          />
-
-          <View className="flex-1 items-center justify-end pb-4">
-            {storedSession?.workout?.workoutFocusType?.name && (
-              <ThemedText type="default" variant="accent">
-                {storedSession.workout.workoutFocusType.name}
-              </ThemedText>
-            )}
-
-            <ThemedText
-              type="default"
-              variant="brand"
-              className="text-center text-4xl font-bold"
+          <View
+            className="overflow-hidden rounded-2xl"
+            style={{ backgroundColor: colors.app.cardPrimary }}
+          >
+            <View
+              className="items-center justify-center p-4"
+              style={{ height: 80 }}
             >
-              {storedSession?.workout?.name ?? "Workout"}
-            </ThemedText>
-          </View>
-        </ImageBackground>
+              {storedSession?.workout?.workoutFocusType?.name && (
+                <ThemedText type="small" variant="primary">
+                  {storedSession.workout.workoutFocusType.name}
+                </ThemedText>
+              )}
 
-        <View className="flex-1 gap-3 px-4">
+              <ThemedText type="title" variant="accent">
+                {storedSession?.workout?.name ?? "Workout"}
+              </ThemedText>
+            </View>
+
+            <RecentMetricList list={summaryMetricList} />
+          </View>
+        </View>
+
+        <View className="flex-1 gap-3 px-4 pt-3">
           {exerciseItems.map((exerciseItem) => (
             <InProgressWorkoutExerciseSection
               key={exerciseItem.clientId}
@@ -380,9 +445,7 @@ export function WorkoutInProgressContent({
               }
             />
           ))}
-        </View>
 
-        <View className="mt-3 px-4">
           <AppButton
             title="Add exercise"
             variant="primary"

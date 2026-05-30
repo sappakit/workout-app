@@ -90,8 +90,9 @@ export function getWorkoutTimerDisplay({
   displaySeconds: number;
   stats: WorkoutTimerStats;
 }) {
-  let status: SessionStatus;
+  const metrics = getWorkoutTimerMetricDisplay(stats);
 
+  let status: SessionStatus;
   if (isPaused) {
     status = SessionStatus.PAUSED;
   } else if (isResting) {
@@ -107,6 +108,17 @@ export function getWorkoutTimerDisplay({
       label: isResting ? "Next set in" : "Session time",
       value: formatDuration(displaySeconds),
     },
+    status: {
+      label: "Status",
+      value: status,
+      labelValue: SessionStatusLabel[status],
+    },
+    ...metrics,
+  };
+}
+
+export function getWorkoutTimerMetricDisplay(stats: WorkoutTimerStats) {
+  return {
     sets: {
       label: "Sets",
       value: `${stats.completedSets} / ${stats.totalSets}`,
@@ -117,12 +129,7 @@ export function getWorkoutTimerDisplay({
     },
     volume: {
       label: "Volume",
-      value: `${stats.volume} kg`,
-    },
-    status: {
-      label: "Status",
-      value: status,
-      labelValue: SessionStatusLabel[status],
+      value: `${stats.volume.toLocaleString()} kg`,
     },
   };
 }

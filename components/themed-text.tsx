@@ -32,7 +32,7 @@ const typeClassMap = {
   extraSmall: "text-xs",
   small: "text-sm",
   defaultSemiBold: "font-semibold",
-  title: "text-2xl font-semibold",
+  title: "text-xl font-semibold",
   subtitle: "text-lg font-medium",
 } satisfies Record<TextType, string>;
 

@@ -1,5 +1,5 @@
 import { HeroCard } from "@/components/home/ui/HeroCard";
-import { PageLayout } from "@/components/layout/PageLayout";
+import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -21,12 +21,14 @@ interface HomeContentProps {
   workoutStats: WorkoutStatsModel;
   workoutPreviewItems: WorkoutPreviewCardItem[];
   historyItems: RecentWorkoutCardItem[];
+  pullToRefresh?: PullToRefreshProps;
 }
 
 export default function HomeContent({
   workoutStats,
   workoutPreviewItems,
   historyItems,
+  pullToRefresh,
 }: HomeContentProps) {
   const router = useRouter();
 
@@ -43,10 +45,7 @@ export default function HomeContent({
   };
 
   return (
-    <PageLayout
-      headerProps={{ variant: "home" }}
-      // pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
-    >
+    <PageLayout headerProps={{ variant: "home" }} pullToRefresh={pullToRefresh}>
       <View className="gap-4">
         <HeroCard onStartWorkout={handleStartWorkout} />
 

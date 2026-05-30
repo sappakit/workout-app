@@ -1,10 +1,13 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { Separator } from "@/components/custom-ui/Separator";
 import { ThemedText } from "@/components/themed-text";
+import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { ArrowUpRight, ImageIcon, LucideIcon } from "lucide-react-native";
+import clsx from "clsx";
+import { ArrowUpRight, LucideIcon } from "lucide-react-native";
 import React from "react";
 import { Image, Pressable, View } from "react-native";
+import { twMerge } from "tailwind-merge";
 
 interface ListItem {
   label: string;
@@ -31,26 +34,10 @@ export function RecentWorkoutCard({ item }: RecentWorkoutCardProps) {
   return (
     <Pressable
       className="overflow-hidden rounded-2xl"
-      style={{ backgroundColor: colors.app.cardPrimaryDark }}
+      style={{ backgroundColor: colors.app.cardPrimary }}
     >
-      <View
-        className="flex-row items-center gap-3 p-4"
-        style={{ backgroundColor: colors.app.cardPrimary }}
-      >
-        <View
-          className="h-14 w-14 items-center justify-center overflow-hidden rounded-full"
-          style={{ backgroundColor: colors.app.cardTertiary }}
-        >
-          {item.imageUrl ? (
-            <Image
-              source={{ uri: item.imageUrl }}
-              className="h-full w-full"
-              resizeMode="cover"
-            />
-          ) : (
-            <ImageIcon size={28} color={colors.app.cardPrimary} />
-          )}
-        </View>
+      <View className="flex-row items-center gap-3 p-4">
+        <WorkoutImageAvatar imageUrl={item.imageUrl} />
 
         <View className="flex-1">
           <ThemedText type="subtitle" variant="accent">
@@ -71,20 +58,41 @@ export function RecentWorkoutCard({ item }: RecentWorkoutCardProps) {
         />
       </View>
 
-      <View className="flex-row items-center justify-between p-4">
-        {item.list.map((metric, index) => (
-          <React.Fragment key={metric.label}>
-            {index > 0 && <Separator className="h-8" />}
-
-            <RecentMetric
-              icon={metric.icon}
-              label={metric.label}
-              value={metric.value}
-            />
-          </React.Fragment>
-        ))}
-      </View>
+      <RecentMetricList list={item.list} />
     </Pressable>
+  );
+}
+
+type RecentMetricListProps = {
+  list: ListItem[];
+  className?: string;
+};
+
+export function RecentMetricList({
+  list,
+  className = "p-4",
+}: RecentMetricListProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View
+      className={twMerge(
+        clsx("flex-row items-center justify-between", className),
+      )}
+      style={{ backgroundColor: colors.app.cardPrimaryDark }}
+    >
+      {list.map((metric, index) => (
+        <React.Fragment key={metric.label}>
+          {index > 0 && <Separator className="h-8" />}
+
+          <RecentMetric
+            icon={metric.icon}
+            label={metric.label}
+            value={metric.value}
+          />
+        </React.Fragment>
+      ))}
+    </View>
   );
 }
 
@@ -109,6 +117,27 @@ function RecentMetric({ icon: Icon, label, value }: RecentMetricProps) {
           {value}
         </ThemedText>
       </View>
+    </View>
+  );
+}
+
+type WorkoutImageAvatarProps = {
+  imageUrl?: string | null;
+};
+
+export function WorkoutImageAvatar({ imageUrl }: WorkoutImageAvatarProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View
+      className="h-14 w-14 items-center justify-center overflow-hidden rounded-full"
+      style={{ backgroundColor: colors.app.cardTertiary }}
+    >
+      <Image
+        source={{ uri: imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+        className="h-full w-full"
+        resizeMode="cover"
+      />
     </View>
   );
 }

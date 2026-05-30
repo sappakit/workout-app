@@ -11,10 +11,9 @@ export function UserAvatar({ imageUrl }: UserAvatarProps) {
 
   return (
     <View
-      className="h-12 w-12 items-center justify-center overflow-hidden rounded-full border"
+      className="h-12 w-12 items-center justify-center overflow-hidden rounded-full"
       style={{
         backgroundColor: colors.app.cardPrimary,
-        borderColor: colors.app.borderPrimary,
       }}
     >
       {imageUrl ? (
