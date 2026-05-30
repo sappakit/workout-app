@@ -11,10 +11,13 @@ import {
   WorkoutResponse,
   WorkoutSession,
 } from "@/types/workout/response/workout.types";
+import { useState } from "react";
 import { workoutApi } from "../api/workout.api";
 
 export default function HomeScreen() {
   const invalidateQueries = useInvalidateQueries();
+
+  const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
 
   const {
     data: progressOverviewData,
@@ -35,6 +38,9 @@ export default function HomeScreen() {
     url: workoutApi.getAll(),
     queryKey: workoutQueryKeys.all,
     limit: 4,
+    params: {
+      muscleIds: selectedMuscleIds.length > 0 ? selectedMuscleIds : undefined,
+    },
   });
 
   const {
@@ -92,6 +98,8 @@ export default function HomeScreen() {
       workoutStats={workoutStats}
       workoutPreviewItems={workoutPreviewItems}
       historyItems={historyItems}
+      selectedMuscleIds={selectedMuscleIds}
+      onChangeMuscleIds={setSelectedMuscleIds}
       pullToRefresh={{
         refreshing: isRefreshing,
         onRefresh: handleRefresh,

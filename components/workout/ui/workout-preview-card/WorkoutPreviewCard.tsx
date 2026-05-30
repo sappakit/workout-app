@@ -2,7 +2,8 @@ import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { ArrowUpRight, Heart, ImageIcon } from "lucide-react-native";
-import { Image, Pressable, View } from "react-native";
+import { Image, Pressable, ScrollView, View } from "react-native";
+import { MuscleCategoryFilter } from "./MuscleCategoryFilter";
 
 export interface WorkoutPreviewCardItem {
   id: number | string;
@@ -11,6 +12,37 @@ export interface WorkoutPreviewCardItem {
   imageUrl?: string | null;
   action: () => void;
   favoriteAction?: () => void;
+}
+
+interface WorkoutPreviewSectionProps {
+  items: WorkoutPreviewCardItem[];
+  selectedMuscleIds: number[];
+  onChangeMuscleIds: (muscleIds: number[]) => void;
+}
+
+export function WorkoutPreviewSection({
+  items,
+  selectedMuscleIds,
+  onChangeMuscleIds,
+}: WorkoutPreviewSectionProps) {
+  return (
+    <View className="gap-3">
+      <MuscleCategoryFilter
+        selectedMuscleIds={selectedMuscleIds}
+        onChange={onChangeMuscleIds}
+      />
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="gap-3"
+      >
+        {items.map((workout) => (
+          <WorkoutPreviewCard key={workout.id} item={workout} />
+        ))}
+      </ScrollView>
+    </View>
+  );
 }
 
 interface WorkoutPreviewCardProps {

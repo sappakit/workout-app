@@ -4,6 +4,7 @@ import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { api } from "@/lib/api";
+import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
@@ -498,7 +499,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
             <>
               <FormInfiniteMultiSelectInput<Muscle>
                 url={muscleApi.getAll()}
-                queryKey={["muscles"]}
+                queryKey={muscleQueryKeys.all}
                 mapOption={(item) => ({ label: item.name, value: item.id })}
                 value={field.value}
                 onChange={field.onChange}

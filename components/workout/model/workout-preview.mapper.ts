@@ -1,6 +1,6 @@
 import { secondsToHMS } from "@/lib/workout/mappers";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
-import { WorkoutPreviewCardItem } from "../ui/WorkoutPreviewCard";
+import { WorkoutPreviewCardItem } from "../ui/workout-preview-card/WorkoutPreviewCard";
 
 function formatWorkoutDuration(seconds?: number | null) {
   if (!seconds || seconds <= 0) return null;

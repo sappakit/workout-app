@@ -10,25 +10,28 @@ import { WorkoutSchedule } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Dumbbell } from "lucide-react-native";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { mapScheduleToWorkoutHeroCardItem } from "./model/workout-content.mapper";
-import { CategoryFilter } from "./ui/CategoryFilter";
 import { WorkoutHeroCard } from "./ui/WorkoutHeroCard";
-import {
-  WorkoutPreviewCard,
-  WorkoutPreviewCardItem,
-} from "./ui/WorkoutPreviewCard";
 import { WorkoutQuickActions } from "./ui/WorkoutQuickActions";
+import {
+  WorkoutPreviewCardItem,
+  WorkoutPreviewSection,
+} from "./ui/workout-preview-card/WorkoutPreviewCard";
 
 interface WorkoutContentProps {
   data: WorkoutSchedule;
   workoutPreviewItems: WorkoutPreviewCardItem[];
+  selectedMuscleIds: number[];
+  onChangeMuscleIds: (muscleIds: number[]) => void;
   pullToRefresh?: PullToRefreshProps;
 }
 
 export default function WorkoutContent({
   data,
   workoutPreviewItems,
+  selectedMuscleIds,
+  onChangeMuscleIds,
   pullToRefresh,
 }: WorkoutContentProps) {
   const router = useRouter();
@@ -121,35 +124,23 @@ export default function WorkoutContent({
           loading={isStarting}
         />
 
-        <View>
-          <View className="mb-3">
-            <SectionHeader
-              title="Your plan"
-              action={
-                <AppButton
-                  title="View All"
-                  variant="ghost"
-                  onPress={handleChooseWorkout}
-                />
-              }
-            />
-          </View>
+        <View className="gap-3">
+          <SectionHeader
+            title="Your plan"
+            action={
+              <AppButton
+                title="View All"
+                variant="ghost"
+                onPress={handleChooseWorkout}
+              />
+            }
+          />
 
-          <CategoryFilter />
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              gap: 12,
-              paddingTop: 12,
-              paddingRight: 16,
-            }}
-          >
-            {workoutPreviewItems.map((workout) => (
-              <WorkoutPreviewCard key={workout.id} item={workout} />
-            ))}
-          </ScrollView>
+          <WorkoutPreviewSection
+            items={workoutPreviewItems}
+            selectedMuscleIds={selectedMuscleIds}
+            onChangeMuscleIds={onChangeMuscleIds}
+          />
         </View>
 
         <WorkoutQuickActions

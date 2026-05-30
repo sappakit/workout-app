@@ -10,10 +10,13 @@ import {
   WorkoutCurrentMode,
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
+import { useState } from "react";
 import { workoutApi } from "../api/workout.api";
 
 export default function WorkoutScreen() {
   const invalidateQueries = useInvalidateQueries();
+
+  const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
 
   const {
     data: currentWorkoutData,
@@ -41,6 +44,9 @@ export default function WorkoutScreen() {
     url: workoutApi.getAll(),
     queryKey: workoutQueryKeys.all,
     limit: 4,
+    params: {
+      muscleIds: selectedMuscleIds.length > 0 ? selectedMuscleIds : undefined,
+    },
     enabled: shouldFetchWorkoutPreviews,
   });
 
@@ -73,6 +79,8 @@ export default function WorkoutScreen() {
         <WorkoutContent
           data={currentWorkoutData.schedule}
           workoutPreviewItems={workoutPreviewItems}
+          selectedMuscleIds={selectedMuscleIds}
+          onChangeMuscleIds={setSelectedMuscleIds}
           pullToRefresh={{
             refreshing: isCurrentWorkoutFetching || isWorkoutPreviewFetching,
             onRefresh: handleRefresh,
