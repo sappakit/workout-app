@@ -1,9 +1,6 @@
-// components/create-plan/CreatePlanContent.tsx
-
 import { muscleApi } from "@/app/api/muscle.api";
 import { workoutApi } from "@/app/api/workout.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
-import { Separator } from "@/components/custom-ui/Separator";
 import FormCheckbox from "@/components/form/FormCheckbox";
 import { FormErrorMessage } from "@/components/form/FormErrorMessage";
 import FormNumberInput from "@/components/form/FormNumberInput";
@@ -626,10 +623,8 @@ export default function CreatePlanContent() {
         <FormErrorMessage message={durationErrorMessage} />
       </View>
 
-      <Separator orientation="horizontal" className="my-6" />
-
       {/* Exercise List */}
-      <View>
+      <View className="mt-6">
         <SectionHeader
           title="Exercise List"
           action={
@@ -654,6 +649,8 @@ export default function CreatePlanContent() {
             <ThemedText type="default" variant="primary">
               Tap the + button to add your first exercise
             </ThemedText>
+
+            <FormErrorMessage message={errors.workoutExercises?.message} />
           </View>
         ) : (
           fields.map((item, index) => (

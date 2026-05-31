@@ -3,7 +3,7 @@ import { PaginatedResponse } from "@/types/api.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryParamValue } from "./useGetQuery";
 
-interface UseInfiniteOptionsQueryProps<T> {
+interface UseInfiniteOptionsQueryProps {
   url: string;
   queryKey: readonly unknown[];
   limit?: number;
@@ -19,7 +19,7 @@ export function useInfiniteOptionsQuery<T>({
   search,
   enabled = true,
   params,
-}: UseInfiniteOptionsQueryProps<T>) {
+}: UseInfiniteOptionsQueryProps) {
   return useInfiniteQuery<PaginatedResponse<T>>({
     initialPageParam: 1,
     enabled,

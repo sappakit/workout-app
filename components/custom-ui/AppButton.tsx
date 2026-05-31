@@ -25,9 +25,12 @@ type ButtonVariant =
   | "primary"
   | "secondary"
   | "tertiary"
+  | "outline"
+  | "destructive"
   | "option"
   | "ghost"
   | "white";
+
 type ButtonVariantStyles = {
   container?: ViewStyle;
   containerClassName?: string;
@@ -79,7 +82,7 @@ export function AppButton({
       containerClassName: undefined,
       textClassName: "font-medium",
       container: {
-        backgroundColor: colors.app.brand,
+        backgroundColor: colors.app.buttonBgPrimary,
       },
       text: {
         color: colors.app.textWhite,
@@ -89,7 +92,7 @@ export function AppButton({
       containerClassName: undefined,
       textClassName: undefined,
       container: {
-        backgroundColor: colors.app.cardPrimary,
+        backgroundColor: colors.app.buttonBgSecondary,
       },
       text: {
         color: colors.app.textAccent,
@@ -99,10 +102,30 @@ export function AppButton({
       containerClassName: undefined,
       textClassName: undefined,
       container: {
-        backgroundColor: colors.app.cardTertiary,
+        backgroundColor: colors.app.buttonBgTertiary,
       },
       text: {
         color: colors.app.textAccent,
+      },
+    },
+    outline: {
+      containerClassName: "border",
+      textClassName: "font-medium",
+      container: {
+        borderColor: colors.app.borderPrimary,
+      },
+      text: {
+        color: colors.app.textAccent,
+      },
+    },
+    destructive: {
+      containerClassName: undefined,
+      textClassName: "font-medium",
+      container: {
+        backgroundColor: colors.app.error,
+      },
+      text: {
+        color: colors.app.textWhite,
       },
     },
     option: {

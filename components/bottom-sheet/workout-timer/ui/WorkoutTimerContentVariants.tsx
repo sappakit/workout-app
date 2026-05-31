@@ -76,10 +76,11 @@ export function CollapsedTimerContent({
             />
 
             <AppButton
-              variant="secondary"
+              variant="tertiary"
               icon={pauseAction.isPaused ? Play : Pause}
               iconSize={20}
-              className="h-14 w-14 border-0"
+              shape="pill"
+              className="h-14 w-14"
               onPress={pauseAction.onPress}
             />
 
@@ -216,7 +217,7 @@ export function ExpandedTimerContent({
 
             <AppButton
               title="Discard"
-              variant="secondary"
+              variant="outline"
               icon={Trash2}
               className="flex-1"
               onPress={discardAction.onPress}

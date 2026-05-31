@@ -64,9 +64,6 @@ export const Colors = {
     backgroundBlack: "#000000",
     shadow: "rgba(0, 0, 0, 0.1)",
 
-    // Page header
-    pageHeaderBackground: "#F8F8FA",
-
     // Text
     textPrimary: "#323232",
     textSecondary: "#D9D9D9",
@@ -83,6 +80,11 @@ export const Colors = {
     cardSecondary: "#F0F0F0",
     cardTertiary: "#EFEFEF",
 
+    // Button background
+    buttonBgPrimary: "#EF6131",
+    buttonBgSecondary: "#F0F0F0",
+    buttonBgTertiary: "#EFEFEF",
+
     // Toast
     toastBackground: "#FFFFFF",
   },
@@ -96,9 +98,6 @@ export const Colors = {
     backgroundWhite: "#FFFFFF",
     backgroundBlack: "#000000",
     shadow: "rgba(0, 0, 0, 0.1)",
-
-    // Page header
-    pageHeaderBackground: "#0D0D0D",
 
     // Text
     textPrimary: "#9C9C9C",
@@ -114,10 +113,15 @@ export const Colors = {
     cardPrimary: "#222222",
     cardPrimaryDark: "#1D1D1D",
     cardSecondary: "#323232",
-    cardTertiary: "#323232",
+    cardTertiary: "#3B3B3B",
+
+    // Button background
+    buttonBgPrimary: "#EF6131",
+    buttonBgSecondary: "#222222",
+    buttonBgTertiary: "#323232",
 
     // Toast
-    toastBackground: "#1D1D1D",
+    toastBackground: "#222222",
   },
 };
 

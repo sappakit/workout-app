@@ -415,36 +415,66 @@ export function WorkoutInProgressContent({
         </View>
 
         <View className="flex-1 gap-3 px-4 pt-3">
-          {exerciseItems.map((exerciseItem) => (
-            <InProgressWorkoutExerciseSection
-              key={exerciseItem.clientId}
-              exercise={exerciseItem}
-              onAddSet={() => handleAddSet(exerciseItem.clientId)}
-              onDeleteExercise={() =>
-                handleDeleteExercise(exerciseItem.clientId)
-              }
-              onReplaceExercise={() =>
-                handleReplaceExercise(exerciseItem.clientId)
-              }
-              onDeleteSet={(setClientId) =>
-                handleDeleteSet(exerciseItem.clientId, setClientId)
-              }
-              onToggleSetCompleted={(setClientId) =>
-                handleToggleSetCompleted(exerciseItem.clientId, setClientId)
-              }
-              onChangeSetValue={(setClientId, field, value) =>
-                handleUpdateSetValue(
-                  exerciseItem.clientId,
-                  setClientId,
-                  field,
-                  value,
-                )
-              }
-              onChangeRestTime={(value) =>
-                handleUpdateExerciseRestTime(exerciseItem.clientId, value)
-              }
-            />
-          ))}
+          {exerciseItems.length === 0 ? (
+            <View
+              className="items-center rounded-2xl p-6"
+              style={{ backgroundColor: colors.app.cardPrimary }}
+            >
+              <View
+                className="mb-3 h-12 w-12 items-center justify-center rounded-full"
+                style={{ backgroundColor: colors.app.cardSecondary }}
+              >
+                <Dumbbell size={24} color={colors.app.brand} />
+              </View>
+
+              <ThemedText
+                type="subtitle"
+                variant="primary"
+                className="text-center"
+              >
+                No exercises yet
+              </ThemedText>
+
+              <ThemedText
+                type="default"
+                variant="primary"
+                className="text-center"
+              >
+                Add your first exercise to start tracking.
+              </ThemedText>
+            </View>
+          ) : (
+            exerciseItems.map((exerciseItem) => (
+              <InProgressWorkoutExerciseSection
+                key={exerciseItem.clientId}
+                exercise={exerciseItem}
+                onAddSet={() => handleAddSet(exerciseItem.clientId)}
+                onDeleteExercise={() =>
+                  handleDeleteExercise(exerciseItem.clientId)
+                }
+                onReplaceExercise={() =>
+                  handleReplaceExercise(exerciseItem.clientId)
+                }
+                onDeleteSet={(setClientId) =>
+                  handleDeleteSet(exerciseItem.clientId, setClientId)
+                }
+                onToggleSetCompleted={(setClientId) =>
+                  handleToggleSetCompleted(exerciseItem.clientId, setClientId)
+                }
+                onChangeSetValue={(setClientId, field, value) =>
+                  handleUpdateSetValue(
+                    exerciseItem.clientId,
+                    setClientId,
+                    field,
+                    value,
+                  )
+                }
+                onChangeRestTime={(value) =>
+                  handleUpdateExerciseRestTime(exerciseItem.clientId, value)
+                }
+              />
+            ))
+          )}
 
           <AppButton
             title="Add exercise"

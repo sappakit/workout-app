@@ -131,7 +131,7 @@ export function WorkoutImageAvatar({ imageUrl }: WorkoutImageAvatarProps) {
   return (
     <View
       className="h-14 w-14 items-center justify-center overflow-hidden rounded-full"
-      style={{ backgroundColor: colors.app.cardTertiary }}
+      style={{ backgroundColor: colors.app.cardSecondary }}
     >
       <Image
         source={{ uri: imageUrl ?? FALLBACK_WORKOUT_IMAGE }}

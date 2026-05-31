@@ -1,7 +1,8 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
+import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { ArrowUpRight, Heart, ImageIcon } from "lucide-react-native";
+import { ArrowUpRight, Heart } from "lucide-react-native";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import { MuscleCategoryFilter } from "./MuscleCategoryFilter";
 
@@ -59,20 +60,11 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
       onPress={item.action}
     >
       <View className="relative h-32">
-        {item.imageUrl ? (
-          <Image
-            source={{ uri: item.imageUrl }}
-            className="h-full w-full"
-            resizeMode="cover"
-          />
-        ) : (
-          <View
-            className="h-full w-full items-center justify-center"
-            style={{ backgroundColor: colors.app.cardTertiary }}
-          >
-            <ImageIcon size={32} color={colors.app.cardPrimary} />
-          </View>
-        )}
+        <Image
+          source={{ uri: item.imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+          className="h-full w-full"
+          resizeMode="cover"
+        />
 
         <View className="absolute right-0 top-0 p-3">
           <AppButton
