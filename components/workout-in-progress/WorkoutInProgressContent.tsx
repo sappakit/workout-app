@@ -10,7 +10,10 @@ import { useAppToast } from "@/lib/toast/useAppToast";
 import { ExerciseFieldKey } from "@/lib/workout/config";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
-import { WorkoutSession } from "@/types/workout/response/workout.types";
+import {
+  ExercisePerformanceSummary,
+  WorkoutSession,
+} from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Dumbbell, Layers, Plus, Weight } from "lucide-react-native";
@@ -36,10 +39,12 @@ import {
 
 type WorkoutInProgressContentProps = {
   session: WorkoutSession;
+  performanceByExerciseId: Record<string, ExercisePerformanceSummary>;
 };
 
 export function WorkoutInProgressContent({
   session,
+  performanceByExerciseId,
 }: WorkoutInProgressContentProps) {
   const { colors } = useAppTheme();
 
@@ -428,8 +433,8 @@ export function WorkoutInProgressContent({
               </View>
 
               <ThemedText
-                type="subtitle"
-                variant="primary"
+                type="default"
+                variant="accent"
                 className="text-center"
               >
                 No exercises yet
@@ -448,6 +453,9 @@ export function WorkoutInProgressContent({
               <InProgressWorkoutExerciseSection
                 key={exerciseItem.clientId}
                 exercise={exerciseItem}
+                performanceSummary={
+                  performanceByExerciseId[String(exerciseItem.exercise.id)]
+                }
                 onAddSet={() => handleAddSet(exerciseItem.clientId)}
                 onDeleteExercise={() =>
                   handleDeleteExercise(exerciseItem.clientId)

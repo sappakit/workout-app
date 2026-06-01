@@ -118,7 +118,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
             renderItem={({ item, index }) => renderSetRow(item, index)}
             ListEmptyComponent={
               <View className="items-center gap-1 p-4">
-                <ThemedText type="default" variant="secondary">
+                <ThemedText type="default" variant="accent">
                   {emptyTitle}
                 </ThemedText>
 

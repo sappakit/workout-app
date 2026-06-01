@@ -107,10 +107,24 @@ export interface WorkoutSession {
   sessionExercises: WorkoutSessionExercise[];
 }
 
+export interface WorkoutSetPerformance {
+  setNumber: number;
+  weight: number | null;
+  reps: number | null;
+  distance: number | null;
+  duration: number | null;
+}
+
+export interface ExercisePerformanceSummary {
+  previousSets: WorkoutSetPerformance[];
+  bestSets: WorkoutSetPerformance[];
+}
+
 export interface WorkoutCurrent {
   mode: WorkoutCurrentMode;
   session: WorkoutSession | null;
   schedule: WorkoutSchedule | null;
+  performanceByExerciseId: Record<string, ExercisePerformanceSummary>;
 }
 
 export interface WorkoutProgressSummary {

@@ -31,6 +31,8 @@ export default function WorkoutScreen() {
     },
   );
 
+  console.log("currentWorkoutData", currentWorkoutData);
+
   const shouldFetchWorkoutPreviews =
     !!currentWorkoutData &&
     currentWorkoutData.mode !== WorkoutCurrentMode.IN_PROGRESS;
@@ -66,7 +68,10 @@ export default function WorkoutScreen() {
     // In-progress session
     case WorkoutCurrentMode.IN_PROGRESS:
       return currentWorkoutData.session ? (
-        <WorkoutInProgressContent session={currentWorkoutData.session} />
+        <WorkoutInProgressContent
+          session={currentWorkoutData.session}
+          performanceByExerciseId={currentWorkoutData.performanceByExerciseId}
+        />
       ) : null;
 
     // Scheduled workout
