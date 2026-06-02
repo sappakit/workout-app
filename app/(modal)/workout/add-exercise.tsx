@@ -10,15 +10,25 @@ import { mapExerciseToCreateWorkoutExerciseFormItem } from "@/lib/workout/mapper
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { Exercise } from "@/types/workout/response/exercise.types";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { SlidersHorizontal } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 
 type WorkoutExerciseDraftItem = EditPlanForm["workoutExercises"][number];
 
+type AddExercisesParams = {
+  mode?: string;
+  exerciseClientId?: string;
+};
+
 export default function AddExercisesPage() {
   const router = useRouter();
+
+  const params = useLocalSearchParams<AddExercisesParams>();
+
+  const isReplaceMode = params.mode === "replace";
+  const targetExerciseClientId = params.exerciseClientId;
 
   const draft = usePlanFormDraftStore((state) => state.draft);
   const replaceDraft = usePlanFormDraftStore((state) => state.replaceDraft);
@@ -27,10 +37,22 @@ export default function AddExercisesPage() {
     Exercise[]
   >([]);
   const [search, setSearch] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const debouncedSearch = useDebounce(search, 300);
 
+  const currentExercises = draft?.workoutExercises ?? [];
+
+  const targetWorkoutExercise = currentExercises.find(
+    (item) => item.clientId === targetExerciseClientId,
+  );
+
   const selectedExerciseIds = new Set(
-    draft?.workoutExercises.map((item) => item.exercise.id) ?? [],
+    currentExercises.map((item) => item.exercise.id),
+  );
+
+  const tempSelectedExerciseIds = new Set(
+    tempSelectedExercises.map((exercise) => exercise.id),
   );
 
   const {
@@ -50,12 +72,9 @@ export default function AddExercisesPage() {
 
   const exercises = data?.pages.flatMap((page) => page.data) ?? [];
 
-  const tempSelectedExerciseIds = new Set(
-    tempSelectedExercises.map((e) => e.id),
-  );
-
   const loadMore = () => {
     if (!hasNextPage || isFetchingNextPage) return;
+
     fetchNextPage();
   };
 
@@ -69,6 +88,10 @@ export default function AddExercisesPage() {
         return prev.filter((item) => item.id !== exercise.id);
       }
 
+      if (isReplaceMode) {
+        return [exercise];
+      }
+
       return [...prev, exercise];
     });
   };
@@ -79,9 +102,34 @@ export default function AddExercisesPage() {
       return;
     }
 
-    const currentExercises = draft.workoutExercises ?? [];
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+
+      if (isReplaceMode) {
+        handleReplaceExercise();
+        return;
+      }
+
+      handleAddExercises();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    router.back();
+  };
+
+  const handleAddExercises = () => {
+    if (!draft) {
+      router.back();
+      return;
+    }
 
     const nextItems: WorkoutExerciseDraftItem[] = [...currentExercises];
+
     let nextOrderIndex =
       currentExercises.length > 0
         ? Math.max(...currentExercises.map((item) => item.orderIndex)) + 1
@@ -109,14 +157,50 @@ export default function AddExercisesPage() {
     router.back();
   };
 
-  const handleClose = () => {
+  const handleReplaceExercise = () => {
+    const selectedExercise = tempSelectedExercises[0];
+
+    if (!draft || !selectedExercise || !targetExerciseClientId) {
+      router.back();
+      return;
+    }
+
+    const targetExerciseIndex = currentExercises.findIndex(
+      (item) => item.clientId === targetExerciseClientId,
+    );
+
+    if (targetExerciseIndex === -1) {
+      router.back();
+      return;
+    }
+
+    const targetWorkoutExercise = currentExercises[targetExerciseIndex];
+
+    const replacementExercise = mapExerciseToCreateWorkoutExerciseFormItem(
+      selectedExercise,
+      targetWorkoutExercise.orderIndex,
+    );
+
+    const nextItems = currentExercises.map((item, index) => {
+      if (index !== targetExerciseIndex) {
+        return item;
+      }
+
+      return replacementExercise;
+    });
+
+    replaceDraft({
+      ...draft,
+      workoutExercises: nextItems,
+    });
+
     router.back();
   };
 
   if (!draft) {
     return (
       <FullScreenPicker
-        title="Add Exercise"
+        title={isReplaceMode ? "Replace Exercise" : "Add Exercise"}
         onClose={handleClose}
         onDone={handleClose}
         doneText="Back"
@@ -135,13 +219,42 @@ export default function AddExercisesPage() {
     );
   }
 
+  if (isReplaceMode && !targetWorkoutExercise) {
+    return (
+      <FullScreenPicker
+        title="Replace Exercise"
+        onClose={handleClose}
+        onDone={handleClose}
+        doneText="Back"
+        closeText="Back"
+        doneDisabled={false}
+        searchValue=""
+        onSearchChange={() => {}}
+        isError={false}
+      >
+        <View className="flex-1 items-center justify-center px-6">
+          <ThemedText type="default" variant="secondary">
+            Exercise not found in this workout plan.
+          </ThemedText>
+        </View>
+      </FullScreenPicker>
+    );
+  }
+
   return (
     <FullScreenPicker
-      title="Add Exercise"
-      description="Select one or more exercises to add to this workout plan."
+      title={isReplaceMode ? "Replace Exercise" : "Add Exercise"}
+      description={
+        isReplaceMode
+          ? `Select one exercise to replace ${
+              targetWorkoutExercise?.exercise.name ?? "this exercise"
+            }.`
+          : "Select one or more exercises to add to this workout plan."
+      }
       onClose={handleClose}
       onDone={handleDone}
-      doneDisabled={tempSelectedExercises.length === 0}
+      doneText={isReplaceMode ? "Replace" : "Done"}
+      doneDisabled={tempSelectedExercises.length === 0 || isSubmitting}
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search exercise"

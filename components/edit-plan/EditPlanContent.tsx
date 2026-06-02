@@ -354,14 +354,14 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   };
 
   // Replace exercise
-  const handleReplaceExercise = (index: number) => {
+  const handleReplaceExercise = (exerciseClientId: string) => {
     replaceDraft(getValues());
 
     router.push({
       pathname: "/(modal)/workout/add-exercise",
       params: {
         mode: "replace",
-        exerciseIndex: index,
+        exerciseClientId,
       },
     });
   };
@@ -673,7 +673,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                 form={form}
                 index={index}
                 onDeleteExercise={() => handleRemoveExercise(index)}
-                onReplaceExercise={() => handleReplaceExercise(index)}
+                onReplaceExercise={() => handleReplaceExercise(item.clientId)}
               />
             </View>
           ))

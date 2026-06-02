@@ -150,7 +150,7 @@ export function AppButton({
       containerClassName: undefined,
       textClassName: "font-medium",
       container: {
-        backgroundColor: colors.app.backgroundWhite,
+        backgroundColor: colors.app.white,
       },
       text: {
         color: colors.app.textBlack,

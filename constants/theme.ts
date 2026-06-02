@@ -10,12 +10,13 @@ const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
 const appColors = {
+  // Base
+  white: "#FFFFFF",
+  black: "#000000",
+
   // Text
-  textDim: "#414141",
-  textMuted: "#D9D9D9",
-  textExtra: "#AAAAAA",
   textWhite: "#FFFFFF",
-  textBlack: "#000000",
+  textBlack: "#2D2D2D",
 
   // Brand
   // #FD8036, #FA3469, #DB4B4B, #E37531, #F36840
@@ -60,8 +61,6 @@ export const Colors = {
     // Base
     background: "#F1F1F1",
     backgroundDark: "#EFEFEF",
-    backgroundWhite: "#FFFFFF",
-    backgroundBlack: "#000000",
     shadow: "rgba(0, 0, 0, 0.1)",
 
     // Text
@@ -95,8 +94,6 @@ export const Colors = {
     // Base
     background: "#1D1D1D",
     backgroundDark: "#171717",
-    backgroundWhite: "#FFFFFF",
-    backgroundBlack: "#000000",
     shadow: "rgba(0, 0, 0, 0.1)",
 
     // Text
@@ -189,4 +186,17 @@ export type AppTheme = Theme & {
   colors: Theme["colors"] & {
     app: AppColors;
   };
+};
+
+// helpers
+export const hexWithOpacity = (hexColor: string, opacity: number) => {
+  const normalizedHex = hexColor.replace("#", "").slice(0, 6);
+  const normalizedOpacity = Math.max(0, Math.min(100, opacity));
+
+  const alpha = Math.round((normalizedOpacity / 100) * 255)
+    .toString(16)
+    .padStart(2, "0")
+    .toUpperCase();
+
+  return `#${normalizedHex}${alpha}`;
 };
