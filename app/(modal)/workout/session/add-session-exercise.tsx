@@ -8,10 +8,12 @@ import {
 } from "@/components/workout-in-progress/model/helpers";
 import { ExercisePickerCard } from "@/components/workout/ui/exercise-card/ExercisePickerCard";
 import { useDebounce } from "@/hooks/useDebounce";
+import { api } from "@/lib/api";
 import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import { Exercise } from "@/types/workout/response/exercise.types";
+import { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SlidersHorizontal } from "lucide-react-native";
 import { useState } from "react";
@@ -32,11 +34,18 @@ export default function AddSessionExercisePage() {
 
   const session = useWorkoutSessionStore((state) => state.session);
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
+  const mergePerformanceByExerciseId = useWorkoutSessionStore(
+    (state) => state.mergePerformanceByExerciseId,
+  );
+  const removePerformanceByExerciseId = useWorkoutSessionStore(
+    (state) => state.removePerformanceByExerciseId,
+  );
 
   const [tempSelectedExercises, setTempSelectedExercises] = useState<
     Exercise[]
   >([]);
   const [search, setSearch] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -75,6 +84,22 @@ export default function AddSessionExercisePage() {
     fetchNextPage();
   };
 
+  const fetchExercisePerformanceMap = async (exercises: Exercise[]) => {
+    const exerciseIds = exercises.map((exercise) => exercise.id);
+
+    if (exerciseIds.length === 0) {
+      return {};
+    }
+
+    const response = await api.get<{
+      data: Record<string, ExercisePerformanceSummary>;
+    }>(exerciseApi.getExercisesPerformance(), {
+      params: { exerciseIds },
+    });
+
+    return response.data.data;
+  };
+
   const handleToggleExercise = (exercise: Exercise) => {
     if (selectedExerciseIds.has(exercise.id)) return;
 
@@ -93,31 +118,44 @@ export default function AddSessionExercisePage() {
     });
   };
 
-  const handleDone = () => {
+  const handleDone = async () => {
     if (!session) {
       router.back();
       return;
     }
 
-    if (isReplaceMode) {
-      handleReplaceExercise();
-      return;
-    }
+    if (isSubmitting) return;
 
-    handleAddExercises();
+    try {
+      setIsSubmitting(true);
+
+      if (isReplaceMode) {
+        await handleReplaceExercise();
+        return;
+      }
+
+      await handleAddExercises();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
     router.back();
   };
 
-  const handleAddExercises = () => {
+  const handleAddExercises = async () => {
+    const performanceMap = await fetchExercisePerformanceMap(
+      tempSelectedExercises,
+    );
+
     updateSession((prev) => addSessionExercise(prev, tempSelectedExercises));
+    mergePerformanceByExerciseId(performanceMap);
 
     router.back();
   };
 
-  const handleReplaceExercise = () => {
+  const handleReplaceExercise = async () => {
     const selectedExercise = tempSelectedExercises[0];
 
     if (!selectedExercise || !targetExerciseClientId) {
@@ -125,9 +163,21 @@ export default function AddSessionExercisePage() {
       return;
     }
 
+    const oldExerciseId = targetSessionExercise?.exercise.id;
+
+    const performanceMap = await fetchExercisePerformanceMap([
+      selectedExercise,
+    ]);
+
     updateSession((prev) =>
       replaceSessionExercise(prev, targetExerciseClientId, selectedExercise),
     );
+
+    if (oldExerciseId != null) {
+      removePerformanceByExerciseId(oldExerciseId);
+    }
+
+    mergePerformanceByExerciseId(performanceMap);
 
     router.back();
   };
@@ -189,7 +239,7 @@ export default function AddSessionExercisePage() {
       onClose={handleClose}
       onDone={handleDone}
       doneText={isReplaceMode ? "Replace" : "Done"}
-      doneDisabled={tempSelectedExercises.length === 0}
+      doneDisabled={tempSelectedExercises.length === 0 || isSubmitting}
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search exercise"

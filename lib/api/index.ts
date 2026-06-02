@@ -4,6 +4,9 @@ import { AuthStorage } from "./authStorage";
 export const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
   timeout: 10000,
+  paramsSerializer: {
+    indexes: null,
+  },
 });
 
 // Request interceptor

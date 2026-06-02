@@ -31,8 +31,6 @@ export default function WorkoutScreen() {
     },
   );
 
-  console.log("currentWorkoutData", currentWorkoutData);
-
   const shouldFetchWorkoutPreviews =
     !!currentWorkoutData &&
     currentWorkoutData.mode !== WorkoutCurrentMode.IN_PROGRESS;

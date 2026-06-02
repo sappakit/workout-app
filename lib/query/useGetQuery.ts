@@ -23,9 +23,6 @@ export function useGetQuery<T>(
     queryFn: async () => {
       const { data } = await api.get<T>(url, {
         params: options?.params,
-        paramsSerializer: {
-          indexes: null,
-        },
       });
 
       return data;

@@ -56,10 +56,18 @@ export function WorkoutInProgressContent({
   // Workout session store
   const hydrated = useWorkoutSessionStore((state) => state.hydrated);
   const storedSession = useWorkoutSessionStore((state) => state.session);
+  const storedPerformanceByExerciseId = useWorkoutSessionStore(
+    (state) => state.performanceByExerciseId,
+  );
   const initializeSession = useWorkoutSessionStore(
     (state) => state.initializeSession,
   );
-
+  const setPerformanceByExerciseId = useWorkoutSessionStore(
+    (state) => state.setPerformanceByExerciseId,
+  );
+  const removePerformanceByExerciseId = useWorkoutSessionStore(
+    (state) => state.removePerformanceByExerciseId,
+  );
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
   const updateSessionExercise = useWorkoutSessionStore(
     (state) => state.updateSessionExercise,
@@ -74,7 +82,14 @@ export function WorkoutInProgressContent({
     if (!hydrated) return;
 
     initializeSession(session);
-  }, [hydrated, session, initializeSession]);
+    setPerformanceByExerciseId(performanceByExerciseId);
+  }, [
+    hydrated,
+    session,
+    performanceByExerciseId,
+    initializeSession,
+    setPerformanceByExerciseId,
+  ]);
 
   // Ensure store is hydrated and contains the current session
   const isActiveSessionReady = hydrated && storedSession?.id === session.id;
@@ -292,9 +307,18 @@ export function WorkoutInProgressContent({
           text: "Remove",
           style: "destructive",
           onPress: () => {
+            const targetExercise = storedSession?.sessionExercises.find(
+              (exercise) => exercise.clientId === exerciseClientId,
+            );
+
             updateSession((prev) =>
               deleteSessionExercise(prev, exerciseClientId),
             );
+
+            // remove exercise performance from session store
+            if (targetExercise?.exercise.id != null) {
+              removePerformanceByExerciseId(targetExercise.exercise.id);
+            }
           },
         },
       ],
@@ -454,7 +478,9 @@ export function WorkoutInProgressContent({
                 key={exerciseItem.clientId}
                 exercise={exerciseItem}
                 performanceSummary={
-                  performanceByExerciseId[String(exerciseItem.exercise.id)]
+                  storedPerformanceByExerciseId[
+                    String(exerciseItem.exercise.id)
+                  ]
                 }
                 onAddSet={() => handleAddSet(exerciseItem.clientId)}
                 onDeleteExercise={() =>
