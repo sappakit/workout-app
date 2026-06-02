@@ -138,7 +138,7 @@ function OptionsButton({ isDisabled }: { isDisabled?: boolean }) {
 
   return (
     <View
-      className="h-7 w-7 items-center justify-center rounded-lg"
+      className="h-8 w-8 items-center justify-center rounded-full"
       style={{
         backgroundColor: colors.app.cardSecondary,
         opacity: isDisabled ? 0.6 : 1,

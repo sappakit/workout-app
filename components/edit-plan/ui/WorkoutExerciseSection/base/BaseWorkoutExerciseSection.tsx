@@ -35,7 +35,7 @@ type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
 
   onAddSet: () => void;
   onDeleteExercise: () => void;
-  onReplaceExercise?: () => void;
+  onReplaceExercise: () => void;
 
   addSetLabel?: string;
   emptyTitle?: string;
@@ -168,7 +168,7 @@ function WorkoutSetFooter({
 }
 
 type BaseWorkoutExerciseSectionMenuProps = {
-  onReplaceExercise?: () => void;
+  onReplaceExercise: () => void;
   onDeleteExercise: () => void;
 };
 
@@ -194,13 +194,11 @@ function BaseWorkoutExerciseSectionMenu({
 
       <MenuSectionLabel label="Actions" />
 
-      {onReplaceExercise && (
-        <DropdownItem
-          label="Replace exercise"
-          icon={Repeat}
-          onSelect={onReplaceExercise}
-        />
-      )}
+      <DropdownItem
+        label="Replace exercise"
+        icon={Repeat}
+        onSelect={onReplaceExercise}
+      />
 
       <DropdownItem
         label="Remove exercise"

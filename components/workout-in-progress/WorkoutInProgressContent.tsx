@@ -9,6 +9,7 @@ import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { ExerciseFieldKey } from "@/lib/workout/config";
 import { workoutQueryKeys } from "@/lib/workout/keys";
+import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import {
   ExercisePerformanceSummary,
@@ -17,7 +18,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Dumbbell, Layers, Plus, Weight } from "lucide-react-native";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import {
   getWorkoutTimerMetricDisplay,
@@ -26,6 +27,7 @@ import {
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
 import WorkoutTimerBottomSheet from "../bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import { AppButton } from "../custom-ui/AppButton";
+import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
 import { InProgressWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
 import { RecentMetricList } from "../progress/ui/sections/progress-history-section/RecentWorkoutCard";
 import {
@@ -52,6 +54,14 @@ export function WorkoutInProgressContent({
   const invalidateQueries = useInvalidateQueries();
   const restTimer = useCountdownTimer();
   const router = useRouter();
+
+  // Display full exercise details toggle
+  const showFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.showFullExerciseDetails,
+  );
+  const toggleShowFullExerciseDetails = useExerciseDisplayStore(
+    (state) => state.toggleShowFullExerciseDetails,
+  );
 
   // Workout session store
   const hydrated = useWorkoutSessionStore((state) => state.hydrated);
@@ -95,7 +105,19 @@ export function WorkoutInProgressContent({
   const isActiveSessionReady = hydrated && storedSession?.id === session.id;
 
   // Use storedSession as the single source of truth
-  const exerciseItems = storedSession?.sessionExercises ?? [];
+  const [exerciseItems, setExerciseItems] = useState(
+    storedSession?.sessionExercises ?? [],
+  );
+
+  // Refresh exercise list layout after session exercises change
+  useEffect(() => {
+    // Wait for the page to fully mount
+    const frame = requestAnimationFrame(() => {
+      setExerciseItems(storedSession?.sessionExercises ?? []);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [storedSession?.sessionExercises]);
 
   // Stats for bottom sheet timer
   const timerStats = storedSession
@@ -277,6 +299,11 @@ export function WorkoutInProgressContent({
     }));
   };
 
+  // Manage mode
+  const handleOpenManageMode = () => {
+    router.push("/(modal)/workout/session/manage-session-exercises");
+  };
+
   // Add exercise
   const handleAddExercise = () => {
     router.push("/(modal)/workout/session/add-session-exercise");
@@ -319,6 +346,40 @@ export function WorkoutInProgressContent({
             if (targetExercise?.exercise.id != null) {
               removePerformanceByExerciseId(targetExercise.exercise.id);
             }
+          },
+        },
+      ],
+    );
+  };
+
+  // Remove all exercises
+  const handleRemoveAllExercises = () => {
+    if (exerciseItems.length === 0) return;
+
+    Alert.alert(
+      "Remove all exercises?",
+      "This will remove all exercises and sets from this workout session.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove All",
+          style: "destructive",
+          onPress: () => {
+            const removedExerciseIds = exerciseItems.map(
+              (item) => item.exercise.id,
+            );
+
+            updateSession((prev) => ({
+              ...prev,
+              sessionExercises: [],
+            }));
+
+            removedExerciseIds.forEach((exerciseId) => {
+              removePerformanceByExerciseId(exerciseId);
+            });
           },
         },
       ],
@@ -425,7 +486,7 @@ export function WorkoutInProgressContent({
             style={{ backgroundColor: colors.app.cardPrimary }}
           >
             <View
-              className="items-center justify-center p-4"
+              className="relative items-center justify-center p-4"
               style={{ height: 80 }}
             >
               {storedSession?.workout?.workoutFocusType?.name && (
@@ -437,6 +498,18 @@ export function WorkoutInProgressContent({
               <ThemedText type="title" variant="accent">
                 {storedSession?.workout?.name ?? "Workout"}
               </ThemedText>
+
+              <View className="absolute right-0 top-0 p-4">
+                <ExerciseListMenu
+                  isDisabled={exerciseItems.length === 0}
+                  showFullExerciseDetails={showFullExerciseDetails}
+                  actions={{
+                    toggleShowFullExerciseDetails,
+                    handleOpenManageMode,
+                    handleRemoveAllExercises,
+                  }}
+                />
+              </View>
             </View>
 
             <RecentMetricList list={summaryMetricList} />

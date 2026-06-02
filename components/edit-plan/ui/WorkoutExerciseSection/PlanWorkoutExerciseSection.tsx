@@ -20,7 +20,7 @@ type PlanWorkoutExerciseSectionProps = {
   form: UseFormReturn<EditPlanForm>;
   index: number;
   onDeleteExercise: () => void;
-  onReplaceExercise?: () => void;
+  onReplaceExercise: () => void;
 };
 
 export function PlanWorkoutExerciseSection({
