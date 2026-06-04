@@ -1,5 +1,6 @@
 import { secondsToHMS } from "@/lib/workout/mappers";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
+import { useRouter } from "expo-router";
 import { WorkoutPreviewCardItem } from "../ui/workout-preview-card/WorkoutPreviewCard";
 
 function formatWorkoutDuration(seconds?: number | null) {
@@ -29,6 +30,8 @@ export function mapWorkoutsToPreviewItems(
   workouts: WorkoutResponse[],
 ): WorkoutPreviewCardItem[] {
   return workouts.map((workout) => {
+    const router = useRouter();
+
     const exerciseCount = workout.workoutExercises?.length ?? 0;
     const durationText = formatWorkoutDuration(workout.duration);
 
@@ -42,7 +45,10 @@ export function mapWorkoutsToPreviewItems(
       subtitle,
       imageUrl: workout.imageUrl,
       action: () => {
-        console.log(`workout: ${workout.id}`);
+        router.push({
+          pathname: "/(pages)/workout/[id]",
+          params: { id: workout.id },
+        });
       },
       favoriteAction: () => {
         console.log(`favorite workout: ${workout.id}`);

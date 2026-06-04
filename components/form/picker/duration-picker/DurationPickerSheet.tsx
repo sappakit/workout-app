@@ -19,7 +19,7 @@ import { durationToSeconds, formatDuration, secondsToDuration } from "./utils";
 type DurationBottomSheetPickerProps = {
   value: number;
   title: string;
-  onChange: (value: number) => void;
+  onChange?: (value: number) => void;
   className?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;

@@ -108,7 +108,7 @@ export function WorkoutSetHeader({
 type WorkoutSetRowProps = {
   setNumber: number;
   columns: WorkoutSetColumn[];
-  onDelete: () => void;
+  onDelete?: () => void;
   renderInput: (
     column: WorkoutSetColumn,
     columnIndex: number,
@@ -125,7 +125,19 @@ export function WorkoutSetRow({
   renderTrailingCell,
   renderPerformanceCell,
 }: WorkoutSetRowProps) {
-  const { colors } = useAppTheme();
+  const rowContent = (
+    <WorkoutSetRowContent
+      setNumber={setNumber}
+      columns={columns}
+      renderInput={renderInput}
+      renderTrailingCell={renderTrailingCell}
+      renderPerformanceCell={renderPerformanceCell}
+    />
+  );
+
+  if (!onDelete) {
+    return rowContent;
+  }
 
   return (
     <Swipeable
@@ -134,31 +146,56 @@ export function WorkoutSetRow({
       overshootRight={false}
       renderRightActions={() => <DeleteSetAction onPress={onDelete} />}
     >
-      <View
-        className="flex-row items-center gap-2 p-2"
-        style={{ backgroundColor: colors.app.cardPrimaryDark }}
-      >
-        <View className="w-12 items-center">
-          <ThemedText type="default" variant="primary">
-            {setNumber}
-          </ThemedText>
-        </View>
-
-        {renderPerformanceCell ? (
-          <View className="flex-1 items-center">{renderPerformanceCell()}</View>
-        ) : null}
-
-        {columns.map((column, columnIndex) => (
-          <View key={column.key} className="flex-1">
-            {renderInput(column, columnIndex)}
-          </View>
-        ))}
-
-        {renderTrailingCell ? (
-          <View className="w-12 items-center">{renderTrailingCell()}</View>
-        ) : null}
-      </View>
+      {rowContent}
     </Swipeable>
+  );
+}
+
+type WorkoutSetRowContentProps = {
+  setNumber: number;
+  columns: WorkoutSetColumn[];
+  renderInput: (
+    column: WorkoutSetColumn,
+    columnIndex: number,
+  ) => ReactElement | null;
+  renderTrailingCell?: () => ReactElement | null;
+  renderPerformanceCell?: () => ReactElement | null;
+};
+
+function WorkoutSetRowContent({
+  setNumber,
+  columns,
+  renderInput,
+  renderTrailingCell,
+  renderPerformanceCell,
+}: WorkoutSetRowContentProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View
+      className="flex-row items-center gap-2 p-2"
+      style={{ backgroundColor: colors.app.cardPrimaryDark }}
+    >
+      <View className="w-12 items-center">
+        <ThemedText type="default" variant="primary">
+          {setNumber}
+        </ThemedText>
+      </View>
+
+      {renderPerformanceCell ? (
+        <View className="flex-1 items-center">{renderPerformanceCell()}</View>
+      ) : null}
+
+      {columns.map((column, columnIndex) => (
+        <View key={column.key} className="flex-1">
+          {renderInput(column, columnIndex)}
+        </View>
+      ))}
+
+      {renderTrailingCell ? (
+        <View className="w-12 items-center">{renderTrailingCell()}</View>
+      ) : null}
+    </View>
   );
 }
 
@@ -170,6 +207,7 @@ type WorkoutSetInputProps = {
   allowDecimal?: boolean;
   min?: number;
   max?: number;
+  disabled?: boolean;
 };
 
 export function WorkoutSetInput({
@@ -180,9 +218,11 @@ export function WorkoutSetInput({
   allowDecimal = false,
   min = 0,
   max,
+  disabled = false,
 }: WorkoutSetInputProps) {
   return (
     <FormNumberInput
+      disabled={disabled}
       allowDecimal={allowDecimal}
       value={value}
       onChange={onChange}

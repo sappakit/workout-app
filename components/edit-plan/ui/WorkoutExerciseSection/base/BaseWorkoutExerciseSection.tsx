@@ -23,7 +23,11 @@ type BaseSetItem = {
   clientId: string;
 };
 
+type BaseWorkoutExerciseSectionMode = "editable" | "readonly";
+
 type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
+  mode?: BaseWorkoutExerciseSectionMode;
+
   exerciseName: string;
   subtitle: string;
   imageUrl?: string | null;
@@ -33,9 +37,9 @@ type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
   restTimerTitle?: string;
   onChangeRestTime?: (seconds: number) => void;
 
-  onAddSet: () => void;
-  onDeleteExercise: () => void;
-  onReplaceExercise: () => void;
+  onAddSet?: () => void;
+  onDeleteExercise?: () => void;
+  onReplaceExercise?: () => void;
 
   addSetLabel?: string;
   emptyTitle?: string;
@@ -46,6 +50,7 @@ type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
 };
 
 export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
+  mode = "editable",
   exerciseName,
   subtitle,
   imageUrl,
@@ -64,6 +69,10 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
 }: BaseWorkoutExerciseSectionProps<TSet>) {
   const { colors } = useAppTheme();
   const [expanded, setExpanded] = useState(true);
+
+  const isEditable = mode === "editable";
+  const canShowMenu = isEditable && onReplaceExercise && onDeleteExercise;
+  const canShowAddSetFooter = isEditable && onAddSet;
 
   const ExpansionIcon = expanded ? ChevronUp : ChevronDown;
 
@@ -88,10 +97,12 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
         </View>
 
         <View className="ml-auto flex-row items-center gap-3">
-          <BaseWorkoutExerciseSectionMenu
-            onReplaceExercise={onReplaceExercise}
-            onDeleteExercise={onDeleteExercise}
-          />
+          {canShowMenu && (
+            <BaseWorkoutExerciseSectionMenu
+              onReplaceExercise={onReplaceExercise}
+              onDeleteExercise={onDeleteExercise}
+            />
+          )}
 
           <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
             <ExpansionIcon size={24} color={colors.app.textPrimary} />
@@ -101,15 +112,14 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
 
       {expanded && (
         <View style={{ backgroundColor: colors.app.cardPrimaryDark }}>
-          {sets.length > 0 && onChangeRestTime && (
-            <View className="p-4">
-              <DurationBottomSheetPicker
-                title={restTimerTitle}
-                value={restTime ?? 0}
-                onChange={onChangeRestTime}
-              />
-            </View>
-          )}
+          <View className="p-4">
+            <DurationBottomSheetPicker
+              title={restTimerTitle}
+              value={restTime ?? 0}
+              onChange={onChangeRestTime}
+              disabled={!isEditable || !onChangeRestTime}
+            />
+          </View>
 
           <FlatList
             data={sets}
@@ -135,7 +145,9 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
               sets.length > 0 && renderSetHeader ? renderSetHeader() : null
             }
             ListFooterComponent={
-              <WorkoutSetFooter label={addSetLabel} onPress={onAddSet} />
+              canShowAddSetFooter ? (
+                <WorkoutSetFooter label={addSetLabel} onPress={onAddSet} />
+              ) : null
             }
           />
         </View>

@@ -1,7 +1,6 @@
 import { workoutApi } from "@/app/api/workout.api";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useCountdownTimer } from "@/hooks/useCountdownTimer";
 import { api } from "@/lib/api";
@@ -19,7 +18,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Dumbbell, Layers, Plus, Weight } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Alert, ImageBackground, View } from "react-native";
+import { Alert, View } from "react-native";
 import {
   getWorkoutTimerMetricDisplay,
   getWorkoutTimerStats,
@@ -30,6 +29,7 @@ import { AppButton } from "../custom-ui/AppButton";
 import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
 import { InProgressWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
 import { RecentMetricList } from "../progress/ui/sections/progress-history-section/RecentWorkoutCard";
+import { DetailHeroImage } from "../workout-detail/ui/DetailHeroImage";
 import {
   addSessionSet,
   commitInheritedSetValues,
@@ -456,24 +456,7 @@ export function WorkoutInProgressContent({
           paddingBottom: 200,
         }}
       >
-        <ImageBackground
-          source={{
-            uri: storedSession?.workout?.imageUrl ?? FALLBACK_WORKOUT_IMAGE,
-          }}
-          resizeMode="cover"
-          className="relative justify-end"
-          style={{ height: 240 }}
-          imageStyle={{
-            borderBottomLeftRadius: 16,
-            borderBottomRightRadius: 16,
-          }}
-        />
-
-        {/* <LinearGradient
-          colors={["transparent", colors.app.background]}
-          locations={[0.4, 1]}
-          style={StyleSheet.absoluteFillObject}
-        /> */}
+        <DetailHeroImage imageUrl={storedSession?.workout?.imageUrl} />
 
         <View
           className="px-4"
