@@ -38,6 +38,7 @@ export function DisplayWorkoutExerciseSection({
   return (
     <BaseWorkoutExerciseSection
       mode="readonly"
+      exerciseId={exercise.exercise.id}
       exerciseName={exercise.exercise.name}
       subtitle={`${exercise.sets.length} ${
         exercise.sets.length === 1 ? "set" : "sets"

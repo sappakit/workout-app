@@ -7,6 +7,7 @@ import {
 import { WorkoutImageAvatar } from "@/components/progress/ui/sections/progress-history-section/RecentWorkoutCard";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useRouter } from "expo-router";
 import {
   ChevronDown,
   ChevronUp,
@@ -28,6 +29,7 @@ type BaseWorkoutExerciseSectionMode = "editable" | "readonly";
 type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
   mode?: BaseWorkoutExerciseSectionMode;
 
+  exerciseId: number;
   exerciseName: string;
   subtitle: string;
   imageUrl?: string | null;
@@ -51,6 +53,7 @@ type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
 
 export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
   mode = "editable",
+  exerciseId,
   exerciseName,
   subtitle,
   imageUrl,
@@ -68,6 +71,8 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
   renderSetRow,
 }: BaseWorkoutExerciseSectionProps<TSet>) {
   const { colors } = useAppTheme();
+  const router = useRouter();
+
   const [expanded, setExpanded] = useState(true);
 
   const isEditable = mode === "editable";
@@ -83,20 +88,31 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
         backgroundColor: colors.app.cardPrimary,
       }}
     >
-      <View className="flex-row items-center gap-3 p-4">
-        <WorkoutImageAvatar imageUrl={imageUrl} />
+      <View className="flex-row items-center justify-between p-4">
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="flex-1 flex-row items-center gap-3"
+          onPress={() => {
+            router.push({
+              pathname: "/(pages)/exercise/[id]",
+              params: { id: exerciseId },
+            });
+          }}
+        >
+          <WorkoutImageAvatar imageUrl={imageUrl} />
 
-        <View className="flex-1">
-          <ThemedText type="default" variant="accent" className="text-base">
-            {exerciseName}
-          </ThemedText>
+          <View className="flex-1">
+            <ThemedText type="default" variant="accent" className="text-base">
+              {exerciseName}
+            </ThemedText>
 
-          <ThemedText type="default" variant="primary" className="text-xs">
-            {subtitle}
-          </ThemedText>
-        </View>
+            <ThemedText type="default" variant="primary" className="text-xs">
+              {subtitle}
+            </ThemedText>
+          </View>
+        </TouchableOpacity>
 
-        <View className="ml-auto flex-row items-center gap-3">
+        <View className="flex-row items-center gap-3">
           {canShowMenu && (
             <BaseWorkoutExerciseSectionMenu
               onReplaceExercise={onReplaceExercise}

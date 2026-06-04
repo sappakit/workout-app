@@ -1,6 +1,5 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { View } from "react-native";
 import { DisplayWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/DisplayWorkoutExerciseSection";
@@ -15,10 +14,6 @@ interface WorkoutDetailContentProps {
 export default function WorkoutDetailContent({
   data,
 }: WorkoutDetailContentProps) {
-  const { colors } = useAppTheme();
-
-  console.log(data);
-
   const exercises = data.workoutExercises;
 
   return (
@@ -31,23 +26,6 @@ export default function WorkoutDetailContent({
       }}
     >
       <DetailHeroImage imageUrl={data.imageUrl} />
-
-      {/* <View className="px-4 pt-4">
-        <View
-          className="overflow-hidden rounded-2xl"
-          style={{ backgroundColor: colors.app.cardPrimary }}
-        >
-          <View className="relative items-center justify-center p-4">
-            <ThemedText type="small" variant="primary">
-              {workoutTypeName}
-            </ThemedText>
-
-            <ThemedText type="title" variant="accent">
-              {data.name}
-            </ThemedText>
-          </View>
-        </View>
-      </View> */}
 
       <View className="gap-4 p-4">
         <View className="justify-center">

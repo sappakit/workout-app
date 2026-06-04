@@ -59,6 +59,7 @@ export function InProgressWorkoutExerciseSection({
 
   return (
     <BaseWorkoutExerciseSection
+      exerciseId={exercise.exercise.id}
       exerciseName={exercise.exercise.name}
       subtitle={getExerciseProgressText(exercise)}
       imageUrl={exercise.exercise.imageUrl}
