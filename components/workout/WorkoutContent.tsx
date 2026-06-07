@@ -99,6 +99,13 @@ export default function WorkoutContent({
     });
   };
 
+  const handleOpenWorkoutDetail = () => {
+    router.push({
+      pathname: "/(pages)/workout/[id]",
+      params: { id: data.workout.id },
+    });
+  };
+
   return (
     <PageLayout
       headerProps={{ variant: "title", title: "Workout" }}
@@ -114,6 +121,7 @@ export default function WorkoutContent({
           item={workoutHeroItem}
           onEditPlan={handleEditPlan}
           onSwitchPlan={handleChooseWorkout}
+          onPress={handleOpenWorkoutDetail}
         />
 
         <AppButton

@@ -67,11 +67,11 @@ export function WorkoutHeroCard({
         </View>
 
         <View className="p-4">
-          <ThemedText type="title" variant="white">
+          <ThemedText type="title" variant="white" className="text-2xl">
             {item.title}
           </ThemedText>
 
-          <ThemedText type="small" variant="white" className="mt-1 opacity-80">
+          <ThemedText type="small" variant="primary">
             {item.exerciseCount} exercises | {item.setCount} sets |{" "}
             {item.durationLabel}
           </ThemedText>

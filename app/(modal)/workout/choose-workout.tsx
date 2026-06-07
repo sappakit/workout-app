@@ -1,5 +1,7 @@
 import { workoutApi } from "@/app/api/workout.api";
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { SortDirection } from "@/components/bottom-sheet/workout-filter/page/WorkoutFilterSortPage";
+import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
+import { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
@@ -12,9 +14,20 @@ import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SlidersHorizontal } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
+
+export type WorkoutSortKey = "created_at" | "name" | "duration";
+
+export const DEFAULT_SORT_BY: WorkoutSortKey = "created_at";
+export const DEFAULT_SORT_DIRECTION: SortDirection = "DESC";
+
+const DEFAULT_WORKOUT_FILTERS: WorkoutFilterValues = {
+  focusTypeIds: [],
+  muscleIds: [],
+  sortBy: DEFAULT_SORT_BY,
+  sortDirection: DEFAULT_SORT_DIRECTION,
+};
 
 export default function ChooseWorkoutPage() {
   const router = useRouter();
@@ -34,8 +47,16 @@ export default function ChooseWorkoutPage() {
     currentWorkoutId,
   );
 
+  const [filters, setFilters] = useState<WorkoutFilterValues>(
+    DEFAULT_WORKOUT_FILTERS,
+  );
+
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
+
+  const sortByParam = filters.sortBy
+    ? `${filters.sortBy}:${filters.sortDirection}`
+    : undefined;
 
   const {
     data,
@@ -47,9 +68,22 @@ export default function ChooseWorkoutPage() {
     refetch,
   } = useInfiniteOptionsQuery<WorkoutResponse>({
     url: workoutApi.getAll(),
-    queryKey: workoutQueryKeys.all,
+    queryKey: [
+      workoutQueryKeys.all,
+      debouncedSearch,
+      filters.focusTypeIds,
+      filters.muscleIds,
+      filters.sortBy,
+      filters.sortDirection,
+    ],
     search: debouncedSearch,
     limit: 20,
+    params: {
+      focusTypeIds:
+        filters.focusTypeIds.length > 0 ? filters.focusTypeIds : undefined,
+      muscleIds: filters.muscleIds.length > 0 ? filters.muscleIds : undefined,
+      sortBy: sortByParam,
+    },
   });
 
   const { mutate: updateScheduleWorkout, isPending } = useMutation({
@@ -86,6 +120,7 @@ export default function ChooseWorkoutPage() {
 
   const loadMore = () => {
     if (!hasNextPage || isFetchingNextPage) return;
+
     fetchNextPage();
   };
 
@@ -121,12 +156,7 @@ export default function ChooseWorkoutPage() {
       errorText="Failed to load workouts"
       onRetry={() => refetch()}
       searchRight={
-        <AppButton
-          variant="option"
-          icon={SlidersHorizontal}
-          className="h-12 w-12 rounded-full"
-          iconSize={18}
-        />
+        <WorkoutFilterBottomSheet value={filters} onApplyFilters={setFilters} />
       }
     >
       <FlatList

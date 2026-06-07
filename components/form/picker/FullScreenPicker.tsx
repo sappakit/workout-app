@@ -85,63 +85,61 @@ export default function FullScreenPicker({
         options: { addBottomInset: true },
       }}
     >
-      <>
-        <View>
-          <ThemedText type="title" variant="accent">
-            {title}
+      <View className="gap-3">
+        <ThemedText type="title" variant="accent">
+          {title}
+        </ThemedText>
+
+        {description ? (
+          <ThemedText type="default" variant="primary">
+            {description}
           </ThemedText>
+        ) : null}
 
-          {description ? (
-            <ThemedText type="default" variant="primary">
-              {description}
+        {shouldShowSearch ? (
+          <View className="flex-row items-center gap-2">
+            <FormTextInput
+              clearable
+              className="flex-1 rounded-full"
+              value={searchValue}
+              onChangeText={onSearchChange}
+              placeholder={searchPlaceholder}
+              icon={Search}
+            />
+
+            {searchRight}
+          </View>
+        ) : null}
+
+        {footerExtra}
+      </View>
+
+      <View className="mt-4 flex-1" style={contentContainerStyle}>
+        {isLoading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator />
+          </View>
+        ) : isError ? (
+          <View className="flex-1 items-center justify-center px-6">
+            <ThemedText type="default" variant="secondary">
+              {errorText}
             </ThemedText>
-          ) : null}
 
-          {shouldShowSearch ? (
-            <View className="mt-4 flex-row items-center gap-2">
-              <FormTextInput
-                clearable
-                className="flex-1 rounded-full"
-                value={searchValue}
-                onChangeText={onSearchChange}
-                placeholder={searchPlaceholder}
-                icon={Search}
-              />
-
-              {searchRight}
-            </View>
-          ) : null}
-
-          {footerExtra}
-        </View>
-
-        <View className="mt-4 flex-1" style={contentContainerStyle}>
-          {isLoading ? (
-            <View className="flex-1 items-center justify-center">
-              <ActivityIndicator />
-            </View>
-          ) : isError ? (
-            <View className="flex-1 items-center justify-center px-6">
-              <ThemedText type="default" variant="secondary">
-                {errorText}
-              </ThemedText>
-
-              {onRetry ? (
-                <View className="mt-4">
-                  <AppButton
-                    title="Try Again"
-                    variant="secondary"
-                    className="px-10"
-                    onPress={onRetry}
-                  />
-                </View>
-              ) : null}
-            </View>
-          ) : (
-            children
-          )}
-        </View>
-      </>
+            {onRetry ? (
+              <View className="mt-4">
+                <AppButton
+                  title="Try Again"
+                  variant="secondary"
+                  className="px-10"
+                  onPress={onRetry}
+                />
+              </View>
+            ) : null}
+          </View>
+        ) : (
+          children
+        )}
+      </View>
     </PageLayout>
   );
 }
