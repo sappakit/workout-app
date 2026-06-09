@@ -24,10 +24,7 @@ export function CategoryFilter<TValue extends string | number = number>({
   const handleSelect = (value: TValue) => {
     const isSelected = selectedValues.includes(value);
 
-    if (isSelected) {
-      onChange([]);
-      return;
-    }
+    if (isSelected) return;
 
     onChange([value]);
   };

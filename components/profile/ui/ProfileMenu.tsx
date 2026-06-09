@@ -63,25 +63,17 @@ export function ProfileSection({ title, children }: ProfileSectionProps) {
   const { colors } = useAppTheme();
 
   return (
-    <View>
+    <View className="gap-2">
       {title ? (
-        <ThemedText
-          type="default"
-          variant="secondary"
-          className="mb-3 text-sm"
-          style={{
-            color: colors.app.textPrimary,
-          }}
-        >
+        <ThemedText type="default" variant="primary">
           {title}
         </ThemedText>
       ) : null}
 
       <View
-        className="overflow-hidden rounded-2xl border"
+        className="overflow-hidden rounded-2xl"
         style={{
           backgroundColor: colors.app.cardPrimary,
-          borderColor: colors.app.borderPrimary,
         }}
       >
         {children}

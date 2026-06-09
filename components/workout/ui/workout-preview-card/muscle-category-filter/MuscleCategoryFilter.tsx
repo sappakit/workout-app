@@ -3,6 +3,7 @@ import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { Muscle } from "@/types/workout/response/shared.types";
 import { CategoryFilter, CategoryFilterOption } from "./CategoryFilter";
+import { CategoryFilterSkeleton } from "./CategoryFilterSkeleton";
 
 interface MuscleCategoryFilterProps {
   selectedMuscleIds: number[];
@@ -21,13 +22,14 @@ export function MuscleCategoryFilter({
 
   const muscles = data?.pages.flatMap((page) => page.data) ?? [];
 
-  if (isLoading) return null;
-  if (isError) return null;
-
   const options: CategoryFilterOption<number>[] = muscles.map((muscle) => ({
     label: muscle.name,
     value: muscle.id,
   }));
+
+  if (isLoading) return <CategoryFilterSkeleton />;
+
+  if (isError || options.length === 0) return null;
 
   return (
     <CategoryFilter

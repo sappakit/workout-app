@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { Text, type TextProps } from "react-native";
 import { twMerge } from "tailwind-merge";
 
-type TextType =
+export type TextType =
   | "default"
   | "extraSmall"
   | "small"

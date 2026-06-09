@@ -1,5 +1,8 @@
 import HomeContent from "@/components/home/HomeContent";
+import { HomeSkeleton } from "@/components/home/ui/HomeSkeleton";
 import { mapWorkoutSessionsToHistoryItems } from "@/components/progress/model/progress-history.mapper";
+import { EmptyState } from "@/components/state/EmptyState";
+import { ErrorState } from "@/components/state/ErrorState";
 import { mapWorkoutsToPreviewItems } from "@/components/workout/model/workout-preview.mapper";
 import { mapProgressOverviewToWorkoutStats } from "@/components/workout/model/workout-stats.mapper";
 import { useGetQuery } from "@/lib/query/useGetQuery";
@@ -17,13 +20,14 @@ import { workoutApi } from "../api/workout.api";
 export default function HomeScreen() {
   const invalidateQueries = useInvalidateQueries();
 
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
   const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
 
   const {
     data: progressOverviewData,
     isLoading: isProgressOverviewLoading,
     isError: isProgressOverviewError,
-    isFetching: isProgressOverviewFetching,
+    refetch: refetchProgressOverview,
   } = useGetQuery<WorkoutProgressOverview>(
     workoutQueryKeys.progressOverview,
     workoutApi.getProgressOverview(),
@@ -33,7 +37,7 @@ export default function HomeScreen() {
     data: workoutPreviewData,
     isLoading: isWorkoutPreviewLoading,
     isError: isWorkoutPreviewError,
-    isFetching: isWorkoutPreviewFetching,
+    refetch: refetchWorkoutPreview,
   } = useInfiniteOptionsQuery<WorkoutResponse>({
     url: workoutApi.getAll(),
     queryKey: workoutQueryKeys.all,
@@ -47,7 +51,7 @@ export default function HomeScreen() {
     data: sessionHistoryData,
     isLoading: isSessionHistoryLoading,
     isError: isSessionHistoryError,
-    isFetching: isSessionHistoryFetching,
+    refetch: refetchSessionHistory,
   } = useInfiniteOptionsQuery<WorkoutSession>({
     url: workoutApi.getSessionHistory(),
     queryKey: workoutQueryKeys.sessionHistory,
@@ -69,39 +73,51 @@ export default function HomeScreen() {
   const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews);
 
   const handleRefresh = async () => {
-    await invalidateQueries([
-      workoutQueryKeys.progressOverview,
-      workoutQueryKeys.all,
-      workoutQueryKeys.sessionHistory,
+    setIsPullRefreshing(true);
+
+    try {
+      await invalidateQueries([
+        workoutQueryKeys.progressOverview,
+        workoutQueryKeys.all,
+        workoutQueryKeys.sessionHistory,
+      ]);
+    } finally {
+      setIsPullRefreshing(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    await Promise.all([
+      refetchProgressOverview(),
+      refetchWorkoutPreview(),
+      refetchSessionHistory(),
     ]);
   };
 
-  // TODO: add loading/error UI
-  const isLoading =
-    isProgressOverviewLoading ||
-    isWorkoutPreviewLoading ||
-    isSessionHistoryLoading;
+  const isPageLoading = isProgressOverviewLoading || isSessionHistoryLoading;
 
-  const isError =
-    isProgressOverviewError || isWorkoutPreviewError || isSessionHistoryError;
+  const isPageError = isProgressOverviewError || isSessionHistoryError;
 
-  const isRefreshing =
-    isProgressOverviewFetching ||
-    isWorkoutPreviewFetching ||
-    isSessionHistoryFetching;
+  if (isPageLoading) return <HomeSkeleton />;
 
-  if (isLoading) return null;
-  if (isError || !workoutStats) return null;
+  if (isPageError) return <ErrorState onRetry={handleRetry} />;
+
+  if (!workoutStats) return <EmptyState />;
 
   return (
     <HomeContent
       workoutStats={workoutStats}
-      workoutPreviewItems={workoutPreviewItems}
       historyItems={historyItems}
-      selectedMuscleIds={selectedMuscleIds}
-      onChangeMuscleIds={setSelectedMuscleIds}
+      workoutPreviewSection={{
+        items: workoutPreviewItems,
+        selectedMuscleIds,
+        onChangeMuscleIds: setSelectedMuscleIds,
+        isLoading: isWorkoutPreviewLoading,
+        isError: isWorkoutPreviewError,
+        onRetry: refetchWorkoutPreview,
+      }}
       pullToRefresh={{
-        refreshing: isRefreshing,
+        refreshing: isPullRefreshing,
         onRefresh: handleRefresh,
       }}
     />

@@ -42,124 +42,126 @@ export default function ProfileContent({ data }: ProfileContentProps) {
         title: "Profile",
       }}
     >
-      {/* Profile header */}
-      <View className="items-center">
-        <View className="p-6">
-          <ProfileAvatar
-            image={data.profile?.imageUrl}
-            onPressEdit={() => router.push("/(pages)/profile/edit")}
-          />
-        </View>
-
+      <View className="gap-4">
+        {/* Profile header */}
         <View className="items-center">
-          <ThemedText type="subtitle" variant="accent">
-            {fullName}
-          </ThemedText>
+          <View className="p-6">
+            <ProfileAvatar
+              image={data.profile?.imageUrl}
+              onPressEdit={() => router.push("/(pages)/profile/edit")}
+            />
+          </View>
 
-          <View className="mt-1 flex-row items-center gap-2">
-            <Mail size={14} color={colors.app.textPrimary} />
-
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="text-sm"
-              style={{
-                color: colors.app.textPrimary,
-              }}
-            >
-              {data.email}
+          <View className="items-center">
+            <ThemedText type="subtitle" variant="accent">
+              {fullName}
             </ThemedText>
+
+            <View className="flex-row items-center gap-2">
+              <Mail size={14} color={colors.app.textPrimary} />
+
+              <ThemedText
+                type="default"
+                variant="secondary"
+                className="text-sm"
+                style={{
+                  color: colors.app.textPrimary,
+                }}
+              >
+                {data.email}
+              </ThemedText>
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* Stats */}
-      <View className="mt-4 flex-row gap-2">
-        <StatCard value="170 cm" label="Height" />
-        <StatCard value="52" label="Weight" />
-        <StatCard value="26" label="Age" />
-      </View>
+        {/* Stats */}
+        <View className="flex-row gap-2">
+          <StatCard value="170 cm" label="Height" />
+          <StatCard value="52" label="Weight" />
+          <StatCard value="26" label="Age" />
+        </View>
 
-      <View className="mt-4 gap-4">
-        <ProfileSection title="Account">
-          <ProfileMenuItem
-            label="Personal Info"
-            icon={User}
-            onPress={() => {
-              router.push("/(pages)/profile/edit");
-            }}
-          />
+        <View className="gap-4">
+          <ProfileSection title="Account">
+            <ProfileMenuItem
+              label="Personal Info"
+              icon={User}
+              onPress={() => {
+                router.push("/(pages)/profile/edit");
+              }}
+            />
 
-          {/* TODO: add more menu */}
-          <ProfileMenuItem
-            label="Change Password"
-            icon={LockKeyhole}
-            onPress={() => {
-              // router.push("/(pages)/profile/change-password");
-            }}
-          />
+            {/* TODO: add more menu */}
+            <ProfileMenuItem
+              label="Change Password"
+              icon={LockKeyhole}
+              onPress={() => {
+                // router.push("/(pages)/profile/change-password");
+              }}
+            />
 
-          <ProfileMenuItem
-            label="Daily Activity"
-            icon={Activity}
-            onPress={() => {
-              // router.push("/(pages)/profile/daily-activity");
-            }}
-          />
+            <ProfileMenuItem
+              label="Daily Activity"
+              icon={Activity}
+              onPress={() => {
+                // router.push("/(pages)/profile/daily-activity");
+              }}
+            />
 
-          <ProfileMenuItem
-            label="Progress"
-            icon={BarChart3}
-            onPress={() => {
-              // router.push("/(pages)/profile/progress");
-            }}
-          />
-        </ProfileSection>
+            <ProfileMenuItem
+              label="Progress"
+              icon={BarChart3}
+              onPress={() => {
+                // router.push("/(pages)/profile/progress");
+              }}
+            />
+          </ProfileSection>
 
-        <ProfileSection title="Training">
-          <ProfileMenuItem
-            label="Workout Preferences"
-            icon={Dumbbell}
-            onPress={() => {
-              // router.push("/(pages)/profile/workout-preferences");
-            }}
-          />
+          <ProfileSection title="Training">
+            <ProfileMenuItem
+              label="Workout Preferences"
+              icon={Dumbbell}
+              onPress={() => {
+                // router.push("/(pages)/profile/workout-preferences");
+              }}
+            />
 
-          <ProfileMenuItem
-            label="Privacy & Data"
-            icon={Shield}
-            onPress={() => {
-              // router.push("/(pages)/profile/privacy");
-            }}
-          />
-        </ProfileSection>
+            <ProfileMenuItem
+              label="Privacy & Data"
+              icon={Shield}
+              onPress={() => {
+                // router.push("/(pages)/profile/privacy");
+              }}
+            />
+          </ProfileSection>
 
-        <ProfileSection title="Help">
-          <ProfileMenuItem
-            label="Live Support"
-            icon={MessageCircle}
-            onPress={() => {
-              // router.push("/(pages)/profile/support");
-            }}
-          />
+          <ProfileSection title="Help">
+            <ProfileMenuItem
+              label="Live Support"
+              icon={MessageCircle}
+              onPress={() => {
+                // router.push("/(pages)/profile/support");
+              }}
+            />
 
-          <ProfileMenuItem
-            label="FAQ"
-            icon={CircleHelp}
-            onPress={() => {
-              // router.push("/(pages)/profile/faq");
-            }}
-          />
-        </ProfileSection>
+            <ProfileMenuItem
+              label="FAQ"
+              icon={CircleHelp}
+              onPress={() => {
+                // router.push("/(pages)/profile/faq");
+              }}
+            />
+          </ProfileSection>
 
-        <ProfileSection>
-          <ProfileMenuItem
-            label="Sign Out"
-            icon={LogOut}
-            destructive
-            onPress={signOut}
-          />
-        </ProfileSection>
+          <ProfileSection>
+            <ProfileMenuItem
+              label="Sign Out"
+              icon={LogOut}
+              destructive
+              onPress={signOut}
+            />
+          </ProfileSection>
+        </View>
       </View>
     </PageLayout>
   );

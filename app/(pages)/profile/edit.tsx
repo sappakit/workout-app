@@ -1,5 +1,8 @@
 import { userApi } from "@/app/api/user.api";
 import EditProfileContent from "@/components/edit-profile/EditProfileContent";
+import { EditProfileSkeleton } from "@/components/edit-profile/ui/EditProfileSkeleton";
+import { EmptyState } from "@/components/state/EmptyState";
+import { ErrorState } from "@/components/state/ErrorState";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { userQueryKeys } from "@/lib/user/keys";
 import { User } from "@/types/user/response/user.types";
@@ -7,22 +10,16 @@ import { User } from "@/types/user/response/user.types";
 export default function EditProfileScreen() {
   const url = userApi.getMyProfile();
 
-  const { data, isLoading, isError } = useGetQuery<User>(userQueryKeys.me, url);
+  const { data, isLoading, isError, refetch } = useGetQuery<User>(
+    userQueryKeys.me,
+    url,
+  );
 
-  // TODO: add loading/error
-  if (isLoading) return null;
-  if (isError || !data) return null;
+  if (isLoading) return <EditProfileSkeleton />;
 
-  // if (isLoading) return <WorkoutSkeleton />;
+  if (isError) return <ErrorState onRetry={refetch} />;
 
-  // if (isError || !data)
-  //   return (
-  //     <ErrorState
-  //       title="Failed to Load Workout"
-  //       message="We couldn't load today's workout."
-  //       onRetry={refetch}
-  //     />
-  //   );
+  if (!data) return <EmptyState />;
 
   return <EditProfileContent data={data} />;
 }

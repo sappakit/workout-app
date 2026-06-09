@@ -86,6 +86,10 @@ export const Colors = {
 
     // Toast
     toastBackground: "#FFFFFF",
+
+    // Skeleton
+    skeletonBase: "#FFFFFF",
+    skeletonHighlight: "#F8F8F8",
   },
 
   appDark: {
@@ -119,6 +123,10 @@ export const Colors = {
 
     // Toast
     toastBackground: "#222222",
+
+    // Skeleton
+    skeletonBase: "#222222",
+    skeletonHighlight: "#2B2B2B",
   },
 };
 

@@ -2,9 +2,10 @@ import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
 import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { ArrowUpRight, Heart } from "lucide-react-native";
+import { ArrowUpRight, RefreshCw } from "lucide-react-native";
 import { Image, Pressable, ScrollView, View } from "react-native";
-import { MuscleCategoryFilter } from "./MuscleCategoryFilter";
+import { MuscleCategoryFilter } from "./muscle-category-filter/MuscleCategoryFilter";
+import { WorkoutPreviewSectionSkeleton } from "./WorkoutPreviewSectionSkeleton";
 
 export interface WorkoutPreviewCardItem {
   id: number | string;
@@ -15,16 +16,22 @@ export interface WorkoutPreviewCardItem {
   favoriteAction?: () => void;
 }
 
-interface WorkoutPreviewSectionProps {
+export interface WorkoutPreviewSectionProps {
   items: WorkoutPreviewCardItem[];
   selectedMuscleIds: number[];
   onChangeMuscleIds: (muscleIds: number[]) => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
 }
 
 export function WorkoutPreviewSection({
   items,
   selectedMuscleIds,
   onChangeMuscleIds,
+  isLoading = false,
+  isError = false,
+  onRetry,
 }: WorkoutPreviewSectionProps) {
   return (
     <View className="gap-3">
@@ -33,15 +40,54 @@ export function WorkoutPreviewSection({
         onChange={onChangeMuscleIds}
       />
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerClassName="gap-3"
-      >
-        {items.map((workout) => (
-          <WorkoutPreviewCard key={workout.id} item={workout} />
-        ))}
-      </ScrollView>
+      {isLoading ? (
+        <WorkoutPreviewSectionSkeleton
+          showHeader={false}
+          showCategories={false}
+        />
+      ) : isError ? (
+        <WorkoutPreviewError onRetry={onRetry} />
+      ) : (
+        <WorkoutPreviewCardList items={items} />
+      )}
+    </View>
+  );
+}
+
+function WorkoutPreviewCardList({
+  items,
+}: {
+  items: WorkoutPreviewCardItem[];
+}) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerClassName="gap-3"
+    >
+      {items.map((workout) => (
+        <WorkoutPreviewCard key={workout.id} item={workout} />
+      ))}
+    </ScrollView>
+  );
+}
+
+function WorkoutPreviewError({ onRetry }: { onRetry?: () => void }) {
+  return (
+    <View className="items-center justify-center gap-2 rounded-2xl py-4">
+      <ThemedText type="small" variant="accent" className="text-center">
+        Failed to load workouts.
+      </ThemedText>
+
+      {onRetry ? (
+        <AppButton
+          title="Retry"
+          icon={RefreshCw}
+          variant="secondary"
+          className="w-28"
+          onPress={onRetry}
+        />
+      ) : null}
     </View>
   );
 }
@@ -55,8 +101,8 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
 
   return (
     <Pressable
-      className="overflow-hidden rounded-2xl"
-      style={{ backgroundColor: colors.app.cardPrimary, width: 240 }}
+      className="w-64 overflow-hidden rounded-2xl"
+      style={{ backgroundColor: colors.app.cardPrimary }}
       onPress={item.action}
     >
       <View className="relative h-32">
@@ -66,7 +112,8 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
           resizeMode="cover"
         />
 
-        <View className="absolute right-0 top-0 p-3">
+        {/* TODO: add favorite */}
+        {/* <View className="absolute right-0 top-0 p-3">
           <AppButton
             variant="white"
             icon={Heart}
@@ -74,11 +121,11 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
             shape="pill"
             onPress={item.favoriteAction}
           />
-        </View>
+        </View> */}
       </View>
 
       <View className="flex-row justify-between p-3">
-        <View>
+        <View className="flex-1">
           <ThemedText type="subtitle" variant="accent" numberOfLines={1}>
             {item.title}
           </ThemedText>

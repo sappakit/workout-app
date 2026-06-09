@@ -12,25 +12,21 @@ import {
 import { WorkoutStatsModel } from "../workout/model/workout-stats.mapper";
 import { HomeStatsCards } from "../workout/ui/stats-cards/HomeStatsCards";
 import {
-  WorkoutPreviewCardItem,
   WorkoutPreviewSection,
+  WorkoutPreviewSectionProps,
 } from "../workout/ui/workout-preview-card/WorkoutPreviewCard";
 
 interface HomeContentProps {
   workoutStats: WorkoutStatsModel;
-  workoutPreviewItems: WorkoutPreviewCardItem[];
   historyItems: RecentWorkoutCardItem[];
-  selectedMuscleIds: number[];
-  onChangeMuscleIds: (muscleIds: number[]) => void;
+  workoutPreviewSection: WorkoutPreviewSectionProps;
   pullToRefresh?: PullToRefreshProps;
 }
 
 export default function HomeContent({
   workoutStats,
-  workoutPreviewItems,
   historyItems,
-  selectedMuscleIds,
-  onChangeMuscleIds,
+  workoutPreviewSection,
   pullToRefresh,
 }: HomeContentProps) {
   const router = useRouter();
@@ -66,11 +62,7 @@ export default function HomeContent({
             }
           />
 
-          <WorkoutPreviewSection
-            items={workoutPreviewItems}
-            selectedMuscleIds={selectedMuscleIds}
-            onChangeMuscleIds={onChangeMuscleIds}
-          />
+          <WorkoutPreviewSection {...workoutPreviewSection} />
         </View>
 
         <View>
