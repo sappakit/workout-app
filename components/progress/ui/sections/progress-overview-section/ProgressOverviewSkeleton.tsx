@@ -4,7 +4,7 @@ import { View } from "react-native";
 
 export function ProgressOverviewSkeleton() {
   return (
-    <View className="gap-3">
+    <View className="gap-3 p-4">
       {/* Weekly Summary header */}
       <View className="gap-2">
         <TextSkeleton type="title" className="w-40" />

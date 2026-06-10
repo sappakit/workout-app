@@ -43,8 +43,8 @@ export function PageLayout({
   headerBottom,
   scrollable = true,
   className,
-  topInset = 12,
-  bottomInset = 12,
+  topInset = 16,
+  bottomInset = 16,
   backgroundColor,
   containerStyle,
   disableContentPadding = false,
@@ -120,7 +120,7 @@ export function PageLayout({
       {stickyFooter && (
         <View
           onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-          className="absolute bottom-0 left-0 right-0 flex-row gap-2 px-4 py-3"
+          className="absolute bottom-0 left-0 right-0 flex-row gap-2 p-4"
           style={
             stickyFooter.options?.addBottomInset
               ? { paddingBottom: insets.bottom }

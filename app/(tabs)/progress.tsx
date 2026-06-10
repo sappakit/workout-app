@@ -3,8 +3,8 @@ import { mapWorkoutSessionsToHistoryItems } from "@/components/progress/model/pr
 import ProgressContent, {
   ProgressHistoryState,
   ProgressOverviewState,
-  ProgressTab,
 } from "@/components/progress/ProgressContent";
+import { ProgressTab } from "@/components/progress/ui/elements/ProgressTabs";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
@@ -13,8 +13,6 @@ import {
   WorkoutSession,
 } from "@/types/workout/response/workout.types";
 import { useState } from "react";
-
-const SESSION_HISTORY_LIMIT = 10;
 
 export default function ProgressScreen() {
   const [activeTab, setActiveTab] = useState<ProgressTab>("overview");
@@ -27,9 +25,6 @@ export default function ProgressScreen() {
   } = useGetQuery<WorkoutProgressOverview>(
     workoutQueryKeys.progressOverview,
     workoutApi.getProgressOverview(),
-    {
-      enabled: activeTab === "overview",
-    },
   );
 
   const {
@@ -43,8 +38,7 @@ export default function ProgressScreen() {
   } = useInfiniteOptionsQuery<WorkoutSession>({
     url: workoutApi.getSessionHistory(),
     queryKey: workoutQueryKeys.sessionHistory,
-    limit: SESSION_HISTORY_LIMIT,
-    enabled: activeTab === "history",
+    limit: 10,
   });
 
   const sessionHistory =

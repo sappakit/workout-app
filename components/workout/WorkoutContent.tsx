@@ -111,7 +111,7 @@ export default function WorkoutContent({
       headerProps={{ variant: "title", title: "Workout" }}
       pullToRefresh={pullToRefresh}
     >
-      <View className="gap-5 pb-6">
+      <View className="gap-5">
         <SectionHeader
           title="Today's Plan"
           subtitle="Ready to train? Start scheduled, pick another, or build your own."

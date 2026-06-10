@@ -2,16 +2,14 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
 import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
-import React from "react";
-import { View } from "react-native";
-import { ProgressTabs } from "./ui/elements/ProgressTabs";
+import { ScrollView, View } from "react-native";
+import { ProgressTab, ProgressTabs } from "./ui/elements/ProgressTabs";
 import { ProgressHistorySection } from "./ui/sections/progress-history-section/ProgressHistorySection";
 import { ProgressHistorySkeleton } from "./ui/sections/progress-history-section/ProgressHistorySkeleton";
 import { RecentWorkoutCardItem } from "./ui/sections/progress-history-section/RecentWorkoutCard";
 import { ProgressOverviewSection } from "./ui/sections/progress-overview-section/ProgressOverviewSection";
 import { ProgressOverviewSkeleton } from "./ui/sections/progress-overview-section/ProgressOverviewSkeleton";
-
-export type ProgressTab = "overview" | "history";
+import { ProgressPager } from "./ui/sections/progress-pager/ProgressPager";
 
 export type ProgressOverviewState = {
   data?: WorkoutProgressOverview;
@@ -43,12 +41,10 @@ export default function ProgressContent({
   overviewState,
   historyState,
 }: ProgressContentProps) {
-  const isHistoryTab = activeTab === "history";
-
   return (
     <PageLayout
-      scrollable={!isHistoryTab}
-      disableContentPadding={isHistoryTab}
+      scrollable={false}
+      disableContentPadding
       headerProps={{
         variant: "title",
         title: "Progress",
@@ -57,13 +53,23 @@ export default function ProgressContent({
         <ProgressTabs activeTab={activeTab} onChangeTab={onChangeTab} />
       }
     >
-      {activeTab === "overview" ? (
-        <ProgressOverviewContent state={overviewState} />
-      ) : (
-        <View className="flex-1">
-          <ProgressHistoryContent state={historyState} />
-        </View>
-      )}
+      <ProgressPager
+        activeTab={activeTab}
+        onChangeTab={onChangeTab}
+        overviewContent={
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            <ProgressOverviewContent state={overviewState} />
+          </ScrollView>
+        }
+        historyContent={
+          <View style={{ flex: 1 }}>
+            <ProgressHistoryContent state={historyState} />
+          </View>
+        }
+      />
     </PageLayout>
   );
 }

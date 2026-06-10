@@ -55,9 +55,7 @@ export default function PageHeader(props: PageHeaderRootProps) {
         <ThemeToggle className="z-10 ml-auto" />
       </View>
 
-      {props.headerBottom ? (
-        <View className="px-4 pb-2">{props.headerBottom}</View>
-      ) : null}
+      {props.headerBottom ? props.headerBottom : null}
     </View>
   );
 }

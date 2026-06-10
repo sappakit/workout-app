@@ -19,7 +19,7 @@ export function ProgressOverviewSection({
   const workoutStats = mapProgressOverviewToWorkoutStats(data);
 
   return (
-    <View className="gap-3">
+    <View className="gap-3 p-4">
       <SectionHeader
         title={getProgressOverviewTitle(data.type)}
         subtitle={getProgressOverviewDateLabel({

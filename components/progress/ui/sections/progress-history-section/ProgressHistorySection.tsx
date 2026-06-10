@@ -17,7 +17,7 @@ export function ProgressHistorySection({
     <FlatList
       data={data}
       keyExtractor={(item) => String(item.id)}
-      contentContainerClassName="gap-3 px-4 pb-8 pt-3"
+      contentContainerClassName="gap-3 p-4"
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.3}
       showsVerticalScrollIndicator={false}
