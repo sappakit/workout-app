@@ -131,6 +131,7 @@ export interface WorkoutProgressSummary {
   workoutsCompleted: number;
   totalVolumeKg: number;
   completedSets: number;
+  totalReps: number;
   totalDurationSeconds: number;
 }
 
@@ -140,10 +141,14 @@ export interface WorkoutProgressVolumeTrendItem {
 }
 
 export interface WorkoutProgressBestPerformance {
+  exerciseId: number;
   exerciseName: string;
+  exerciseImageUrl: string | null;
   bestWeightKg: number;
   bestSetVolumeKg: number;
   bestSetLabel: string;
+  completedAt: string | null;
+  setCompletedAt: string | null;
 }
 
 export interface WorkoutProgressOverview {

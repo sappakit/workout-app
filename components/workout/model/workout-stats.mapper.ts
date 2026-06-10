@@ -9,6 +9,7 @@ export type WorkoutStatsModel = {
   totalVolumeText: string;
   workoutsCompletedText: string;
   completedSetsText: string;
+  totalRepsText: string;
   totalDurationText: string;
   volumeTrend: WorkoutVolumeTrendItem[];
 };
@@ -45,6 +46,7 @@ export function mapProgressOverviewToWorkoutStats(
     totalVolumeText: `${formatNumber(overview.summary.totalVolumeKg)} kg`,
     workoutsCompletedText: `${overview.summary.workoutsCompleted}`,
     completedSetsText: `${overview.summary.completedSets}`,
+    totalRepsText: `${overview.summary.totalReps}`,
     totalDurationText: formatDurationMinutes(
       overview.summary.totalDurationSeconds,
     ),

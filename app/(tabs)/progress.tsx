@@ -23,6 +23,7 @@ export default function ProgressScreen() {
     data: overviewData,
     isLoading: isOverviewLoading,
     isError: isOverviewError,
+    refetch: refetchOverview,
   } = useGetQuery<WorkoutProgressOverview>(
     workoutQueryKeys.progressOverview,
     workoutApi.getProgressOverview(),
@@ -35,6 +36,7 @@ export default function ProgressScreen() {
     data: sessionHistoryData,
     isLoading: isSessionHistoryLoading,
     isError: isSessionHistoryError,
+    refetch: refetchSessionHistory,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -47,12 +49,14 @@ export default function ProgressScreen() {
 
   const sessionHistory =
     sessionHistoryData?.pages.flatMap((page) => page.data) ?? [];
+
   const historyItems = mapWorkoutSessionsToHistoryItems(sessionHistory);
 
   const overviewState: ProgressOverviewState = {
     data: overviewData,
     isLoading: isOverviewLoading,
     isError: isOverviewError,
+    onRetry: refetchOverview,
   };
 
   const historyState: ProgressHistoryState = {
@@ -61,6 +65,7 @@ export default function ProgressScreen() {
     isError: isSessionHistoryError,
     isFetchingNextPage,
     hasNextPage,
+    onRetry: refetchSessionHistory,
     onLoadMore: () => {
       if (!hasNextPage || isFetchingNextPage) return;
       fetchNextPage();
