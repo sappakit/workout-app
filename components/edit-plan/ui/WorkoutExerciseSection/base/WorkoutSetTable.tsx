@@ -7,7 +7,7 @@ import {
   getExerciseFields,
 } from "@/lib/workout/config";
 import { ExerciseType } from "@/types/workout/response/exercise.types";
-import { Check, ChevronDown, Trash2 } from "lucide-react-native";
+import { Check, ChevronsUpDown, Trash2 } from "lucide-react-native";
 import { ReactElement } from "react";
 import {
   Pressable,
@@ -78,7 +78,7 @@ export function WorkoutSetHeader({
             {performanceMode === "previous" ? "PREVIOUS" : "BEST"}
           </ThemedText>
 
-          <ChevronDown
+          <ChevronsUpDown
             size={12}
             style={{ minWidth: 12 }}
             color={colors.app.textAccent}

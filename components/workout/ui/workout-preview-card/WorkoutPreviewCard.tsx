@@ -136,7 +136,7 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
         </View>
 
         <AppButton
-          variant="primary"
+          variant="tertiary"
           icon={ArrowUpRight}
           className="h-9 w-9 self-end"
           shape="pill"

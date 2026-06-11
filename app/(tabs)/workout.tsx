@@ -63,7 +63,6 @@ export default function WorkoutScreen() {
   if (isCurrentWorkoutError || !currentWorkoutData) return null;
 
   switch (currentWorkoutData.mode) {
-    // In-progress session
     case WorkoutCurrentMode.IN_PROGRESS:
       return currentWorkoutData.session ? (
         <WorkoutInProgressContent
@@ -72,15 +71,18 @@ export default function WorkoutScreen() {
         />
       ) : null;
 
-    // Scheduled workout
     case WorkoutCurrentMode.SCHEDULED:
+    case WorkoutCurrentMode.REST_DAY:
+    case WorkoutCurrentMode.UNASSIGNED:
       // TODO: add loading/error
       if (isWorkoutPreviewLoading) return null;
       if (isWorkoutPreviewError) return null;
 
-      return currentWorkoutData.schedule ? (
+      return (
         <WorkoutContent
+          mode={currentWorkoutData.mode}
           data={currentWorkoutData.schedule}
+          hasCompletedWorkoutToday={currentWorkoutData.hasCompletedWorkoutToday}
           workoutPreviewItems={workoutPreviewItems}
           selectedMuscleIds={selectedMuscleIds}
           onChangeMuscleIds={setSelectedMuscleIds}
@@ -89,11 +91,8 @@ export default function WorkoutScreen() {
             onRefresh: handleRefresh,
           }}
         />
-      ) : null;
+      );
 
-    // TODO: add scrren for Rest day
-    // Rest day
-    case WorkoutCurrentMode.REST_DAY:
     default:
       return null;
   }

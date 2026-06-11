@@ -16,7 +16,9 @@ const appColors = {
 
   // Text
   textWhite: "#FFFFFF",
+  textWhiteMuted: "#D1D1D1",
   textBlack: "#2D2D2D",
+  textBlackMuted: "#7A7A7A",
 
   // Brand
   // #FD8036, #FA3469, #DB4B4B, #E37531, #F36840

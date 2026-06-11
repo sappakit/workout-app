@@ -506,10 +506,10 @@ export function WorkoutInProgressContent({
               style={{ backgroundColor: colors.app.cardPrimary }}
             >
               <View
-                className="mb-3 h-12 w-12 items-center justify-center rounded-full"
+                className="mb-3 h-16 w-16 items-center justify-center rounded-2xl"
                 style={{ backgroundColor: colors.app.cardSecondary }}
               >
-                <Dumbbell size={24} color={colors.app.brand} />
+                <Dumbbell size={24} color={colors.app.textAccent} />
               </View>
 
               <ThemedText

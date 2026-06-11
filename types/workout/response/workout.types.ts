@@ -18,6 +18,7 @@ export enum WorkoutCurrentMode {
   IN_PROGRESS = "in_progress",
   SCHEDULED = "scheduled",
   REST_DAY = "rest_day",
+  UNASSIGNED = "unassigned",
 }
 
 export enum WorkoutProgressOverviewType {
@@ -125,6 +126,7 @@ export interface WorkoutCurrent {
   session: WorkoutSession | null;
   schedule: WorkoutSchedule | null;
   performanceByExerciseId: Record<string, ExercisePerformanceSummary>;
+  hasCompletedWorkoutToday: boolean;
 }
 
 export interface WorkoutProgressSummary {
