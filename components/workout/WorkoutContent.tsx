@@ -162,7 +162,7 @@ export default function WorkoutContent({
           <UnassignedPlanSection />
         ) : null} */}
 
-        {/* {isScheduledDay && data && workoutHeroItem ? (
+        {isScheduledDay && data && workoutHeroItem ? (
           <TodayPlanSection
             state={todayPlanState}
             workoutHeroItem={workoutHeroItem}
@@ -172,11 +172,11 @@ export default function WorkoutContent({
             onSwitchPlan={handleChooseWorkout}
             onOpenWorkoutDetail={handleOpenWorkoutDetail}
           />
-        ) : null} */}
+        ) : null}
 
         {isRestDay ? <RestDaySection /> : null}
 
-        {!isUnassignedDay ? <UnassignedPlanSection /> : null}
+        {isUnassignedDay ? <UnassignedPlanSection /> : null}
 
         <View className="gap-3">
           <SectionHeader

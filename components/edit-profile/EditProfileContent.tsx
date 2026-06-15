@@ -4,18 +4,22 @@ import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import { appendImageToFormData } from "@/lib/form-data/utils";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { userQueryKeys } from "@/lib/user/keys";
 import { EditProfileForm, editProfileSchema } from "@/schemas/user.schema";
+import { ReactNativeFile } from "@/types/common/file.types";
 import { User } from "@/types/user/response/user.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Save } from "lucide-react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { Alert, Linking, View } from "react-native";
+import { AvatarImageEditor } from "../profile/ui/AvatarImageEditor";
 import { ProfileAvatar } from "../profile/ui/ProfileAvatar";
 import { ProfileFormField } from "./ui/ProfileFormField";
 
@@ -30,6 +34,12 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
 
   const { loadUser } = useAuth();
 
+  const [selectedImage, setSelectedImage] = useState<ReactNativeFile | null>(
+    null,
+  );
+  const [pickedImageUri, setPickedImageUri] = useState<string | null>(null);
+  const [isEditorVisible, setIsEditorVisible] = useState(false);
+
   const form = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     mode: "onTouched",
@@ -38,7 +48,6 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
       lastName: data.profile?.lastName ?? "",
       email: data.email ?? "",
       phoneNumber: data.profile?.phoneNumber ?? "",
-      // dateOfBirth: data.profile?.dateOfBirth ?? "",
     },
   });
 
@@ -46,14 +55,103 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
     control,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = form;
+
+  const hasUnsavedChanges = isDirty || !!selectedImage;
+
+  const handleCancelEdit = () => {
+    const resetFormAndBack = () => {
+      reset();
+      setSelectedImage(null);
+      setPickedImageUri(null);
+      setIsEditorVisible(false);
+      router.back();
+    };
+
+    if (!hasUnsavedChanges) {
+      resetFormAndBack();
+      return;
+    }
+
+    Alert.alert(
+      "Discard changes?",
+      "You have unsaved changes. If you go back, your edits will be lost.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Discard",
+          style: "destructive",
+          onPress: resetFormAndBack,
+        },
+      ],
+    );
+  };
+
+  const closeImageEditor = () => {
+    setIsEditorVisible(false);
+    setPickedImageUri(null);
+  };
+
+  const pickImageFromLibrary = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      if (!permissionResult.canAskAgain) {
+        Alert.alert(
+          "Photo access is blocked",
+          "Please enable photo library access in your phone settings.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Open Settings", onPress: () => Linking.openSettings() },
+          ],
+        );
+        return;
+      }
+
+      Alert.alert(
+        "Permission needed",
+        "Please allow photo library access to update your profile image.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+
+    setPickedImageUri(asset.uri);
+    setIsEditorVisible(true);
+  };
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: EditProfileForm) => {
-      const url = userApi.updateMyProfile();
+      const formData = new FormData();
 
-      return await api.patch(url, values);
+      formData.append("firstName", values.firstName);
+      formData.append("lastName", values.lastName);
+      formData.append("email", values.email);
+      formData.append("phoneNumber", values.phoneNumber ?? "");
+
+      if (selectedImage) {
+        await appendImageToFormData(formData, selectedImage);
+      }
+
+      return await api.patch(userApi.updateMyProfile(), formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
     },
     onSuccess: async (_, values) => {
       reset(values);
@@ -81,6 +179,8 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
     mutate(values);
   };
 
+  const avatarImage = selectedImage?.uri ?? data.profile?.imageUrl;
+
   return (
     <PageLayout
       topInset={0}
@@ -88,6 +188,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
         variant: "title",
         title: "Edit Profile",
         showBackButton: true,
+        onBackPress: handleCancelEdit,
       }}
       stickyFooter={{
         content: (
@@ -97,6 +198,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
             variant="primary"
             icon={Save}
             loading={isPending}
+            disabled={isPending}
             onPress={handleSubmit(onSubmit)}
           />
         ),
@@ -106,7 +208,11 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
       <View className="gap-6">
         <View className="items-center">
           <View className="p-6">
-            <ProfileAvatar image={data.profile?.imageUrl} />
+            <ProfileAvatar
+              image={avatarImage}
+              onPressEdit={pickImageFromLibrary}
+              showEditIcon
+            />
           </View>
         </View>
 
@@ -209,6 +315,16 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
           </ProfileFormField> */}
         </View>
       </View>
+
+      <AvatarImageEditor
+        visible={isEditorVisible}
+        imageUri={pickedImageUri}
+        onClose={closeImageEditor}
+        onComplete={(image) => {
+          setSelectedImage(image);
+          closeImageEditor();
+        }}
+      />
     </PageLayout>
   );
 }
