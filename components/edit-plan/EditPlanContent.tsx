@@ -1,8 +1,10 @@
 import { muscleApi } from "@/app/api/muscle.api";
 import { workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
+import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { api } from "@/lib/api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInvalidateQueries } from "@/lib/query/utils";
@@ -11,7 +13,6 @@ import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
   mapEditPlanFormToUpdateWorkoutPayload,
   mapWorkoutResponseToEditPlanForm,
-  secondsToHMS,
 } from "@/lib/workout/mappers";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
@@ -33,10 +34,10 @@ import { Alert, View } from "react-native";
 import { AppButton } from "../custom-ui/AppButton";
 import FormCheckbox from "../form/FormCheckbox";
 import { FormErrorMessage } from "../form/FormErrorMessage";
-import FormNumberInput from "../form/FormNumberInput";
 import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "../layout/SectionHeader";
+import { DurationPickerTrigger } from "./ui/DurationPickerTrigger";
 import { ExerciseListMenu } from "./ui/ExerciseListMenu";
 import { PlanWorkoutExerciseSection } from "./ui/WorkoutExerciseSection/PlanWorkoutExerciseSection";
 
@@ -45,6 +46,7 @@ interface EditPlanContentProps {
 }
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
+  const { colors } = useAppTheme();
   const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
@@ -148,7 +150,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
 
       await invalidateQueries([
         workoutQueryKeys.detail(data.id),
-        workoutQueryKeys.schedule,
+        workoutQueryKeys.current,
       ]);
 
       toast.success({
@@ -168,12 +170,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     mutate(values);
   };
 
-  // Duration errors
-  const durationErrorMessage =
-    errors.durationHours?.message ||
-    errors.durationMinutes?.message ||
-    errors.durationSeconds?.message;
-
   // Auto-filled duration
   const autoFillDuration = useWatch({
     control,
@@ -183,11 +179,11 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   useEffect(() => {
     if (!autoFillDuration) return;
 
-    // Empty duration field if no exercises
     if (workoutExercises.length === 0) {
-      setValue("durationHours", null);
-      setValue("durationMinutes", null);
-      setValue("durationSeconds", null);
+      setValue("duration", 0, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       return;
     }
 
@@ -196,11 +192,10 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       { timeType: "seconds" },
     );
 
-    const { hours, minutes, seconds } = secondsToHMS(totalSeconds);
-
-    setValue("durationHours", hours);
-    setValue("durationMinutes", minutes);
-    setValue("durationSeconds", seconds);
+    setValue("duration", totalSeconds, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   }, [workoutExercises, autoFillDuration, setValue]);
 
   // Auto-filled muscles
@@ -373,7 +368,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         variant="primary"
         icon={Save}
         className="flex-1"
-        textClassName="font-medium"
         onPress={handleSubmit(onSubmit)}
         loading={isPending}
       />
@@ -469,7 +463,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           Target Muscle Groups
         </ThemedText>
 
-        {/* Auto-filled */}
         <View className="my-2">
           <Controller
             control={control}
@@ -538,11 +531,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
                   field.onChange(value);
 
                   if (value) {
-                    clearErrors([
-                      "durationHours",
-                      "durationMinutes",
-                      "durationSeconds",
-                    ]);
+                    clearErrors("duration");
                   }
                 }}
                 error={!!errors.autoFillDuration}
@@ -552,89 +541,33 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           />
         </View>
 
-        <View className="flex-row justify-between gap-3">
-          <View className="flex-1">
-            <Controller
-              control={control}
-              name="durationHours"
-              render={({ field, fieldState }) => (
-                <FormNumberInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={0}
-                  step={1}
-                  placeholder="0"
-                  error={!!fieldState.error}
-                  disabled={autoFillDuration}
-                />
-              )}
-            />
+        <Controller
+          control={control}
+          name="duration"
+          render={({ field, fieldState }) => (
+            <>
+              <DurationBottomSheetPicker
+                title="Select Estimated Duration"
+                value={field.value ?? 0}
+                onChange={(value) => {
+                  field.onChange(value);
+                  clearErrors("duration");
+                }}
+                disabled={autoFillDuration}
+                renderTrigger={({ value, openSheet, disabled }) => (
+                  <DurationPickerTrigger
+                    value={value}
+                    onPress={openSheet}
+                    disabled={disabled}
+                    error={!!fieldState.error}
+                  />
+                )}
+              />
 
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="mt-2 self-center"
-            >
-              Hours
-            </ThemedText>
-          </View>
-
-          <View className="flex-1">
-            <Controller
-              control={control}
-              name="durationMinutes"
-              render={({ field, fieldState }) => (
-                <FormNumberInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={0}
-                  max={59}
-                  step={1}
-                  placeholder="0"
-                  error={!!fieldState.error}
-                  disabled={autoFillDuration}
-                />
-              )}
-            />
-
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="mt-2 self-center"
-            >
-              Minutes
-            </ThemedText>
-          </View>
-
-          <View className="flex-1">
-            <Controller
-              control={control}
-              name="durationSeconds"
-              render={({ field, fieldState }) => (
-                <FormNumberInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={0}
-                  max={59}
-                  step={1}
-                  placeholder="0"
-                  error={!!fieldState.error}
-                  disabled={autoFillDuration}
-                />
-              )}
-            />
-
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="mt-2 self-center"
-            >
-              Seconds
-            </ThemedText>
-          </View>
-        </View>
-
-        <FormErrorMessage message={durationErrorMessage} />
+              <FormErrorMessage message={fieldState.error?.message} />
+            </>
+          )}
+        />
       </View>
 
       {/* Exercise List */}

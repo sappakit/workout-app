@@ -97,17 +97,11 @@ export function mapWorkoutExerciseToFormItem(
 export function mapWorkoutResponseToEditPlanForm(
   data: WorkoutResponse,
 ): EditPlanForm {
-  const duration = secondsToHMS(data.duration);
-
   return {
     name: data.name,
     workoutFocusTypeId: data.workoutFocusType?.id ?? null,
     targetMuscles: data.muscles.map((item) => item.muscle.id),
-
-    durationHours: duration.hours ?? 0,
-    durationMinutes: duration.minutes ?? 0,
-    durationSeconds: duration.seconds ?? 0,
-
+    duration: data.duration ?? 0,
     autoFillMuscles: false,
     autoFillDuration: false,
 
@@ -150,12 +144,7 @@ export function mapEditPlanFormToUpdateWorkoutPayload(
     name: values.name.trim(),
     workoutFocusTypeId: values.workoutFocusTypeId,
     targetMuscles: values.targetMuscles,
-    duration:
-      hmsToSeconds(
-        values.durationHours,
-        values.durationMinutes,
-        values.durationSeconds,
-      ) ?? 0,
+    duration: values.duration,
     workoutExercises: values.workoutExercises.map(
       mapWorkoutExerciseFormToPayload,
     ),

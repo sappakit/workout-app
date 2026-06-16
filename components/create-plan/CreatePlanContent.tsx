@@ -3,22 +3,20 @@ import { workoutApi } from "@/app/api/workout.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import FormCheckbox from "@/components/form/FormCheckbox";
 import { FormErrorMessage } from "@/components/form/FormErrorMessage";
-import FormNumberInput from "@/components/form/FormNumberInput";
 import FormTextInput from "@/components/form/FormTextInput";
+import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
 import FormInfiniteMultiSelectInput from "@/components/form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "@/components/form/select-input/FormInfiniteSelectInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { api } from "@/lib/api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import {
-  mapEditPlanFormToUpdateWorkoutPayload,
-  secondsToHMS,
-} from "@/lib/workout/mappers";
+import { mapEditPlanFormToUpdateWorkoutPayload } from "@/lib/workout/mappers";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
@@ -33,6 +31,7 @@ import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Alert, View } from "react-native";
+import { DurationPickerTrigger } from "../edit-plan/ui/DurationPickerTrigger";
 import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
 import { PlanWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/PlanWorkoutExerciseSection";
 
@@ -42,13 +41,12 @@ const CREATE_PLAN_DEFAULT_VALUES: EditPlanForm = {
   targetMuscles: [],
   autoFillMuscles: false,
   autoFillDuration: false,
-  durationHours: null,
-  durationMinutes: null,
-  durationSeconds: null,
+  duration: 0,
   workoutExercises: [],
 };
 
 export default function CreatePlanContent() {
+  const { colors } = useAppTheme();
   const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
@@ -142,10 +140,7 @@ export default function CreatePlanContent() {
     onSuccess: async () => {
       resetDraft();
 
-      await invalidateQueries([
-        workoutQueryKeys.schedule,
-        workoutQueryKeys.current,
-      ]);
+      await invalidateQueries([workoutQueryKeys.current]);
 
       toast.success({
         title: "Plan created",
@@ -166,12 +161,6 @@ export default function CreatePlanContent() {
     mutate(values);
   };
 
-  // Duration errors
-  const durationErrorMessage =
-    errors.durationHours?.message ||
-    errors.durationMinutes?.message ||
-    errors.durationSeconds?.message;
-
   // Auto-filled duration
   const autoFillDuration = useWatch({
     control,
@@ -181,11 +170,11 @@ export default function CreatePlanContent() {
   useEffect(() => {
     if (!autoFillDuration) return;
 
-    // Empty duration field if no exercises
     if (workoutExercises.length === 0) {
-      setValue("durationHours", null);
-      setValue("durationMinutes", null);
-      setValue("durationSeconds", null);
+      setValue("duration", 0, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       return;
     }
 
@@ -194,11 +183,10 @@ export default function CreatePlanContent() {
       { timeType: "seconds" },
     );
 
-    const { hours, minutes, seconds } = secondsToHMS(totalSeconds);
-
-    setValue("durationHours", hours);
-    setValue("durationMinutes", minutes);
-    setValue("durationSeconds", seconds);
+    setValue("duration", totalSeconds, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   }, [workoutExercises, autoFillDuration, setValue]);
 
   // Auto-filled muscles
@@ -524,11 +512,7 @@ export default function CreatePlanContent() {
                   field.onChange(value);
 
                   if (value) {
-                    clearErrors([
-                      "durationHours",
-                      "durationMinutes",
-                      "durationSeconds",
-                    ]);
+                    clearErrors("duration");
                   }
                 }}
                 error={!!errors.autoFillDuration}
@@ -538,89 +522,33 @@ export default function CreatePlanContent() {
           />
         </View>
 
-        <View className="flex-row justify-between gap-3">
-          <View className="flex-1">
-            <Controller
-              control={control}
-              name="durationHours"
-              render={({ field, fieldState }) => (
-                <FormNumberInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={0}
-                  step={1}
-                  placeholder="0"
-                  error={!!fieldState.error}
-                  disabled={autoFillDuration}
-                />
-              )}
-            />
+        <Controller
+          control={control}
+          name="duration"
+          render={({ field, fieldState }) => (
+            <>
+              <DurationBottomSheetPicker
+                title="Select Estimated Duration"
+                value={field.value ?? 0}
+                onChange={(value) => {
+                  field.onChange(value);
+                  clearErrors("duration");
+                }}
+                disabled={autoFillDuration}
+                renderTrigger={({ value, openSheet, disabled }) => (
+                  <DurationPickerTrigger
+                    value={value}
+                    onPress={openSheet}
+                    disabled={disabled}
+                    error={!!fieldState.error}
+                  />
+                )}
+              />
 
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="mt-2 self-center"
-            >
-              Hours
-            </ThemedText>
-          </View>
-
-          <View className="flex-1">
-            <Controller
-              control={control}
-              name="durationMinutes"
-              render={({ field, fieldState }) => (
-                <FormNumberInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={0}
-                  max={59}
-                  step={1}
-                  placeholder="0"
-                  error={!!fieldState.error}
-                  disabled={autoFillDuration}
-                />
-              )}
-            />
-
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="mt-2 self-center"
-            >
-              Minutes
-            </ThemedText>
-          </View>
-
-          <View className="flex-1">
-            <Controller
-              control={control}
-              name="durationSeconds"
-              render={({ field, fieldState }) => (
-                <FormNumberInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={0}
-                  max={59}
-                  step={1}
-                  placeholder="0"
-                  error={!!fieldState.error}
-                  disabled={autoFillDuration}
-                />
-              )}
-            />
-
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="mt-2 self-center"
-            >
-              Seconds
-            </ThemedText>
-          </View>
-        </View>
-
-        <FormErrorMessage message={durationErrorMessage} />
+              <FormErrorMessage message={fieldState.error?.message} />
+            </>
+          )}
+        />
       </View>
 
       {/* Exercise List */}

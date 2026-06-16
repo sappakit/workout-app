@@ -28,11 +28,17 @@ function formatWorkoutDuration(duration: number | null) {
   if (!duration) return "No duration";
 
   if (duration < 60) {
-    return `${duration} min`;
+    return `${duration} sec`;
   }
 
-  const hours = Math.floor(duration / 60);
-  const minutes = duration % 60;
+  const totalMinutes = Math.round(duration / 60);
+
+  if (totalMinutes < 60) {
+    return `${totalMinutes} min`;
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
 
   if (minutes === 0) {
     return `${hours} hr`;
