@@ -1,6 +1,6 @@
-import { HeroCard } from "@/components/home/ui/HeroCard";
 import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import { WorkoutTodayOverview } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import React from "react";
 import { View } from "react-native";
@@ -15,8 +15,10 @@ import {
   WorkoutPreviewSection,
   WorkoutPreviewSectionProps,
 } from "../workout/ui/workout-preview-card/WorkoutPreviewCard";
+import { TodayWorkoutCard } from "./ui/TodayWorkoutCard";
 
 interface HomeContentProps {
+  todayOverview?: WorkoutTodayOverview;
   workoutStats: WorkoutStatsModel;
   historyItems: RecentWorkoutCardItem[];
   workoutPreviewSection: WorkoutPreviewSectionProps;
@@ -24,16 +26,13 @@ interface HomeContentProps {
 }
 
 export default function HomeContent({
+  todayOverview,
   workoutStats,
   historyItems,
   workoutPreviewSection,
   pullToRefresh,
 }: HomeContentProps) {
   const router = useRouter();
-
-  const handleStartWorkout = () => {
-    router.push("/(tabs)/workout");
-  };
 
   const handleViewAllWorkouts = () => {
     router.push("/(tabs)/workout");
@@ -46,7 +45,7 @@ export default function HomeContent({
   return (
     <PageLayout headerProps={{ variant: "home" }} pullToRefresh={pullToRefresh}>
       <View className="gap-4">
-        <HeroCard onStartWorkout={handleStartWorkout} />
+        <TodayWorkoutCard todayOverview={todayOverview} />
 
         <HomeStatsCards data={workoutStats} />
 

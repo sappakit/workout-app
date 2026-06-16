@@ -20,8 +20,8 @@ export function HomeSkeleton() {
   );
 }
 
-function HeroCardSkeleton() {
-  return <SkeletonPlaceholder className="aspect-[2.5] w-full rounded-3xl" />;
+export function HeroCardSkeleton() {
+  return <SkeletonPlaceholder className="h-44 rounded-3xl" />;
 }
 
 function HomeStatsSkeleton() {

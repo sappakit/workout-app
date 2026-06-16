@@ -13,6 +13,7 @@ import {
   WorkoutProgressOverview,
   WorkoutResponse,
   WorkoutSession,
+  WorkoutTodayOverview,
 } from "@/types/workout/response/workout.types";
 import { useState } from "react";
 import { workoutApi } from "../api/workout.api";
@@ -22,6 +23,16 @@ export default function HomeScreen() {
 
   const [isPullRefreshing, setIsPullRefreshing] = useState(false);
   const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
+
+  const {
+    data: todayOverviewData,
+    isLoading: isTodayOverviewLoading,
+    isError: isTodayOverviewError,
+    refetch: refetchTodayOverview,
+  } = useGetQuery<WorkoutTodayOverview>(
+    workoutQueryKeys.todayOverview,
+    workoutApi.getTodayOverview(),
+  );
 
   const {
     data: progressOverviewData,
@@ -77,6 +88,7 @@ export default function HomeScreen() {
 
     try {
       await invalidateQueries([
+        workoutQueryKeys.todayOverview,
         workoutQueryKeys.progressOverview,
         workoutQueryKeys.all,
         workoutQueryKeys.sessionHistory,
@@ -88,13 +100,17 @@ export default function HomeScreen() {
 
   const handleRetry = async () => {
     await Promise.all([
+      refetchTodayOverview(),
       refetchProgressOverview(),
       refetchWorkoutPreview(),
       refetchSessionHistory(),
     ]);
   };
 
-  const isPageLoading = isProgressOverviewLoading || isSessionHistoryLoading;
+  const isPageLoading =
+    isTodayOverviewLoading ||
+    isProgressOverviewLoading ||
+    isSessionHistoryLoading;
 
   const isPageError = isProgressOverviewError || isSessionHistoryError;
 
@@ -106,6 +122,7 @@ export default function HomeScreen() {
 
   return (
     <HomeContent
+      todayOverview={todayOverviewData}
       workoutStats={workoutStats}
       historyItems={historyItems}
       workoutPreviewSection={{

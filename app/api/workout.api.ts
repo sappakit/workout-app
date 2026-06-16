@@ -8,6 +8,7 @@ export const workoutApi = {
   getCurrent: () => `${BASE}/current`,
   getProgressOverview: () => `${BASE}/progress/overview`,
   getSessionHistory: () => `${BASE}/sessions/history`,
+  getTodayOverview: () => `${BASE}/today/overview`,
 
   // Create
   create: () => BASE,

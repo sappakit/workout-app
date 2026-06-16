@@ -27,6 +27,12 @@ export enum WorkoutProgressOverviewType {
   ALL_TIME = "all_time",
 }
 
+export enum WorkoutWeeklyPlanDayType {
+  WORKOUT = "workout",
+  REST = "rest",
+  UNASSIGNED = "unassigned",
+}
+
 export interface WorkoutSetValue {
   reps: number | null;
   weight: number | null;
@@ -160,4 +166,10 @@ export interface WorkoutProgressOverview {
   summary: WorkoutProgressSummary;
   volumeTrend: WorkoutProgressVolumeTrendItem[];
   bestPerformances: WorkoutProgressBestPerformance[];
+}
+
+export interface WorkoutTodayOverview {
+  todayPlanType: WorkoutWeeklyPlanDayType;
+  schedule: WorkoutSchedule | null;
+  hasCompletedWorkoutToday: boolean;
 }
