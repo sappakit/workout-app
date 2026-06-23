@@ -9,6 +9,7 @@ export const workoutApi = {
   getProgressOverview: () => `${BASE}/progress/overview`,
   getSessionHistory: () => `${BASE}/sessions/history`,
   getTodayOverview: () => `${BASE}/today/overview`,
+  getWeeklyPlan: () => `${BASE}/weekly-plan`,
 
   // Create
   create: () => BASE,
@@ -22,4 +23,5 @@ export const workoutApi = {
   finishSession: (sessionId: number) => `${BASE}/sessions/${sessionId}/finish`,
   updateScheduleWorkout: (scheduleId: number) =>
     `${BASE}/schedule/${scheduleId}/workout`,
+  updateWeeklyPlan: () => `${BASE}/weekly-plan`,
 };

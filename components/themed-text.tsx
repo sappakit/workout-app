@@ -31,7 +31,7 @@ const typeClassMap = {
   default: "text-base",
   extraSmall: "text-xs",
   small: "text-sm",
-  defaultSemiBold: "font-semibold",
+  defaultSemiBold: "text-base font-semibold",
   title: "text-xl font-semibold",
   subtitle: "text-lg font-medium",
 } satisfies Record<TextType, string>;

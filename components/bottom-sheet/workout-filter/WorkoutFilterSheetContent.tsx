@@ -12,10 +12,10 @@ import { WorkoutFocusType } from "@/types/workout/response/workout.types";
 import { Calendar, Dumbbell, Timer } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+  SlideInLeft,
+  SlideInRight,
+  SlideOutLeft,
+  SlideOutRight,
 } from "react-native-reanimated";
 import { WorkoutFilterOverviewPage } from "./page/WorkoutFilterOverviewPage";
 import {
@@ -233,60 +233,60 @@ type AnimatedFilterPageProps = {
   children: React.ReactNode;
 };
 
-export function AnimatedFilterPage({
-  pageKey,
-  shouldAnimate,
-  children,
-}: AnimatedFilterPageProps) {
-  const translateX = useSharedValue(0);
-
-  useEffect(() => {
-    if (!shouldAnimate) {
-      translateX.value = 0;
-      return;
-    }
-
-    translateX.value = pageKey === "main" ? -48 : 48;
-
-    translateX.value = withTiming(0, {
-      duration: 420,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [pageKey, shouldAnimate, translateX]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
-
-  return (
-    <Animated.View key={pageKey} style={[{ flex: 1 }, animatedStyle]}>
-      {children}
-    </Animated.View>
-  );
-}
-
-// TODO: old animation
+// TODO: new animation
 // export function AnimatedFilterPage({
 //   pageKey,
 //   shouldAnimate,
 //   children,
 // }: AnimatedFilterPageProps) {
-//   const isBackToMain = pageKey === "main";
+//   const translateX = useSharedValue(0);
 
-//   const entering = isBackToMain ? SlideInLeft : SlideInRight;
-//   const exiting = isBackToMain ? SlideOutLeft : SlideOutRight;
+//   useEffect(() => {
+//     if (!shouldAnimate) {
+//       translateX.value = 0;
+//       return;
+//     }
+
+//     translateX.value = pageKey === "main" ? -48 : 48;
+
+//     translateX.value = withTiming(0, {
+//       duration: 420,
+//       easing: Easing.out(Easing.cubic),
+//     });
+//   }, [pageKey, shouldAnimate, translateX]);
+
+//   const animatedStyle = useAnimatedStyle(() => ({
+//     transform: [{ translateX: translateX.value }],
+//   }));
 
 //   return (
-//     <Animated.View
-//       key={pageKey}
-//       entering={shouldAnimate ? entering.duration(350) : undefined}
-//       exiting={exiting.duration(350)}
-//       style={{ flex: 1 }}
-//     >
+//     <Animated.View key={pageKey} style={[{ flex: 1 }, animatedStyle]}>
 //       {children}
 //     </Animated.View>
 //   );
 // }
+
+export function AnimatedFilterPage({
+  pageKey,
+  shouldAnimate,
+  children,
+}: AnimatedFilterPageProps) {
+  const isBackToMain = pageKey === "main";
+
+  const entering = isBackToMain ? SlideInLeft : SlideInRight;
+  const exiting = isBackToMain ? SlideOutLeft : SlideOutRight;
+
+  return (
+    <Animated.View
+      key={pageKey}
+      entering={shouldAnimate ? entering.duration(350) : undefined}
+      exiting={exiting.duration(350)}
+      style={{ flex: 1 }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
 
 function getSelectedCountSummary(selectedIds: number[], emptyLabel: string) {
   if (selectedIds.length === 0) return emptyLabel;

@@ -12,6 +12,7 @@ interface TodayPlanSectionProps {
   onStartTodayPlan: () => void;
   onEditPlan: () => void;
   onSwitchPlan: () => void;
+  onWeeklyPlan: () => void;
   onOpenWorkoutDetail: () => void;
 }
 
@@ -22,6 +23,7 @@ export function TodayPlanSection({
   onStartTodayPlan,
   onEditPlan,
   onSwitchPlan,
+  onWeeklyPlan,
   onOpenWorkoutDetail,
 }: TodayPlanSectionProps) {
   const isScheduledPlanCompleted = state === "completed_scheduled_plan";
@@ -50,6 +52,7 @@ export function TodayPlanSection({
         statusIcon={statusIcon}
         onEditPlan={onEditPlan}
         onSwitchPlan={onSwitchPlan}
+        onWeeklyPlan={onWeeklyPlan}
         onPress={onOpenWorkoutDetail}
       />
 

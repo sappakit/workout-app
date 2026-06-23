@@ -173,3 +173,14 @@ export interface WorkoutTodayOverview {
   schedule: WorkoutSchedule | null;
   hasCompletedWorkoutToday: boolean;
 }
+
+export type WorkoutWeeklyPlanDay = {
+  id: number | null;
+  dayOfWeek: number;
+  dayType: WorkoutWeeklyPlanDayType;
+  workout: WorkoutResponse | null;
+};
+
+export type WorkoutWeeklyPlan = {
+  days: WorkoutWeeklyPlanDay[];
+};

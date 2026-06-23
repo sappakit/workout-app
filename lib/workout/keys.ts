@@ -5,6 +5,7 @@ export const workoutQueryKeys = {
   progressOverview: ["workout", "progress", "overview"] as const,
   sessionHistory: ["workout", "sessions", "history"] as const,
   todayOverview: ["workout", "todayOverview"] as const,
+  weeklyPlan: ["workout", "weekly-plan"] as const,
 
   detail: (id: number) => ["workout", "detail", id] as const,
 };

@@ -1,13 +1,18 @@
+import { AppButton } from "@/components/custom-ui/AppButton";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
 import { WORKOUT_REST_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { LinearGradient } from "expo-linear-gradient";
-import { BatteryCharging } from "lucide-react-native";
+import { BatteryCharging, CalendarCog } from "lucide-react-native";
 import { ImageBackground, StyleSheet, View } from "react-native";
 
-export function RestDaySection() {
+interface RestDaySectionProps {
+  onWeeklyPlan: () => void;
+}
+
+export function RestDaySection({ onWeeklyPlan }: RestDaySectionProps) {
   const { colors } = useAppTheme();
 
   return (
@@ -60,6 +65,13 @@ export function RestDaySection() {
           </View>
         </ImageBackground>
       </View>
+
+      <AppButton
+        title="Edit weekly plan"
+        icon={CalendarCog}
+        variant="primary"
+        onPress={onWeeklyPlan}
+      />
     </View>
   );
 }

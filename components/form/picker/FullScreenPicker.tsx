@@ -86,15 +86,17 @@ export default function FullScreenPicker({
       }}
     >
       <View className="gap-3">
-        <ThemedText type="title" variant="accent">
-          {title}
-        </ThemedText>
-
-        {description ? (
-          <ThemedText type="default" variant="primary">
-            {description}
+        <View>
+          <ThemedText type="title" variant="accent">
+            {title}
           </ThemedText>
-        ) : null}
+
+          {description ? (
+            <ThemedText type="default" variant="primary">
+              {description}
+            </ThemedText>
+          ) : null}
+        </View>
 
         {shouldShowSearch ? (
           <View className="flex-row items-center gap-2">

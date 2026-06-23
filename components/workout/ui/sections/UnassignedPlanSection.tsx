@@ -8,7 +8,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { CalendarCog, CalendarPlus } from "lucide-react-native";
 import { ImageBackground, StyleSheet, View } from "react-native";
 
-export function UnassignedPlanSection() {
+interface UnassignedPlanSectionProps {
+  onWeeklyPlan: () => void;
+}
+
+export function UnassignedPlanSection({
+  onWeeklyPlan,
+}: UnassignedPlanSectionProps) {
   const { colors } = useAppTheme();
 
   return (
@@ -63,11 +69,10 @@ export function UnassignedPlanSection() {
       </View>
 
       <AppButton
-        title="Assign weekday plan"
+        title="Assign weekly plan"
         icon={CalendarCog}
         variant="primary"
-        //   onPress={onStartTodayPlan}
-        //   loading={isStarting}
+        onPress={onWeeklyPlan}
       />
     </View>
   );

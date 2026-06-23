@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import {
   CalendarCheck,
   CalendarClock,
+  CalendarDays,
   Dumbbell,
   Layers,
   LucideIcon,
@@ -38,6 +39,7 @@ interface WorkoutHeroCardProps {
   onPress?: () => void;
   onEditPlan: () => void;
   onSwitchPlan: () => void;
+  onWeeklyPlan: () => void;
   isDisabled?: boolean;
 }
 
@@ -47,6 +49,7 @@ export function WorkoutHeroCard({
   onPress,
   onEditPlan,
   onSwitchPlan,
+  onWeeklyPlan,
   isDisabled,
 }: WorkoutHeroCardProps) {
   const { colors } = useAppTheme();
@@ -83,6 +86,7 @@ export function WorkoutHeroCard({
             actions={{
               onEditPlan,
               onSwitchPlan,
+              onWeeklyPlan,
             }}
           />
         </View>
@@ -153,11 +157,12 @@ type WorkoutHeroCardMenuProps = {
   actions: {
     onEditPlan: () => void;
     onSwitchPlan: () => void;
+    onWeeklyPlan: () => void;
   };
   isDisabled?: boolean;
 };
 
-function WorkoutHeroCardMenu({
+export function WorkoutHeroCardMenu({
   isDisabled,
   actions,
 }: WorkoutHeroCardMenuProps) {
@@ -166,15 +171,21 @@ function WorkoutHeroCardMenu({
       <MenuSectionLabel label="Actions" />
 
       <DropdownItem
-        label="Edit plan"
+        label="Edit workout"
         icon={Settings2}
         onSelect={actions.onEditPlan}
       />
 
       <DropdownItem
-        label="Switch plan"
+        label="Switch workout"
         icon={Repeat}
         onSelect={actions.onSwitchPlan}
+      />
+
+      <DropdownItem
+        label="Edit weekly plan"
+        icon={CalendarDays}
+        onSelect={actions.onWeeklyPlan}
       />
     </OptionsMenu>
   );

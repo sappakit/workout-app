@@ -140,6 +140,10 @@ export default function WorkoutContent({
     });
   };
 
+  const handleWeeklyPlan = () => {
+    router.push("/(pages)/weekly-plan");
+  };
+
   return (
     <PageLayout
       headerProps={{ variant: "title", title: "Workout" }}
@@ -170,13 +174,16 @@ export default function WorkoutContent({
             onStartTodayPlan={startWorkout}
             onEditPlan={handleEditPlan}
             onSwitchPlan={handleChooseWorkout}
+            onWeeklyPlan={handleWeeklyPlan}
             onOpenWorkoutDetail={handleOpenWorkoutDetail}
           />
         ) : null}
 
-        {isRestDay ? <RestDaySection /> : null}
+        {isRestDay ? <RestDaySection onWeeklyPlan={handleWeeklyPlan} /> : null}
 
-        {isUnassignedDay ? <UnassignedPlanSection /> : null}
+        {isUnassignedDay ? (
+          <UnassignedPlanSection onWeeklyPlan={handleWeeklyPlan} />
+        ) : null}
 
         <View className="gap-3">
           <SectionHeader
