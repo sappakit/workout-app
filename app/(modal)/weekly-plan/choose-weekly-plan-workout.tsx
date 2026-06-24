@@ -1,31 +1,22 @@
 import { workoutApi } from "@/app/api/workout.api";
-import { SortDirection } from "@/components/bottom-sheet/workout-filter/page/WorkoutFilterSortPage";
 import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
 import { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
-import { ThemedText } from "@/components/themed-text";
 import { useWeeklyPlanWorkoutPickerStore } from "@/components/weekly-plan/weeklyPlanWorkoutSelectionStore";
+import { ChooseWorkoutPickerSkeleton } from "@/components/workout/ui/workout-card/ChooseWorkoutPickerSkeleton";
+import {
+  mapWorkoutToWorkoutCardItem,
+  WorkoutCard,
+} from "@/components/workout/ui/workout-card/WorkoutCard";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Check } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
-
-export type WorkoutSortKey = "created_at" | "name" | "duration";
-
-export const DEFAULT_SORT_BY: WorkoutSortKey = "created_at";
-export const DEFAULT_SORT_DIRECTION: SortDirection = "DESC";
-
-const DEFAULT_WORKOUT_FILTERS: WorkoutFilterValues = {
-  focusTypeIds: [],
-  muscleIds: [],
-  sortBy: DEFAULT_SORT_BY,
-  sortDirection: DEFAULT_SORT_DIRECTION,
-};
+import { ActivityIndicator, FlatList, View } from "react-native";
+import { DEFAULT_WORKOUT_FILTERS } from "../workout/choose-workout";
 
 export default function ChooseWeeklyPlanWorkoutPage() {
   const router = useRouter();
@@ -130,8 +121,12 @@ export default function ChooseWeeklyPlanWorkoutPage() {
       searchPlaceholder="Search workout"
       isLoading={isLoading}
       isError={isError}
+      isEmpty={workouts.length === 0}
       errorText="Failed to load workouts"
+      emptyTitle="No workouts found"
+      emptyText="Try changing your search or filters."
       onRetry={() => refetch()}
+      loadingSkeleton={<ChooseWorkoutPickerSkeleton />}
       searchRight={
         <WorkoutFilterBottomSheet value={filters} onApplyFilters={setFilters} />
       }
@@ -139,16 +134,9 @@ export default function ChooseWeeklyPlanWorkoutPage() {
       <FlatList
         data={workouts}
         keyExtractor={(item) => String(item.id)}
-        contentContainerClassName="gap-2"
+        contentContainerClassName="gap-3"
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        ListEmptyComponent={
-          <View className="items-center justify-center py-10">
-            <ThemedText type="default" variant="secondary">
-              No workouts found
-            </ThemedText>
-          </View>
-        }
         ListFooterComponent={
           isFetchingNextPage ? (
             <View className="py-4">
@@ -158,32 +146,20 @@ export default function ChooseWeeklyPlanWorkoutPage() {
         }
         renderItem={({ item }) => {
           const isSelected = selectedWorkoutId === item.id;
+          const cardItem = mapWorkoutToWorkoutCardItem(item);
 
           return (
-            <Pressable
+            <WorkoutCard
+              title={cardItem.title}
+              subtitle={cardItem.subtitle}
+              imageUrl={cardItem.imageUrl}
+              metaItems={cardItem.metaItems}
               onPress={() => handleSelectWorkout(item)}
-              className="flex-row items-center justify-between rounded-2xl border px-4 py-4"
+              className="border"
               style={{
-                backgroundColor: colors.app.cardPrimary,
-                borderColor: isSelected
-                  ? colors.app.brand
-                  : colors.app.borderPrimary,
+                borderColor: isSelected ? colors.app.brand : "transparent",
               }}
-            >
-              <View className="flex-1">
-                <ThemedText type="default" variant="primary">
-                  {item.name}
-                </ThemedText>
-
-                {item.workoutFocusType?.name ? (
-                  <ThemedText type="small" variant="secondary" className="mt-1">
-                    {item.workoutFocusType.name}
-                  </ThemedText>
-                ) : null}
-              </View>
-
-              {isSelected ? <Check size={20} color={colors.app.brand} /> : null}
-            </Pressable>
+            />
           );
         }}
       />

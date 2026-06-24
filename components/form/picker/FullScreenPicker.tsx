@@ -1,6 +1,8 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { EmptyState } from "@/components/state/EmptyState";
+import { ErrorState } from "@/components/state/ErrorState";
 import { ThemedText } from "@/components/themed-text";
 import { Check, Search, X } from "lucide-react-native";
 import React from "react";
@@ -23,12 +25,20 @@ interface FullScreenPickerProps {
 
   isLoading?: boolean;
   isError?: boolean;
+  isEmpty?: boolean;
+
+  errorTitle?: string;
   errorText?: string;
   onRetry?: () => void;
+
+  emptyTitle?: string;
+  emptyText?: string;
+  emptyState?: React.ReactNode;
 
   children: React.ReactNode;
   contentContainerStyle?: StyleProp<ViewStyle>;
   footerExtra?: React.ReactNode;
+  loadingSkeleton?: React.ReactNode;
 }
 
 export default function FullScreenPicker({
@@ -43,13 +53,23 @@ export default function FullScreenPicker({
   onSearchChange,
   searchPlaceholder = "Search",
   searchRight,
+
   isLoading = false,
   isError = false,
+  isEmpty = false,
+
+  errorTitle = "Something went wrong",
   errorText = "Failed to load data",
   onRetry,
+
+  emptyTitle = "No data found",
+  emptyText = "There's nothing to show here yet.",
+  emptyState,
+
   children,
   contentContainerStyle,
   footerExtra,
+  loadingSkeleton,
 }: FullScreenPickerProps) {
   const shouldShowSearch =
     searchValue !== undefined && onSearchChange !== undefined;
@@ -75,6 +95,33 @@ export default function FullScreenPicker({
       />
     </>
   );
+
+  let content = children;
+
+  if (isLoading) {
+    content = loadingSkeleton ?? (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator />
+      </View>
+    );
+  } else if (isError) {
+    content = (
+      <ErrorState
+        title={errorTitle}
+        message={errorText}
+        onRetry={onRetry}
+        showHomeButton={false}
+      />
+    );
+  } else if (isEmpty) {
+    content = emptyState ?? (
+      <EmptyState
+        title={emptyTitle}
+        message={emptyText}
+        showHomeButton={false}
+      />
+    );
+  }
 
   return (
     <PageLayout
@@ -117,30 +164,7 @@ export default function FullScreenPicker({
       </View>
 
       <View className="mt-4 flex-1" style={contentContainerStyle}>
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator />
-          </View>
-        ) : isError ? (
-          <View className="flex-1 items-center justify-center px-6">
-            <ThemedText type="default" variant="secondary">
-              {errorText}
-            </ThemedText>
-
-            {onRetry ? (
-              <View className="mt-4">
-                <AppButton
-                  title="Try Again"
-                  variant="secondary"
-                  className="px-10"
-                  onPress={onRetry}
-                />
-              </View>
-            ) : null}
-          </View>
-        ) : (
-          children
-        )}
+        {content}
       </View>
     </PageLayout>
   );

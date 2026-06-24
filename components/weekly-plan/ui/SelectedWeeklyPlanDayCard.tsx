@@ -1,6 +1,7 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { Separator } from "@/components/custom-ui/Separator";
 import { ThemedText } from "@/components/themed-text";
+import { WorkoutMetaPill } from "@/components/workout/ui/WorkoutCard";
 import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
@@ -13,7 +14,6 @@ import {
   formatWorkoutDuration,
   WeeklyPlanDay,
 } from "../model/weekly-plan.mapper";
-import { WorkoutMetaPill } from "./WorkoutCard";
 
 interface SelectedWeeklyPlanDayCardProps {
   day: WeeklyPlanDay;
