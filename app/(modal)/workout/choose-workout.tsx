@@ -1,7 +1,7 @@
 import { workoutApi } from "@/app/api/workout.api";
-import { SortDirection } from "@/components/bottom-sheet/workout-filter/page/WorkoutFilterSortPage";
 import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
 import { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
+import { SortDirection } from "@/components/filter-option/FilterSortPage";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { ChooseWorkoutPickerSkeleton } from "@/components/workout/ui/workout-card/ChooseWorkoutPickerSkeleton";
 import {

@@ -1,8 +1,8 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { Separator } from "@/components/custom-ui/Separator";
 import { ThemedText } from "@/components/themed-text";
-import { WorkoutMetaPill } from "@/components/workout/ui/WorkoutCard";
-import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
+import { WorkoutMetaPill } from "@/components/workout/ui/workout-card/WorkoutCard";
+import { WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutWeeklyPlanDayType } from "@/types/workout/response/workout.types";
@@ -118,7 +118,7 @@ export function SelectedWeeklyPlanDayCard({
     >
       {hasWorkout ? (
         <ImageBackground
-          source={{ uri: day.workout?.imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+          source={{ uri: day.workout?.imageUrl ?? WORKOUT_IMAGE }}
           resizeMode="cover"
         >
           <View

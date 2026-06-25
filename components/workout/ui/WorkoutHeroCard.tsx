@@ -4,7 +4,7 @@ import {
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
 import { ThemedText } from "@/components/themed-text";
-import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
+import { WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { LinearGradient } from "expo-linear-gradient";
@@ -61,7 +61,7 @@ export function WorkoutHeroCard({
       className="overflow-hidden rounded-3xl"
     >
       <ImageBackground
-        source={{ uri: item.imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+        source={{ uri: item.imageUrl ?? WORKOUT_IMAGE }}
         resizeMode="cover"
         className="h-60 justify-between overflow-hidden p-5"
       >

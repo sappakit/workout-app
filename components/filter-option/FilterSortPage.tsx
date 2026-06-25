@@ -1,13 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
-import {
-  ArrowDown,
-  ArrowUp,
-  ChevronLeft,
-  LucideIcon,
-} from "lucide-react-native";
+import { ArrowDown, ArrowUp, LucideIcon } from "lucide-react-native";
 import { Pressable, View } from "react-native";
+import { FilterOptionPageHeader } from "./option-page/FilterOptionPage";
 
 export type SortDirection = "ASC" | "DESC";
 
@@ -19,7 +15,7 @@ export type SortOption<TValue extends string = string> = {
   descLabel?: string;
 };
 
-type WorkoutFilterSortPageProps<TValue extends string = string> = {
+type FilterSortPageProps<TValue extends string = string> = {
   title: string;
   options: SortOption<TValue>[];
   selectedSortBy: TValue | null;
@@ -30,7 +26,7 @@ type WorkoutFilterSortPageProps<TValue extends string = string> = {
   onChangeSortDirection: (direction: SortDirection) => void;
 };
 
-export function WorkoutFilterSortPage<TValue extends string = string>({
+export function FilterSortPage<TValue extends string = string>({
   title,
   options,
   selectedSortBy,
@@ -39,7 +35,7 @@ export function WorkoutFilterSortPage<TValue extends string = string>({
   onBack,
   onChangeSortBy,
   onChangeSortDirection,
-}: WorkoutFilterSortPageProps<TValue>) {
+}: FilterSortPageProps<TValue>) {
   const { colors } = useAppTheme();
 
   const handleToggleDirection = () => {
@@ -48,7 +44,7 @@ export function WorkoutFilterSortPage<TValue extends string = string>({
 
   return (
     <View className="gap-4 px-4" style={{ paddingBottom: bottomInset + 20 }}>
-      <FilterSortHeader title={title} onBack={onBack} />
+      <FilterOptionPageHeader title={title} onBack={onBack} />
 
       <View
         className="overflow-hidden rounded-2xl"
@@ -78,14 +74,14 @@ export function WorkoutFilterSortPage<TValue extends string = string>({
                 onPress={() => onChangeSortBy(option.value)}
                 className="flex-1 flex-row items-center gap-3"
               >
-                {Icon && (
+                {Icon ? (
                   <Icon
                     size={20}
                     color={
                       selected ? colors.app.brand : colors.app.textSecondary
                     }
                   />
-                )}
+                ) : null}
 
                 <ThemedText
                   type="default"
@@ -96,7 +92,7 @@ export function WorkoutFilterSortPage<TValue extends string = string>({
                 </ThemedText>
               </Pressable>
 
-              {selected && (
+              {selected ? (
                 <Pressable
                   hitSlop={12}
                   onPress={handleToggleDirection}
@@ -112,34 +108,12 @@ export function WorkoutFilterSortPage<TValue extends string = string>({
                     <ArrowDown size={16} color={colors.app.brand} />
                   )}
                 </Pressable>
-              )}
+              ) : null}
             </View>
           );
         })}
       </View>
     </View>
-  );
-}
-
-function FilterSortHeader({
-  title,
-  onBack,
-}: {
-  title: string;
-  onBack: () => void;
-}) {
-  const { colors } = useAppTheme();
-
-  return (
-    <Pressable onPress={onBack} className="flex-row items-center gap-2">
-      <View className="items-center justify-center">
-        <ChevronLeft size={22} color={colors.app.textAccent} />
-      </View>
-
-      <ThemedText type="subtitle" variant="accent">
-        {title}
-      </ThemedText>
-    </Pressable>
   );
 }
 

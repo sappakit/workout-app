@@ -1,4 +1,4 @@
-import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
+import { WORKOUT_IMAGE } from "@/constants/images";
 import { ImageBackground, ImageStyle, StyleProp } from "react-native";
 
 interface DetailHeroImageProps {
@@ -18,7 +18,7 @@ export function DetailHeroImage({
 }: DetailHeroImageProps) {
   return (
     <ImageBackground
-      source={{ uri: imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+      source={{ uri: imageUrl ?? WORKOUT_IMAGE }}
       resizeMode="cover"
       className={className}
       style={[{ height }, style]}

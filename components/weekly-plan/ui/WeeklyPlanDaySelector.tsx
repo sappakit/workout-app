@@ -90,7 +90,7 @@ function DayPill({ day, isSelected, onPress }: DayPillProps) {
       )}
 
       <ThemedText
-        type="defaultSemiBold"
+        type="default"
         style={{
           color: textColor,
         }}

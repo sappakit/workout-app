@@ -23,11 +23,10 @@ export default function Thumbnail({
 
   return (
     <View
-      className={twMerge(clsx("rounded-xl border", className))}
+      className={twMerge(clsx("rounded-2xl", className))}
       style={[
         styles.imageWrapper,
         {
-          borderColor: colors.app.borderPrimary,
           backgroundColor: colors.app.cardSecondary,
         },
         style,

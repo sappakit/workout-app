@@ -1,7 +1,7 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { Separator } from "@/components/custom-ui/Separator";
 import { ThemedText } from "@/components/themed-text";
-import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
+import { WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { ArrowUpRight, LucideIcon } from "lucide-react-native";
@@ -134,7 +134,7 @@ export function WorkoutImageAvatar({ imageUrl }: WorkoutImageAvatarProps) {
       style={{ backgroundColor: colors.app.cardSecondary }}
     >
       <Image
-        source={{ uri: imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+        source={{ uri: imageUrl ?? WORKOUT_IMAGE }}
         className="h-full w-full"
         resizeMode="cover"
       />

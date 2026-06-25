@@ -5,36 +5,38 @@ import { Check, ChevronLeft } from "lucide-react-native";
 import { ListRenderItem, Pressable, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
-export type FilterOption = {
-  id: number;
+export type FilterOption<TId extends string | number = number> = {
+  id: TId;
   label: string;
 };
 
-type BaseWorkoutFilterOptionPageProps = {
+type BaseFilterOptionPageProps<TId extends string | number = number> = {
   title: string;
-  options: FilterOption[];
+  options: FilterOption<TId>[];
   bottomInset: number;
   onBack: () => void;
   onEndReached?: () => void;
   isFetchingNextPage?: boolean;
 };
 
-type WorkoutFilterOptionPageProps =
-  | (BaseWorkoutFilterOptionPageProps & {
+export type FilterOptionPageProps<TId extends string | number = number> =
+  | (BaseFilterOptionPageProps<TId> & {
       selectionMode: "multiple";
-      selectedIds: number[];
-      onChangeSelectedIds: (ids: number[]) => void;
+      selectedIds: TId[];
+      onChangeSelectedIds: (ids: TId[]) => void;
     })
-  | (BaseWorkoutFilterOptionPageProps & {
+  | (BaseFilterOptionPageProps<TId> & {
       selectionMode: "single";
-      selectedId: number | null;
-      onChangeSelectedId: (id: number | null) => void;
+      selectedId: TId | null;
+      onChangeSelectedId: (id: TId | null) => void;
     });
 
-export function WorkoutFilterOptionPage(props: WorkoutFilterOptionPageProps) {
+export function FilterOptionPage<TId extends string | number = number>(
+  props: FilterOptionPageProps<TId>,
+) {
   const { colors } = useAppTheme();
 
-  const handleSelect = (id: number) => {
+  const handleSelect = (id: TId) => {
     if (props.selectionMode === "multiple") {
       const nextSelectedIds = props.selectedIds.includes(id)
         ? props.selectedIds.filter((selectedId) => selectedId !== id)
@@ -47,7 +49,7 @@ export function WorkoutFilterOptionPage(props: WorkoutFilterOptionPageProps) {
     props.onChangeSelectedId(id);
   };
 
-  const isSelected = (id: number) => {
+  const isSelected = (id: TId) => {
     if (props.selectionMode === "multiple") {
       return props.selectedIds.includes(id);
     }
@@ -55,7 +57,7 @@ export function WorkoutFilterOptionPage(props: WorkoutFilterOptionPageProps) {
     return props.selectedId === id;
   };
 
-  const renderItem: ListRenderItem<FilterOption> = ({ item, index }) => {
+  const renderItem: ListRenderItem<FilterOption<TId>> = ({ item, index }) => {
     const selected = isSelected(item.id);
     const isFirstItem = index === 0;
     const isLastItem = index === props.options.length - 1;
@@ -75,7 +77,10 @@ export function WorkoutFilterOptionPage(props: WorkoutFilterOptionPageProps) {
         }}
       >
         <View
-          className="h-5 w-5 items-center justify-center rounded-full border"
+          className={clsx(
+            "h-5 w-5 items-center justify-center border",
+            props.selectionMode === "multiple" ? "rounded-md" : "rounded-full",
+          )}
           style={{
             borderColor: selected
               ? colors.app.brand
@@ -83,7 +88,7 @@ export function WorkoutFilterOptionPage(props: WorkoutFilterOptionPageProps) {
             backgroundColor: selected ? colors.app.brand : "transparent",
           }}
         >
-          {selected && <Check size={13} color={colors.app.textWhite} />}
+          {selected ? <Check size={13} color={colors.app.textWhite} /> : null}
         </View>
 
         <ThemedText
@@ -107,11 +112,11 @@ export function WorkoutFilterOptionPage(props: WorkoutFilterOptionPageProps) {
 
   return (
     <View className="gap-4 px-4">
-      <FilterOptionHeader title={props.title} onBack={props.onBack} />
+      <FilterOptionPageHeader title={props.title} onBack={props.onBack} />
 
       <FlatList
         data={props.options}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         onEndReached={props.onEndReached}
@@ -125,7 +130,7 @@ export function WorkoutFilterOptionPage(props: WorkoutFilterOptionPageProps) {
   );
 }
 
-export function FilterOptionHeader({
+export function FilterOptionPageHeader({
   title,
   onBack,
 }: {

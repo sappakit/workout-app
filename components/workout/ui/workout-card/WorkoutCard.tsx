@@ -1,5 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
-import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
+import { WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import clsx from "clsx";
@@ -60,7 +60,7 @@ export function WorkoutCard({
         }}
       >
         <Image
-          source={{ uri: imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+          source={{ uri: imageUrl ?? WORKOUT_IMAGE }}
           className="w-full flex-1"
           resizeMode="cover"
         />
@@ -96,7 +96,7 @@ export function WorkoutCard({
 }
 
 interface WorkoutMetaPillProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   label: string;
 }
 
@@ -110,7 +110,7 @@ export function WorkoutMetaPill({ icon: Icon, label }: WorkoutMetaPillProps) {
         backgroundColor: colors.app.cardSecondary,
       }}
     >
-      <Icon size={12} color={colors.app.textPrimary} />
+      {Icon ? <Icon size={12} color={colors.app.textPrimary} /> : null}
 
       <ThemedText type="extraSmall" variant="primary">
         {label}

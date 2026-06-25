@@ -1,6 +1,6 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
-import { FALLBACK_WORKOUT_IMAGE } from "@/constants/images";
+import { WORKOUT_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { ArrowUpRight, RefreshCw } from "lucide-react-native";
 import { Image, Pressable, ScrollView, View } from "react-native";
@@ -107,7 +107,7 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
     >
       <View className="relative h-32">
         <Image
-          source={{ uri: item.imageUrl ?? FALLBACK_WORKOUT_IMAGE }}
+          source={{ uri: item.imageUrl ?? WORKOUT_IMAGE }}
           className="h-full w-full"
           resizeMode="cover"
         />

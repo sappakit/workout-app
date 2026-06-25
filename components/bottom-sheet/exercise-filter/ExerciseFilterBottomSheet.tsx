@@ -1,24 +1,24 @@
 import { FilterBottomSheet } from "@/components/filter-option/FilterBottomSheet";
 import {
-  WorkoutFilterSheetContent,
-  WorkoutFilterValues,
-} from "./WorkoutFilterSheetContent";
+  ExerciseFilterSheetContent,
+  ExerciseFilterValues,
+} from "./ExerciseFilterSheetContent";
 
-type WorkoutFilterBottomSheetProps = {
-  value: WorkoutFilterValues;
-  onApplyFilters: (value: WorkoutFilterValues) => void;
+type ExerciseFilterBottomSheetProps = {
+  value: ExerciseFilterValues;
+  onApplyFilters: (value: ExerciseFilterValues) => void;
 };
 
-export default function WorkoutFilterBottomSheet({
+export default function ExerciseFilterBottomSheet({
   value,
   onApplyFilters,
-}: WorkoutFilterBottomSheetProps) {
+}: ExerciseFilterBottomSheetProps) {
   return (
-    <FilterBottomSheet<WorkoutFilterValues>
+    <FilterBottomSheet<ExerciseFilterValues>
       value={value}
       onApplyFilters={onApplyFilters}
       renderContent={({ value, bottomInset, onClose, onApplyFilters }) => (
-        <WorkoutFilterSheetContent
+        <ExerciseFilterSheetContent
           value={value}
           bottomInset={bottomInset}
           onClose={onClose}

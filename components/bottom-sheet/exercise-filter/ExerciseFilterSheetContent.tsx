@@ -1,10 +1,4 @@
-import {
-  DEFAULT_SORT_BY,
-  DEFAULT_SORT_DIRECTION,
-  WorkoutSortKey,
-} from "@/app/(modal)/workout/choose-workout";
 import { muscleApi } from "@/app/api/muscle.api";
-import { workoutApi } from "@/app/api/workout.api";
 import {
   FilterNavigationItem,
   FilterOverviewPage,
@@ -15,18 +9,20 @@ import {
   SortDirection,
   SortOption,
 } from "@/components/filter-option/FilterSortPage";
+import { FilterOptionPage } from "@/components/filter-option/option-page/FilterOptionPage";
 import { RemoteFilterOptionPage } from "@/components/filter-option/option-page/RemoteFilterOptionPage";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
-import { workoutQueryKeys } from "@/lib/workout/keys";
+import {
+  ExerciseType,
+  ExerciseTypeLabel,
+} from "@/types/workout/response/exercise.types";
 import { Muscle } from "@/types/workout/response/shared.types";
-import { WorkoutFocusType } from "@/types/workout/response/workout.types";
 import {
   BicepsFlexed,
   Calendar,
   Dumbbell,
   Sparkles,
   Target,
-  Timer,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import Animated, {
@@ -36,9 +32,33 @@ import Animated, {
   SlideOutRight,
 } from "react-native-reanimated";
 
-type FilterPage = "main" | "focus" | "muscle" | "sort";
+export type ExerciseSortKey = "created_at" | "name";
 
-const sortOptions: SortOption<WorkoutSortKey>[] = [
+type FilterPage = "main" | "type" | "muscle" | "sort";
+
+export const DEFAULT_EXERCISE_SORT_BY: ExerciseSortKey = "name";
+export const DEFAULT_EXERCISE_SORT_DIRECTION: SortDirection = "ASC";
+
+export type ExerciseFilterValues = {
+  exerciseTypes: ExerciseType[];
+  muscleIds: number[];
+  sortBy: ExerciseSortKey | null;
+  sortDirection: SortDirection;
+};
+
+export const DEFAULT_EXERCISE_FILTERS: ExerciseFilterValues = {
+  exerciseTypes: [],
+  muscleIds: [],
+  sortBy: DEFAULT_EXERCISE_SORT_BY,
+  sortDirection: DEFAULT_EXERCISE_SORT_DIRECTION,
+};
+
+const exerciseTypeOptions = Object.values(ExerciseType).map((type) => ({
+  id: type,
+  label: ExerciseTypeLabel[type],
+}));
+
+const sortOptions: SortOption<ExerciseSortKey>[] = [
   {
     value: "created_at",
     label: "Date",
@@ -53,47 +73,33 @@ const sortOptions: SortOption<WorkoutSortKey>[] = [
     ascLabel: "A to Z",
     descLabel: "Z to A",
   },
-  {
-    value: "duration",
-    label: "Duration",
-    icon: Timer,
-    ascLabel: "Low to high",
-    descLabel: "High to low",
-  },
 ];
 
-export type WorkoutFilterValues = {
-  focusTypeIds: number[];
-  muscleIds: number[];
-  sortBy: WorkoutSortKey | null;
-  sortDirection: SortDirection;
-};
-
-type WorkoutFilterSheetContentProps = {
-  value: WorkoutFilterValues;
+type ExerciseFilterSheetContentProps = {
+  value: ExerciseFilterValues;
   bottomInset: number;
   onClose: () => void;
-  onApplyFilters: (value: WorkoutFilterValues) => void;
+  onApplyFilters: (value: ExerciseFilterValues) => void;
 };
 
-export function WorkoutFilterSheetContent({
+export function ExerciseFilterSheetContent({
   value,
   bottomInset,
   onClose,
   onApplyFilters,
-}: WorkoutFilterSheetContentProps) {
+}: ExerciseFilterSheetContentProps) {
   const [page, setPage] = useState<FilterPage>("main");
   const [hasNavigated, setHasNavigated] = useState(false);
 
-  const [selectedFocusTypeIds, setSelectedFocusTypeIds] = useState<number[]>(
-    value.focusTypeIds,
-  );
+  const [selectedExerciseTypes, setSelectedExerciseTypes] = useState<
+    ExerciseType[]
+  >(value.exerciseTypes);
 
   const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>(
     value.muscleIds,
   );
 
-  const [selectedSortBy, setSelectedSortBy] = useState<WorkoutSortKey | null>(
+  const [selectedSortBy, setSelectedSortBy] = useState<ExerciseSortKey | null>(
     value.sortBy,
   );
 
@@ -102,18 +108,18 @@ export function WorkoutFilterSheetContent({
   );
 
   useEffect(() => {
-    setSelectedFocusTypeIds(value.focusTypeIds);
+    setSelectedExerciseTypes(value.exerciseTypes);
     setSelectedMuscleIds(value.muscleIds);
     setSelectedSortBy(value.sortBy);
     setSortDirection(value.sortDirection);
-  }, [value.focusTypeIds, value.muscleIds, value.sortBy, value.sortDirection]);
+  }, [value.exerciseTypes, value.muscleIds, value.sortBy, value.sortDirection]);
 
   const selectedFilterCount =
-    selectedFocusTypeIds.length + selectedMuscleIds.length;
+    selectedExerciseTypes.length + selectedMuscleIds.length;
 
-  const focusSummary = getSelectedCountSummary(
-    selectedFocusTypeIds,
-    "Any focus",
+  const exerciseTypeSummary = getSelectedCountSummary(
+    selectedExerciseTypes,
+    "Any type",
   );
 
   const muscleSummary = getSelectedCountSummary(
@@ -143,15 +149,15 @@ export function WorkoutFilterSheetContent({
   };
 
   const handleReset = () => {
-    setSelectedFocusTypeIds([]);
+    setSelectedExerciseTypes([]);
     setSelectedMuscleIds([]);
-    setSelectedSortBy(DEFAULT_SORT_BY);
-    setSortDirection(DEFAULT_SORT_DIRECTION);
+    setSelectedSortBy(DEFAULT_EXERCISE_SORT_BY);
+    setSortDirection(DEFAULT_EXERCISE_SORT_DIRECTION);
   };
 
   const handleApply = () => {
     onApplyFilters({
-      focusTypeIds: selectedFocusTypeIds,
+      exerciseTypes: selectedExerciseTypes,
       muscleIds: selectedMuscleIds,
       sortBy: selectedSortBy,
       sortDirection,
@@ -160,7 +166,7 @@ export function WorkoutFilterSheetContent({
     onClose();
   };
 
-  const handleChangeSortBy = (sortBy: WorkoutSortKey) => {
+  const handleChangeSortBy = (sortBy: ExerciseSortKey) => {
     setSelectedSortBy(sortBy);
 
     if (sortBy === "created_at") {
@@ -175,11 +181,11 @@ export function WorkoutFilterSheetContent({
     <AnimatedFilterPage pageKey={page} shouldAnimate={hasNavigated}>
       {page === "main" && (
         <FilterOverviewPage
-          title="Workout filters"
+          title="Exercise filters"
           subtitle={
             selectedFilterCount > 0
               ? `${selectedFilterCount} filters selected`
-              : "Find the right workout faster"
+              : "Find the right exercise faster"
           }
           bottomInset={bottomInset}
           onReset={handleReset}
@@ -187,9 +193,9 @@ export function WorkoutFilterSheetContent({
         >
           <FilterNavigationItem
             icon={Target}
-            title="Workout focus"
-            description={focusSummary}
-            onPress={() => openPage("focus")}
+            title="Exercise type"
+            description={exerciseTypeSummary}
+            onPress={() => openPage("type")}
           />
 
           <FilterNavigationItem
@@ -208,19 +214,15 @@ export function WorkoutFilterSheetContent({
         </FilterOverviewPage>
       )}
 
-      {page === "focus" && (
-        <RemoteFilterOptionPage<WorkoutFocusType>
-          title="Workout focus"
-          url={workoutApi.getTypes()}
-          queryKey={workoutQueryKeys.type}
-          selectedIds={selectedFocusTypeIds}
+      {page === "type" && (
+        <FilterOptionPage<ExerciseType>
+          title="Exercise type"
+          options={exerciseTypeOptions}
+          selectionMode="multiple"
+          selectedIds={selectedExerciseTypes}
+          onChangeSelectedIds={setSelectedExerciseTypes}
           bottomInset={bottomInset}
           onBack={handleBackToMain}
-          onChangeSelectedIds={setSelectedFocusTypeIds}
-          mapOption={(item) => ({
-            id: item.id,
-            label: item.name,
-          })}
         />
       )}
 
@@ -241,7 +243,7 @@ export function WorkoutFilterSheetContent({
       )}
 
       {page === "sort" && (
-        <FilterSortPage<WorkoutSortKey>
+        <FilterSortPage<ExerciseSortKey>
           title="Sort by"
           options={sortOptions}
           selectedSortBy={selectedSortBy}
@@ -262,40 +264,7 @@ type AnimatedFilterPageProps = {
   children: React.ReactNode;
 };
 
-// TODO: new animation
-// export function AnimatedFilterPage({
-//   pageKey,
-//   shouldAnimate,
-//   children,
-// }: AnimatedFilterPageProps) {
-//   const translateX = useSharedValue(0);
-
-//   useEffect(() => {
-//     if (!shouldAnimate) {
-//       translateX.value = 0;
-//       return;
-//     }
-
-//     translateX.value = pageKey === "main" ? -48 : 48;
-
-//     translateX.value = withTiming(0, {
-//       duration: 420,
-//       easing: Easing.out(Easing.cubic),
-//     });
-//   }, [pageKey, shouldAnimate, translateX]);
-
-//   const animatedStyle = useAnimatedStyle(() => ({
-//     transform: [{ translateX: translateX.value }],
-//   }));
-
-//   return (
-//     <Animated.View key={pageKey} style={[{ flex: 1 }, animatedStyle]}>
-//       {children}
-//     </Animated.View>
-//   );
-// }
-
-export function AnimatedFilterPage({
+function AnimatedFilterPage({
   pageKey,
   shouldAnimate,
   children,
@@ -317,10 +286,13 @@ export function AnimatedFilterPage({
   );
 }
 
-function getSelectedCountSummary(selectedIds: number[], emptyLabel: string) {
-  if (selectedIds.length === 0) return emptyLabel;
+function getSelectedCountSummary<TValue>(
+  selectedValues: TValue[],
+  emptyLabel: string,
+) {
+  if (selectedValues.length === 0) return emptyLabel;
 
-  if (selectedIds.length === 1) return "1 selected";
+  if (selectedValues.length === 1) return "1 selected";
 
-  return `${selectedIds.length} selected`;
+  return `${selectedValues.length} selected`;
 }

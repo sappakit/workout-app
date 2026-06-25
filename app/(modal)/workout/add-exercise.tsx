@@ -1,8 +1,16 @@
 import { exerciseApi } from "@/app/api/exercise.api";
-import { AppButton } from "@/components/custom-ui/AppButton";
+import ExerciseFilterBottomSheet from "@/components/bottom-sheet/exercise-filter/ExerciseFilterBottomSheet";
+import {
+  DEFAULT_EXERCISE_FILTERS,
+  ExerciseFilterValues,
+} from "@/components/bottom-sheet/exercise-filter/ExerciseFilterSheetContent";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { ThemedText } from "@/components/themed-text";
-import { ExercisePickerCard } from "@/components/workout/ui/exercise-card/ExercisePickerCard";
+import {
+  ExerciseCard,
+  mapExerciseToExerciseCardItem,
+} from "@/components/workout/ui/exercise-card/ExerciseCard";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDebounce } from "@/hooks/useDebounce";
 import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
@@ -11,7 +19,6 @@ import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { Exercise } from "@/types/workout/response/exercise.types";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SlidersHorizontal } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 
@@ -24,6 +31,7 @@ type AddExercisesParams = {
 
 export default function AddExercisesPage() {
   const router = useRouter();
+  const { colors } = useAppTheme();
 
   const params = useLocalSearchParams<AddExercisesParams>();
 
@@ -37,9 +45,16 @@ export default function AddExercisesPage() {
     Exercise[]
   >([]);
   const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<ExerciseFilterValues>(
+    DEFAULT_EXERCISE_FILTERS,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const debouncedSearch = useDebounce(search, 300);
+
+  const sortByParam = filters.sortBy
+    ? `${filters.sortBy}:${filters.sortDirection}`
+    : undefined;
 
   const currentExercises = draft?.workoutExercises ?? [];
 
@@ -55,6 +70,16 @@ export default function AddExercisesPage() {
     tempSelectedExercises.map((exercise) => exercise.id),
   );
 
+  const pickerTitle = isReplaceMode ? "Replace Exercise" : "Add Exercise";
+
+  const pickerDescription = isReplaceMode
+    ? `Select one exercise to replace ${
+        targetWorkoutExercise?.exercise.name ?? "this exercise"
+      }.`
+    : "Select one or more exercises to add to this workout plan.";
+
+  const doneText = isReplaceMode ? "Replace" : "Done";
+
   const {
     data,
     isLoading,
@@ -65,9 +90,23 @@ export default function AddExercisesPage() {
     refetch,
   } = useInfiniteOptionsQuery<Exercise>({
     url: exerciseApi.getAll(),
-    queryKey: exerciseQueryKeys.all,
+    queryKey: [
+      exerciseQueryKeys.all,
+      "add-exercise-picker",
+      debouncedSearch,
+      filters.exerciseTypes,
+      filters.muscleIds,
+      filters.sortBy,
+      filters.sortDirection,
+    ],
     search: debouncedSearch,
     limit: 20,
+    params: {
+      exerciseTypes:
+        filters.exerciseTypes.length > 0 ? filters.exerciseTypes : undefined,
+      muscleIds: filters.muscleIds.length > 0 ? filters.muscleIds : undefined,
+      sortBy: sortByParam,
+    },
   });
 
   const exercises = data?.pages.flatMap((page) => page.data) ?? [];
@@ -200,7 +239,7 @@ export default function AddExercisesPage() {
   if (!draft) {
     return (
       <FullScreenPicker
-        title={isReplaceMode ? "Replace Exercise" : "Add Exercise"}
+        title={pickerTitle}
         onClose={handleClose}
         onDone={handleClose}
         doneText="Back"
@@ -243,48 +282,35 @@ export default function AddExercisesPage() {
 
   return (
     <FullScreenPicker
-      title={isReplaceMode ? "Replace Exercise" : "Add Exercise"}
-      description={
-        isReplaceMode
-          ? `Select one exercise to replace ${
-              targetWorkoutExercise?.exercise.name ?? "this exercise"
-            }.`
-          : "Select one or more exercises to add to this workout plan."
-      }
+      title={pickerTitle}
+      description={pickerDescription}
       onClose={handleClose}
       onDone={handleDone}
-      doneText={isReplaceMode ? "Replace" : "Done"}
+      doneText={doneText}
       doneDisabled={tempSelectedExercises.length === 0 || isSubmitting}
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search exercise"
       isLoading={isLoading}
       isError={isError}
+      isEmpty={exercises.length === 0}
       errorText="Failed to load exercises"
+      emptyTitle="No exercises found"
+      emptyText="Try changing your search or filters."
       onRetry={() => refetch()}
       searchRight={
-        <AppButton
-          variant="option"
-          icon={SlidersHorizontal}
-          className="h-12 w-12 rounded-full"
-          iconSize={18}
-          // TODO: connect filter action later.
+        <ExerciseFilterBottomSheet
+          value={filters}
+          onApplyFilters={setFilters}
         />
       }
     >
       <FlatList
         data={exercises}
         keyExtractor={(item) => String(item.id)}
-        contentContainerClassName="gap-2"
+        contentContainerClassName="gap-3"
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        ListEmptyComponent={
-          <View className="items-center justify-center py-10">
-            <ThemedText type="default" variant="secondary">
-              No exercises found
-            </ThemedText>
-          </View>
-        }
         ListFooterComponent={
           isFetchingNextPage ? (
             <View className="py-4">
@@ -295,18 +321,20 @@ export default function AddExercisesPage() {
         renderItem={({ item }) => {
           const isAlreadyAdded = selectedExerciseIds.has(item.id);
           const isSelected = tempSelectedExerciseIds.has(item.id);
-
-          const status = isAlreadyAdded
-            ? "already-added"
-            : isSelected
-              ? "selected"
-              : "idle";
+          const cardItem = mapExerciseToExerciseCardItem(item);
 
           return (
-            <ExercisePickerCard
-              exercise={item}
-              status={status}
-              onPressAdd={() => handleToggleExercise(item)}
+            <ExerciseCard
+              title={cardItem.title}
+              subtitle={isAlreadyAdded ? "Already added" : cardItem.subtitle}
+              imageUrl={cardItem.imageUrl}
+              metaItems={cardItem.metaItems}
+              onPress={() => handleToggleExercise(item)}
+              disabled={isSubmitting || isAlreadyAdded}
+              className="border"
+              style={{
+                borderColor: isSelected ? colors.app.brand : "transparent",
+              }}
             />
           );
         }}

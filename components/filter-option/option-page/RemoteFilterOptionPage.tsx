@@ -6,11 +6,11 @@ import { useMemo } from "react";
 import { View } from "react-native";
 import {
   FilterOption,
-  FilterOptionHeader,
-  WorkoutFilterOptionPage,
-} from "./WorkoutFilterOptionPage";
+  FilterOptionPage,
+  FilterOptionPageHeader,
+} from "./FilterOptionPage";
 
-type WorkoutFilterRemoteOptionPageProps<TItem> = {
+type RemoteFilterOptionPageProps<TItem> = {
   title: string;
   url: string;
   queryKey: readonly unknown[];
@@ -22,7 +22,7 @@ type WorkoutFilterRemoteOptionPageProps<TItem> = {
   limit?: number;
 };
 
-export function WorkoutFilterRemoteOptionPage<TItem>({
+export function RemoteFilterOptionPage<TItem>({
   title,
   url,
   queryKey,
@@ -32,7 +32,7 @@ export function WorkoutFilterRemoteOptionPage<TItem>({
   onChangeSelectedIds,
   mapOption,
   limit = 20,
-}: WorkoutFilterRemoteOptionPageProps<TItem>) {
+}: RemoteFilterOptionPageProps<TItem>) {
   const {
     data,
     isLoading,
@@ -62,7 +62,7 @@ export function WorkoutFilterRemoteOptionPage<TItem>({
 
   if (isLoading) {
     return (
-      <RemoteOptionStatePage
+      <RemoteFilterOptionStatePage
         title={title}
         message="Loading options..."
         bottomInset={bottomInset}
@@ -73,7 +73,7 @@ export function WorkoutFilterRemoteOptionPage<TItem>({
 
   if (isError) {
     return (
-      <RemoteOptionStatePage
+      <RemoteFilterOptionStatePage
         title={title}
         message="Failed to load options."
         bottomInset={bottomInset}
@@ -84,7 +84,7 @@ export function WorkoutFilterRemoteOptionPage<TItem>({
 
   if (options.length === 0) {
     return (
-      <RemoteOptionStatePage
+      <RemoteFilterOptionStatePage
         title={title}
         message="No options available."
         bottomInset={bottomInset}
@@ -94,7 +94,7 @@ export function WorkoutFilterRemoteOptionPage<TItem>({
   }
 
   return (
-    <WorkoutFilterOptionPage
+    <FilterOptionPage
       title={title}
       options={options}
       selectionMode="multiple"
@@ -108,7 +108,7 @@ export function WorkoutFilterRemoteOptionPage<TItem>({
   );
 }
 
-function RemoteOptionStatePage({
+export function RemoteFilterOptionStatePage({
   title,
   message,
   bottomInset,
@@ -123,7 +123,7 @@ function RemoteOptionStatePage({
 
   return (
     <View className="gap-4 px-4" style={{ paddingBottom: bottomInset + 20 }}>
-      <FilterOptionHeader title={title} onBack={onBack} />
+      <FilterOptionPageHeader title={title} onBack={onBack} />
 
       <View
         className="gap-3 rounded-2xl p-4"
