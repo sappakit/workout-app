@@ -1,6 +1,7 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { Separator } from "@/components/custom-ui/Separator";
 import { ThemedText } from "@/components/themed-text";
+import { formatWorkoutDuration } from "@/components/workout/model/workout-content.mapper";
 import { WorkoutMetaPill } from "@/components/workout/ui/workout-card/WorkoutCard";
 import { WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
@@ -10,10 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { CircleDashed, Clock, Dumbbell, Moon } from "lucide-react-native";
 import { ImageBackground, Pressable, StyleSheet, View } from "react-native";
-import {
-  formatWorkoutDuration,
-  WeeklyPlanDay,
-} from "../model/weekly-plan.mapper";
+import { WeeklyPlanDay } from "../model/weekly-plan.mapper";
 
 interface SelectedWeeklyPlanDayCardProps {
   day: WeeklyPlanDay;

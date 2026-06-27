@@ -61,29 +61,6 @@ export function mapWeeklyPlanStateToUpdatePayload(
   };
 }
 
-export function formatWorkoutDuration(duration: number | null) {
-  if (!duration) return null;
-
-  if (duration < 60) {
-    return `${duration} sec`;
-  }
-
-  const totalMinutes = Math.floor(duration / 60);
-
-  if (totalMinutes < 60) {
-    return `${totalMinutes} min`;
-  }
-
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (minutes === 0) {
-    return `${hours} hr`;
-  }
-
-  return `${hours} hr ${minutes} min`;
-}
-
 export function getTodayDayOfWeek() {
   const jsDay = new Date().getDay();
 

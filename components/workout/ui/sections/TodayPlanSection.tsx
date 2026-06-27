@@ -1,13 +1,14 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { TodayPlanDisplayState } from "@/components/workout/WorkoutContent";
+import { WorkoutCardItem } from "@/components/workout/ui/workout-card/WorkoutCard";
 import { Dumbbell, RotateCcw } from "lucide-react-native";
 import { View } from "react-native";
-import { WorkoutHeroCard, WorkoutHeroCardItem } from "../WorkoutHeroCard";
+import { WorkoutHeroCard } from "../WorkoutHeroCard";
 
 interface TodayPlanSectionProps {
   state: TodayPlanDisplayState;
-  workoutHeroItem: WorkoutHeroCardItem;
+  workoutHeroItem: WorkoutCardItem;
   isStarting: boolean;
   onStartTodayPlan: () => void;
   onEditPlan: () => void;

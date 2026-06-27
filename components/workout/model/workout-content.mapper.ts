@@ -1,18 +1,38 @@
-import { WorkoutHeroCardItem } from "@/components/workout/ui/WorkoutHeroCard";
+import {
+  formatExerciseCount,
+  mapWorkoutToWorkoutCardItem,
+  WorkoutCardItem,
+} from "@/components/workout/ui/workout-card/WorkoutCard";
 import { WorkoutSchedule } from "@/types/workout/response/workout.types";
+import { Clock, Dumbbell, Layers } from "lucide-react-native";
 
 export function mapScheduleToWorkoutHeroCardItem(
   schedule: WorkoutSchedule,
-): WorkoutHeroCardItem {
+): WorkoutCardItem {
   const workout = schedule.workout;
+  const cardItem = mapWorkoutToWorkoutCardItem(workout);
+  const durationLabel = formatWorkoutDuration(workout.duration);
 
   return {
-    id: workout.id,
-    title: workout.name,
-    exerciseCount: workout.workoutExercises.length,
-    setCount: getWorkoutSetCount(workout.workoutExercises),
-    durationLabel: formatWorkoutDuration(workout.duration),
-    imageUrl: workout.imageUrl,
+    ...cardItem,
+    metaItems: [
+      {
+        icon: Dumbbell,
+        label: formatExerciseCount(workout.workoutExercises.length),
+      },
+      {
+        icon: Layers,
+        label: `${getWorkoutSetCount(workout.workoutExercises)} sets`,
+      },
+      ...(durationLabel
+        ? [
+            {
+              icon: Clock,
+              label: durationLabel,
+            },
+          ]
+        : []),
+    ],
   };
 }
 
@@ -24,8 +44,8 @@ function getWorkoutSetCount(
   }, 0);
 }
 
-function formatWorkoutDuration(duration: number | null) {
-  if (!duration) return "No duration";
+export function formatWorkoutDuration(duration: number | null) {
+  if (!duration) return null;
 
   if (duration < 60) {
     return `${duration} sec`;

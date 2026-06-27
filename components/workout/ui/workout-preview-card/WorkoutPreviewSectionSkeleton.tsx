@@ -39,5 +39,5 @@ export function WorkoutPreviewSectionSkeleton({
 }
 
 function WorkoutPreviewCardSkeleton() {
-  return <SkeletonPlaceholder className="aspect-[1.25] w-64 rounded-2xl" />;
+  return <SkeletonPlaceholder className="aspect-[1.15] w-56 rounded-2xl" />;
 }

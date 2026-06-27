@@ -10,10 +10,12 @@ import {
   WorkoutCurrentMode,
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { workoutApi } from "../api/workout.api";
 
 export default function WorkoutScreen() {
+  const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
 
   const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
@@ -56,7 +58,18 @@ export default function WorkoutScreen() {
 
   const workoutPreviews =
     workoutPreviewData?.pages.flatMap((page) => page.data) ?? [];
-  const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews);
+
+  const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews, {
+    onOpenWorkout: (workoutId) => {
+      router.push({
+        pathname: "/(pages)/workout/[id]",
+        params: { id: workoutId },
+      });
+    },
+    onFavoriteWorkout: (workoutId) => {
+      console.log(`favorite workout: ${workoutId}`);
+    },
+  });
 
   // TODO: add loading/error
   if (isCurrentWorkoutLoading) return null;

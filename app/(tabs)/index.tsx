@@ -15,10 +15,12 @@ import {
   WorkoutSession,
   WorkoutTodayOverview,
 } from "@/types/workout/response/workout.types";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { workoutApi } from "../api/workout.api";
 
 export default function HomeScreen() {
+  const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
 
   const [isPullRefreshing, setIsPullRefreshing] = useState(false);
@@ -81,7 +83,17 @@ export default function HomeScreen() {
   const workoutPreviews =
     workoutPreviewData?.pages.flatMap((page) => page.data) ?? [];
 
-  const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews);
+  const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews, {
+    onOpenWorkout: (workoutId) => {
+      router.push({
+        pathname: "/(pages)/workout/[id]",
+        params: { id: workoutId },
+      });
+    },
+    onFavoriteWorkout: (workoutId) => {
+      console.log(`favorite workout: ${workoutId}`);
+    },
+  });
 
   const handleRefresh = async () => {
     setIsPullRefreshing(true);

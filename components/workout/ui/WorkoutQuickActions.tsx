@@ -20,8 +20,8 @@ export function WorkoutQuickActions({
   onStartEmptyWorkoutAction,
 }: WorkoutQuickActionsProps) {
   return (
-    <View className="gap-2">
-      <View className="flex-row gap-2">
+    <View className="gap-3">
+      <View className="flex-row gap-3">
         <AppButton
           title="Browse plans"
           icon={Search}

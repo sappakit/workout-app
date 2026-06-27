@@ -1,18 +1,21 @@
 import { ThemedText } from "@/components/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
+import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import clsx from "clsx";
 import { Clock, Dumbbell, LucideIcon } from "lucide-react-native";
 import { Image, Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { twMerge } from "tailwind-merge";
+import { formatWorkoutDuration } from "../../model/workout-content.mapper";
 
 type WorkoutCardMetaItem = {
   icon: LucideIcon;
   label: string;
 };
 
-type WorkoutCardItem = {
+export type WorkoutCardItem = {
+  id: number | string;
   title: string;
   subtitle?: string;
   imageUrl?: string | null;
@@ -100,64 +103,71 @@ interface WorkoutMetaPillProps {
   label: string;
 }
 
-export function WorkoutMetaPill({ icon: Icon, label }: WorkoutMetaPillProps) {
+interface WorkoutMetaPillProps {
+  icon?: LucideIcon;
+  label: string;
+  variant?: "primary" | "overlay";
+}
+
+export function WorkoutMetaPill({
+  icon: Icon,
+  label,
+  variant = "primary",
+}: WorkoutMetaPillProps) {
   const { colors } = useAppTheme();
+
+  const isOverlay = variant === "overlay";
 
   return (
     <View
       className="flex-row items-center gap-1 rounded-full px-2 py-1"
       style={{
-        backgroundColor: colors.app.cardSecondary,
+        backgroundColor: isOverlay
+          ? hexWithOpacity(colors.app.white, 15)
+          : colors.app.cardSecondary,
       }}
     >
-      {Icon ? <Icon size={12} color={colors.app.textPrimary} /> : null}
+      {Icon ? (
+        <Icon
+          size={12}
+          color={isOverlay ? colors.app.textWhite : colors.app.textPrimary}
+        />
+      ) : null}
 
-      <ThemedText type="extraSmall" variant="primary">
+      <ThemedText type="extraSmall" variant={isOverlay ? "white" : "primary"}>
         {label}
       </ThemedText>
     </View>
   );
 }
 
+export function formatExerciseCount(count: number) {
+  return `${count} ${count === 1 ? "exercise" : "exercises"}`;
+}
+
 export function mapWorkoutToWorkoutCardItem(
   workout: WorkoutResponse,
 ): WorkoutCardItem {
+  const durationLabel = formatWorkoutDuration(workout.duration);
+
   return {
+    id: workout.id,
     title: workout.name,
     subtitle: workout.workoutFocusType?.name,
     imageUrl: workout.imageUrl,
     metaItems: [
       {
         icon: Dumbbell,
-        label: `${workout.workoutExercises.length} exercises`,
+        label: formatExerciseCount(workout.workoutExercises.length),
       },
-      {
-        icon: Clock,
-        label: formatWorkoutDuration(workout.duration),
-      },
+      ...(durationLabel
+        ? [
+            {
+              icon: Clock,
+              label: durationLabel,
+            },
+          ]
+        : []),
     ],
   };
-}
-
-function formatWorkoutDuration(duration: number | null) {
-  if (!duration) return "No duration";
-
-  if (duration < 60) {
-    return `${duration} sec`;
-  }
-
-  const totalMinutes = Math.floor(duration / 60);
-
-  if (totalMinutes < 60) {
-    return `${totalMinutes} min`;
-  }
-
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (minutes === 0) {
-    return `${hours} hr`;
-  }
-
-  return `${hours} hr ${minutes} min`;
 }

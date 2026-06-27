@@ -12,29 +12,17 @@ import {
   CalendarCheck,
   CalendarClock,
   CalendarDays,
-  Dumbbell,
-  Layers,
   LucideIcon,
   Repeat,
   Settings2,
-  Timer,
 } from "lucide-react-native";
-import React from "react";
 import { ImageBackground, Pressable, StyleSheet, View } from "react-native";
-
-export type WorkoutHeroCardItem = {
-  id: number;
-  title: string;
-  exerciseCount: number;
-  setCount: number;
-  durationLabel: string;
-  imageUrl: string | null;
-};
+import { WorkoutCardItem } from "./workout-card/WorkoutCard";
 
 export type WorkoutHeroStatusIcon = "scheduled" | "completed";
 
 interface WorkoutHeroCardProps {
-  item: WorkoutHeroCardItem;
+  item: WorkoutCardItem;
   statusIcon?: WorkoutHeroStatusIcon;
   onPress?: () => void;
   onEditPlan: () => void;
@@ -92,20 +80,32 @@ export function WorkoutHeroCard({
         </View>
 
         <View className="gap-2">
-          <ThemedText type="title" variant="white" className="text-2xl">
-            {item.title}
-          </ThemedText>
+          <View>
+            {item.subtitle ? (
+              <ThemedText
+                type="small"
+                style={{ color: colors.app.textWhiteMuted }}
+              >
+                {item.subtitle}
+              </ThemedText>
+            ) : null}
 
-          <View className="flex-row items-center gap-3">
-            <WorkoutHeroMetaItem
-              icon={Dumbbell}
-              text={`${item.exerciseCount} exercises`}
-            />
-
-            <WorkoutHeroMetaItem icon={Layers} text={`${item.setCount} sets`} />
-
-            <WorkoutHeroMetaItem icon={Timer} text={item.durationLabel} />
+            <ThemedText type="title" variant="white" className="text-2xl">
+              {item.title}
+            </ThemedText>
           </View>
+
+          {item.metaItems && item.metaItems.length > 0 ? (
+            <View className="flex-row flex-wrap items-center gap-3">
+              {item.metaItems.map((metaItem) => (
+                <WorkoutHeroMetaItem
+                  key={metaItem.label}
+                  icon={metaItem.icon}
+                  label={metaItem.label}
+                />
+              ))}
+            </View>
+          ) : null}
         </View>
       </ImageBackground>
     </Pressable>
@@ -136,10 +136,10 @@ function WorkoutHeroStatusIcon({ icon }: WorkoutHeroStatusIconProps) {
 
 type WorkoutHeroMetaItemProps = {
   icon: LucideIcon;
-  text: string;
+  label: string;
 };
 
-function WorkoutHeroMetaItem({ icon: Icon, text }: WorkoutHeroMetaItemProps) {
+function WorkoutHeroMetaItem({ icon: Icon, label }: WorkoutHeroMetaItemProps) {
   const { colors } = useAppTheme();
 
   return (
@@ -147,7 +147,7 @@ function WorkoutHeroMetaItem({ icon: Icon, text }: WorkoutHeroMetaItemProps) {
       <Icon size={14} color={colors.app.brand} />
 
       <ThemedText type="small" style={{ color: colors.app.textWhiteMuted }}>
-        {text}
+        {label}
       </ThemedText>
     </View>
   );

@@ -1,19 +1,18 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { ThemedText } from "@/components/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
+import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { ArrowUpRight, RefreshCw } from "lucide-react-native";
-import { Image, Pressable, ScrollView, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Heart, RefreshCw } from "lucide-react-native";
+import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { WorkoutCardItem, WorkoutMetaPill } from "../workout-card/WorkoutCard";
 import { MuscleCategoryFilter } from "./muscle-category-filter/MuscleCategoryFilter";
 import { WorkoutPreviewSectionSkeleton } from "./WorkoutPreviewSectionSkeleton";
 
-export interface WorkoutPreviewCardItem {
-  id: number | string;
-  title: string;
-  subtitle: string;
-  imageUrl?: string | null;
+export interface WorkoutPreviewCardItem extends WorkoutCardItem {
   action: () => void;
-  favoriteAction?: () => void;
+  favoriteAction: () => void;
 }
 
 export interface WorkoutPreviewSectionProps {
@@ -101,7 +100,7 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
 
   return (
     <Pressable
-      className="w-64 overflow-hidden rounded-2xl"
+      className="w-56 overflow-hidden rounded-2xl"
       style={{ backgroundColor: colors.app.cardPrimary }}
       onPress={item.action}
     >
@@ -112,36 +111,57 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
           resizeMode="cover"
         />
 
-        {/* TODO: add favorite */}
-        {/* <View className="absolute right-0 top-0 p-3">
-          <AppButton
-            variant="white"
-            icon={Heart}
-            className="h-9 w-9"
-            shape="pill"
-            onPress={item.favoriteAction}
-          />
-        </View> */}
+        <LinearGradient
+          colors={["transparent", hexWithOpacity(colors.app.black, 80)]}
+          locations={[0.4, 1]}
+          style={StyleSheet.absoluteFillObject}
+        />
+
+        <View className="absolute bottom-0 left-0 right-0 p-2">
+          {item.metaItems && item.metaItems.length > 0 ? (
+            <View className="flex-row flex-wrap gap-2">
+              {item.metaItems.map((metaItem) => (
+                <WorkoutMetaPill
+                  key={metaItem.label}
+                  icon={metaItem.icon}
+                  label={metaItem.label}
+                  variant="overlay"
+                />
+              ))}
+            </View>
+          ) : null}
+        </View>
       </View>
 
-      <View className="flex-row justify-between p-3">
+      <View className="flex-row items-end justify-between gap-2 p-3">
         <View className="flex-1">
-          <ThemedText type="subtitle" variant="accent" numberOfLines={1}>
-            {item.title}
-          </ThemedText>
+          {item.subtitle ? (
+            <ThemedText type="extraSmall" variant="primary" numberOfLines={1}>
+              {item.subtitle}
+            </ThemedText>
+          ) : null}
 
-          <ThemedText type="small" variant="primary" numberOfLines={1}>
-            {item.subtitle}
+          <ThemedText type="default" variant="accent" numberOfLines={1}>
+            {item.title}
           </ThemedText>
         </View>
 
+        {/* TODO: add favorite */}
         <AppButton
+          variant="tertiary"
+          icon={Heart}
+          className="h-9 w-9"
+          shape="pill"
+          onPress={item.favoriteAction}
+        />
+
+        {/* <AppButton
           variant="tertiary"
           icon={ArrowUpRight}
           className="h-9 w-9 self-end"
           shape="pill"
           onPress={item.action}
-        />
+        /> */}
       </View>
     </Pressable>
   );
