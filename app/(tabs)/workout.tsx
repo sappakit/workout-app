@@ -1,5 +1,8 @@
+import { EmptyState } from "@/components/state/EmptyState";
+import { ErrorState } from "@/components/state/ErrorState";
 import { WorkoutInProgressContent } from "@/components/workout-in-progress/WorkoutInProgressContent";
 import { mapWorkoutsToPreviewItems } from "@/components/workout/model/workout-preview.mapper";
+import { WorkoutSkeleton } from "@/components/workout/ui/WorkoutSkeleton";
 import WorkoutContent from "@/components/workout/WorkoutContent";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
@@ -18,13 +21,14 @@ export default function WorkoutScreen() {
   const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
 
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
   const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
 
   const {
     data: currentWorkoutData,
     isLoading: isCurrentWorkoutLoading,
     isError: isCurrentWorkoutError,
-    isFetching: isCurrentWorkoutFetching,
+    refetch: refetchCurrentWorkout,
   } = useGetQuery<WorkoutCurrent>(
     workoutQueryKeys.current,
     workoutApi.getCurrent(),
@@ -42,18 +46,30 @@ export default function WorkoutScreen() {
     isLoading: isWorkoutPreviewLoading,
     isError: isWorkoutPreviewError,
     isFetching: isWorkoutPreviewFetching,
+    refetch: refetchWorkoutPreview,
   } = useInfiniteOptionsQuery<WorkoutResponse>({
     url: workoutApi.getAll(),
     queryKey: workoutQueryKeys.all,
     limit: 4,
     params: {
       muscleIds: selectedMuscleIds.length > 0 ? selectedMuscleIds : undefined,
+      createdByMe: true,
     },
     enabled: shouldFetchWorkoutPreviews,
   });
 
   const handleRefresh = async () => {
-    await invalidateQueries([workoutQueryKeys.current, workoutQueryKeys.all]);
+    setIsPullRefreshing(true);
+
+    try {
+      await invalidateQueries([workoutQueryKeys.current, workoutQueryKeys.all]);
+    } finally {
+      setIsPullRefreshing(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    await Promise.all([refetchCurrentWorkout(), refetchWorkoutPreview()]);
   };
 
   const workoutPreviews =
@@ -71,9 +87,11 @@ export default function WorkoutScreen() {
     },
   });
 
-  // TODO: add loading/error
-  if (isCurrentWorkoutLoading) return null;
-  if (isCurrentWorkoutError || !currentWorkoutData) return null;
+  if (isCurrentWorkoutLoading) return <WorkoutSkeleton />;
+
+  if (isCurrentWorkoutError) return <ErrorState onRetry={handleRetry} />;
+
+  if (!currentWorkoutData) return <EmptyState />;
 
   switch (currentWorkoutData.mode) {
     case WorkoutCurrentMode.IN_PROGRESS:
@@ -82,31 +100,34 @@ export default function WorkoutScreen() {
           session={currentWorkoutData.session}
           performanceByExerciseId={currentWorkoutData.performanceByExerciseId}
         />
-      ) : null;
+      ) : (
+        <EmptyState />
+      );
 
     case WorkoutCurrentMode.SCHEDULED:
     case WorkoutCurrentMode.REST_DAY:
     case WorkoutCurrentMode.UNASSIGNED:
-      // TODO: add loading/error
-      if (isWorkoutPreviewLoading) return null;
-      if (isWorkoutPreviewError) return null;
-
       return (
         <WorkoutContent
           mode={currentWorkoutData.mode}
           data={currentWorkoutData.schedule}
           hasCompletedWorkoutToday={currentWorkoutData.hasCompletedWorkoutToday}
-          workoutPreviewItems={workoutPreviewItems}
-          selectedMuscleIds={selectedMuscleIds}
-          onChangeMuscleIds={setSelectedMuscleIds}
+          workoutPreviewSection={{
+            items: workoutPreviewItems,
+            selectedMuscleIds,
+            onChangeMuscleIds: setSelectedMuscleIds,
+            isLoading: isWorkoutPreviewLoading,
+            isError: isWorkoutPreviewError,
+            onRetry: refetchWorkoutPreview,
+          }}
           pullToRefresh={{
-            refreshing: isCurrentWorkoutFetching || isWorkoutPreviewFetching,
+            refreshing: isPullRefreshing,
             onRefresh: handleRefresh,
           }}
         />
       );
 
     default:
-      return null;
+      return <EmptyState />;
   }
 }

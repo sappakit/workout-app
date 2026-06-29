@@ -8,7 +8,6 @@
   Fix: add fieldConfigOverride in exercise-level
 
 - text input still leaves blank space
-- Three column input (Estimated duration) too small on ios making it show as '...'
 - Allow duplicate exercise in one workout
 - make WorkoutTimerBottomSheet show on every page
 - WorkoutTimerBottomSheet buttons don't work if swipe up/down too fast
@@ -19,3 +18,5 @@
 
 - Migrate ExerciseTypeFieldConfig from frontend to db
 - Allow > 1 workout schedule per day
+- Add notification
+  rest time end, user afk

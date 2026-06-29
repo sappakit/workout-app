@@ -34,13 +34,20 @@ type WorkoutContentMode = Exclude<
   WorkoutCurrentMode.IN_PROGRESS
 >;
 
+type WorkoutPreviewSectionState = {
+  items: WorkoutPreviewCardItem[];
+  selectedMuscleIds: number[];
+  onChangeMuscleIds: (muscleIds: number[]) => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
+};
+
 interface WorkoutContentProps {
   mode: WorkoutContentMode;
   data: WorkoutSchedule | null;
   hasCompletedWorkoutToday?: boolean;
-  workoutPreviewItems: WorkoutPreviewCardItem[];
-  selectedMuscleIds: number[];
-  onChangeMuscleIds: (muscleIds: number[]) => void;
+  workoutPreviewSection: WorkoutPreviewSectionState;
   pullToRefresh?: PullToRefreshProps;
 }
 
@@ -48,9 +55,7 @@ export default function WorkoutContent({
   mode,
   data,
   hasCompletedWorkoutToday = false,
-  workoutPreviewItems,
-  selectedMuscleIds,
-  onChangeMuscleIds,
+  workoutPreviewSection,
   pullToRefresh,
 }: WorkoutContentProps) {
   const router = useRouter();
@@ -198,20 +203,23 @@ export default function WorkoutContent({
           />
 
           <WorkoutPreviewSection
-            items={workoutPreviewItems}
-            selectedMuscleIds={selectedMuscleIds}
-            onChangeMuscleIds={onChangeMuscleIds}
-          />
-
-          <WorkoutQuickActions
-            onBrowsePlans={handleChooseWorkout}
-            onCreatePlan={handleCreateWorkout}
-            onStartEmptyWorkoutAction={{
-              onPress: startEmptyWorkout,
-              loading: isStartingEmpty,
-            }}
+            items={workoutPreviewSection.items}
+            selectedMuscleIds={workoutPreviewSection.selectedMuscleIds}
+            onChangeMuscleIds={workoutPreviewSection.onChangeMuscleIds}
+            isLoading={workoutPreviewSection.isLoading}
+            isError={workoutPreviewSection.isError}
+            onRetry={workoutPreviewSection.onRetry}
           />
         </View>
+
+        <WorkoutQuickActions
+          onBrowsePlans={handleChooseWorkout}
+          onCreatePlan={handleCreateWorkout}
+          onStartEmptyWorkoutAction={{
+            onPress: startEmptyWorkout,
+            loading: isStartingEmpty,
+          }}
+        />
       </View>
     </PageLayout>
   );

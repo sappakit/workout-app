@@ -222,6 +222,7 @@ export function WorkoutSetInput({
 }: WorkoutSetInputProps) {
   return (
     <FormNumberInput
+      inputMode="gesture"
       disabled={disabled}
       allowDecimal={allowDecimal}
       value={value}
@@ -232,6 +233,20 @@ export function WorkoutSetInput({
       max={max}
       error={error}
     />
+  );
+}
+
+type WorkoutSetValueTextProps = {
+  value?: number | string | null;
+};
+
+export function WorkoutSetValueText({ value }: WorkoutSetValueTextProps) {
+  return (
+    <View className="h-12 items-center justify-center rounded-lg">
+      <ThemedText type="default" variant="primary" numberOfLines={1}>
+        {value ?? "-"}
+      </ThemedText>
+    </View>
   );
 }
 

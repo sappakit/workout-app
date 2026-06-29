@@ -4,7 +4,13 @@ import { WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { LinearGradient } from "expo-linear-gradient";
-import { Heart, RefreshCw } from "lucide-react-native";
+import {
+  Dumbbell,
+  Heart,
+  LucideIcon,
+  RefreshCw,
+  WifiOff,
+} from "lucide-react-native";
 import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { WorkoutCardItem, WorkoutMetaPill } from "../workout-card/WorkoutCard";
 import { MuscleCategoryFilter } from "./muscle-category-filter/MuscleCategoryFilter";
@@ -32,6 +38,8 @@ export function WorkoutPreviewSection({
   isError = false,
   onRetry,
 }: WorkoutPreviewSectionProps) {
+  const isEmpty = items.length === 0;
+
   return (
     <View className="gap-3">
       <MuscleCategoryFilter
@@ -46,10 +54,95 @@ export function WorkoutPreviewSection({
         />
       ) : isError ? (
         <WorkoutPreviewError onRetry={onRetry} />
+      ) : isEmpty ? (
+        <WorkoutPreviewEmpty />
       ) : (
         <WorkoutPreviewCardList items={items} />
       )}
     </View>
+  );
+}
+
+type WorkoutPreviewFeedbackProps = {
+  icon: LucideIcon;
+  title: string;
+  subtitle: string;
+  action?: {
+    title: string;
+    icon?: LucideIcon;
+    onPress: () => void;
+  };
+};
+
+function WorkoutPreviewFeedback({
+  icon: Icon,
+  title,
+  subtitle,
+  action,
+}: WorkoutPreviewFeedbackProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View
+      className="items-center justify-center gap-3 rounded-2xl px-4 py-6"
+      style={{ backgroundColor: colors.app.cardPrimary }}
+    >
+      <View
+        className="h-12 w-12 items-center justify-center rounded-2xl"
+        style={{ backgroundColor: colors.app.cardSecondary }}
+      >
+        <Icon size={20} color={colors.app.textAccent} />
+      </View>
+
+      <View className="items-center">
+        <ThemedText type="default" variant="accent">
+          {title}
+        </ThemedText>
+
+        <ThemedText type="small" variant="primary" className="text-center">
+          {subtitle}
+        </ThemedText>
+      </View>
+
+      {action ? (
+        <AppButton
+          title={action.title}
+          icon={action.icon}
+          variant="outline"
+          className="w-28"
+          onPress={action.onPress}
+        />
+      ) : null}
+    </View>
+  );
+}
+
+function WorkoutPreviewEmpty() {
+  return (
+    <WorkoutPreviewFeedback
+      icon={Dumbbell}
+      title="No workouts found"
+      subtitle="Explore another muscle group to find a workout."
+    />
+  );
+}
+
+function WorkoutPreviewError({ onRetry }: { onRetry?: () => void }) {
+  return (
+    <WorkoutPreviewFeedback
+      icon={WifiOff}
+      title="Failed to load workouts"
+      subtitle="Something went wrong. Please try again."
+      action={
+        onRetry
+          ? {
+              title: "Retry",
+              icon: RefreshCw,
+              onPress: onRetry,
+            }
+          : undefined
+      }
+    />
   );
 }
 
@@ -71,31 +164,7 @@ function WorkoutPreviewCardList({
   );
 }
 
-function WorkoutPreviewError({ onRetry }: { onRetry?: () => void }) {
-  return (
-    <View className="items-center justify-center gap-2 rounded-2xl py-4">
-      <ThemedText type="small" variant="accent" className="text-center">
-        Failed to load workouts.
-      </ThemedText>
-
-      {onRetry ? (
-        <AppButton
-          title="Retry"
-          icon={RefreshCw}
-          variant="secondary"
-          className="w-28"
-          onPress={onRetry}
-        />
-      ) : null}
-    </View>
-  );
-}
-
-interface WorkoutPreviewCardProps {
-  item: WorkoutPreviewCardItem;
-}
-
-export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
+export function WorkoutPreviewCard({ item }: { item: WorkoutPreviewCardItem }) {
   const { colors } = useAppTheme();
 
   return (
@@ -146,7 +215,6 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
           </ThemedText>
         </View>
 
-        {/* TODO: add favorite */}
         <AppButton
           variant="tertiary"
           icon={Heart}
@@ -154,14 +222,6 @@ export function WorkoutPreviewCard({ item }: WorkoutPreviewCardProps) {
           shape="pill"
           onPress={item.favoriteAction}
         />
-
-        {/* <AppButton
-          variant="tertiary"
-          icon={ArrowUpRight}
-          className="h-9 w-9 self-end"
-          shape="pill"
-          onPress={item.action}
-        /> */}
       </View>
     </Pressable>
   );

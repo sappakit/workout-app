@@ -134,6 +134,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
               value={restTime ?? 0}
               onChange={onChangeRestTime}
               disabled={!isEditable || !onChangeRestTime}
+              style={{ opacity: 1 }}
             />
           </View>
 

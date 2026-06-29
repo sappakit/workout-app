@@ -9,8 +9,8 @@ import {
   getWorkoutSetColumns,
   WorkoutSetColumn,
   WorkoutSetHeader,
-  WorkoutSetInput,
   WorkoutSetRow,
+  WorkoutSetValueText,
 } from "./base/WorkoutSetTable";
 
 interface DisplayWorkoutExerciseSectionProps {
@@ -59,17 +59,7 @@ export function DisplayWorkoutExerciseSection({
           renderInput={(column) => {
             const value = getWorkoutExerciseSetValue(setItem, column.key);
 
-            return (
-              <WorkoutSetInput
-                value={value}
-                onChange={() => {}}
-                placeholder="-"
-                allowDecimal={column.allowDecimal}
-                min={column.min}
-                max={column.max}
-                disabled={true}
-              />
-            );
+            return <WorkoutSetValueText value={value} />;
           }}
         />
       )}

@@ -97,7 +97,7 @@ export function DurationBottomSheetPicker({
         <Pressable
           onPress={openSheet}
           disabled={disabled}
-          className={twMerge(clsx("flex-row items-center gap-1", className))}
+          className={twMerge(clsx("flex-row items-center gap-2", className))}
           style={[{ opacity: disabled ? 0.5 : 1 }, style]}
         >
           <Timer size={20} color={colors.app.brand} />

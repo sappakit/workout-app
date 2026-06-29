@@ -51,7 +51,7 @@ export function WorkoutHeroCard({
       <ImageBackground
         source={{ uri: item.imageUrl ?? WORKOUT_IMAGE }}
         resizeMode="cover"
-        className="h-60 justify-between overflow-hidden p-5"
+        className="h-56 justify-between overflow-hidden p-5"
       >
         <View
           style={[
