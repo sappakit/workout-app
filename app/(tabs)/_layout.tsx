@@ -10,13 +10,18 @@ import {
 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const TAB_BAR_BASE_HEIGHT = 72;
+const TAB_BAR_BASE_HEIGHT = 64;
+const WORKOUT_TIMER_SHEET_TAB_OVERLAP = 1;
 
 export default function TabLayout() {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   const tabBarHeight = TAB_BAR_BASE_HEIGHT + insets.bottom;
+  const sheetBottomInset = Math.max(
+    0,
+    tabBarHeight - WORKOUT_TIMER_SHEET_TAB_OVERLAP,
+  );
 
   return (
     <>
@@ -86,7 +91,7 @@ export default function TabLayout() {
         />
       </Tabs>
 
-      <WorkoutTimerBottomSheet bottomInset={tabBarHeight} />
+      <WorkoutTimerBottomSheet bottomInset={sheetBottomInset} />
     </>
   );
 }

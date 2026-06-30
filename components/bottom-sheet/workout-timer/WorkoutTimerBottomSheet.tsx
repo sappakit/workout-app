@@ -8,7 +8,12 @@ import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
+import {
+  selectActiveWorkoutSession,
+  selectHasActiveWorkoutSession,
+  useWorkoutSessionStore,
+} from "@/stores/workoutSessionStore";
+import { useWorkoutTimerSheetStore } from "@/stores/workoutTimerSheetStore";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useMutation } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
@@ -50,6 +55,10 @@ export default function WorkoutTimerBottomSheet({
     number | null
   >(null);
 
+  const setCollapsedSnapPoint = useWorkoutTimerSheetStore(
+    (state) => state.setCollapsedSnapPoint,
+  );
+
   const snapPoints = useMemo(() => {
     const collapsedHeight =
       collapsedContentHeight != null
@@ -71,8 +80,10 @@ export default function WorkoutTimerBottomSheet({
   const restTimer = useWorkoutRestTimer();
 
   // Workout session store
-  const hydrated = useWorkoutSessionStore((state) => state.hydrated);
-  const storedSession = useWorkoutSessionStore((state) => state.session);
+  const hasActiveWorkoutSession = useWorkoutSessionStore(
+    selectHasActiveWorkoutSession,
+  );
+  const storedSession = useWorkoutSessionStore(selectActiveWorkoutSession);
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
   const clearSession = useWorkoutSessionStore((state) => state.clearSession);
 
@@ -193,7 +204,7 @@ export default function WorkoutTimerBottomSheet({
     });
   };
 
-  if (!hydrated || !storedSession) {
+  if (!hasActiveWorkoutSession || !storedSession) {
     return null;
   }
 
@@ -240,6 +251,10 @@ export default function WorkoutTimerBottomSheet({
         onCollapsedLayout={(height) => {
           setCollapsedContentHeight((prev) =>
             prev === height ? prev : height,
+          );
+
+          setCollapsedSnapPoint(
+            height + WORKOUT_TIMER_SHEET_VERTICAL_PADDING + SHEET_HEIGHT_BUFFER,
           );
         }}
         onExpandedLayout={(height) => {

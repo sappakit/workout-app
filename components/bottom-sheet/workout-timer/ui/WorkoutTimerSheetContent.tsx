@@ -1,5 +1,6 @@
 import { BottomSheetView, useBottomSheet } from "@gorhom/bottom-sheet";
-import { LayoutChangeEvent, View } from "react-native";
+import { useRouter } from "expo-router";
+import { LayoutChangeEvent, Pressable, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -46,6 +47,7 @@ export function WorkoutTimerSheetContent({
   onCollapsedLayout,
   onExpandedLayout,
 }: WorkoutTimerContentProps) {
+  const router = useRouter();
   const { animatedIndex } = useBottomSheet();
 
   const isResting = remainingRestSeconds > 0;
@@ -112,6 +114,10 @@ export function WorkoutTimerSheetContent({
     onExpandedLayout?.(Math.ceil(event.nativeEvent.layout.height));
   };
 
+  const handleOpenWorkoutPage = () => {
+    router.navigate("/workout");
+  };
+
   return (
     <BottomSheetView
       style={{
@@ -133,26 +139,30 @@ export function WorkoutTimerSheetContent({
             collapsedAnimatedStyle,
           ]}
         >
-          <CollapsedTimerContent
-            display={display}
-            restAction={restAction}
-            finishAction={finishAction}
-            discardAction={discardAction}
-            pauseAction={pauseAction}
-          />
+          <Pressable onPress={handleOpenWorkoutPage}>
+            <CollapsedTimerContent
+              display={display}
+              restAction={restAction}
+              finishAction={finishAction}
+              discardAction={discardAction}
+              pauseAction={pauseAction}
+            />
+          </Pressable>
         </Animated.View>
 
         <Animated.View
           onLayout={handleExpandedLayout}
           style={expandedAnimatedStyle}
         >
-          <ExpandedTimerContent
-            display={display}
-            restAction={restAction}
-            finishAction={finishAction}
-            discardAction={discardAction}
-            pauseAction={pauseAction}
-          />
+          <Pressable onPress={handleOpenWorkoutPage}>
+            <ExpandedTimerContent
+              display={display}
+              restAction={restAction}
+              finishAction={finishAction}
+              discardAction={discardAction}
+              pauseAction={pauseAction}
+            />
+          </Pressable>
         </Animated.View>
       </View>
     </BottomSheetView>

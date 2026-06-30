@@ -1,5 +1,13 @@
 import PageHeader, { PageHeaderProps } from "@/components/layout/PageHeader";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import {
+  selectHasActiveWorkoutSession,
+  useWorkoutSessionStore,
+} from "@/stores/workoutSessionStore";
+import {
+  selectWorkoutTimerSheetCollapsedSnapPoint,
+  useWorkoutTimerSheetStore,
+} from "@/stores/workoutTimerSheetStore";
 import clsx from "clsx";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode, useState } from "react";
@@ -34,6 +42,7 @@ type PageLayoutProps = {
   showsVerticalScrollIndicator?: boolean;
   stickyFooter?: { content: ReactNode; options?: { addBottomInset: boolean } };
   pullToRefresh?: PullToRefreshProps;
+  hasWorkoutTimerSheet?: boolean;
 };
 
 export function PageLayout({
@@ -51,16 +60,37 @@ export function PageLayout({
   showsVerticalScrollIndicator = false,
   stickyFooter,
   pullToRefresh,
+  hasWorkoutTimerSheet = true,
 }: PageLayoutProps) {
   const { colors } = useAppTheme();
 
   const insets = useSafeAreaInsets();
   const [footerHeight, setFooterHeight] = useState(0);
 
+  const hasActiveWorkoutSession = useWorkoutSessionStore(
+    selectHasActiveWorkoutSession,
+  );
+
+  const collapsedWorkoutTimerSheetHeight = useWorkoutTimerSheetStore(
+    selectWorkoutTimerSheetCollapsedSnapPoint,
+  );
+
+  const shouldAddWorkoutTimerPadding =
+    hasWorkoutTimerSheet && hasActiveWorkoutSession;
+
+  const extraWorkoutTimerPadding = shouldAddWorkoutTimerPadding
+    ? collapsedWorkoutTimerSheetHeight
+    : 0;
+
   const bg = backgroundColor ?? colors.app.background;
-  const paddingBottom = stickyFooter ? footerHeight : bottomInset;
+
+  const paddingBottom =
+    (stickyFooter ? footerHeight : bottomInset) + extraWorkoutTimerPadding;
+
   const bodyContainerStyle = disableContentPadding
-    ? undefined
+    ? {
+        paddingBottom,
+      }
     : {
         paddingTop: topInset,
         paddingBottom: paddingBottom,

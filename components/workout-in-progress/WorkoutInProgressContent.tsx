@@ -4,7 +4,12 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import { ExerciseFieldKey } from "@/lib/workout/config";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
-import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
+import {
+  selectActiveWorkoutSession,
+  selectWorkoutSessionHydrated,
+  selectWorkoutSessionPerformanceByExerciseId,
+  useWorkoutSessionStore,
+} from "@/stores/workoutSessionStore";
 import {
   ExercisePerformanceSummary,
   WorkoutSession,
@@ -58,10 +63,10 @@ export function WorkoutInProgressContent({
   );
 
   // Workout session store
-  const hydrated = useWorkoutSessionStore((state) => state.hydrated);
-  const storedSession = useWorkoutSessionStore((state) => state.session);
+  const hydrated = useWorkoutSessionStore(selectWorkoutSessionHydrated);
+  const storedSession = useWorkoutSessionStore(selectActiveWorkoutSession);
   const storedPerformanceByExerciseId = useWorkoutSessionStore(
-    (state) => state.performanceByExerciseId,
+    selectWorkoutSessionPerformanceByExerciseId,
   );
   const initializeSession = useWorkoutSessionStore(
     (state) => state.initializeSession,
@@ -336,9 +341,9 @@ export function WorkoutInProgressContent({
         variant: "title",
         title: "Workout",
       }}
-      containerStyle={{
-        paddingBottom: 200,
-      }}
+      // containerStyle={{
+      //   paddingBottom: 200,
+      // }}
     >
       <DetailHeroImage imageUrl={storedSession?.workout?.imageUrl} />
 

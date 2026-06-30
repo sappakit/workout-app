@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-interface WorkoutSessionStore {
+export interface WorkoutSessionStore {
   session: WorkoutSessionModel | null;
   performanceByExerciseId: Record<string, ExercisePerformanceSummary>;
 
@@ -181,3 +181,16 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
     },
   ),
 );
+
+export const selectWorkoutSessionHydrated = (state: WorkoutSessionStore) =>
+  state.hydrated;
+
+export const selectActiveWorkoutSession = (state: WorkoutSessionStore) =>
+  state.session;
+
+export const selectHasActiveWorkoutSession = (state: WorkoutSessionStore) =>
+  state.hydrated && state.session != null;
+
+export const selectWorkoutSessionPerformanceByExerciseId = (
+  state: WorkoutSessionStore,
+) => state.performanceByExerciseId;
