@@ -1,5 +1,7 @@
 import { api, AuthStorage } from "@/lib/api";
 import { SignInForm } from "@/schemas/auth.schema";
+import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
+import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import { SignUpRequest, UserAuth } from "@/types/auth.types";
 import { useRouter } from "expo-router";
 import {
@@ -90,6 +92,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     await AuthStorage.clearTokens();
+
+    // Clear workout runtime state
+    useWorkoutSessionStore.getState().clearSession();
+    useWorkoutRestTimerStore.getState().stopRestTimer();
+
+    // Clear persisted Zustand storage
+    useWorkoutSessionStore.persist.clearStorage();
+    useWorkoutRestTimerStore.persist.clearStorage();
+
     setUser(null);
     router.replace("/(auth)/sign-in");
   }

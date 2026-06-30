@@ -1,5 +1,6 @@
 import WorkoutTimerBottomSheet from "@/components/bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import { HapticTab } from "@/components/haptic-tab";
+import { WorkoutSessionSync } from "@/components/workout-in-progress/WorkoutSessionSync";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Tabs } from "expo-router";
 import {
@@ -90,6 +91,8 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+
+      <WorkoutSessionSync />
 
       <WorkoutTimerBottomSheet bottomInset={sheetBottomInset} />
     </>

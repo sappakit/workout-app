@@ -10,6 +10,10 @@ import {
   selectWorkoutSessionPerformanceByExerciseId,
   useWorkoutSessionStore,
 } from "@/stores/workoutSessionStore";
+import {
+  ExercisePerformanceSummary,
+  WorkoutSession,
+} from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import { Dumbbell, Layers, Plus, Weight } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -32,7 +36,15 @@ import {
   syncSessionExerciseCompletion,
 } from "./model/helpers";
 
-export function WorkoutInProgressContent() {
+type WorkoutInProgressContentProps = {
+  session: WorkoutSession;
+  performanceByExerciseId: Record<string, ExercisePerformanceSummary>;
+};
+
+export function WorkoutInProgressContent({
+  session,
+  performanceByExerciseId,
+}: WorkoutInProgressContentProps) {
   const { colors } = useAppTheme();
 
   const router = useRouter();
@@ -56,6 +68,12 @@ export function WorkoutInProgressContent() {
   const storedPerformanceByExerciseId = useWorkoutSessionStore(
     selectWorkoutSessionPerformanceByExerciseId,
   );
+  const initializeSession = useWorkoutSessionStore(
+    (state) => state.initializeSession,
+  );
+  const setPerformanceByExerciseId = useWorkoutSessionStore(
+    (state) => state.setPerformanceByExerciseId,
+  );
   const removePerformanceByExerciseId = useWorkoutSessionStore(
     (state) => state.removePerformanceByExerciseId,
   );
@@ -67,8 +85,28 @@ export function WorkoutInProgressContent() {
     (state) => state.updateSessionSet,
   );
 
+  // Initialize session state as a page-level fallback.
+  // WorkoutSessionSync handles the normal global sync.
+  // This only runs if the page has a session but the local store is missing
+  // or contains a different session.
+  useEffect(() => {
+    if (!hydrated) return;
+
+    if (storedSession?.id === session.id) return;
+
+    initializeSession(session);
+    setPerformanceByExerciseId(performanceByExerciseId);
+  }, [
+    hydrated,
+    storedSession?.id,
+    session,
+    performanceByExerciseId,
+    initializeSession,
+    setPerformanceByExerciseId,
+  ]);
+
   // Ensure store is hydrated and contains the current session
-  const isActiveSessionReady = hydrated && !!storedSession;
+  const isActiveSessionReady = hydrated && storedSession?.id === session.id;
 
   // Use storedSession as the single source of truth
   const [exerciseItems, setExerciseItems] = useState(
@@ -309,6 +347,9 @@ export function WorkoutInProgressContent() {
         variant: "title",
         title: "Workout",
       }}
+      // containerStyle={{
+      //   paddingBottom: 200,
+      // }}
     >
       <DetailHeroImage imageUrl={storedSession.workout?.imageUrl} />
 

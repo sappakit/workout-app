@@ -96,10 +96,7 @@ export default function WorkoutScreen() {
   switch (currentWorkoutData.mode) {
     case WorkoutCurrentMode.IN_PROGRESS:
       return currentWorkoutData.session ? (
-        <WorkoutInProgressContent
-          session={currentWorkoutData.session}
-          performanceByExerciseId={currentWorkoutData.performanceByExerciseId}
-        />
+        <WorkoutInProgressContent />
       ) : (
         <EmptyState />
       );
