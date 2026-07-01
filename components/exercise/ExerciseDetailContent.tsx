@@ -27,6 +27,7 @@ export default function ExerciseDetailContent({
           title: data.name,
           showBackButton: true,
         },
+        scrollEffect: { overlay: true },
       }}
     >
       <DetailHeroImage imageUrl={data.imageUrl} />

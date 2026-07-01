@@ -9,15 +9,8 @@ import {
   useWorkoutTimerSheetStore,
 } from "@/stores/workoutTimerSheetStore";
 import clsx from "clsx";
-import { LinearGradient } from "expo-linear-gradient";
-import { ReactNode, useState } from "react";
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from "react-native";
+import { ReactNode, useRef, useState } from "react";
+import { Animated, RefreshControl, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
 
@@ -34,6 +27,14 @@ export type PullToRefreshProps = {
   enabled?: boolean;
 };
 
+export type PageHeaderScrollEffect = {
+  overlay?: boolean;
+  backgroundFadeStart?: number;
+  backgroundFadeEnd?: number;
+  titleFadeStart?: number;
+  titleFadeEnd?: number;
+};
+
 type ContentPaddingSide = "top" | "bottom" | "left" | "right";
 
 type DisableContentPadding =
@@ -43,6 +44,7 @@ type DisableContentPadding =
 type PageLayoutHeader = {
   props: PageHeaderProps;
   bottom?: ReactNode;
+  scrollEffect?: PageHeaderScrollEffect;
 };
 
 type PageLayoutProps = {
@@ -70,6 +72,8 @@ export function PageLayout({
 }: PageLayoutProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
+
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const [footerHeight, setFooterHeight] = useState(0);
 
@@ -112,7 +116,6 @@ export function PageLayout({
 
   const rootStyle: ViewStyle = {
     backgroundColor: colors.app.background,
-    paddingTop: insets.top,
   };
 
   const stickyFooterStyle: ViewStyle = {
@@ -132,26 +135,46 @@ export function PageLayout({
     />
   ) : undefined;
 
+  const headerScrollEffect = header?.scrollEffect;
+  const isOverlayHeader = !!headerScrollEffect?.overlay;
+
+  const scrollHandler = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    {
+      useNativeDriver: true,
+    },
+  );
+
   return (
     <View className="flex-1" style={rootStyle}>
-      <LinearGradient
+      {/* <LinearGradient
         colors={[colors.app.background, colors.app.backgroundDark]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
-      />
+      /> */}
 
-      {header && <PageHeader {...header.props} headerBottom={header.bottom} />}
+      {header && (
+        <PageHeader
+          {...header.props}
+          headerBottom={header.bottom}
+          scrollY={scrollY}
+          scrollEffect={headerScrollEffect}
+          overlay={isOverlayHeader}
+        />
+      )}
 
       {scrollable ? (
-        <ScrollView
+        <Animated.ScrollView
           className={className}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[contentContainerStyle, containerStyle]}
           refreshControl={refreshControl}
+          scrollEventThrottle={16}
+          onScroll={headerScrollEffect ? scrollHandler : undefined}
         >
           {children}
-        </ScrollView>
+        </Animated.ScrollView>
       ) : (
         <View
           className={twMerge(clsx("flex-1", className))}

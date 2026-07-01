@@ -1,12 +1,15 @@
+import { AppButton } from "@/components/custom-ui/AppButton";
+import { ThemeToggle } from "@/components/custom-ui/ThemeToggle";
+import { UserAvatar } from "@/components/custom-ui/UserAvatar";
+import { PageHeaderScrollEffect } from "@/components/layout/PageLayout";
+import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { ReactNode } from "react";
-import { View } from "react-native";
-import { AppButton } from "../custom-ui/AppButton";
-import { ThemeToggle } from "../custom-ui/ThemeToggle";
-import { UserAvatar } from "../custom-ui/UserAvatar";
-import { ThemedText } from "../themed-text";
+import { Animated, StyleSheet, View, ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type HomePageHeaderProps = {
   variant: "home";
@@ -25,17 +28,72 @@ export type PageHeaderProps = HomePageHeaderProps | TitlePageHeaderProps;
 
 type PageHeaderRootProps = PageHeaderProps & {
   headerBottom?: ReactNode;
+  scrollY?: Animated.Value;
+  scrollEffect?: PageHeaderScrollEffect;
+  overlay?: boolean;
 };
 
 export default function PageHeader(props: PageHeaderRootProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const handleBackPress =
     props.variant === "title" ? (props.onBackPress ?? router.back) : undefined;
 
+  const backgroundOpacity =
+    !!props.scrollY && !!props.scrollEffect
+      ? props.scrollY.interpolate({
+          inputRange: [
+            props.scrollEffect?.backgroundFadeStart ?? 0,
+            props.scrollEffect?.backgroundFadeEnd ?? 80,
+          ],
+          outputRange: [0, 1],
+          extrapolate: "clamp",
+        })
+      : 1;
+
+  const titleOpacity =
+    !!props.scrollY && !!props.scrollEffect
+      ? props.scrollY.interpolate({
+          inputRange: [
+            props.scrollEffect?.titleFadeStart ?? 40,
+            props.scrollEffect?.titleFadeEnd ?? 100,
+          ],
+          outputRange: [0, 1],
+          extrapolate: "clamp",
+        })
+      : 1;
+
+  const rootStyle: ViewStyle = {
+    paddingTop: insets.top,
+  };
+
+  const overlayStyle: ViewStyle | undefined = props.overlay
+    ? {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        elevation: 50,
+      }
+    : undefined;
+
   return (
-    <View className="relative z-50">
+    <View className="relative z-50" style={[rootStyle, overlayStyle]}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFillObject,
+          {
+            backgroundColor: colors.app.background,
+            opacity: backgroundOpacity,
+          },
+        ]}
+      />
+
       <View className="h-16 flex-row items-center justify-between px-4">
         {props.variant === "title" ? (
           <TitleHeader
@@ -43,6 +101,7 @@ export default function PageHeader(props: PageHeaderRootProps) {
             subtitle={props.subtitle}
             showBackButton={props.showBackButton}
             onBackPress={handleBackPress}
+            titleStyle={{ opacity: titleOpacity }}
           />
         ) : (
           <HomeHeader
@@ -94,6 +153,7 @@ type TitleHeaderProps = {
   subtitle?: string;
   showBackButton?: boolean;
   onBackPress?: () => void;
+  titleStyle?: Animated.WithAnimatedObject<ViewStyle>;
 };
 
 function TitleHeader({
@@ -101,6 +161,7 @@ function TitleHeader({
   subtitle,
   showBackButton,
   onBackPress,
+  titleStyle,
 }: TitleHeaderProps) {
   return (
     <>
@@ -113,7 +174,17 @@ function TitleHeader({
         />
       )}
 
-      <View className="absolute left-0 right-0 flex-1 items-center">
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            left: 0,
+            right: 0,
+            alignItems: "center",
+          },
+          titleStyle,
+        ]}
+      >
         <ThemedText type="subtitle" variant="accent">
           {title}
         </ThemedText>
@@ -123,7 +194,7 @@ function TitleHeader({
             {subtitle}
           </ThemedText>
         )}
-      </View>
+      </Animated.View>
     </>
   );
 }

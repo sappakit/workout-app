@@ -309,6 +309,7 @@ export function WorkoutInProgressContent() {
           variant: "title",
           title: "Workout",
         },
+        scrollEffect: { overlay: true },
       }}
     >
       <DetailHeroImage imageUrl={storedSession.workout?.imageUrl} />

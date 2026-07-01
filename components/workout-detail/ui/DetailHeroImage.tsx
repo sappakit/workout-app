@@ -15,7 +15,7 @@ interface DetailHeroImageProps {
 
 export function DetailHeroImage({
   imageUrl,
-  height = 240,
+  height = 256,
   style,
   imageStyle,
   className,
@@ -28,8 +28,8 @@ export function DetailHeroImage({
       style={[{ height }, style]}
       imageStyle={[
         {
-          borderBottomLeftRadius: 24,
-          borderBottomRightRadius: 24,
+          borderBottomLeftRadius: 16,
+          borderBottomRightRadius: 16,
           marginHorizontal: -CONTENT_PADDING_HORIZONTAL,
           marginTop: -CONTENT_PADDING_TOP,
         },

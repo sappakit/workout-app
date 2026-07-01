@@ -21,9 +21,10 @@ export default function WorkoutDetailContent({
       header={{
         props: {
           variant: "title",
-          title: `${data.name}`,
+          title: data.name,
           showBackButton: true,
         },
+        scrollEffect: { overlay: true },
       }}
     >
       <DetailHeroImage imageUrl={data.imageUrl} />
