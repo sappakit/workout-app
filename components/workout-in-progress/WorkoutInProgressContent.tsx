@@ -2,7 +2,6 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { ExerciseFieldKey } from "@/lib/workout/config";
-import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import {
   selectActiveWorkoutSession,
@@ -36,14 +35,6 @@ export function WorkoutInProgressContent() {
   const { colors } = useAppTheme();
 
   const router = useRouter();
-
-  // Display full exercise details toggle
-  const showFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.showFullExerciseDetails,
-  );
-  const toggleShowFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.toggleShowFullExerciseDetails,
-  );
 
   // Workout rest timer store
   const startRestTimer = useWorkoutRestTimerStore(
@@ -340,9 +331,7 @@ export function WorkoutInProgressContent() {
             <View className="absolute right-0 top-0 p-4">
               <ExerciseListMenu
                 isDisabled={exerciseItems.length === 0}
-                showFullExerciseDetails={showFullExerciseDetails}
                 actions={{
-                  toggleShowFullExerciseDetails,
                   handleOpenManageMode,
                   handleRemoveAllExercises,
                 }}

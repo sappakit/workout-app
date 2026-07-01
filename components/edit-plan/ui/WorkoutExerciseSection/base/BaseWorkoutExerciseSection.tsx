@@ -7,17 +7,17 @@ import {
 import { WorkoutImageAvatar } from "@/components/progress/ui/sections/progress-history-section/RecentWorkoutCard";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useExerciseCardExpandedState } from "@/hooks/useExerciseCardExpandedState";
 import { useRouter } from "expo-router";
 import {
   ChevronDown,
   ChevronUp,
   MoreVertical,
-  PanelTopOpen,
   Plus,
   Repeat,
   Trash2,
 } from "lucide-react-native";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 
 type BaseSetItem = {
@@ -73,7 +73,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
   const { colors } = useAppTheme();
   const router = useRouter();
 
-  const [expanded, setExpanded] = useState(true);
+  const { expanded, toggleExpanded } = useExerciseCardExpandedState();
 
   const isEditable = mode === "editable";
   const canShowMenu = isEditable && onReplaceExercise && onDeleteExercise;
@@ -120,7 +120,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
             />
           )}
 
-          <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
+          <TouchableOpacity onPress={toggleExpanded}>
             <ExpansionIcon size={24} color={colors.app.textPrimary} />
           </TouchableOpacity>
         </View>
@@ -213,14 +213,6 @@ function BaseWorkoutExerciseSectionMenu({
         <MoreVertical size={18} color={colors.app.textPrimary} />
       )}
     >
-      <MenuSectionLabel label="View" />
-
-      <DropdownItem
-        isToggleItem
-        label="Show full details"
-        icon={PanelTopOpen}
-      />
-
       <MenuSectionLabel label="Actions" />
 
       <DropdownItem

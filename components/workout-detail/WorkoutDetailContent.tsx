@@ -2,6 +2,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { View } from "react-native";
+import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
 import { DisplayWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/DisplayWorkoutExerciseSection";
 import { ScreenSection } from "../layout/ScreenSection";
 import { SectionHeader } from "../layout/SectionHeader";
@@ -18,6 +19,7 @@ export default function WorkoutDetailContent({
 
   return (
     <PageLayout
+      includeBottomInset
       header={{
         props: {
           variant: "title",
@@ -49,7 +51,7 @@ export default function WorkoutDetailContent({
         </ScreenSection>
 
         <ScreenSection>
-          <SectionHeader title="Exercise lists" />
+          <SectionHeader title="Exercise List" action={<ExerciseListMenu />} />
 
           <View className="gap-3">
             {exercises.length > 0 ? (

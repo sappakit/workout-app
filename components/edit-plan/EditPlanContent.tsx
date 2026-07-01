@@ -576,9 +576,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
           action={
             <ExerciseListMenu
               isDisabled={fields.length === 0}
-              showFullExerciseDetails={showFullExerciseDetails}
               actions={{
-                toggleShowFullExerciseDetails,
                 handleOpenManageMode,
                 handleRemoveAllExercises,
               }}

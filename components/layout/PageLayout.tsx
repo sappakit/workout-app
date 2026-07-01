@@ -57,6 +57,7 @@ type PageLayoutProps = {
   stickyFooter?: ReactNode;
   pullToRefresh?: PullToRefreshProps;
   hasWorkoutTimerSheet?: boolean;
+  includeBottomInset?: boolean;
 };
 
 export function PageLayout({
@@ -69,6 +70,7 @@ export function PageLayout({
   stickyFooter,
   pullToRefresh,
   hasWorkoutTimerSheet = true,
+  includeBottomInset = false,
 }: PageLayoutProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -92,18 +94,30 @@ export function PageLayout({
     ? collapsedWorkoutTimerSheetHeight
     : 0;
 
-  const baseBottomSpace = stickyFooter ? footerHeight : CONTENT_PADDING_BOTTOM;
+  const contentBottomBasePadding = isContentPaddingDisabled(
+    disableContentPadding,
+    "bottom",
+  )
+    ? 0
+    : CONTENT_PADDING_BOTTOM;
 
-  const contentPaddingBottom = baseBottomSpace + workoutTimerBottomSpace;
+  const stickyFooterBottomSpace = stickyFooter ? footerHeight : 0;
+
+  const safeAreaBottomSpace =
+    includeBottomInset && !stickyFooter ? insets.bottom : 0;
+
+  const contentPaddingBottom =
+    contentBottomBasePadding +
+    stickyFooterBottomSpace +
+    safeAreaBottomSpace +
+    workoutTimerBottomSpace;
 
   const contentContainerStyle: ViewStyle = {
     paddingTop: isContentPaddingDisabled(disableContentPadding, "top")
       ? 0
       : CONTENT_PADDING_TOP,
 
-    paddingBottom: isContentPaddingDisabled(disableContentPadding, "bottom")
-      ? workoutTimerBottomSpace
-      : contentPaddingBottom,
+    paddingBottom: contentPaddingBottom,
 
     paddingLeft: isContentPaddingDisabled(disableContentPadding, "left")
       ? 0

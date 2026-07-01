@@ -21,6 +21,7 @@ export default function ExerciseDetailContent({
 
   return (
     <PageLayout
+      includeBottomInset
       header={{
         props: {
           variant: "title",

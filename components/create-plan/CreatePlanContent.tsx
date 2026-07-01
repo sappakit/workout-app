@@ -557,9 +557,7 @@ export default function CreatePlanContent() {
           action={
             <ExerciseListMenu
               isDisabled={fields.length === 0}
-              showFullExerciseDetails={showFullExerciseDetails}
               actions={{
-                toggleShowFullExerciseDetails,
                 handleOpenManageMode,
                 handleRemoveAllExercises,
               }}
