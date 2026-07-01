@@ -6,11 +6,13 @@ import { View } from "react-native";
 export function EditProfileSkeleton() {
   return (
     <PageLayout
-      topInset={0}
-      headerProps={{
-        variant: "title",
-        title: "Edit Profile",
-        showBackButton: true,
+      disableContentPadding={{ top: true }}
+      header={{
+        props: {
+          variant: "title",
+          title: "Edit Profile",
+          showBackButton: true,
+        },
       }}
     >
       <View className="gap-6">

@@ -69,7 +69,7 @@ export default function SignUpScreen() {
   };
 
   return (
-    <PageLayout showHeader={false}>
+    <PageLayout>
       <View>
         {/* Logo */}
         <AppLogo size={200} />

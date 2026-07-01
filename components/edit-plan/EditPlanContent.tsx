@@ -383,16 +383,15 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
 
   return (
     <PageLayout
-      headerProps={{
-        variant: "title",
-        title: "Edit Plan",
-        showBackButton: true,
-        onBackPress: handleCancelEdit,
+      header={{
+        props: {
+          variant: "title",
+          title: "Edit Plan",
+          showBackButton: true,
+          onBackPress: handleCancelEdit,
+        },
       }}
-      stickyFooter={{
-        content: footer,
-        options: { addBottomInset: true },
-      }}
+      stickyFooter={footer}
     >
       {/* Plan Name */}
       <View>

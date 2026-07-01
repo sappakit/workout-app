@@ -1,3 +1,4 @@
+import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { WorkoutWeeklyPlanDayType } from "@/types/workout/response/workout.types";
@@ -43,6 +44,11 @@ export function WeeklyPlanDaySelector({
       keyExtractor={(item) => String(item.dayOfWeek)}
       showsHorizontalScrollIndicator={false}
       contentContainerClassName="gap-2"
+      style={{ marginHorizontal: -CONTENT_PADDING_HORIZONTAL }}
+      contentContainerStyle={{
+        gap: 12,
+        paddingHorizontal: CONTENT_PADDING_HORIZONTAL,
+      }}
       onScrollToIndexFailed={(info) => {
         requestAnimationFrame(() => {
           listRef.current?.scrollToOffset({

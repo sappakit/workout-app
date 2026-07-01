@@ -374,16 +374,15 @@ export default function CreatePlanContent() {
 
   return (
     <PageLayout
-      headerProps={{
-        variant: "title",
-        title: "Create Plan",
-        showBackButton: true,
-        onBackPress: handleCancelCreate,
+      header={{
+        props: {
+          variant: "title",
+          title: "Create Plan",
+          showBackButton: true,
+          onBackPress: handleCancelCreate,
+        },
       }}
-      stickyFooter={{
-        content: footer,
-        options: { addBottomInset: true },
-      }}
+      stickyFooter={footer}
     >
       {/* Plan Name */}
       <View>

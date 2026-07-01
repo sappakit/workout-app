@@ -36,10 +36,12 @@ export default function ProfileContent({ data }: ProfileContentProps) {
 
   return (
     <PageLayout
-      topInset={0}
-      headerProps={{
-        variant: "title",
-        title: "Profile",
+      disableContentPadding={{ top: true }}
+      header={{
+        props: {
+          variant: "title",
+          title: "Profile",
+        },
       }}
     >
       <View className="gap-4">

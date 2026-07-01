@@ -183,27 +183,26 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
 
   return (
     <PageLayout
-      topInset={0}
-      headerProps={{
-        variant: "title",
-        title: "Edit Profile",
-        showBackButton: true,
-        onBackPress: handleCancelEdit,
+      disableContentPadding={{ top: true }}
+      header={{
+        props: {
+          variant: "title",
+          title: "Edit Profile",
+          showBackButton: true,
+          onBackPress: handleCancelEdit,
+        },
       }}
-      stickyFooter={{
-        content: (
-          <AppButton
-            className="flex-1"
-            title="Save Changes"
-            variant="primary"
-            icon={Save}
-            loading={isPending}
-            disabled={isPending}
-            onPress={handleSubmit(onSubmit)}
-          />
-        ),
-        options: { addBottomInset: true },
-      }}
+      stickyFooter={
+        <AppButton
+          className="flex-1"
+          title="Save Changes"
+          variant="primary"
+          icon={Save}
+          loading={isPending}
+          disabled={isPending}
+          onPress={handleSubmit(onSubmit)}
+        />
+      }
     >
       <View className="gap-6">
         <View className="items-center">

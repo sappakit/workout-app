@@ -21,56 +21,50 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
 
-export const CONTENT_PADDING_TOP = 16;
-export const CONTENT_PADDING_BOTTOM = 16;
-export const CONTENT_PADDING_HORIZONTAL = 16;
-
-const STICKY_FOOTER_PADDING_TOP = 16;
-const STICKY_FOOTER_PADDING_BOTTOM = 8;
-
 export type PullToRefreshProps = {
   refreshing: boolean;
   onRefresh: () => void | Promise<void>;
   enabled?: boolean;
 };
 
-type ContentPaddingSide = "top" | "bottom" | "left" | "right";
-
-type DisableContentPadding =
-  | boolean
-  | Partial<Record<ContentPaddingSide, boolean>>;
-
-type PageLayoutHeader = {
-  props: PageHeaderProps;
-  bottom?: ReactNode;
-};
-
 type PageLayoutProps = {
   children: ReactNode;
-  header?: PageLayoutHeader;
+  showHeader?: boolean;
+  headerProps?: PageHeaderProps;
+  headerBottom?: ReactNode;
   scrollable?: boolean;
   className?: string;
+  topInset?: number;
+  bottomInset?: number;
+  backgroundColor?: string;
   containerStyle?: ViewStyle;
-  disableContentPadding?: DisableContentPadding;
-  stickyFooter?: ReactNode;
+  disableContentPadding?: boolean;
+  showsVerticalScrollIndicator?: boolean;
+  stickyFooter?: { content: ReactNode; options?: { addBottomInset: boolean } };
   pullToRefresh?: PullToRefreshProps;
   hasWorkoutTimerSheet?: boolean;
 };
 
 export function PageLayout({
   children,
-  header,
+  showHeader = true,
+  headerProps,
+  headerBottom,
   scrollable = true,
   className,
+  topInset = 16,
+  bottomInset = 16,
+  backgroundColor,
   containerStyle,
   disableContentPadding = false,
+  showsVerticalScrollIndicator = false,
   stickyFooter,
   pullToRefresh,
   hasWorkoutTimerSheet = true,
 }: PageLayoutProps) {
   const { colors } = useAppTheme();
-  const insets = useSafeAreaInsets();
 
+  const insets = useSafeAreaInsets();
   const [footerHeight, setFooterHeight] = useState(0);
 
   const hasActiveWorkoutSession = useWorkoutSessionStore(
@@ -81,45 +75,29 @@ export function PageLayout({
     selectWorkoutTimerSheetCollapsedSnapPoint,
   );
 
-  const shouldReserveWorkoutTimerSpace =
+  const shouldAddWorkoutTimerPadding =
     hasWorkoutTimerSheet && hasActiveWorkoutSession;
 
-  const workoutTimerBottomSpace = shouldReserveWorkoutTimerSpace
+  const extraWorkoutTimerPadding = shouldAddWorkoutTimerPadding
     ? collapsedWorkoutTimerSheetHeight
     : 0;
 
-  const baseBottomSpace = stickyFooter ? footerHeight : CONTENT_PADDING_BOTTOM;
+  const bg = backgroundColor ?? colors.app.background;
 
-  const contentPaddingBottom = baseBottomSpace + workoutTimerBottomSpace;
+  const paddingBottom =
+    (stickyFooter ? footerHeight : bottomInset) + extraWorkoutTimerPadding;
 
-  const contentContainerStyle: ViewStyle = {
-    paddingTop: isContentPaddingDisabled(disableContentPadding, "top")
-      ? 0
-      : CONTENT_PADDING_TOP,
+  const bodyContainerStyle = disableContentPadding
+    ? {
+        paddingBottom,
+      }
+    : {
+        paddingTop: topInset,
+        paddingBottom: paddingBottom,
+        paddingHorizontal: 16,
+      };
 
-    paddingBottom: isContentPaddingDisabled(disableContentPadding, "bottom")
-      ? workoutTimerBottomSpace
-      : contentPaddingBottom,
-
-    paddingLeft: isContentPaddingDisabled(disableContentPadding, "left")
-      ? 0
-      : CONTENT_PADDING_HORIZONTAL,
-
-    paddingRight: isContentPaddingDisabled(disableContentPadding, "right")
-      ? 0
-      : CONTENT_PADDING_HORIZONTAL,
-  };
-
-  const rootStyle: ViewStyle = {
-    backgroundColor: colors.app.background,
-    paddingTop: insets.top,
-  };
-
-  const stickyFooterStyle: ViewStyle = {
-    paddingTop: STICKY_FOOTER_PADDING_TOP,
-    paddingBottom: insets.bottom + STICKY_FOOTER_PADDING_BOTTOM,
-  };
-
+  // Pull to refresh
   const shouldEnablePullToRefresh =
     scrollable &&
     pullToRefresh?.enabled !== false &&
@@ -133,7 +111,13 @@ export function PageLayout({
   ) : undefined;
 
   return (
-    <View className="flex-1" style={rootStyle}>
+    <View
+      className="flex-1"
+      style={{
+        // backgroundColor: bg,
+        paddingTop: insets.top,
+      }}
+    >
       <LinearGradient
         colors={[colors.app.background, colors.app.backgroundDark]}
         start={{ x: 0, y: 0 }}
@@ -141,13 +125,15 @@ export function PageLayout({
         style={StyleSheet.absoluteFillObject}
       />
 
-      {header && <PageHeader {...header.props} headerBottom={header.bottom} />}
+      {showHeader && headerProps && (
+        <PageHeader {...headerProps} headerBottom={headerBottom} />
+      )}
 
       {scrollable ? (
         <ScrollView
           className={className}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[contentContainerStyle, containerStyle]}
+          showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+          contentContainerStyle={[bodyContainerStyle, containerStyle]}
           refreshControl={refreshControl}
         >
           {children}
@@ -155,7 +141,7 @@ export function PageLayout({
       ) : (
         <View
           className={twMerge(clsx("flex-1", className))}
-          style={[contentContainerStyle, containerStyle]}
+          style={[bodyContainerStyle, containerStyle]}
         >
           {children}
         </View>
@@ -164,22 +150,16 @@ export function PageLayout({
       {stickyFooter && (
         <View
           onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-          className="absolute bottom-0 left-0 right-0 flex-row gap-2 px-4"
-          style={stickyFooterStyle}
+          className="absolute bottom-0 left-0 right-0 flex-row gap-2 p-4"
+          style={
+            stickyFooter.options?.addBottomInset
+              ? { paddingBottom: insets.bottom }
+              : undefined
+          }
         >
-          {stickyFooter}
+          {stickyFooter.content}
         </View>
       )}
     </View>
   );
-}
-
-function isContentPaddingDisabled(
-  disabledPadding: DisableContentPadding | undefined,
-  side: ContentPaddingSide,
-) {
-  if (disabledPadding === true) return true;
-  if (!disabledPadding) return false;
-
-  return disabledPadding[side] === true;
 }

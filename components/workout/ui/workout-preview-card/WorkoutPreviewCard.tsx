@@ -1,15 +1,16 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
+import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { LinearGradient } from "expo-linear-gradient";
 import {
+  CircleAlert,
   Dumbbell,
   Heart,
   LucideIcon,
   RefreshCw,
-  WifiOff,
 } from "lucide-react-native";
 import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { WorkoutCardItem, WorkoutMetaPill } from "../workout-card/WorkoutCard";
@@ -41,7 +42,10 @@ export function WorkoutPreviewSection({
   const isEmpty = items.length === 0;
 
   return (
-    <View className="gap-3">
+    <View
+      className="gap-3"
+      style={{ marginHorizontal: -CONTENT_PADDING_HORIZONTAL }}
+    >
       <MuscleCategoryFilter
         selectedMuscleIds={selectedMuscleIds}
         onChange={onChangeMuscleIds}
@@ -130,7 +134,7 @@ function WorkoutPreviewEmpty() {
 function WorkoutPreviewError({ onRetry }: { onRetry?: () => void }) {
   return (
     <WorkoutPreviewFeedback
-      icon={WifiOff}
+      icon={CircleAlert}
       title="Failed to load workouts"
       subtitle="Something went wrong. Please try again."
       action={
@@ -155,7 +159,10 @@ function WorkoutPreviewCardList({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerClassName="gap-3"
+      contentContainerStyle={{
+        gap: 12,
+        paddingHorizontal: CONTENT_PADDING_HORIZONTAL,
+      }}
     >
       {items.map((workout) => (
         <WorkoutPreviewCard key={workout.id} item={workout} />

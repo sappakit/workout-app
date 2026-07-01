@@ -6,10 +6,12 @@ import { ScrollView, View } from "react-native";
 export function WeeklyPlanSkeleton() {
   return (
     <PageLayout
-      headerProps={{
-        variant: "title",
-        title: "Weekly Plan",
-        showBackButton: true,
+      header={{
+        props: {
+          variant: "title",
+          title: "Weekly Plan",
+          showBackButton: true,
+        },
       }}
     >
       <View className="gap-4">

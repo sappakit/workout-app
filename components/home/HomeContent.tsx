@@ -43,7 +43,12 @@ export default function HomeContent({
   };
 
   return (
-    <PageLayout headerProps={{ variant: "home" }} pullToRefresh={pullToRefresh}>
+    <PageLayout
+      header={{
+        props: { variant: "home" },
+      }}
+      pullToRefresh={pullToRefresh}
+    >
       <View className="gap-4">
         <TodayWorkoutCard todayOverview={todayOverview} />
 

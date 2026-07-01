@@ -1,10 +1,11 @@
 import { useRouter } from "expo-router";
-import { LucideIcon, RefreshCw, WifiOff } from "lucide-react-native";
+import { CircleAlert, LucideIcon, RefreshCw } from "lucide-react-native";
 import { PageState } from "./base/PageState";
 
 type ErrorStateProps = {
   title?: string;
   message?: string;
+  icon?: LucideIcon;
   actionLabel?: string;
   actionIcon?: LucideIcon;
   onRetry?: () => void;
@@ -14,6 +15,7 @@ type ErrorStateProps = {
 export function ErrorState({
   title = "Something went wrong",
   message = "We couldn't load this page. Please try again.",
+  icon = CircleAlert,
   actionLabel = "Try Again",
   actionIcon = RefreshCw,
   onRetry,
@@ -25,7 +27,7 @@ export function ErrorState({
     <PageState
       title={title}
       message={message}
-      icon={WifiOff}
+      icon={icon}
       actionLabel={actionLabel}
       actionIcon={actionIcon}
       onAction={onRetry}

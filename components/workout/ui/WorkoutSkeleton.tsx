@@ -6,7 +6,11 @@ import { View } from "react-native";
 
 export function WorkoutSkeleton() {
   return (
-    <PageLayout headerProps={{ variant: "title", title: "Workout" }}>
+    <PageLayout
+      header={{
+        props: { variant: "title", title: "Workout" },
+      }}
+    >
       <View className="gap-4">
         <TodayPlanSkeleton />
 

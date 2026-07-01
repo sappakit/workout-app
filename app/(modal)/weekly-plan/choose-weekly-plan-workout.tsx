@@ -150,6 +150,7 @@ export default function ChooseWeeklyPlanWorkoutPage() {
 
           return (
             <WorkoutCard
+              id={cardItem.id}
               title={cardItem.title}
               subtitle={cardItem.subtitle}
               imageUrl={cardItem.imageUrl}

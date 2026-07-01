@@ -151,7 +151,9 @@ export default function WorkoutContent({
 
   return (
     <PageLayout
-      headerProps={{ variant: "title", title: "Workout" }}
+      header={{
+        props: { variant: "title", title: "Workout" },
+      }}
       pullToRefresh={pullToRefresh}
     >
       <View className="gap-4">

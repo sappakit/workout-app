@@ -18,16 +18,17 @@ export default function WorkoutDetailContent({
 
   return (
     <PageLayout
-      disableContentPadding
-      headerProps={{
-        variant: "title",
-        title: `${data.name}`,
-        showBackButton: true,
+      header={{
+        props: {
+          variant: "title",
+          title: `${data.name}`,
+          showBackButton: true,
+        },
       }}
     >
       <DetailHeroImage imageUrl={data.imageUrl} />
 
-      <View className="gap-4 p-4">
+      <View className="gap-4">
         <View className="justify-center">
           <ThemedText type="default" variant="primary">
             {data.workoutFocusType?.name ?? "General Workout"}

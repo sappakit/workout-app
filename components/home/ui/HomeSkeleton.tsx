@@ -6,7 +6,12 @@ import { View } from "react-native";
 
 export function HomeSkeleton() {
   return (
-    <PageLayout headerProps={{ variant: "home" }} scrollable={false}>
+    <PageLayout
+      header={{
+        props: { variant: "home" },
+      }}
+      scrollable={false}
+    >
       <View className="gap-4">
         <HeroCardSkeleton />
 

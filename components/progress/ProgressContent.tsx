@@ -45,13 +45,15 @@ export default function ProgressContent({
     <PageLayout
       scrollable={false}
       disableContentPadding
-      headerProps={{
-        variant: "title",
-        title: "Progress",
+      header={{
+        props: {
+          variant: "title",
+          title: "Progress",
+        },
+        bottom: (
+          <ProgressTabs activeTab={activeTab} onChangeTab={onChangeTab} />
+        ),
       }}
-      headerBottom={
-        <ProgressTabs activeTab={activeTab} onChangeTab={onChangeTab} />
-      }
     >
       <ProgressPager
         activeTab={activeTab}

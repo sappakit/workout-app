@@ -57,7 +57,7 @@ export default function SignInScreen() {
   };
 
   return (
-    <PageLayout showHeader={false}>
+    <PageLayout>
       {/* Logo here */}
       <AppLogo size={200} />
 

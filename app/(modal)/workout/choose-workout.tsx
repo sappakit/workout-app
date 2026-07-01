@@ -189,6 +189,7 @@ export default function ChooseWorkoutPage() {
 
           return (
             <WorkoutCard
+              id={cardItem.id}
               title={cardItem.title}
               subtitle={cardItem.subtitle}
               imageUrl={cardItem.imageUrl}

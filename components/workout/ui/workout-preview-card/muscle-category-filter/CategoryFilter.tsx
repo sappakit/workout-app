@@ -1,4 +1,5 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
+import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
 import { ScrollView } from "react-native";
 
 export type CategoryFilterOption<TValue extends string | number = number> = {
@@ -33,7 +34,10 @@ export function CategoryFilter<TValue extends string | number = number>({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 8 }}
+      contentContainerStyle={{
+        gap: 8,
+        paddingHorizontal: CONTENT_PADDING_HORIZONTAL,
+      }}
     >
       <AppButton
         className="h-8 px-6"

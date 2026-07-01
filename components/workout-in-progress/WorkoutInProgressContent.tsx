@@ -304,16 +304,16 @@ export function WorkoutInProgressContent() {
 
   return (
     <PageLayout
-      disableContentPadding
-      headerProps={{
-        variant: "title",
-        title: "Workout",
+      header={{
+        props: {
+          variant: "title",
+          title: "Workout",
+        },
       }}
     >
       <DetailHeroImage imageUrl={storedSession.workout?.imageUrl} />
 
       <View
-        className="px-4"
         style={{
           marginTop: -76, // cardHeight / 2
         }}
@@ -353,7 +353,7 @@ export function WorkoutInProgressContent() {
         </View>
       </View>
 
-      <View className="flex-1 gap-3 px-4 pt-3">
+      <View className="flex-1 gap-3 pt-3">
         {exerciseItems.length === 0 ? (
           <View
             className="items-center rounded-2xl p-6"

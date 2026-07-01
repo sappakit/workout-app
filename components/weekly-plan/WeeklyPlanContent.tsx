@@ -202,26 +202,25 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
 
   return (
     <PageLayout
-      headerProps={{
-        variant: "title",
-        title: "Weekly Plan",
-        showBackButton: true,
-        onBackPress: handleCancel,
+      header={{
+        props: {
+          variant: "title",
+          title: "Weekly Plan",
+          showBackButton: true,
+          onBackPress: handleCancel,
+        },
       }}
-      stickyFooter={{
-        content: (
-          <AppButton
-            title="Save weekly plan"
-            variant="primary"
-            icon={Save}
-            className="flex-1"
-            loading={isPending}
-            disabled={isPending}
-            onPress={handleSave}
-          />
-        ),
-        options: { addBottomInset: true },
-      }}
+      stickyFooter={
+        <AppButton
+          title="Save weekly plan"
+          variant="primary"
+          icon={Save}
+          className="flex-1"
+          loading={isPending}
+          disabled={isPending}
+          onPress={handleSave}
+        />
+      }
     >
       <View className="gap-4">
         <WeeklyPlanSummary

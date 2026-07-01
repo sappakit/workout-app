@@ -5,6 +5,7 @@ import { PageState } from "./base/PageState";
 type EmptyStateProps = {
   title?: string;
   message?: string;
+  icon?: LucideIcon;
   actionLabel?: string;
   actionIcon?: LucideIcon;
   onAction?: () => void;
@@ -14,6 +15,7 @@ type EmptyStateProps = {
 export function EmptyState({
   title = "No data found",
   message = "There's nothing to show here yet.",
+  icon = SearchX,
   actionLabel,
   actionIcon = Plus,
   onAction,
@@ -25,7 +27,7 @@ export function EmptyState({
     <PageState
       title={title}
       message={message}
-      icon={SearchX}
+      icon={icon}
       actionLabel={actionLabel}
       actionIcon={actionIcon}
       onAction={onAction}
