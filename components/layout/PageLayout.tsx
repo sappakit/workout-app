@@ -36,10 +36,13 @@ export type PageHeaderScrollEffect = {
 };
 
 type ContentPaddingSide = "top" | "bottom" | "left" | "right";
+type InsetSide = "top" | "bottom";
 
 type DisableContentPadding =
   | boolean
   | Partial<Record<ContentPaddingSide, boolean>>;
+
+type IncludeInsets = boolean | Partial<Record<InsetSide, boolean>>;
 
 type PageLayoutHeader = {
   props: PageHeaderProps;
@@ -57,7 +60,7 @@ type PageLayoutProps = {
   stickyFooter?: ReactNode;
   pullToRefresh?: PullToRefreshProps;
   hasWorkoutTimerSheet?: boolean;
-  includeBottomInset?: boolean;
+  includeInsets?: IncludeInsets;
 };
 
 export function PageLayout({
@@ -70,7 +73,7 @@ export function PageLayout({
   stickyFooter,
   pullToRefresh,
   hasWorkoutTimerSheet = true,
-  includeBottomInset = false,
+  includeInsets = false,
 }: PageLayoutProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -94,6 +97,13 @@ export function PageLayout({
     ? collapsedWorkoutTimerSheetHeight
     : 0;
 
+  const contentTopBasePadding = isContentPaddingDisabled(
+    disableContentPadding,
+    "top",
+  )
+    ? 0
+    : CONTENT_PADDING_TOP;
+
   const contentBottomBasePadding = isContentPaddingDisabled(
     disableContentPadding,
     "bottom",
@@ -103,8 +113,16 @@ export function PageLayout({
 
   const stickyFooterBottomSpace = stickyFooter ? footerHeight : 0;
 
+  const safeAreaTopSpace = shouldIncludeInset(includeInsets, "top")
+    ? insets.top
+    : 0;
+
   const safeAreaBottomSpace =
-    includeBottomInset && !stickyFooter ? insets.bottom : 0;
+    !stickyFooter && shouldIncludeInset(includeInsets, "bottom")
+      ? insets.bottom
+      : 0;
+
+  const contentPaddingTop = contentTopBasePadding + safeAreaTopSpace;
 
   const contentPaddingBottom =
     contentBottomBasePadding +
@@ -113,10 +131,7 @@ export function PageLayout({
     workoutTimerBottomSpace;
 
   const contentContainerStyle: ViewStyle = {
-    paddingTop: isContentPaddingDisabled(disableContentPadding, "top")
-      ? 0
-      : CONTENT_PADDING_TOP,
-
+    paddingTop: contentPaddingTop,
     paddingBottom: contentPaddingBottom,
 
     paddingLeft: isContentPaddingDisabled(disableContentPadding, "left")
@@ -161,13 +176,6 @@ export function PageLayout({
 
   return (
     <View className="flex-1" style={rootStyle}>
-      {/* <LinearGradient
-        colors={[colors.app.background, colors.app.backgroundDark]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      /> */}
-
       {header && (
         <PageHeader
           {...header.props}
@@ -219,4 +227,14 @@ function isContentPaddingDisabled(
   if (!disabledPadding) return false;
 
   return disabledPadding[side] === true;
+}
+
+function shouldIncludeInset(
+  includeInsets: IncludeInsets | undefined,
+  side: InsetSide,
+) {
+  if (includeInsets === true) return true;
+  if (!includeInsets) return false;
+
+  return includeInsets[side] === true;
 }

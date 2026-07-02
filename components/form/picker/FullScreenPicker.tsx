@@ -124,7 +124,11 @@ export default function FullScreenPicker({
   }
 
   return (
-    <PageLayout scrollable={false} stickyFooter={footer}>
+    <PageLayout
+      includeInsets={{ top: true }}
+      scrollable={false}
+      stickyFooter={footer}
+    >
       <View className="gap-3">
         <View>
           <ThemedText type="title" variant="accent">

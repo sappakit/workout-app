@@ -1,5 +1,21 @@
-import axios from "axios";
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { AuthStorage } from "./authStorage";
+
+type ApiErrorResponse = {
+  message?: string | string[];
+  error?: string;
+  statusCode?: number;
+};
+
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
+
+type AuthExpiredCallback = () => void | Promise<void>;
 
 export const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
@@ -9,26 +25,25 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor
-api.interceptors.request.use(async (config) => {
-  const token = await AuthStorage.getAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// Response interceptor auth callback
+let onAuthExpired: AuthExpiredCallback | null = null;
 
-// Response interceptor
-let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
-
-function subscribeTokenRefresh(cb: (token: string) => void) {
-  refreshSubscribers.push(cb);
+export function setOnAuthExpired(callback: AuthExpiredCallback | null) {
+  onAuthExpired = callback;
 }
 
-function notifySubscribers(token: string) {
-  refreshSubscribers.forEach((cb) => cb(token));
-  refreshSubscribers = [];
+// Shared refresh promise so multiple 401 requests wait for the same refresh request
+let refreshPromise: Promise<string> | null = null;
+
+function setAuthorizationHeader(config: RetryableRequestConfig, token: string) {
+  if (!config.headers) {
+    config.headers = new AxiosHeaders();
+  }
+
+  config.headers.Authorization = `Bearer ${token}`;
 }
 
+// Refresh access token
 async function refreshAccessToken() {
   const refreshToken = await AuthStorage.getRefreshToken();
   if (!refreshToken) throw new Error("No refresh token");
@@ -36,6 +51,7 @@ async function refreshAccessToken() {
   const { data } = await axios.post(
     `${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`,
     { refreshToken },
+    { timeout: 10000 },
   );
 
   const { accessToken, refreshToken: newRefreshToken } = data;
@@ -44,63 +60,82 @@ async function refreshAccessToken() {
   return accessToken;
 }
 
+const AUTH_REFRESH_SKIP_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/logout",
+];
+
+function shouldSkipAuthRefresh(url?: string) {
+  return AUTH_REFRESH_SKIP_PATHS.some((path) => url?.includes(path));
+}
+
+// Request interceptor
+api.interceptors.request.use(async (config) => {
+  const token = await AuthStorage.getAccessToken();
+
+  if (token) {
+    setAuthorizationHeader(config as RetryableRequestConfig, token);
+  }
+
+  return config;
+});
+
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    const status = error?.response?.status;
+  async (error: AxiosError<ApiErrorResponse>) => {
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
+    const status = error.response?.status;
+    const url = originalRequest?.url;
 
     // Debug logging
     if (__DEV__) {
       console.log("API ERROR:", {
-        url: originalRequest?.url,
+        url,
         method: originalRequest?.method,
         status,
-        data: error?.response?.data,
+        data: error.response?.data,
       });
     }
 
     // Handle 401 (Refresh)
     if (
       status === 401 &&
+      originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes("/auth/login") // skip in login process
+      !shouldSkipAuthRefresh(url)
     ) {
       originalRequest._retry = true;
 
-      // If refresh already running -> wait
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(api(originalRequest));
-          });
-        });
-      }
-
-      isRefreshing = true;
-
       try {
-        const newAccessToken = await refreshAccessToken();
+        if (!refreshPromise) {
+          refreshPromise = refreshAccessToken().finally(() => {
+            refreshPromise = null;
+          });
+        }
 
-        notifySubscribers(newAccessToken);
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        const newAccessToken = await refreshPromise;
+
+        setAuthorizationHeader(originalRequest, newAccessToken);
 
         return api(originalRequest);
       } catch (refreshError) {
         await AuthStorage.clearTokens();
 
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
+        // Notify AuthProvider so in-memory auth state does not stay logged in
+        await onAuthExpired?.();
+
+        throw refreshError;
       }
     }
 
     // Other errors
     const message =
-      error?.response?.data?.message ??
-      error?.response?.data?.error ??
-      error?.message ??
+      error.response?.data?.message ??
+      error.response?.data?.error ??
+      error.message ??
       "Request failed";
 
     return Promise.reject(

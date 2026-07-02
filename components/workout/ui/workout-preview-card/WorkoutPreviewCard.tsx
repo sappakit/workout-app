@@ -55,6 +55,7 @@ export function WorkoutPreviewSection({
         <WorkoutPreviewSectionSkeleton
           showHeader={false}
           showCategories={false}
+          withHorizontalPadding
         />
       ) : isError ? (
         <WorkoutPreviewError onRetry={onRetry} />

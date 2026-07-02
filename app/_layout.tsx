@@ -1,4 +1,3 @@
-import { AuthGate } from "@/components/guards/AuthGate";
 import { AppDarkTheme, AppLightTheme } from "@/constants/theme";
 import { AuthProvider } from "@/context/AuthContext";
 import { createToastConfig } from "@/lib/toast/config";
@@ -34,24 +33,25 @@ export default function RootLayout() {
           <BottomSheetModalProvider>
             <MenuProvider>
               <AuthProvider>
-                <AuthGate>
-                  <>
-                    <Stack
-                      screenOptions={{
-                        headerShown: false,
-                        animation: "slide_from_right",
-                      }}
-                    >
-                      <Stack.Screen name="(tabs)" />
-                    </Stack>
+                <>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                    }}
+                  >
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="(pages)" />
+                    <Stack.Screen name="(modal)" />
+                  </Stack>
 
-                    <StatusBar
-                      style={colorScheme === "dark" ? "light" : "dark"}
-                    />
+                  <StatusBar
+                    style={colorScheme === "dark" ? "light" : "dark"}
+                  />
 
-                    <Toast config={toastConfig} />
-                  </>
-                </AuthGate>
+                  <Toast config={toastConfig} />
+                </>
               </AuthProvider>
             </MenuProvider>
           </BottomSheetModalProvider>

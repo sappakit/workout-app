@@ -1,4 +1,5 @@
 import { SectionHeaderSkeleton } from "@/components/home/ui/HomeSkeleton";
+import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
 import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { ScrollView, View } from "react-native";
 import { CategoryFilterSkeleton } from "./muscle-category-filter/CategoryFilterSkeleton";
@@ -8,6 +9,7 @@ type WorkoutPreviewSectionSkeletonProps = {
   showHeader?: boolean;
   showCategories?: boolean;
   cardCount?: number;
+  withHorizontalPadding?: boolean;
 };
 
 export function WorkoutPreviewSectionSkeleton({
@@ -15,6 +17,7 @@ export function WorkoutPreviewSectionSkeleton({
   showHeader = true,
   showCategories = true,
   cardCount = 4,
+  withHorizontalPadding = false,
 }: WorkoutPreviewSectionSkeletonProps) {
   return (
     <View className="gap-3">
@@ -28,7 +31,12 @@ export function WorkoutPreviewSectionSkeleton({
         horizontal
         scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
-        contentContainerClassName="gap-3"
+        contentContainerStyle={{
+          gap: 12,
+          paddingHorizontal: withHorizontalPadding
+            ? CONTENT_PADDING_HORIZONTAL
+            : undefined,
+        }}
       >
         {Array.from({ length: cardCount }).map((_, index) => (
           <WorkoutPreviewCardSkeleton key={index} />
@@ -39,5 +47,5 @@ export function WorkoutPreviewSectionSkeleton({
 }
 
 function WorkoutPreviewCardSkeleton() {
-  return <SkeletonPlaceholder className="aspect-[1.15] w-56 rounded-2xl" />;
+  return <SkeletonPlaceholder className="aspect-[1.17] w-56 rounded-2xl" />;
 }

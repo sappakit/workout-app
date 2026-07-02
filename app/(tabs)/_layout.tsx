@@ -1,8 +1,10 @@
 import WorkoutTimerBottomSheet from "@/components/bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import { HapticTab } from "@/components/haptic-tab";
+import { AppLoadingScreen } from "@/components/state/AppLoadingScreen";
 import { WorkoutSessionSync } from "@/components/workout-in-progress/WorkoutSessionSync";
+import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import {
   ChartNoAxesColumnIncreasing,
   Dumbbell,
@@ -15,6 +17,7 @@ const TAB_BAR_BASE_HEIGHT = 64;
 const WORKOUT_TIMER_SHEET_TAB_OVERLAP = 1;
 
 export default function TabLayout() {
+  const { user, loading } = useAuth();
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
 
@@ -23,6 +26,13 @@ export default function TabLayout() {
     0,
     tabBarHeight - WORKOUT_TIMER_SHEET_TAB_OVERLAP,
   );
+
+  // Block tabs before auth is restored
+  if (loading) return <AppLoadingScreen />;
+
+  if (!user) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
 
   return (
     <>

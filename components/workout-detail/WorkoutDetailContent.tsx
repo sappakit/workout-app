@@ -19,7 +19,7 @@ export default function WorkoutDetailContent({
 
   return (
     <PageLayout
-      includeBottomInset
+      includeInsets={{ bottom: true }}
       header={{
         props: {
           variant: "title",

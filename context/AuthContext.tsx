@@ -1,4 +1,4 @@
-import { api, AuthStorage } from "@/lib/api";
+import { api, AuthStorage, setOnAuthExpired } from "@/lib/api";
 import { SignInForm } from "@/schemas/auth.schema";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -37,6 +38,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const router = useRouter();
 
+  const clearLocalAuthState = useCallback(async () => {
+    await AuthStorage.clearTokens();
+
+    // Clear workout runtime state
+    useWorkoutSessionStore.getState().clearSession();
+    useWorkoutRestTimerStore.getState().stopRestTimer();
+
+    // Clear persisted Zustand storage
+    useWorkoutSessionStore.persist.clearStorage();
+    useWorkoutRestTimerStore.persist.clearStorage();
+
+    setUser(null);
+  }, []);
+
+  // Let the API layer clear AuthContext when refresh token expires
+  useEffect(() => {
+    setOnAuthExpired(async () => {
+      await clearLocalAuthState();
+      router.replace("/(auth)/sign-in");
+    });
+
+    return () => {
+      setOnAuthExpired(null);
+    };
+  }, [clearLocalAuthState, router]);
+
   // Restore session on app start
   useEffect(() => {
     (async () => {
@@ -53,13 +80,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await api.get<UserAuth>("/auth/me");
         setUser(data);
       } catch {
-        setUser(null);
-        await AuthStorage.clearTokens();
+        await clearLocalAuthState();
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [clearLocalAuthState]);
 
   // Sign up
   async function signUp(values: SignUpRequest) {
@@ -91,17 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    await AuthStorage.clearTokens();
+    await clearLocalAuthState();
 
-    // Clear workout runtime state
-    useWorkoutSessionStore.getState().clearSession();
-    useWorkoutRestTimerStore.getState().stopRestTimer();
-
-    // Clear persisted Zustand storage
-    useWorkoutSessionStore.persist.clearStorage();
-    useWorkoutRestTimerStore.persist.clearStorage();
-
-    setUser(null);
     router.replace("/(auth)/sign-in");
   }
 
