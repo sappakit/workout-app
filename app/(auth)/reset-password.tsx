@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { LogIn, MailPlus } from "lucide-react-native";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -29,9 +30,16 @@ export default function ResetPasswordScreen() {
       <ErrorState
         title="Reset link is missing"
         message="This password reset link doesn't include a valid token. Please request a new reset link."
-        actionLabel="Request New Link"
-        onRetry={() => router.replace("/(auth)/forgot-password")}
-        showHomeButton={false}
+        primaryAction={{
+          label: "Resend Email",
+          icon: MailPlus,
+          onPress: () => router.replace("/(auth)/forgot-password"),
+        }}
+        secondaryAction={{
+          label: "Sign In",
+          icon: LogIn,
+          onPress: () => router.replace("/(auth)/sign-in"),
+        }}
       />
     );
   }
@@ -48,9 +56,16 @@ export default function ResetPasswordScreen() {
         <ErrorState
           title="Reset link expired"
           message="This password reset link is invalid or has expired. Please request a new reset link."
-          actionLabel="Request New Link"
-          onRetry={() => router.replace("/(auth)/forgot-password")}
-          showHomeButton={false}
+          primaryAction={{
+            label: "Resend Email",
+            icon: MailPlus,
+            onPress: () => router.replace("/(auth)/forgot-password"),
+          }}
+          secondaryAction={{
+            label: "Sign In",
+            icon: LogIn,
+            onPress: () => router.replace("/(auth)/sign-in"),
+          }}
         />
       );
     }
@@ -59,8 +74,14 @@ export default function ResetPasswordScreen() {
       <ErrorState
         title="Unable to verify reset link"
         message="We're having trouble verifying your reset link right now. Please try again."
-        onRetry={refetch}
-        showHomeButton={false}
+        primaryAction={{
+          onPress: refetch,
+        }}
+        secondaryAction={{
+          label: "Sign In",
+          icon: LogIn,
+          onPress: () => router.replace("/(auth)/sign-in"),
+        }}
       />
     );
   }

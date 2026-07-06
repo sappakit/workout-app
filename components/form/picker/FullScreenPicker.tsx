@@ -109,8 +109,10 @@ export default function FullScreenPicker({
       <ErrorState
         title={errorTitle}
         message={errorText}
-        onRetry={onRetry}
-        showHomeButton={false}
+        primaryAction={{
+          onPress: onRetry,
+        }}
+        secondaryAction={{ hidden: true }}
       />
     );
   } else if (isEmpty) {
@@ -118,7 +120,7 @@ export default function FullScreenPicker({
       <EmptyState
         title={emptyTitle}
         message={emptyText}
-        showHomeButton={false}
+        secondaryAction={{ hidden: true }}
       />
     );
   }

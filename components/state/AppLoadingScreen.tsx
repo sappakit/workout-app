@@ -12,13 +12,9 @@ export function AppLoadingScreen() {
         backgroundColor: colors.app.background,
       }}
     >
-      <AppLogo size={200} />
+      <AppLogo />
 
-      <ActivityIndicator
-        size="large"
-        color={colors.app.brand}
-        className="-mt-8"
-      />
+      <ActivityIndicator size="large" color={colors.app.brand} />
     </View>
   );
 }

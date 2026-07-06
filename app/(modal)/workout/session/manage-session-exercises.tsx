@@ -113,6 +113,7 @@ export default function ManageSessionExercisesPage() {
           title="No active workout session found"
           message="We couldn't find the workout session you were editing."
           icon={FileQuestion}
+          primaryAction={{ hidden: true }}
         />
       </PageLayout>
     );

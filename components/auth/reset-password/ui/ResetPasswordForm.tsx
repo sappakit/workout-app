@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { KeyRound } from "lucide-react-native";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import { View } from "react-native";
-import { AuthHeader } from "../../forgot-password/ui/AuthHeader";
+import { AuthHeader } from "../../ui/AuthHeader";
 
 interface ResetPasswordFormProps {
   control: Control<ResetPasswordFormValues>;

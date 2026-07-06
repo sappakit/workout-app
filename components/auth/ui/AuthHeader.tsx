@@ -10,9 +10,11 @@ interface AuthHeaderProps {
 export function AuthHeader({ title, subtitle }: AuthHeaderProps) {
   return (
     <View>
-      <AppLogo size={200} />
+      <View className="py-2">
+        <AppLogo />
+      </View>
 
-      <View className="-mt-6 items-center gap-2">
+      <View className="items-center gap-2">
         <ThemedText type="title" variant="accent">
           {title}
         </ThemedText>

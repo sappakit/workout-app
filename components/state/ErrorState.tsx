@@ -1,38 +1,53 @@
 import { useRouter } from "expo-router";
-import { CircleAlert, LucideIcon, RefreshCw } from "lucide-react-native";
-import { PageState } from "./base/PageState";
+import { CircleAlert, House, LucideIcon, RefreshCw } from "lucide-react-native";
+import {
+  PageState,
+  PageStateAction,
+  PageStateActionOverride,
+} from "./base/PageState";
 
 type ErrorStateProps = {
   title?: string;
   message?: string;
   icon?: LucideIcon;
-  actionLabel?: string;
-  actionIcon?: LucideIcon;
-  onRetry?: () => void;
-  showHomeButton?: boolean;
+  primaryAction?: PageStateActionOverride;
+  secondaryAction?: PageStateActionOverride;
 };
 
 export function ErrorState({
   title = "Something went wrong",
   message = "We couldn't load this page. Please try again.",
   icon = CircleAlert,
-  actionLabel = "Try Again",
-  actionIcon = RefreshCw,
-  onRetry,
-  showHomeButton = true,
+  primaryAction,
+  secondaryAction,
 }: ErrorStateProps) {
   const router = useRouter();
+
+  const defaultPrimaryAction: PageStateAction = {
+    label: "Try Again",
+    icon: RefreshCw,
+    onPress: () => {},
+  };
+
+  const defaultSecondaryAction: PageStateAction = {
+    label: "Home",
+    icon: House,
+    onPress: () => router.replace("/(tabs)"),
+  };
 
   return (
     <PageState
       title={title}
       message={message}
       icon={icon}
-      actionLabel={actionLabel}
-      actionIcon={actionIcon}
-      onAction={onRetry}
-      showHomeButton={showHomeButton}
-      onPressHome={() => router.replace("/(tabs)")}
+      primaryAction={{
+        ...defaultPrimaryAction,
+        ...primaryAction,
+      }}
+      secondaryAction={{
+        ...defaultSecondaryAction,
+        ...secondaryAction,
+      }}
     />
   );
 }

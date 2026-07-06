@@ -15,7 +15,9 @@ import { ForgotPasswordSuccess } from "./ui/ForgotPasswordSuccess";
 
 export default function ForgotPasswordContent() {
   const toast = useAppToast();
+
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
 
   const {
     control,
@@ -33,7 +35,8 @@ export default function ForgotPasswordContent() {
     mutationFn: async (values: ForgotPasswordFormValues) => {
       return api.post(authApi.forgotPassword(), values);
     },
-    onSuccess: () => {
+    onSuccess: (_, values) => {
+      setSubmittedEmail(values.email);
       setIsEmailSent(true);
     },
     onError: () => {
@@ -44,10 +47,20 @@ export default function ForgotPasswordContent() {
     },
   });
 
+  const handleResendEmail = () => {
+    if (!submittedEmail) return;
+
+    mutate({ email: submittedEmail });
+  };
+
   return (
     <PageLayout>
       {isEmailSent ? (
-        <ForgotPasswordSuccess />
+        <ForgotPasswordSuccess
+          email={submittedEmail}
+          loading={isPending}
+          onResend={handleResendEmail}
+        />
       ) : (
         <ForgotPasswordForm
           control={control}

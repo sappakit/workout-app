@@ -17,7 +17,14 @@ export default function ProfileScreen() {
 
   if (isLoading) return <ProfileSkeleton />;
 
-  if (isError) return <ErrorState onRetry={refetch} />;
+  if (isError)
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: refetch,
+        }}
+      />
+    );
 
   if (!data) return <EmptyState />;
 

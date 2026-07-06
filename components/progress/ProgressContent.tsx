@@ -1,8 +1,8 @@
 import { PageLayout } from "@/components/layout/PageLayout";
-import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
 import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
 import { ScrollView, View } from "react-native";
+import { EmptyState } from "../state/EmptyState";
 import { ProgressTab, ProgressTabs } from "./ui/elements/ProgressTabs";
 import { ProgressHistorySection } from "./ui/sections/progress-history-section/ProgressHistorySection";
 import { ProgressHistorySkeleton } from "./ui/sections/progress-history-section/ProgressHistorySkeleton";
@@ -80,7 +80,13 @@ function ProgressOverviewContent({ state }: { state: ProgressOverviewState }) {
   if (state.isLoading) return <ProgressOverviewSkeleton />;
 
   if (state.isError) {
-    return <ErrorState onRetry={state.onRetry} />;
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: state.onRetry,
+        }}
+      />
+    );
   }
 
   if (!state.data) {
@@ -99,7 +105,13 @@ function ProgressHistoryContent({ state }: { state: ProgressHistoryState }) {
   if (state.isLoading) return <ProgressHistorySkeleton />;
 
   if (state.isError) {
-    return <ErrorState onRetry={state.onRetry} />;
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: state.onRetry,
+        }}
+      />
+    );
   }
 
   if (state.data.length === 0) {

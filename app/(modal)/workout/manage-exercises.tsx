@@ -100,6 +100,7 @@ export default function ManageExercisesPage() {
           title="No plan draft found"
           message="We couldn't find the workout plan you were editing."
           icon={FileQuestion}
+          primaryAction={{ hidden: true }}
         />
       </PageLayout>
     );

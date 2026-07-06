@@ -89,7 +89,14 @@ export default function WorkoutScreen() {
 
   if (isCurrentWorkoutLoading) return <WorkoutSkeleton />;
 
-  if (isCurrentWorkoutError) return <ErrorState onRetry={handleRetry} />;
+  if (isCurrentWorkoutError)
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: handleRetry,
+        }}
+      />
+    );
 
   if (!currentWorkoutData) return <EmptyState />;
 

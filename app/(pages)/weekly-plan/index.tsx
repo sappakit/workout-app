@@ -15,7 +15,14 @@ export default function WeeklyPlanScreen() {
 
   if (isLoading) return <WeeklyPlanSkeleton />;
 
-  if (isError) return <ErrorState onRetry={refetch} />;
+  if (isError)
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: refetch,
+        }}
+      />
+    );
 
   if (!data) return <EmptyState />;
 

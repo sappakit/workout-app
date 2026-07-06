@@ -128,7 +128,14 @@ export default function HomeScreen() {
 
   if (isPageLoading) return <HomeSkeleton />;
 
-  if (isPageError) return <ErrorState onRetry={handleRetry} />;
+  if (isPageError)
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: handleRetry,
+        }}
+      />
+    );
 
   if (!workoutStats) return <EmptyState />;
 

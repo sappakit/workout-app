@@ -7,8 +7,8 @@ export function ResetPasswordSkeleton() {
   return (
     <PageLayout>
       {/* Logo */}
-      <View className="items-center">
-        <SkeletonPlaceholder className="h-40 w-40 rounded-3xl" />
+      <View className="items-center py-2">
+        <SkeletonPlaceholder className="h-36 w-36 rounded-3xl" />
       </View>
 
       {/* Title */}

@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import { Send } from "lucide-react-native";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import { View } from "react-native";
-import { AuthHeader } from "./AuthHeader";
+import { AuthHeader } from "../../ui/AuthHeader";
 
 interface ForgotPasswordFormProps {
   control: Control<ForgotPasswordFormValues>;

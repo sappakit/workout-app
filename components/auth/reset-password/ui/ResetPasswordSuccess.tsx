@@ -2,7 +2,7 @@ import { AppButton } from "@/components/custom-ui/AppButton";
 import { useRouter } from "expo-router";
 import { LogIn } from "lucide-react-native";
 import { View } from "react-native";
-import { AuthHeader } from "../../forgot-password/ui/AuthHeader";
+import { AuthHeader } from "../../ui/AuthHeader";
 
 export function ResetPasswordSuccess() {
   const router = useRouter();

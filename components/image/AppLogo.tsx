@@ -18,7 +18,7 @@ const SOURCES = {
 } as const;
 
 export function AppLogo({
-  size = 96,
+  size = 144,
   variant = "color",
   className,
   style,
