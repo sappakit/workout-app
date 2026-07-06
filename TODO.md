@@ -12,7 +12,9 @@
 - make WorkoutTimerBottomSheet show on every page
 - WorkoutTimerBottomSheet buttons don't work if swipe up/down too fast
 - Add error message on exercise with no sets
-- home screen stuck on loading state after login (android studio)
+- use new pageState version
+- use new logo version
+- bug create schedule multiple times
 
 # OPTIONAL
 

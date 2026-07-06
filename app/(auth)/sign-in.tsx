@@ -155,13 +155,13 @@ export default function SignInScreen() {
             </ThemedText>
           ) : null}
 
-          {/* Forgot */}
+          {/* Forgot password */}
           <View className="mt-3 items-end">
             <ThemedText
               type="default"
               variant="primary"
               className="text-sm"
-              // onPress={() => router.push("/(auth)/forgot-password")}
+              onPress={() => router.push("/(auth)/forgot-password")}
             >
               Forgot password?
             </ThemedText>

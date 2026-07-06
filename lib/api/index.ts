@@ -138,9 +138,9 @@ api.interceptors.response.use(
       error.message ??
       "Request failed";
 
-    return Promise.reject(
-      new Error(Array.isArray(message) ? message.join("\n") : message),
-    );
+    error.message = Array.isArray(message) ? message.join("\n") : message;
+
+    return Promise.reject(error);
   },
 );
 

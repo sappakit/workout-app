@@ -1,3 +1,4 @@
+import { authApi } from "@/app/api/auth.api";
 import { api, AuthStorage, setOnAuthExpired } from "@/lib/api";
 import { SignInForm } from "@/schemas/auth.schema";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
@@ -77,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Token exists -> get user from backend
-        const { data } = await api.get<UserAuth>("/auth/me");
+        const { data } = await api.get<UserAuth>(authApi.me());
         setUser(data);
       } catch {
         await clearLocalAuthState();
@@ -89,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign up
   async function signUp(values: SignUpRequest) {
-    const { data } = await api.post<AuthResponse>("/auth/register", values);
+    const { data } = await api.post<AuthResponse>(authApi.register(), values);
     const { accessToken, refreshToken, user } = data;
 
     await AuthStorage.setTokens(accessToken, refreshToken);
@@ -98,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign in
   async function signIn(values: SignInForm) {
-    const { data } = await api.post<AuthResponse>("/auth/login", values);
+    const { data } = await api.post<AuthResponse>(authApi.login(), values);
     const { accessToken, refreshToken, user } = data;
 
     await AuthStorage.setTokens(accessToken, refreshToken);
@@ -111,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (refreshToken) {
       try {
-        await api.post("/auth/logout", { refreshToken });
+        await api.post(authApi.logout(), { refreshToken });
       } catch (e) {
         console.log("Logout failed:", e);
       }
@@ -124,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Re-fetch user
   async function loadUser() {
-    const { data } = await api.get<UserAuth>("/auth/me");
+    const { data } = await api.get<UserAuth>(authApi.me());
     setUser(data);
   }
 
