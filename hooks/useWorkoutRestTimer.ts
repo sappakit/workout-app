@@ -10,8 +10,12 @@ export function useWorkoutRestTimer() {
     (state) => state.startRestTimer,
   );
 
-  const stopRestTimer = useWorkoutRestTimerStore(
-    (state) => state.stopRestTimer,
+  const skipRestTimer = useWorkoutRestTimerStore(
+    (state) => state.skipRestTimer,
+  );
+
+  const completeRestTimer = useWorkoutRestTimerStore(
+    (state) => state.completeRestTimer,
   );
 
   const increaseRestTimer = useWorkoutRestTimerStore(
@@ -54,15 +58,15 @@ export function useWorkoutRestTimer() {
     if (!restTimerEndsAt || endTime == null) return;
 
     if (endTime <= now) {
-      stopRestTimer();
+      completeRestTimer();
     }
-  }, [restTimerEndsAt, endTime, now, stopRestTimer]);
+  }, [restTimerEndsAt, endTime, now, completeRestTimer]);
 
   return {
     isActive,
     remainingSeconds,
     start: startRestTimer,
-    stop: stopRestTimer,
+    skip: skipRestTimer,
     increase: increaseRestTimer,
     decrease: decreaseRestTimer,
   };

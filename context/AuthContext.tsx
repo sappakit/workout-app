@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Clear workout runtime state
     useWorkoutSessionStore.getState().clearSession();
-    useWorkoutRestTimerStore.getState().stopRestTimer();
+    useWorkoutRestTimerStore.getState().clearRestTimer();
 
     // Clear persisted Zustand storage
     useWorkoutSessionStore.persist.clearStorage();

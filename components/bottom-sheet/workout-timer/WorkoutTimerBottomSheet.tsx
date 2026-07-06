@@ -3,11 +3,13 @@ import { mapWorkoutSessionModelToFinishPayload } from "@/components/workout-in-p
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { usePausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
+import { useRestCompleteAlert } from "@/hooks/useRestCompleteAlert";
 import { useWorkoutRestTimer } from "@/hooks/useWorkoutRestTimer";
 import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
+import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import {
   selectActiveWorkoutSession,
   selectHasActiveWorkoutSession,
@@ -79,6 +81,15 @@ export default function WorkoutTimerBottomSheet({
 
   const restTimer = useWorkoutRestTimer();
 
+  const clearRestTimer = useWorkoutRestTimerStore(
+    (state) => state.clearRestTimer,
+  );
+
+  useRestCompleteAlert({
+    soundEnabled: true,
+    vibrationEnabled: true,
+  });
+
   // Workout session store
   const hasActiveWorkoutSession = useWorkoutSessionStore(
     selectHasActiveWorkoutSession,
@@ -107,7 +118,7 @@ export default function WorkoutTimerBottomSheet({
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current]);
 
-      restTimer.stop();
+      clearRestTimer();
       clearSession();
 
       toast.success({
@@ -135,7 +146,7 @@ export default function WorkoutTimerBottomSheet({
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current, workoutQueryKeys.all]);
 
-      restTimer.stop();
+      clearRestTimer();
       clearSession();
 
       toast.success({
@@ -232,7 +243,7 @@ export default function WorkoutTimerBottomSheet({
         remainingRestSeconds={restTimer.remainingSeconds}
         stats={timerStats}
         restAction={{
-          onSkip: restTimer.stop,
+          onSkip: restTimer.skip,
           onIncrease: restTimer.increase,
           onDecrease: restTimer.decrease,
         }}

@@ -24,8 +24,8 @@ export function WorkoutSessionSync() {
   );
   const clearSession = useWorkoutSessionStore((state) => state.clearSession);
 
-  const stopRestTimer = useWorkoutRestTimerStore(
-    (state) => state.stopRestTimer,
+  const clearRestTimer = useWorkoutRestTimerStore(
+    (state) => state.clearRestTimer,
   );
 
   const { data, isSuccess } = useQuery({
@@ -65,7 +65,7 @@ export function WorkoutSessionSync() {
     // Clear local session if no active workout
     if (storedSession) {
       clearSession();
-      stopRestTimer();
+      clearRestTimer();
     }
   }, [
     hydrated,
@@ -75,7 +75,7 @@ export function WorkoutSessionSync() {
     initializeSession,
     setPerformanceByExerciseId,
     clearSession,
-    stopRestTimer,
+    clearRestTimer,
   ]);
 
   return null;

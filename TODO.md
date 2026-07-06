@@ -19,3 +19,5 @@
 - Add notification
   rest time end, user afk
 - update every fields to use FormField (there's ProfileFormField)
+- use gluestack UI
+- make stickyFooter (pageLayout) follow keyboard

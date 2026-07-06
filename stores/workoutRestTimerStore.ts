@@ -6,9 +6,12 @@ const DEFAULT_REST_TIMER_STEP_SECONDS = 15;
 
 interface WorkoutRestTimerStore {
   restTimerEndsAt: string | null;
+  lastCompletedAt: number | null;
 
   startRestTimer: (seconds: number) => void;
-  stopRestTimer: () => void;
+  skipRestTimer: () => void;
+  completeRestTimer: () => void;
+  clearRestTimer: () => void;
   increaseRestTimer: (seconds?: number) => void;
   decreaseRestTimer: (seconds?: number) => void;
 }
@@ -17,6 +20,7 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
   persist(
     (set, get) => ({
       restTimerEndsAt: null,
+      lastCompletedAt: null,
 
       startRestTimer: (seconds) => {
         if (seconds <= 0) {
@@ -29,9 +33,23 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
         });
       },
 
-      stopRestTimer: () => {
+      skipRestTimer: () => {
         set({
           restTimerEndsAt: null,
+        });
+      },
+
+      completeRestTimer: () => {
+        set({
+          restTimerEndsAt: null,
+          lastCompletedAt: Date.now(),
+        });
+      },
+
+      clearRestTimer: () => {
+        set({
+          restTimerEndsAt: null,
+          lastCompletedAt: null,
         });
       },
 
@@ -75,7 +93,7 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
           restTimerEndsAt &&
           new Date(restTimerEndsAt).getTime() <= Date.now()
         ) {
-          state?.stopRestTimer();
+          state?.clearRestTimer();
         }
       },
     },
