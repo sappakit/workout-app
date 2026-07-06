@@ -5,6 +5,7 @@ export default function PagesLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: "slide_from_right",
       }}
     />
   );

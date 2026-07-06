@@ -93,15 +93,15 @@ export default function ProfileContent({ data }: ProfileContentProps) {
               }}
             />
 
-            {/* TODO: add more menu */}
             <ProfileMenuItem
               label="Change Password"
               icon={LockKeyhole}
               onPress={() => {
-                // router.push("/(pages)/profile/change-password");
+                router.push("/(pages)/profile/change-password");
               }}
             />
 
+            {/* TODO: add more menu */}
             <ProfileMenuItem
               label="Daily Activity"
               icon={Activity}
