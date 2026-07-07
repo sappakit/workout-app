@@ -11,6 +11,7 @@
 - Allow duplicate exercise in one workout
 - Add error message on exercise with no sets
 - bug create schedule multiple times
+- (filter) remove selected value after filter
 
 # OPTIONAL
 
@@ -21,3 +22,4 @@
 - update every fields to use FormField (there's ProfileFormField)
 - use gluestack UI
 - make stickyFooter (pageLayout) follow keyboard
+- add dev log service

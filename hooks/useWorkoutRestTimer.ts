@@ -1,5 +1,6 @@
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AppState, AppStateStatus } from "react-native";
 
 export function useWorkoutRestTimer() {
   const restTimerEndsAt = useWorkoutRestTimerStore(
@@ -28,6 +29,8 @@ export function useWorkoutRestTimer() {
 
   const [now, setNow] = useState(Date.now());
 
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+
   const endTime = restTimerEndsAt ? new Date(restTimerEndsAt).getTime() : null;
 
   const isActive = endTime != null && endTime > now;
@@ -36,6 +39,39 @@ export function useWorkoutRestTimer() {
     isActive && endTime != null
       ? Math.max(0, Math.ceil((endTime - now) / 1000))
       : 0;
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      const previousAppState = appStateRef.current;
+      appStateRef.current = nextAppState;
+
+      const isComingBackToForeground =
+        previousAppState.match(/inactive|background/) &&
+        nextAppState === "active";
+
+      // Only run the expired-timer cleanup when the app moves from background/inactive -> active
+      if (!isComingBackToForeground) return;
+
+      const currentEndsAt = useWorkoutRestTimerStore.getState().restTimerEndsAt;
+
+      if (!currentEndsAt) {
+        setNow(Date.now());
+        return;
+      }
+
+      const currentEndTime = new Date(currentEndsAt).getTime();
+
+      // If notification already handled the alert, silently finish the expired timer
+      if (currentEndTime <= Date.now()) {
+        completeRestTimer({ shouldAlert: false });
+        return;
+      }
+
+      setNow(Date.now());
+    });
+
+    return () => subscription.remove();
+  }, [completeRestTimer]);
 
   // Keep ticking while a rest timer exists
   useEffect(() => {
@@ -57,8 +93,11 @@ export function useWorkoutRestTimer() {
   useEffect(() => {
     if (!restTimerEndsAt || endTime == null) return;
 
+    // Only play the in-app alert when the timer finishes while the app is active
+    if (AppState.currentState !== "active") return;
+
     if (endTime <= now) {
-      completeRestTimer();
+      completeRestTimer({ shouldAlert: true });
     }
   }, [restTimerEndsAt, endTime, now, completeRestTimer]);
 

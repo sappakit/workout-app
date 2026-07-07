@@ -1,5 +1,6 @@
 import { AppDarkTheme, AppLightTheme } from "@/constants/theme";
 import { AuthProvider } from "@/context/AuthContext";
+import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
 import { createToastConfig } from "@/lib/toast/config";
 import { useThemeStore } from "@/stores/themeStore";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -22,9 +23,9 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
   const colorScheme = useThemeStore((s) => s.colorScheme);
   const theme = colorScheme === "dark" ? AppDarkTheme : AppLightTheme;
-
-  // Toast
   const toastConfig = createToastConfig(colorScheme);
+
+  useNotificationPermissions();
 
   return (
     <QueryClientProvider client={queryClient}>

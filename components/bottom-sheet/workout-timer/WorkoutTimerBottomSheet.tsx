@@ -80,10 +80,7 @@ export default function WorkoutTimerBottomSheet({
 
   const restTimer = useWorkoutRestTimer();
 
-  useRestCompleteAlert({
-    soundEnabled: true,
-    vibrationEnabled: true,
-  });
+  useRestCompleteAlert();
 
   // Workout session store
   const hasActiveWorkoutSession = useWorkoutSessionStore(
