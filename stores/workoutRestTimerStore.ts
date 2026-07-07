@@ -1,3 +1,4 @@
+import { devLog } from "@/lib/logger/devLogger";
 import {
   cancelRestCompleteNotification,
   scheduleRestCompleteNotification,
@@ -25,13 +26,13 @@ interface WorkoutRestTimerStore {
 
 function cancelRestNotificationSafely() {
   void cancelRestCompleteNotification().catch((error) => {
-    console.log("Failed to cancel rest notification:", error);
+    devLog.error("Failed to cancel rest notification", error);
   });
 }
 
 function scheduleRestNotificationSafely(seconds: number) {
   void scheduleRestCompleteNotification(seconds).catch((error) => {
-    console.log("Failed to schedule rest notification:", error);
+    devLog.error("Failed to schedule rest notification", error);
   });
 }
 
@@ -105,11 +106,12 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
         const currentEndsAt = get().restTimerEndsAt;
         if (!currentEndsAt) return;
 
+        const now = Date.now();
         const nextTime = new Date(currentEndsAt).getTime() - seconds * 1000;
 
         cancelRestNotificationSafely();
 
-        if (nextTime <= Date.now()) {
+        if (nextTime <= now) {
           set({
             restTimerEndsAt: null,
             restCompletedAt: null,
@@ -118,7 +120,7 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
           return;
         }
 
-        const nextRemainingSeconds = Math.ceil((nextTime - Date.now()) / 1000);
+        const nextRemainingSeconds = Math.ceil((nextTime - now) / 1000);
 
         scheduleRestNotificationSafely(nextRemainingSeconds);
 

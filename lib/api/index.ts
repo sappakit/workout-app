@@ -3,7 +3,7 @@ import axios, {
   AxiosHeaders,
   InternalAxiosRequestConfig,
 } from "axios";
-import { AuthStorage } from "./authStorage";
+import { AuthStorage } from "../storage/authStorage";
 
 type ApiErrorResponse = {
   message?: string | string[];

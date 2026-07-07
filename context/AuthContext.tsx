@@ -1,5 +1,6 @@
 import { authApi } from "@/app/api/auth.api";
 import { api, AuthStorage, setOnAuthExpired } from "@/lib/api";
+import { devLog } from "@/lib/logger/devLogger";
 import { SignInForm } from "@/schemas/auth.schema";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
@@ -113,8 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (refreshToken) {
       try {
         await api.post(authApi.logout(), { refreshToken });
-      } catch (e) {
-        console.log("Logout failed:", e);
+      } catch (error) {
+        devLog.error("Logout API request failed", error);
       }
     }
 
