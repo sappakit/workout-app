@@ -1,8 +1,8 @@
-import { workoutApi } from "@/app/api/workout.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";

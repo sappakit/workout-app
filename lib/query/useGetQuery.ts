@@ -1,5 +1,5 @@
-import { api } from "@/lib/api";
 import { QueryKey, useQuery } from "@tanstack/react-query";
+import { api } from "../api/client";
 
 export type QueryParamValue =
   | string

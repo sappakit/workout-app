@@ -1,4 +1,3 @@
-import { muscleApi } from "@/app/api/muscle.api";
 import {
   FilterNavigationItem,
   FilterOverviewPage,
@@ -11,6 +10,7 @@ import {
 } from "@/components/filter-option/FilterSortPage";
 import { FilterOptionPage } from "@/components/filter-option/option-page/FilterOptionPage";
 import { RemoteFilterOptionPage } from "@/components/filter-option/option-page/RemoteFilterOptionPage";
+import { muscleApi } from "@/lib/api/muscle.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import {
   ExerciseType,

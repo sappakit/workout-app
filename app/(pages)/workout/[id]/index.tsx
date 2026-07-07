@@ -1,5 +1,5 @@
-import { workoutApi } from "@/app/api/workout.api";
 import WorkoutDetailContent from "@/components/workout-detail/WorkoutDetailContent";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";

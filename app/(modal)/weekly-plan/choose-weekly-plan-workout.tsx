@@ -1,4 +1,3 @@
-import { workoutApi } from "@/app/api/workout.api";
 import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
 import { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
@@ -10,6 +9,7 @@ import {
 } from "@/components/workout/ui/workout-card/WorkoutCard";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDebounce } from "@/hooks/useDebounce";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";

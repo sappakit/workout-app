@@ -1,8 +1,8 @@
-import { userApi } from "@/app/api/user.api";
 import EditProfileContent from "@/components/edit-profile/EditProfileContent";
 import { EditProfileSkeleton } from "@/components/edit-profile/ui/EditProfileSkeleton";
 import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
+import { userApi } from "@/lib/api/user.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { userQueryKeys } from "@/lib/user/keys";
 import { User } from "@/types/user/response/user.types";

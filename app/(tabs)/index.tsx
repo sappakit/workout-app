@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
 import { mapWorkoutsToPreviewItems } from "@/components/workout/model/workout-preview.mapper";
 import { mapProgressOverviewToWorkoutStats } from "@/components/workout/model/workout-stats.mapper";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useInvalidateQueries } from "@/lib/query/utils";
@@ -17,7 +18,6 @@ import {
 } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { workoutApi } from "../api/workout.api";
 
 export default function HomeScreen() {
   const router = useRouter();

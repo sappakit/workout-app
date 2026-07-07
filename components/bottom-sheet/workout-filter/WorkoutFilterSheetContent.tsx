@@ -3,8 +3,6 @@ import {
   DEFAULT_SORT_DIRECTION,
   WorkoutSortKey,
 } from "@/app/(modal)/workout/choose-workout";
-import { muscleApi } from "@/app/api/muscle.api";
-import { workoutApi } from "@/app/api/workout.api";
 import {
   FilterNavigationItem,
   FilterOverviewPage,
@@ -16,6 +14,8 @@ import {
   SortOption,
 } from "@/components/filter-option/FilterSortPage";
 import { RemoteFilterOptionPage } from "@/components/filter-option/option-page/RemoteFilterOptionPage";
+import { muscleApi } from "@/lib/api/muscle.api";
+import { workoutApi } from "@/lib/api/workout.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { Muscle } from "@/types/workout/response/shared.types";

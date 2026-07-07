@@ -1,6 +1,6 @@
-import { workoutApi } from "@/app/api/workout.api";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
+import { workoutApi } from "@/lib/api/workout.api";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";

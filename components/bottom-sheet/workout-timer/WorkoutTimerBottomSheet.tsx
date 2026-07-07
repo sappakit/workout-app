@@ -1,11 +1,11 @@
-import { workoutApi } from "@/app/api/workout.api";
 import { mapWorkoutSessionModelToFinishPayload } from "@/components/workout-in-progress/model/helpers";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { usePausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
 import { useRestCompleteAlert } from "@/hooks/useRestCompleteAlert";
 import { useWorkoutRestTimer } from "@/hooks/useWorkoutRestTimer";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";

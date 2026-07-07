@@ -1,10 +1,10 @@
-import { workoutApi } from "@/app/api/workout.api";
 import { mapWorkoutSessionsToHistoryItems } from "@/components/progress/model/progress-history.mapper";
 import ProgressContent, {
   ProgressHistoryState,
   ProgressOverviewState,
 } from "@/components/progress/ProgressContent";
 import { ProgressTab } from "@/components/progress/ui/elements/ProgressTabs";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";

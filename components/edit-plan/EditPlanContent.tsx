@@ -1,11 +1,11 @@
-import { muscleApi } from "@/app/api/muscle.api";
-import { workoutApi } from "@/app/api/workout.api";
 import FormTextInput from "@/components/form/FormTextInput";
 import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
+import { muscleApi } from "@/lib/api/muscle.api";
+import { workoutApi } from "@/lib/api/workout.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";

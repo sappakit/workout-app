@@ -1,9 +1,9 @@
-import { userApi } from "@/app/api/user.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
+import { userApi } from "@/lib/api/user.api";
 import { appendImageToFormData } from "@/lib/form-data/utils";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";

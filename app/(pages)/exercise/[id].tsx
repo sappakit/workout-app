@@ -1,5 +1,5 @@
-import { exerciseApi } from "@/app/api/exercise.api";
 import ExerciseDetailContent from "@/components/exercise/ExerciseDetailContent";
+import { exerciseApi } from "@/lib/api/exercise.api";
 import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { Exercise } from "@/types/workout/response/exercise.types";

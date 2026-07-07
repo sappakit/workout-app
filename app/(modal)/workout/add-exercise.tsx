@@ -1,4 +1,3 @@
-import { exerciseApi } from "@/app/api/exercise.api";
 import ExerciseFilterBottomSheet from "@/components/bottom-sheet/exercise-filter/ExerciseFilterBottomSheet";
 import {
   DEFAULT_EXERCISE_FILTERS,
@@ -12,6 +11,7 @@ import {
 } from "@/components/workout/ui/exercise-card/ExerciseCard";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDebounce } from "@/hooks/useDebounce";
+import { exerciseApi } from "@/lib/api/exercise.api";
 import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { mapExerciseToCreateWorkoutExerciseFormItem } from "@/lib/workout/mappers";

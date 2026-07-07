@@ -1,6 +1,6 @@
-import { authApi } from "@/app/api/auth.api";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { api } from "@/lib/api";
+import { authApi } from "@/lib/api/auth.api";
+import { api } from "@/lib/api/client";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import {
   ResetPasswordForm as ResetPasswordFormValues,

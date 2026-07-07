@@ -1,5 +1,3 @@
-import { muscleApi } from "@/app/api/muscle.api";
-import { workoutApi } from "@/app/api/workout.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import FormCheckbox from "@/components/form/FormCheckbox";
 import { FormErrorMessage } from "@/components/form/FormErrorMessage";
@@ -10,8 +8,9 @@ import FormInfiniteSelectInput from "@/components/form/select-input/FormInfinite
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
+import { muscleApi } from "@/lib/api/muscle.api";
+import { workoutApi } from "@/lib/api/workout.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -19,7 +18,6 @@ import { workoutQueryKeys } from "@/lib/workout/keys";
 import { mapEditPlanFormToUpdateWorkoutPayload } from "@/lib/workout/mappers";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
-import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
 import { Muscle } from "@/types/workout/response/shared.types";
@@ -46,18 +44,9 @@ const CREATE_PLAN_DEFAULT_VALUES: EditPlanForm = {
 };
 
 export default function CreatePlanContent() {
-  const { colors } = useAppTheme();
   const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
-
-  // Display full exercise details toggle
-  const showFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.showFullExerciseDetails,
-  );
-  const toggleShowFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.toggleShowFullExerciseDetails,
-  );
 
   // Draft store
   const draftMode = usePlanFormDraftStore((state) => state.mode);
@@ -131,8 +120,7 @@ export default function CreatePlanContent() {
     mutationFn: async (values: EditPlanForm) => {
       const url = workoutApi.create();
 
-      // You can rename this later to mapPlanFormToWorkoutPayload
-      // if create and update use the same payload shape.
+      // TODO: rename to mapPlanFormToWorkoutPayload
       const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
 
       return await api.post(url, payload);

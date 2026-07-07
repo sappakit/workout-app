@@ -1,8 +1,8 @@
-import { workoutApi } from "@/app/api/workout.api";
 import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
 import { WeeklyPlanSkeleton } from "@/components/weekly-plan/ui/WeeklyPlanSkeleton";
 import WeeklyPlanContent from "@/components/weekly-plan/WeeklyPlanContent";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutWeeklyPlan } from "@/types/workout/response/workout.types";

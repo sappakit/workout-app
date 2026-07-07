@@ -1,6 +1,6 @@
-import { api } from "@/lib/api";
 import { PaginatedResponse } from "@/types/api.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { api } from "../api/client";
 import { QueryParamValue } from "./useGetQuery";
 
 interface UseInfiniteOptionsQueryProps {

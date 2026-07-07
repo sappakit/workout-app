@@ -1,9 +1,9 @@
-import { authApi } from "@/app/api/auth.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import FormPasswordInput from "@/components/form/FormPasswordInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
-import { api } from "@/lib/api";
+import { authApi } from "@/lib/api/auth.api";
+import { api } from "@/lib/api/client";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import {
   ChangePasswordForm,

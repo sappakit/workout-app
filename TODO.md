@@ -12,7 +12,6 @@
 - Add error message on exercise with no sets
 - bug create schedule multiple times
 - (filter) remove selected value after filter
-- move .api file
 
 # OPTIONAL
 

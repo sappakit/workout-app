@@ -1,4 +1,4 @@
-import { muscleApi } from "@/app/api/muscle.api";
+import { muscleApi } from "@/lib/api/muscle.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { Muscle } from "@/types/workout/response/shared.types";
