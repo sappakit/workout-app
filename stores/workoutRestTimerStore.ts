@@ -6,10 +6,9 @@ const DEFAULT_REST_TIMER_STEP_SECONDS = 15;
 
 interface WorkoutRestTimerStore {
   restTimerEndsAt: string | null;
-  lastCompletedAt: number | null;
+  restCompletedAt: number | null;
 
   startRestTimer: (seconds: number) => void;
-  skipRestTimer: () => void;
   completeRestTimer: () => void;
   clearRestTimer: () => void;
   increaseRestTimer: (seconds?: number) => void;
@@ -20,36 +19,35 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
   persist(
     (set, get) => ({
       restTimerEndsAt: null,
-      lastCompletedAt: null,
+      restCompletedAt: null,
 
       startRestTimer: (seconds) => {
         if (seconds <= 0) {
-          set({ restTimerEndsAt: null });
+          set({
+            restTimerEndsAt: null,
+            restCompletedAt: null,
+          });
+
           return;
         }
 
         set({
           restTimerEndsAt: new Date(Date.now() + seconds * 1000).toISOString(),
-        });
-      },
-
-      skipRestTimer: () => {
-        set({
-          restTimerEndsAt: null,
+          restCompletedAt: null,
         });
       },
 
       completeRestTimer: () => {
         set({
           restTimerEndsAt: null,
-          lastCompletedAt: Date.now(),
+          restCompletedAt: Date.now(),
         });
       },
 
       clearRestTimer: () => {
         set({
           restTimerEndsAt: null,
-          lastCompletedAt: null,
+          restCompletedAt: null,
         });
       },
 
@@ -62,6 +60,7 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
 
         set({
           restTimerEndsAt: new Date(baseTime + seconds * 1000).toISOString(),
+          restCompletedAt: null,
         });
       },
 
@@ -74,12 +73,15 @@ export const useWorkoutRestTimerStore = create<WorkoutRestTimerStore>()(
         if (nextTime <= Date.now()) {
           set({
             restTimerEndsAt: null,
+            restCompletedAt: null,
           });
+
           return;
         }
 
         set({
           restTimerEndsAt: new Date(nextTime).toISOString(),
+          restCompletedAt: null,
         });
       },
     }),

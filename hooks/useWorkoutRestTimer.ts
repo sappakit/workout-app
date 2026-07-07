@@ -10,12 +10,12 @@ export function useWorkoutRestTimer() {
     (state) => state.startRestTimer,
   );
 
-  const skipRestTimer = useWorkoutRestTimerStore(
-    (state) => state.skipRestTimer,
-  );
-
   const completeRestTimer = useWorkoutRestTimerStore(
     (state) => state.completeRestTimer,
+  );
+
+  const clearRestTimer = useWorkoutRestTimerStore(
+    (state) => state.clearRestTimer,
   );
 
   const increaseRestTimer = useWorkoutRestTimerStore(
@@ -66,7 +66,7 @@ export function useWorkoutRestTimer() {
     isActive,
     remainingSeconds,
     start: startRestTimer,
-    skip: skipRestTimer,
+    clear: clearRestTimer,
     increase: increaseRestTimer,
     decrease: decreaseRestTimer,
   };

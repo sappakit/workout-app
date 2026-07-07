@@ -68,7 +68,7 @@ export default function SignUpContent() {
   };
 
   return (
-    <PageLayout>
+    <PageLayout includeInsets={{ top: true }}>
       <AuthHeader
         title="Create Account"
         subtitle="Start tracking your workouts and build your streak."

@@ -9,7 +9,6 @@ import { api } from "@/lib/api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import {
   selectActiveWorkoutSession,
   selectHasActiveWorkoutSession,
@@ -81,10 +80,6 @@ export default function WorkoutTimerBottomSheet({
 
   const restTimer = useWorkoutRestTimer();
 
-  const clearRestTimer = useWorkoutRestTimerStore(
-    (state) => state.clearRestTimer,
-  );
-
   useRestCompleteAlert({
     soundEnabled: true,
     vibrationEnabled: true,
@@ -118,7 +113,7 @@ export default function WorkoutTimerBottomSheet({
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current]);
 
-      clearRestTimer();
+      restTimer.clear();
       clearSession();
 
       toast.success({
@@ -146,7 +141,7 @@ export default function WorkoutTimerBottomSheet({
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current, workoutQueryKeys.all]);
 
-      clearRestTimer();
+      restTimer.clear();
       clearSession();
 
       toast.success({
@@ -243,7 +238,7 @@ export default function WorkoutTimerBottomSheet({
         remainingRestSeconds={restTimer.remainingSeconds}
         stats={timerStats}
         restAction={{
-          onSkip: restTimer.skip,
+          onSkip: restTimer.clear,
           onIncrease: restTimer.increase,
           onDecrease: restTimer.decrease,
         }}

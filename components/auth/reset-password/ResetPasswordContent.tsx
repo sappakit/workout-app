@@ -56,7 +56,7 @@ export default function ResetPasswordContent({
   });
 
   return (
-    <PageLayout>
+    <PageLayout includeInsets={{ top: true }}>
       {isPasswordReset ? (
         <ResetPasswordSuccess />
       ) : (

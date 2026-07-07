@@ -54,7 +54,7 @@ export default function ForgotPasswordContent() {
   };
 
   return (
-    <PageLayout>
+    <PageLayout includeInsets={{ top: true }}>
       {isEmailSent ? (
         <ForgotPasswordSuccess
           email={submittedEmail}

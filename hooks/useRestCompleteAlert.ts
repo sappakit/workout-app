@@ -16,13 +16,13 @@ export function useRestCompleteAlert({
   soundEnabled = true,
   vibrationEnabled = true,
 }: UseRestCompleteAlertParams = {}) {
-  const lastCompletedAt = useWorkoutRestTimerStore(
-    (state) => state.lastCompletedAt,
+  const restCompletedAt = useWorkoutRestTimerStore(
+    (state) => state.restCompletedAt,
   );
 
   const player = useAudioPlayer(REST_ALERT_SOUNDS.complete);
 
-  const lastPlayedAtRef = useRef<number | null>(lastCompletedAt);
+  const lastPlayedAtRef = useRef<number | null>(restCompletedAt);
 
   const playRestCompleteSound = useCallback(() => {
     player.seekTo(0);
@@ -31,10 +31,10 @@ export function useRestCompleteAlert({
   }, [player]);
 
   useEffect(() => {
-    if (!lastCompletedAt) return;
-    if (lastPlayedAtRef.current === lastCompletedAt) return;
+    if (!restCompletedAt) return;
+    if (lastPlayedAtRef.current === restCompletedAt) return;
 
-    lastPlayedAtRef.current = lastCompletedAt;
+    lastPlayedAtRef.current = restCompletedAt;
 
     if (soundEnabled) {
       playRestCompleteSound();
@@ -43,5 +43,5 @@ export function useRestCompleteAlert({
     if (vibrationEnabled) {
       Vibration.vibrate(300);
     }
-  }, [lastCompletedAt, playRestCompleteSound, soundEnabled, vibrationEnabled]);
+  }, [restCompletedAt, playRestCompleteSound, soundEnabled, vibrationEnabled]);
 }

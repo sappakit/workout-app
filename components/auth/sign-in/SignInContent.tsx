@@ -57,7 +57,7 @@ export default function SignInContent() {
   };
 
   return (
-    <PageLayout>
+    <PageLayout includeInsets={{ top: true }}>
       <AuthHeader
         title="Sign In"
         subtitle="Welcome back — log your workouts and keep the streak going."
