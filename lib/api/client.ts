@@ -3,6 +3,7 @@ import axios, {
   AxiosHeaders,
   InternalAxiosRequestConfig,
 } from "axios";
+import { devLogger } from "../logger/devLogger";
 import { AuthStorage } from "../storage/authStorage";
 
 type ApiErrorResponse = {
@@ -91,14 +92,12 @@ api.interceptors.response.use(
     const url = originalRequest?.url;
 
     // Debug logging
-    if (__DEV__) {
-      console.log("API ERROR:", {
-        url,
-        method: originalRequest?.method,
-        status,
-        data: error.response?.data,
-      });
-    }
+    devLogger.error("API request failed", error, {
+      url,
+      method: originalRequest?.method,
+      status,
+      data: error.response?.data,
+    });
 
     // Handle 401 (Refresh)
     if (
@@ -122,12 +121,18 @@ api.interceptors.response.use(
 
         return api(originalRequest);
       } catch (refreshError) {
+        devLogger.error("Failed to refresh access token", refreshError, {
+          url,
+          method: originalRequest.method,
+          status,
+        });
+
         await AuthStorage.clearTokens();
 
         // Notify AuthProvider so in-memory auth state does not stay logged in
         await onAuthExpired?.();
 
-        throw refreshError;
+        return Promise.reject(refreshError);
       }
     }
 

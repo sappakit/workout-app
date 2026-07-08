@@ -1,12 +1,7 @@
-import FormTextInput from "@/components/form/FormTextInput";
-import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
+import { AppButton } from "@/components/custom-ui/AppButton";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
 import { api } from "@/lib/api/client";
-import { muscleApi } from "@/lib/api/muscle.api";
 import { workoutApi } from "@/lib/api/workout.api";
-import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
@@ -16,50 +11,28 @@ import {
 } from "@/lib/workout/mappers";
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
-import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
-import { Muscle } from "@/types/workout/response/shared.types";
-import {
-  WorkoutFocusType,
-  WorkoutResponse,
-} from "@/types/workout/response/workout.types";
+import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { Alert, View } from "react-native";
-import { AppButton } from "../custom-ui/AppButton";
-import FormCheckbox from "../form/FormCheckbox";
-import { FormErrorMessage } from "../form/FormErrorMessage";
-import FormInfiniteMultiSelectInput from "../form/select-input/FormInfiniteMultiSelectInput";
-import FormInfiniteSelectInput from "../form/select-input/FormInfiniteSelectInput";
-import { SectionHeader } from "../layout/SectionHeader";
-import { DurationPickerTrigger } from "./ui/DurationPickerTrigger";
-import { ExerciseListMenu } from "./ui/ExerciseListMenu";
-import { PlanWorkoutExerciseSection } from "./ui/WorkoutExerciseSection/PlanWorkoutExerciseSection";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { Alert } from "react-native";
+import { PlanFormFields } from "./ui/PlanFormFields";
 
 interface EditPlanContentProps {
   data: WorkoutResponse;
 }
 
 export default function EditPlanContent({ data }: EditPlanContentProps) {
-  const { colors } = useAppTheme();
   const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
 
-  // Display full exercise details toggle
-  const showFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.showFullExerciseDetails,
-  );
-  const toggleShowFullExerciseDetails = useExerciseDisplayStore(
-    (state) => state.toggleShowFullExerciseDetails,
-  );
-
-  // Draft store
+  // Draft store.
   const draftMode = usePlanFormDraftStore((state) => state.mode);
   const draftWorkoutId = usePlanFormDraftStore((state) => state.workoutId);
   const draft = usePlanFormDraftStore((state) => state.draft);
@@ -69,13 +42,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   const replaceDraft = usePlanFormDraftStore((state) => state.replaceDraft);
   const resetDraft = usePlanFormDraftStore((state) => state.resetDraft);
 
-  // Base values from API response
+  // Base values from the API response.
   const mappedDefaultValues = useMemo(
     () => mapWorkoutResponseToEditPlanForm(data),
     [data],
   );
 
-  // If store already contains draft for this workout, use it instead
+  // Use the existing draft for this workout if one already exists.
   const initialFormValues = useMemo(() => {
     if (draftMode === "edit" && draftWorkoutId === data.id && draft) {
       return draft;
@@ -97,8 +70,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     setValue,
     reset,
     getValues,
-    clearErrors,
-    formState: { errors, isDirty },
+    formState: { isDirty },
   } = form;
 
   const { fields, replace, remove } = useFieldArray({
@@ -113,7 +85,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       name: "workoutExercises",
     }) ?? [];
 
-  // Initialize Zustand draft once for this workout
+  // Initialize the Zustand draft once for this workout.
   useEffect(() => {
     initializeDraft({
       mode: "edit",
@@ -122,12 +94,11 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     });
   }, [data.id, initialFormValues, initializeDraft]);
 
-  // When draft changes from another page (like manage mode),
-  // refresh RHF so this screen reflects the latest shared draft.
+  // Refresh RHF when the draft changes from another page, like manage mode.
   useEffect(() => {
     if (draftMode !== "edit" || draftWorkoutId !== data.id || !draft) return;
 
-    // Wait for the page to fully mount
+    // Wait until the page has fully mounted.
     const frame = requestAnimationFrame(() => {
       reset(draft, {
         keepDefaultValues: true,
@@ -170,7 +141,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     mutate(values);
   };
 
-  // Auto-filled duration
+  // Auto-fill the duration.
   const autoFillDuration = useWatch({
     control,
     name: "autoFillDuration",
@@ -198,7 +169,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     });
   }, [workoutExercises, autoFillDuration, setValue]);
 
-  // Auto-filled muscles
+  // Auto-fill the target muscles.
   const autoFillMuscles = useWatch({
     control,
     name: "autoFillMuscles",
@@ -223,7 +194,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     });
   }, [workoutExercises, autoFillMuscles, setValue]);
 
-  // Disable auto-fill if no exercises
+  // Disable auto-fill when there are no exercises.
   const hasExercises = workoutExercises.length > 0;
 
   useEffect(() => {
@@ -244,7 +215,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     }
   }, [hasExercises, getValues, setValue]);
 
-  // Cancel edit
+  // Cancel editing.
   const handleCancelEdit = () => {
     const resetFormAndBack = () => {
       resetDraft();
@@ -273,7 +244,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
-  // Remove all exercises
+  // Remove all exercises.
   const handleRemoveAllExercises = () => {
     if (workoutExercises.length === 0) return;
 
@@ -296,7 +267,7 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
-  // Remove one exercise
+  // Remove one exercise.
   const handleRemoveExercise = (index: number) => {
     const targetExercise = workoutExercises[index];
 
@@ -333,22 +304,22 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     );
   };
 
-  // Open the manage mode page
+  // Open the manage mode page.
   const handleOpenManageMode = () => {
-    // Update Zustand state with the latest form values
+    // Update Zustand with the latest form values.
     replaceDraft(getValues());
 
     router.push("/(modal)/workout/manage-exercises");
   };
 
-  // Open the add exercise page
+  // Open the add exercise page.
   const handleOpenAddExercise = () => {
     replaceDraft(getValues());
 
     router.push("/(modal)/workout/add-exercise");
   };
 
-  // Replace exercise
+  // Replace an exercise.
   const handleReplaceExercise = (exerciseClientId: string) => {
     replaceDraft(getValues());
 
@@ -360,6 +331,18 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       },
     });
   };
+
+  const selectedWorkoutFocusTypeOption = data.workoutFocusType
+    ? {
+        label: data.workoutFocusType.name,
+        value: data.workoutFocusType.id,
+      }
+    : undefined;
+
+  const selectedTargetMuscleOptions = data.muscles.map((item) => ({
+    label: item.muscle.name,
+    value: item.muscle.id,
+  }));
 
   const footer = (
     <>
@@ -393,222 +376,19 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       }}
       stickyFooter={footer}
     >
-      {/* Plan Name */}
-      <View>
-        <ThemedText type="subtitle" variant="accent" className="mb-2">
-          Plan Name
-        </ThemedText>
-
-        <Controller
-          control={control}
-          name="name"
-          render={({ field, fieldState }) => (
-            <>
-              <FormTextInput
-                placeholder="Enter plan name"
-                value={field.value}
-                onChangeText={field.onChange}
-                error={!!fieldState.error}
-              />
-
-              <FormErrorMessage message={fieldState.error?.message} />
-            </>
-          )}
-        />
-      </View>
-
-      {/* Workout Type */}
-      <View className="mt-4">
-        <ThemedText type="subtitle" variant="accent" className="mb-2">
-          Workout Type
-        </ThemedText>
-
-        <Controller
-          control={control}
-          name="workoutFocusTypeId"
-          render={({ field, fieldState }) => (
-            <>
-              <FormInfiniteSelectInput<WorkoutFocusType>
-                allowEmpty
-                emptySelectionLabel="No workout type"
-                url={workoutApi.getTypes()}
-                queryKey={["workout-types"]}
-                mapOption={(item) => ({ label: item.name, value: item.id })}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Select workout type"
-                validationError={!!fieldState.error}
-                title="Select Workout Type"
-                snapPoints={["70%"]}
-                selectedOption={
-                  data.workoutFocusType
-                    ? {
-                        label: data.workoutFocusType.name,
-                        value: data.workoutFocusType.id,
-                      }
-                    : undefined
-                }
-              />
-
-              <FormErrorMessage message={fieldState.error?.message} />
-            </>
-          )}
-        />
-      </View>
-
-      {/* Target Muscle Groups */}
-      <View className="mt-4">
-        <ThemedText type="subtitle" variant="accent">
-          Target Muscle Groups
-        </ThemedText>
-
-        <View className="my-2">
-          <Controller
-            control={control}
-            name="autoFillMuscles"
-            render={({ field }) => (
-              <FormCheckbox
-                label="Auto-filled"
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-
-                  if (value) {
-                    clearErrors(["targetMuscles"]);
-                  }
-                }}
-                error={!!errors.autoFillMuscles}
-                disabled={!hasExercises}
-              />
-            )}
-          />
-        </View>
-
-        <Controller
-          control={control}
-          name="targetMuscles"
-          render={({ field, fieldState }) => (
-            <>
-              <FormInfiniteMultiSelectInput<Muscle>
-                url={muscleApi.getAll()}
-                queryKey={muscleQueryKeys.all}
-                mapOption={(item) => ({ label: item.name, value: item.id })}
-                value={field.value}
-                onChange={field.onChange}
-                selectedOptions={data.muscles.map((item) => ({
-                  label: item.muscle.name,
-                  value: item.muscle.id,
-                }))}
-                placeholder="Select target muscle group"
-                validationError={!!fieldState.error}
-                title="Select Target Muscles"
-                snapPoints={["70%"]}
-                disabled={autoFillMuscles}
-              />
-
-              <FormErrorMessage message={fieldState.error?.message} />
-            </>
-          )}
-        />
-      </View>
-
-      {/* Estimated Duration */}
-      <View className="mt-4">
-        <ThemedText type="subtitle" variant="accent">
-          Estimated Duration
-        </ThemedText>
-
-        <View className="my-2">
-          <Controller
-            control={control}
-            name="autoFillDuration"
-            render={({ field }) => (
-              <FormCheckbox
-                label="Auto-filled"
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-
-                  if (value) {
-                    clearErrors("duration");
-                  }
-                }}
-                error={!!errors.autoFillDuration}
-                disabled={!hasExercises}
-              />
-            )}
-          />
-        </View>
-
-        <Controller
-          control={control}
-          name="duration"
-          render={({ field, fieldState }) => (
-            <>
-              <DurationBottomSheetPicker
-                title="Select Estimated Duration"
-                value={field.value ?? 0}
-                onChange={(value) => {
-                  field.onChange(value);
-                  clearErrors("duration");
-                }}
-                disabled={autoFillDuration}
-                renderTrigger={({ value, openSheet, disabled }) => (
-                  <DurationPickerTrigger
-                    value={value}
-                    onPress={openSheet}
-                    disabled={disabled}
-                    error={!!fieldState.error}
-                  />
-                )}
-              />
-
-              <FormErrorMessage message={fieldState.error?.message} />
-            </>
-          )}
-        />
-      </View>
-
-      {/* Exercise List */}
-      <View className="mt-6">
-        <SectionHeader
-          title="Exercise List"
-          action={
-            <ExerciseListMenu
-              isDisabled={fields.length === 0}
-              actions={{
-                handleOpenManageMode,
-                handleRemoveAllExercises,
-              }}
-            />
-          }
-        />
-
-        {fields.length === 0 ? (
-          <View className="py-2">
-            <ThemedText type="default" variant="accent">
-              No exercises added yet
-            </ThemedText>
-
-            <ThemedText type="default" variant="primary">
-              Tap the + button to add your first exercise
-            </ThemedText>
-
-            <FormErrorMessage message={errors.workoutExercises?.message} />
-          </View>
-        ) : (
-          fields.map((item, index) => (
-            <View key={item.fieldId} className="mt-2">
-              <PlanWorkoutExerciseSection
-                form={form}
-                index={index}
-                onDeleteExercise={() => handleRemoveExercise(index)}
-                onReplaceExercise={() => handleReplaceExercise(item.clientId)}
-              />
-            </View>
-          ))
-        )}
-      </View>
+      <PlanFormFields
+        form={form}
+        fields={fields}
+        hasExercises={hasExercises}
+        autoFillMuscles={!!autoFillMuscles}
+        autoFillDuration={!!autoFillDuration}
+        selectedWorkoutFocusTypeOption={selectedWorkoutFocusTypeOption}
+        selectedTargetMuscleOptions={selectedTargetMuscleOptions}
+        onOpenManageMode={handleOpenManageMode}
+        onRemoveAllExercises={handleRemoveAllExercises}
+        onRemoveExercise={handleRemoveExercise}
+        onReplaceExercise={handleReplaceExercise}
+      />
     </PageLayout>
   );
 }

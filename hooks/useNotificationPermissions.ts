@@ -1,4 +1,4 @@
-import { devLog } from "@/lib/logger/devLogger";
+import { devLogger } from "@/lib/logger/devLogger";
 import { setupNotificationChannels } from "@/lib/notifications/shared/notificationChannels";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
@@ -16,7 +16,7 @@ export function useNotificationPermissions() {
     }
 
     void setupNotifications().catch((error) => {
-      devLog.error("Failed to setup notifications", error);
+      devLogger.error("Failed to setup notifications", error);
     });
   }, []);
 }

@@ -1,4 +1,4 @@
-import { devLog } from "@/lib/logger/devLogger";
+import { devLogger } from "@/lib/logger/devLogger";
 import {
   cancelRestCompleteNotification,
   scheduleRestCompleteNotification,
@@ -26,13 +26,13 @@ interface WorkoutRestTimerStore {
 
 function cancelRestNotificationSafely() {
   void cancelRestCompleteNotification().catch((error) => {
-    devLog.error("Failed to cancel rest notification", error);
+    devLogger.error("Failed to cancel rest notification", error);
   });
 }
 
 function scheduleRestNotificationSafely(seconds: number) {
   void scheduleRestCompleteNotification(seconds).catch((error) => {
-    devLog.error("Failed to schedule rest notification", error);
+    devLogger.error("Failed to schedule rest notification", error);
   });
 }
 
