@@ -29,20 +29,20 @@ const exerciseEquipmentLinkSchema = z.object({
 export const exerciseSchema = z.object({
   id: z.number(),
   name: z.string(),
-  description: z.string().nullish(),
-  imageUrl: z.string().nullish(),
+  description: z.string().nullable(),
+  imageUrl: z.string().nullable(),
 
   exerciseType: z.enum(ExerciseType),
   difficultyLevel: z.enum(DifficultyLevel),
 
-  defaultCaloriesBurned: z.number().nullish(),
-  defaultDuration: z.number().nullish(),
-  defaultRestTime: z.number().nullish(),
-  defaultRepsRange: z.string().nullish(),
-  defaultSets: z.number().nullish(),
+  defaultCaloriesBurned: z.number().nullable(),
+  defaultDuration: z.number().nullable(),
+  defaultRestTime: z.number().nullable(),
+  defaultRepsRange: z.string().nullable(),
+  defaultSets: z.number().nullable(),
 
-  demoLink: z.string().nullish(),
-  howToPerform: z.string().nullish(),
+  demoLink: z.string().nullable(),
+  howToPerform: z.string().nullable(),
 
   muscles: z.array(exerciseMuscleItemSchema).nullish(),
   equipmentLinks: z.array(exerciseEquipmentLinkSchema).nullish(),

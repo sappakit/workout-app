@@ -55,26 +55,3 @@ export interface Exercise {
   muscles?: ExerciseMuscleItem[] | null;
   equipmentLinks?: ExerciseEquipmentLink[] | null;
 }
-
-// TODO: remove
-interface Exercise_Old {
-  id: number;
-  name: string;
-  description?: string | null;
-  imageUrl?: string | null;
-
-  exerciseType: ExerciseType;
-  difficultyLevel: DifficultyLevel;
-
-  defaultCaloriesBurned?: number | null;
-  defaultDuration?: number | null;
-  defaultRestTime?: number | null;
-  defaultRepsRange?: string | null;
-  defaultSets?: number | null;
-
-  demoLink?: string | null;
-  howToPerform?: string | null;
-
-  muscles?: ExerciseMuscleItem[] | null;
-  equipmentLinks?: ExerciseEquipmentLink[] | null;
-}

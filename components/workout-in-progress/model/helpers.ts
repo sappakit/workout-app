@@ -108,12 +108,7 @@ export function addSessionExercise(
       : 1;
 
   exercises.forEach((exercise) => {
-    const exists = currentExercises.some(
-      (item) => item.exercise.id === exercise.id,
-    );
-
-    if (exists) return;
-
+    // Allow duplicate exercises as separate session exercise rows
     nextSessionExercises.push(
       mapExerciseToSessionExerciseModel(exercise, nextOrderIndex),
     );
