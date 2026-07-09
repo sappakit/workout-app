@@ -39,6 +39,8 @@ type BaseWorkoutExerciseSectionProps<TSet extends BaseSetItem> = {
   restTimerTitle?: string;
   onChangeRestTime?: (seconds: number) => void;
 
+  errorMessage?: string;
+
   onAddSet?: () => void;
   onDeleteExercise?: () => void;
   onReplaceExercise?: () => void;
@@ -61,6 +63,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
   restTime = 0,
   restTimerTitle = "Select Rest Timer",
   onChangeRestTime,
+  errorMessage,
   onAddSet,
   onDeleteExercise,
   onReplaceExercise,
@@ -78,14 +81,16 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
   const isEditable = mode === "editable";
   const canShowMenu = isEditable && onReplaceExercise && onDeleteExercise;
   const canShowAddSetFooter = isEditable && onAddSet;
+  const hasError = !!errorMessage;
 
   const ExpansionIcon = expanded ? ChevronUp : ChevronDown;
 
   return (
     <View
-      className="overflow-hidden rounded-2xl"
+      className="overflow-hidden rounded-2xl border"
       style={{
         backgroundColor: colors.app.cardPrimary,
+        borderColor: hasError ? colors.app.error : "transparent",
       }}
     >
       <View className="flex-row items-center justify-between p-4">
@@ -149,13 +154,15 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
                   {emptyTitle}
                 </ThemedText>
 
-                <ThemedText
-                  type="default"
-                  variant="primary"
-                  className="text-xs"
-                >
+                <ThemedText type="extraSmall" variant="primary">
                   {emptyDescription}
                 </ThemedText>
+
+                {hasError && (
+                  <ThemedText type="extraSmall" variant="error">
+                    {errorMessage}
+                  </ThemedText>
+                )}
               </View>
             }
             ListHeaderComponent={

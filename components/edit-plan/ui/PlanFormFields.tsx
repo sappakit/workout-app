@@ -56,7 +56,7 @@ export function PlanFormFields({
   onRemoveExercise,
   onReplaceExercise,
 }: PlanFormFieldsProps) {
-  const { control, clearErrors } = form;
+  const { control } = form;
   const { errors } = useFormState({ control });
 
   return (
@@ -129,10 +129,6 @@ export function PlanFormFields({
                     value={autoFillField.value}
                     onChange={(value) => {
                       autoFillField.onChange(value);
-
-                      if (value) {
-                        clearErrors(["targetMuscles"]);
-                      }
                     }}
                     error={!!errors.autoFillMuscles}
                     disabled={!hasExercises}
@@ -176,10 +172,6 @@ export function PlanFormFields({
                     value={autoFillField.value}
                     onChange={(value) => {
                       autoFillField.onChange(value);
-
-                      if (value) {
-                        clearErrors("duration");
-                      }
                     }}
                     error={!!errors.autoFillDuration}
                     disabled={!hasExercises}
@@ -192,7 +184,6 @@ export function PlanFormFields({
                 value={field.value ?? 0}
                 onChange={(value) => {
                   field.onChange(value);
-                  clearErrors("duration");
                 }}
                 disabled={autoFillDuration}
                 renderTrigger={({ value, openSheet, disabled }) => (

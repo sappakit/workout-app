@@ -1,21 +1,20 @@
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { usePlanFormAutoFill } from "@/hooks/usePlanFormAutoFill";
 import { api } from "@/lib/api/client";
 import { workoutApi } from "@/lib/api/workout.api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { mapEditPlanFormToUpdateWorkoutPayload } from "@/lib/workout/mappers";
-import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
 import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
 import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
-import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { PlanFormFields } from "../edit-plan/ui/PlanFormFields";
 
@@ -73,11 +72,8 @@ export default function CreatePlanContent() {
     keyName: "fieldId",
   });
 
-  const workoutExercises =
-    useWatch({
-      control,
-      name: "workoutExercises",
-    }) ?? [];
+  const { workoutExercises, autoFillMuscles, autoFillDuration, hasExercises } =
+    usePlanFormAutoFill({ form });
 
   // Initialize the Zustand draft once for create mode.
   useEffect(() => {
@@ -132,80 +128,6 @@ export default function CreatePlanContent() {
   const onSubmit = (values: EditPlanForm) => {
     mutate(values);
   };
-
-  // Auto-fill the duration.
-  const autoFillDuration = useWatch({
-    control,
-    name: "autoFillDuration",
-  });
-
-  useEffect(() => {
-    if (!autoFillDuration) return;
-
-    if (workoutExercises.length === 0) {
-      setValue("duration", 0, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-      return;
-    }
-
-    const totalSeconds = calculateWorkoutDurationFromExercises(
-      workoutExercises,
-      { timeType: "seconds" },
-    );
-
-    setValue("duration", totalSeconds, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  }, [workoutExercises, autoFillDuration, setValue]);
-
-  // Auto-fill the target muscles.
-  const autoFillMuscles = useWatch({
-    control,
-    name: "autoFillMuscles",
-  });
-
-  useEffect(() => {
-    if (!autoFillMuscles) return;
-
-    const uniqueMuscleIds = Array.from(
-      new Set(
-        workoutExercises.flatMap((workoutExercise) =>
-          (workoutExercise.exercise.muscles ?? []).map(
-            (item: ExerciseMuscleItem) => item.muscle.id,
-          ),
-        ),
-      ),
-    );
-
-    setValue("targetMuscles", uniqueMuscleIds, {
-      shouldValidate: false,
-      shouldDirty: true,
-    });
-  }, [workoutExercises, autoFillMuscles, setValue]);
-
-  // Disable auto-fill when there are no exercises.
-  const hasExercises = workoutExercises.length > 0;
-
-  useEffect(() => {
-    if (hasExercises) return;
-
-    if (getValues("autoFillMuscles")) {
-      setValue("autoFillMuscles", false, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-    }
-
-    if (getValues("autoFillDuration")) {
-      setValue("autoFillDuration", false, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-    }
-  }, [hasExercises, getValues, setValue]);
 
   // Cancel creation.
   const handleCancelCreate = () => {

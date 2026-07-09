@@ -75,7 +75,12 @@ export function ExercisePickerScreen({
     ? `Select one exercise to replace ${targetExercise?.name ?? "this exercise"}.`
     : addDescription;
 
-  const doneText = isReplaceMode ? "Replace" : "Done";
+  const selectedCount = tempSelectedExercises.length;
+  const doneText = isReplaceMode
+    ? "Replace"
+    : selectedCount > 0
+      ? `Add (${selectedCount})`
+      : "Add";
 
   const {
     data,
@@ -196,7 +201,7 @@ export function ExercisePickerScreen({
       onClose={onClose}
       onDone={handleDone}
       doneText={doneText}
-      doneDisabled={tempSelectedExercises.length === 0 || isSubmitting}
+      doneDisabled={selectedCount === 0 || isSubmitting}
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search exercise"

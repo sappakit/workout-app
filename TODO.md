@@ -7,9 +7,9 @@
 - some cardio shouldn't have distance (jump rope, boxing)
   Fix: add fieldConfigOverride in exercise-level
 - text input still leaves blank space
-- Add error message on exercise with no sets
 - bug create schedule multiple times
-- (filter) remove selected value after filter
+- validate in-progress workout with zod
+  exercise must have at least one set
 
 # OPTIONAL
 

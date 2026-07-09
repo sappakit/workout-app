@@ -27,7 +27,7 @@ export interface FormNumberInputProps {
   disabled?: boolean;
   allowDecimal?: boolean;
   showStepper?: boolean;
-  inputMode?: "default" | "gesture";
+  inputMode?: "default" | "gesture"; // "gesture" for ReanimatedSwipeable compatibility
 }
 
 export default function FormNumberInput({

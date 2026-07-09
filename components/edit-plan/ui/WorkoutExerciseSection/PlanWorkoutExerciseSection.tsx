@@ -5,6 +5,7 @@ import {
   Controller,
   FieldPath,
   UseFormReturn,
+  useFormState,
   useWatch,
 } from "react-hook-form";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
@@ -29,12 +30,19 @@ export function PlanWorkoutExerciseSection({
   onDeleteExercise,
   onReplaceExercise,
 }: PlanWorkoutExerciseSectionProps) {
-  const { control, getValues, setValue } = form;
+  const { control, getValues, setValue, trigger } = form;
+
+  const { errors } = useFormState({
+    control,
+  });
 
   const exercise = useWatch({
     control,
     name: `workoutExercises.${index}`,
   });
+
+  const setsErrorMessage =
+    errors.workoutExercises?.[index]?.sets?.root?.message;
 
   const columns = useMemo<WorkoutSetColumn[]>(() => {
     if (!exercise) return [];
@@ -51,26 +59,30 @@ export function PlanWorkoutExerciseSection({
     });
   };
 
-  const handleAddSet = () => {
-    const currentSets = getValues(`workoutExercises.${index}.sets`) ?? [];
+  const handleAddSet = async () => {
+    const setsPath = `workoutExercises.${index}.sets` as const;
 
-    const nextSetNumber =
-      currentSets.length > 0
-        ? Math.max(...currentSets.map((set) => set.setNumber)) + 1
-        : 1;
+    const currentSets = getValues(setsPath) ?? [];
+
+    const nextSetNumber = currentSets.length + 1;
 
     setValue(
-      `workoutExercises.${index}.sets`,
+      setsPath,
       [...currentSets, createEmptyWorkoutExerciseFormSet(nextSetNumber)],
       {
         shouldDirty: true,
         shouldValidate: true,
       },
     );
+
+    // Revalidate the nested sets array so sets.root.message is recalculated.
+    await trigger(setsPath);
   };
 
-  const handleDeleteSet = (targetClientId: string) => {
-    const currentSets = getValues(`workoutExercises.${index}.sets`) ?? [];
+  const handleDeleteSet = async (targetClientId: string) => {
+    const setsPath = `workoutExercises.${index}.sets` as const;
+
+    const currentSets = getValues(setsPath) ?? [];
 
     const nextSets = currentSets
       .filter((set) => set.clientId !== targetClientId)
@@ -79,10 +91,12 @@ export function PlanWorkoutExerciseSection({
         setNumber: setIndex + 1,
       }));
 
-    setValue(`workoutExercises.${index}.sets`, nextSets, {
+    setValue(setsPath, nextSets, {
       shouldDirty: true,
       shouldValidate: true,
     });
+
+    await trigger(setsPath);
   };
 
   return (
@@ -95,6 +109,7 @@ export function PlanWorkoutExerciseSection({
       imageUrl={exercise.exercise.imageUrl}
       sets={exercise.sets}
       restTime={exercise.restTime ?? 0}
+      errorMessage={setsErrorMessage}
       onChangeRestTime={handleChangeRestTime}
       onAddSet={handleAddSet}
       onDeleteExercise={onDeleteExercise}
