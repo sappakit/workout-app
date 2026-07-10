@@ -6,19 +6,17 @@
 
 - some cardio shouldn't have distance (jump rope, boxing)
   Fix: add fieldConfigOverride in exercise-level
-
 - text input still leaves blank space
-- when on WorkoutExercise card editing state, shouldn't be able to leave the page
-  Fix: disable button or alert user when leaving page or replace edit WorkoutExercise ui field with bottomSheet
-
-- Three column input (Estimated duration) too small on ios making it show as '...'
-- Allow duplicate exercise in one workout
-- session pause just pause on the frontend but session time still calculate from startedAt
-- make WorkoutTimerBottomSheet show on every page
-- WorkoutTimerBottomSheet buttons don't work if swipe up/down too fast
+- bug create schedule multiple times
+- validate in-progress workout with zod
+  exercise must have at least one set
 
 # OPTIONAL
 
 - Migrate ExerciseTypeFieldConfig from frontend to db
-- Tabs: Home, Workout, Stats, History, Profile
 - Allow > 1 workout schedule per day
+- Add notification
+  schedule workout, user afk
+- update every fields to use FormField (there's ProfileFormField)
+- use gluestack UI
+- make stickyFooter (pageLayout) follow keyboard

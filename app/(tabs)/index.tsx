@@ -1,118 +1,161 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { StatsGrid } from "@/components/custom-ui/StatGrid";
-import { StreakCard } from "@/components/custom-ui/StreakCard";
-import { WeekCalendar } from "@/components/custom-ui/WeekCalendar";
-import { PageLayout } from "@/components/layout/PageLayout";
-import { SectionHeader } from "@/components/layout/SectionHeader";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { AuthStorage } from "@/lib/api";
+import HomeContent from "@/components/home/HomeContent";
+import { HomeSkeleton } from "@/components/home/ui/HomeSkeleton";
+import { mapWorkoutSessionsToHistoryItems } from "@/components/progress/model/progress-history.mapper";
+import { EmptyState } from "@/components/state/EmptyState";
+import { ErrorState } from "@/components/state/ErrorState";
+import { mapWorkoutsToPreviewItems } from "@/components/workout/model/workout-preview.mapper";
+import { mapProgressOverviewToWorkoutStats } from "@/components/workout/model/workout-stats.mapper";
+import { workoutApi } from "@/lib/api/workout.api";
+import { useGetQuery } from "@/lib/query/useGetQuery";
+import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useInvalidateQueries } from "@/lib/query/utils";
-import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import * as Clipboard from "expo-clipboard";
-import { ChevronLeft, ChevronRight } from "lucide-react-native";
-import { View } from "react-native";
+import {
+  WorkoutProgressOverview,
+  WorkoutResponse,
+  WorkoutSession,
+  WorkoutTodayOverview,
+} from "@/types/workout/response/workout.types";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 
 export default function HomeScreen() {
-  const { colors } = useAppTheme();
-
+  const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
 
-  // TODO: remove
-  const toast = useAppToast();
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
 
-  // Today workout data
-  // const url = workoutApi.getSchedule();
+  const {
+    data: todayOverviewData,
+    isLoading: isTodayOverviewLoading,
+    isError: isTodayOverviewError,
+    refetch: refetchTodayOverview,
+  } = useGetQuery<WorkoutTodayOverview>(
+    workoutQueryKeys.todayOverview,
+    workoutApi.getTodayOverview(),
+  );
 
-  // const { data, isLoading, isError, isSuccess, isFetching } =
-  //   useGetQuery<WorkoutSchedule>(workoutQueryKeys.schedule, url);
+  const {
+    data: progressOverviewData,
+    isLoading: isProgressOverviewLoading,
+    isError: isProgressOverviewError,
+    refetch: refetchProgressOverview,
+  } = useGetQuery<WorkoutProgressOverview>(
+    workoutQueryKeys.progressOverview,
+    workoutApi.getProgressOverview(),
+  );
+
+  const {
+    data: workoutPreviewData,
+    isLoading: isWorkoutPreviewLoading,
+    isError: isWorkoutPreviewError,
+    refetch: refetchWorkoutPreview,
+  } = useInfiniteOptionsQuery<WorkoutResponse>({
+    url: workoutApi.getAll(),
+    queryKey: workoutQueryKeys.all,
+    limit: 4,
+    params: {
+      muscleIds: selectedMuscleIds.length > 0 ? selectedMuscleIds : undefined,
+    },
+  });
+
+  const {
+    data: sessionHistoryData,
+    isLoading: isSessionHistoryLoading,
+    isError: isSessionHistoryError,
+    refetch: refetchSessionHistory,
+  } = useInfiniteOptionsQuery<WorkoutSession>({
+    url: workoutApi.getSessionHistory(),
+    queryKey: workoutQueryKeys.sessionHistory,
+    limit: 3,
+  });
+
+  const workoutStats = progressOverviewData
+    ? mapProgressOverviewToWorkoutStats(progressOverviewData)
+    : null;
+
+  const sessionHistory =
+    sessionHistoryData?.pages.flatMap((page) => page.data) ?? [];
+
+  const historyItems = mapWorkoutSessionsToHistoryItems(sessionHistory);
+
+  const workoutPreviews =
+    workoutPreviewData?.pages.flatMap((page) => page.data) ?? [];
+
+  const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews, {
+    onOpenWorkout: (workoutId) => {
+      router.push({
+        pathname: "/(pages)/workout/[id]",
+        params: { id: workoutId },
+      });
+    },
+    onFavoriteWorkout: (workoutId) => {
+      console.log(`favorite workout: ${workoutId}`);
+    },
+  });
 
   const handleRefresh = async () => {
-    await invalidateQueries([workoutQueryKeys.schedule]);
+    setIsPullRefreshing(true);
+
+    try {
+      await invalidateQueries([
+        workoutQueryKeys.todayOverview,
+        workoutQueryKeys.progressOverview,
+        workoutQueryKeys.all,
+        workoutQueryKeys.sessionHistory,
+      ]);
+    } finally {
+      setIsPullRefreshing(false);
+    }
   };
 
-  // TODO: add loading/error
-  // if (isLoading) return null;
-  // if (isError || !data) return null;
+  const handleRetry = async () => {
+    await Promise.all([
+      refetchTodayOverview(),
+      refetchProgressOverview(),
+      refetchWorkoutPreview(),
+      refetchSessionHistory(),
+    ]);
+  };
+
+  const isPageLoading =
+    isTodayOverviewLoading ||
+    isProgressOverviewLoading ||
+    isSessionHistoryLoading;
+
+  const isPageError = isProgressOverviewError || isSessionHistoryError;
+
+  if (isPageLoading) return <HomeSkeleton />;
+
+  if (isPageError)
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: handleRetry,
+        }}
+      />
+    );
+
+  if (!workoutStats) return <EmptyState />;
 
   return (
-    <PageLayout
-      headerProps={{
-        variant: "home",
-        userName: "Tae",
+    <HomeContent
+      todayOverview={todayOverviewData}
+      workoutStats={workoutStats}
+      historyItems={historyItems}
+      workoutPreviewSection={{
+        items: workoutPreviewItems,
+        selectedMuscleIds,
+        onChangeMuscleIds: setSelectedMuscleIds,
+        isLoading: isWorkoutPreviewLoading,
+        isError: isWorkoutPreviewError,
+        onRetry: refetchWorkoutPreview,
       }}
-      // pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
-    >
-      {/* TODO: remove */}
-      <AppButton
-        title="Toast"
-        variant="primary"
-        textClassName="font-medium"
-        onPress={() =>
-          toast.error({
-            title: "Sign-up failed",
-            message: "Something went wrong. Please try again.",
-          })
-        }
-        className="mb-4"
-      />
-
-      {/* TODO: remove */}
-      <AppButton
-        title="Get access token"
-        variant="primary"
-        textClassName="font-medium"
-        onPress={async () => {
-          const token = await AuthStorage.getAccessToken();
-
-          if (token) {
-            await Clipboard.setStringAsync(token);
-            console.log("Token copied");
-          }
-        }}
-        className="mb-4"
-      />
-
-      {/* Streak Card */}
-      <StreakCard />
-
-      {/* Stats */}
-      <View className="mt-4">
-        <SectionHeader title="Your stats" />
-
-        <View className="mt-2">
-          <StatsGrid />
-        </View>
-      </View>
-
-      {/* Calendar */}
-      <View className="mt-4">
-        <WeekCalendar onDateChange={(d) => console.log("Selected:", d)} />
-
-        <View className="mt-2 flex-row items-center justify-between">
-          <ChevronLeft size={24} color={colors.app.textSecondary} />
-
-          <ThemedText
-            type="default"
-            variant="primary"
-            style={{ color: colors.app.textAccent }}
-          >
-            November 2025
-          </ThemedText>
-
-          <ChevronRight size={24} color={colors.app.textSecondary} />
-        </View>
-      </View>
-
-      {/* Today Plan */}
-      {/* <View className="mt-4">
-        <SectionHeader title="Today plan" />
-
-        {data.workout.workoutExercises.map((item) => (
-          <ExerciseCardReadonly key={item.id} data={item} className="mt-2" />
-        ))}
-      </View> */}
-    </PageLayout>
+      pullToRefresh={{
+        refreshing: isPullRefreshing,
+        onRefresh: handleRefresh,
+      }}
+    />
   );
 }

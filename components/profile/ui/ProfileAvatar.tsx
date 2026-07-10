@@ -1,24 +1,30 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { Pencil, User } from "lucide-react-native";
-import { Image, Pressable, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 import { twMerge } from "tailwind-merge";
 
 type ProfileAvatarProps = {
   image?: string | null;
   className?: string;
   onPressEdit?: () => void;
+  showEditIcon?: boolean;
 };
 
 export function ProfileAvatar({
   image,
   className,
   onPressEdit,
+  showEditIcon = false,
 }: ProfileAvatarProps) {
   const { colors } = useAppTheme();
 
   return (
-    <View className={twMerge(clsx("relative", className))}>
+    <TouchableOpacity
+      onPress={onPressEdit}
+      activeOpacity={0.8}
+      className={twMerge(clsx("relative", className))}
+    >
       <View className="h-24 w-24 overflow-hidden rounded-full">
         {image ? (
           <Image
@@ -36,16 +42,17 @@ export function ProfileAvatar({
         )}
       </View>
 
-      <Pressable
-        className="absolute bottom-0 right-0 h-9 w-9 translate-y-1/4 items-center justify-center rounded-full border-4"
-        style={{
-          backgroundColor: colors.app.brand,
-          borderColor: colors.app.background,
-        }}
-        onPress={onPressEdit}
-      >
-        <Pencil size={14} color={colors.app.textAccent} />
-      </Pressable>
-    </View>
+      {showEditIcon ? (
+        <View
+          className="absolute bottom-0 right-0 h-10 w-10 translate-y-1/4 items-center justify-center rounded-full border-4"
+          style={{
+            backgroundColor: colors.app.brand,
+            borderColor: colors.app.background,
+          }}
+        >
+          <Pencil size={14} color={colors.app.white} />
+        </View>
+      ) : null}
+    </TouchableOpacity>
   );
 }

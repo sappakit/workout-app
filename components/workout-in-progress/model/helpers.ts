@@ -1,5 +1,6 @@
 import { getPausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
 import { createClientId } from "@/lib/id/utils";
+import { ExerciseFieldKey, getExerciseFields } from "@/lib/workout/config";
 import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
@@ -107,12 +108,7 @@ export function addSessionExercise(
       : 1;
 
   exercises.forEach((exercise) => {
-    const exists = currentExercises.some(
-      (item) => item.exercise.id === exercise.id,
-    );
-
-    if (exists) return;
-
+    // Allow duplicate exercises as separate session exercise rows
     nextSessionExercises.push(
       mapExerciseToSessionExerciseModel(exercise, nextOrderIndex),
     );
@@ -141,13 +137,15 @@ export function replaceSessionExercise(
 
       return {
         ...sessionExercise,
+        workoutExerciseId: null,
         exercise: selectedExercise,
+        restTime: selectedExercise.defaultRestTime ?? null,
         completedAt: null,
-        plannedRestTime: selectedExercise.defaultRestTime ?? 0,
         sets:
           sessionExercise.sets.length > 0
             ? sessionExercise.sets.map((set) => ({
                 ...set,
+                workoutExerciseSetId: null,
                 completedAt: null,
               }))
             : [createEmptySessionSet(1)],
@@ -179,6 +177,7 @@ function createEmptySessionSet(setNumber = 1): WorkoutSessionExerciseSetModel {
   return {
     id: null,
     clientId: createClientId("new-session-set"),
+    workoutExerciseSetId: null,
     setNumber,
     reps: null,
     weight: null,
@@ -220,15 +219,9 @@ function mapExerciseToSessionExerciseModel(
   return {
     id: null,
     clientId: createClientId("new-session-exercise"),
+    workoutExerciseId: null,
     orderIndex,
-
-    plannedSets: null,
-    plannedRepsRange: null,
-    plannedWeight: null,
-    plannedRestTime: null,
-    plannedDuration: null,
-    plannedDistance: null,
-
+    restTime: exercise.defaultRestTime ?? null,
     completedAt: null,
     exercise,
     sets: [firstSet],
@@ -267,12 +260,14 @@ export const mapWorkoutSessionModelToFinishPayload = (
     caloriesBurned: session.caloriesBurned,
     sessionExercises: session.sessionExercises.map((sessionExercise) => ({
       id: sessionExercise.id ?? null,
+      workoutExerciseId: sessionExercise.workoutExerciseId ?? null,
       exerciseId: sessionExercise.exercise.id,
       orderIndex: sessionExercise.orderIndex,
-      plannedRestTime: sessionExercise.plannedRestTime,
+      restTime: sessionExercise.restTime ?? null,
       completedAt: sessionExercise.completedAt,
       sets: sessionExercise.sets.map((set) => ({
-        id: set.id,
+        id: set.id ?? null,
+        workoutExerciseSetId: set.workoutExerciseSetId ?? null,
         setNumber: set.setNumber,
         reps: set.reps,
         weight: set.weight,
@@ -284,3 +279,88 @@ export const mapWorkoutSessionModelToFinishPayload = (
     })),
   };
 };
+
+// Set input value helpers
+// Commit inherited placeholder values into empty set fields
+export function commitInheritedSetValues({
+  set,
+  sets,
+  currentIndex,
+  exercise,
+}: {
+  set: WorkoutSessionExerciseSetModel;
+  sets: WorkoutSessionExerciseSetModel[];
+  currentIndex: number;
+  exercise: WorkoutSessionExerciseModel;
+}): WorkoutSessionExerciseSetModel {
+  const fields = Array.from(getExerciseFields(exercise.exercise.exerciseType));
+
+  return fields.reduce<WorkoutSessionExerciseSetModel>((updatedSet, field) => {
+    const currentValue = getWorkoutSessionSetValue(updatedSet, field);
+
+    // If user already typed a value, do not overwrite it.
+    if (currentValue != null) {
+      return updatedSet;
+    }
+
+    const inheritedValue = getPreviousSetValue({
+      sets,
+      currentIndex,
+      field,
+    });
+
+    // If there is no previous value, keep it empty.
+    if (inheritedValue == null) {
+      return updatedSet;
+    }
+
+    return updateWorkoutSessionSetValue(updatedSet, field, inheritedValue);
+  }, set);
+}
+
+// Get nearest previous actual value for a set field
+export function getPreviousSetValue({
+  sets,
+  currentIndex,
+  field,
+}: {
+  sets: WorkoutSessionExerciseSetModel[];
+  currentIndex: number;
+  field: ExerciseFieldKey;
+}): number | null {
+  for (let index = currentIndex - 1; index >= 0; index--) {
+    const previousSet = sets[index];
+
+    if (!previousSet) {
+      continue;
+    }
+
+    const previousValue = getWorkoutSessionSetValue(previousSet, field);
+
+    if (previousValue != null) {
+      return previousValue;
+    }
+  }
+
+  return null;
+}
+
+// Get actual value from a session set field
+export function getWorkoutSessionSetValue(
+  set: WorkoutSessionExerciseSetModel,
+  field: ExerciseFieldKey,
+): number | null {
+  return set[field] ?? null;
+}
+
+// Update actual value for a session set field
+function updateWorkoutSessionSetValue(
+  set: WorkoutSessionExerciseSetModel,
+  field: ExerciseFieldKey,
+  value: number | null,
+): WorkoutSessionExerciseSetModel {
+  return {
+    ...set,
+    [field]: value,
+  };
+}

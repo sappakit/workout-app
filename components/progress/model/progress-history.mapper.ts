@@ -1,11 +1,11 @@
 import { secondsToHMS } from "@/lib/workout/mappers";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
-import { BicepsFlexed } from "lucide-react-native";
-import { ProgressMetricCardItem } from "../ui/elements/ProgressMetricCard";
+import { Layers, Timer, Weight } from "lucide-react-native";
+import { RecentWorkoutCardItem } from "../ui/sections/progress-history-section/RecentWorkoutCard";
 
-export function mapWorkoutSessionsToProgressHistoryItems(
+export function mapWorkoutSessionsToHistoryItems(
   sessions: WorkoutSession[],
-): ProgressMetricCardItem[] {
+): RecentWorkoutCardItem[] {
   return sessions.map((session) => {
     const volumeKg = getSessionVolumeKg(session);
     const completedSets = getCompletedSetCount(session);
@@ -14,21 +14,26 @@ export function mapWorkoutSessionsToProgressHistoryItems(
     return {
       id: session.id,
       title: session.workout?.name ?? "Workout",
-      subtitle: session.workout?.workoutFocusType?.name,
-      rightText: formatHistoryDate(session.endedAt ?? session.startedAt),
-      icon: BicepsFlexed,
+      subtitle: formatHistoryDate(session.endedAt ?? session.startedAt),
+      imageUrl: session.workout?.imageUrl,
+      action: () => {
+        console.log(`session: ${session.id}`);
+      },
       list: [
         {
-          label: "Duration",
-          value: formatDurationShort(session.totalDuration ?? 0),
+          label: "Sets",
+          value: `${completedSets}/${totalSets}`,
+          icon: Layers,
         },
         {
           label: "Volume",
           value: `${formatNumber(volumeKg)} kg`,
+          icon: Weight,
         },
         {
-          label: "Sets",
-          value: `${completedSets}/${totalSets}`,
+          label: "Duration",
+          value: formatDurationShort(session.totalDuration ?? 0),
+          icon: Timer,
         },
       ],
     };
@@ -83,7 +88,7 @@ export function formatDate(
   return new Intl.DateTimeFormat("en-US", options).format(new Date(value));
 }
 
-function formatHistoryDate(value?: string | null) {
+export function formatHistoryDate(value?: string | null) {
   if (!value) return "-";
 
   return formatDate(value, {

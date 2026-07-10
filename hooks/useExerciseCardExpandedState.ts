@@ -12,6 +12,7 @@ export function useExerciseCardExpandedState() {
 
   const expanded = expandedOverride ?? showFullExerciseDetails;
 
+  // reset local override whenever the global setting changes
   useEffect(() => {
     setExpandedOverride(null);
   }, [showFullExerciseDetails]);

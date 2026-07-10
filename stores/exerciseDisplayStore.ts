@@ -11,7 +11,7 @@ interface ExerciseDisplayStore {
 export const useExerciseDisplayStore = create<ExerciseDisplayStore>()(
   persist(
     (set) => ({
-      showFullExerciseDetails: false,
+      showFullExerciseDetails: true,
       setShowFullExerciseDetails: (value) =>
         set({ showFullExerciseDetails: value }),
       toggleShowFullExerciseDetails: () =>

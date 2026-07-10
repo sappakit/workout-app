@@ -1,59 +1,55 @@
-import { workoutApi } from "@/app/api/workout.api";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useCountdownTimer } from "@/hooks/useCountdownTimer";
-import { api } from "@/lib/api";
-import { useInvalidateQueries } from "@/lib/query/utils";
-import { useAppToast } from "@/lib/toast/useAppToast";
-import { workoutQueryKeys } from "@/lib/workout/keys";
-import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
-import { WorkoutSession } from "@/types/workout/response/workout.types";
-import { useMutation } from "@tanstack/react-query";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import { Plus } from "lucide-react-native";
-import { useEffect } from "react";
-import { Alert, ImageBackground, StyleSheet, View } from "react-native";
+import { ExerciseFieldKey } from "@/lib/workout/config";
+import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import {
+  selectActiveWorkoutSession,
+  selectWorkoutSessionHydrated,
+  selectWorkoutSessionPerformanceByExerciseId,
+  useWorkoutSessionStore,
+} from "@/stores/workoutSessionStore";
+import { useRouter } from "expo-router";
+import { Dumbbell, Layers, Plus, Weight } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Alert, View } from "react-native";
+import {
+  getWorkoutTimerMetricDisplay,
   getWorkoutTimerStats,
   INITIAL_TIMER_STATS,
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
-import WorkoutTimerBottomSheet from "../bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import { AppButton } from "../custom-ui/AppButton";
+import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
+import { InProgressWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
+import { RecentMetricList } from "../progress/ui/sections/progress-history-section/RecentWorkoutCard";
+import { DetailHeroImage } from "../workout-detail/ui/DetailHeroImage";
 import {
   addSessionSet,
+  commitInheritedSetValues,
   deleteSessionExercise,
   deleteSessionSet,
-  mapWorkoutSessionModelToFinishPayload,
   syncSessionExerciseCompletion,
 } from "./model/helpers";
-import { WorkoutExerciseSection } from "./ui/WorkoutExerciseSection";
 
-type WorkoutInProgressContentProps = {
-  session: WorkoutSession;
-};
-
-const fallbackImage =
-  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80";
-
-export function WorkoutInProgressContent({
-  session,
-}: WorkoutInProgressContentProps) {
+export function WorkoutInProgressContent() {
   const { colors } = useAppTheme();
 
-  const toast = useAppToast();
-  const invalidateQueries = useInvalidateQueries();
-  const restTimer = useCountdownTimer();
   const router = useRouter();
 
-  // Workout session store
-  const hydrated = useWorkoutSessionStore((state) => state.hydrated);
-  const storedSession = useWorkoutSessionStore((state) => state.session);
-  const initializeSession = useWorkoutSessionStore(
-    (state) => state.initializeSession,
+  // Workout rest timer store
+  const startRestTimer = useWorkoutRestTimerStore(
+    (state) => state.startRestTimer,
   );
 
+  // Workout session store
+  const hydrated = useWorkoutSessionStore(selectWorkoutSessionHydrated);
+  const storedSession = useWorkoutSessionStore(selectActiveWorkoutSession);
+  const storedPerformanceByExerciseId = useWorkoutSessionStore(
+    selectWorkoutSessionPerformanceByExerciseId,
+  );
+  const removePerformanceByExerciseId = useWorkoutSessionStore(
+    (state) => state.removePerformanceByExerciseId,
+  );
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
   const updateSessionExercise = useWorkoutSessionStore(
     (state) => state.updateSessionExercise,
@@ -61,80 +57,50 @@ export function WorkoutInProgressContent({
   const updateSessionSet = useWorkoutSessionStore(
     (state) => state.updateSessionSet,
   );
-  const clearSession = useWorkoutSessionStore((state) => state.clearSession);
-
-  // Initialize session state
-  useEffect(() => {
-    if (!hydrated) return;
-
-    initializeSession(session);
-  }, [hydrated, session, initializeSession]);
 
   // Ensure store is hydrated and contains the current session
-  const isActiveSessionReady = hydrated && storedSession?.id === session.id;
+  const isActiveSessionReady = hydrated && !!storedSession;
 
   // Use storedSession as the single source of truth
-  const exerciseItems = storedSession?.sessionExercises ?? [];
+  const [exerciseItems, setExerciseItems] = useState(
+    storedSession?.sessionExercises ?? [],
+  );
+
+  // Refresh exercise list layout after session exercises change
+  useEffect(() => {
+    // Wait for the page to fully mount
+    const frame = requestAnimationFrame(() => {
+      setExerciseItems(storedSession?.sessionExercises ?? []);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [storedSession?.sessionExercises]);
 
   // Stats for bottom sheet timer
   const timerStats = storedSession
     ? getWorkoutTimerStats(storedSession)
     : INITIAL_TIMER_STATS;
 
-  /* Mutations */
-  // Cancel workout
-  const cancelWorkoutMutation = useMutation({
-    mutationFn: () => {
-      if (!storedSession) throw new Error("No active session");
+  // Stats for workout card
+  const timerMetrics = getWorkoutTimerMetricDisplay(timerStats);
 
-      return api.post(workoutApi.cancelSession(storedSession.id));
+  const summaryMetricList = [
+    {
+      label: timerMetrics.exercises.label,
+      value: timerMetrics.exercises.value,
+      icon: Dumbbell,
     },
-    onSuccess: async () => {
-      await invalidateQueries([workoutQueryKeys.current]);
-
-      restTimer.stop();
-      clearSession();
-
-      toast.success({
-        title: "Workout cancelled",
-        message: "Your workout was discarded.",
-      });
+    {
+      label: timerMetrics.sets.label,
+      value: timerMetrics.sets.value,
+      icon: Layers,
     },
-    onError: () => {
-      toast.error({
-        title: "Cancel failed",
-        message: "Could not cancel workout session.",
-      });
+    {
+      label: timerMetrics.volume.label,
+      value: timerMetrics.volume.value,
+      icon: Weight,
     },
-  });
-
-  // Finish workout
-  const finishWorkoutSessionMutation = useMutation({
-    mutationFn: async () => {
-      if (!storedSession) throw new Error("No active session");
-
-      const payload = mapWorkoutSessionModelToFinishPayload(storedSession);
-
-      return api.patch(workoutApi.finishSession(storedSession.id), payload);
-    },
-    onSuccess: async () => {
-      await invalidateQueries([workoutQueryKeys.current]);
-
-      restTimer.stop();
-      clearSession();
-
-      toast.success({
-        title: "Workout completed",
-        message: "Your workout has been saved successfully.",
-      });
-    },
-    onError: () => {
-      toast.error({
-        title: "Save failed",
-        message: "Something went wrong while saving your session.",
-      });
-    },
-  });
+  ];
 
   /* Functions */
   // Add set
@@ -167,14 +133,38 @@ export function WorkoutInProgressContent({
     const isCompleting = !targetSet?.completedAt;
 
     updateSessionExercise(exerciseClientId, (exercise) => {
-      const updatedSets = exercise.sets.map((set) =>
-        set.clientId === setClientId
-          ? {
-              ...set,
-              completedAt: set.completedAt ? null : completedAt,
-            }
-          : set,
+      const targetSetIndex = exercise.sets.findIndex(
+        (set) => set.clientId === setClientId,
       );
+
+      if (targetSetIndex === -1) {
+        return exercise;
+      }
+
+      const updatedSets = exercise.sets.map((set, index) => {
+        if (set.clientId !== setClientId) {
+          return set;
+        }
+
+        // Unchecking DONE should only remove completedAt
+        if (set.completedAt) {
+          return {
+            ...set,
+            completedAt: null,
+          };
+        }
+
+        // Checking DONE should commit inherited placeholder values
+        return {
+          ...commitInheritedSetValues({
+            set,
+            sets: exercise.sets,
+            currentIndex: index,
+            exercise,
+          }),
+          completedAt,
+        };
+      });
 
       return syncSessionExerciseCompletion({
         ...exercise,
@@ -183,15 +173,15 @@ export function WorkoutInProgressContent({
     });
 
     if (isCompleting) {
-      restTimer.start(targetExercise?.plannedRestTime ?? 0);
+      startRestTimer(targetExercise?.restTime ?? 0);
     }
   };
 
-  // Update set weight/reps
+  // Update set value
   const handleUpdateSetValue = (
     exerciseClientId: string,
     setClientId: string,
-    field: "weight" | "reps",
+    field: ExerciseFieldKey,
     value: number | null,
   ) => {
     updateSessionSet(exerciseClientId, setClientId, (set) => ({
@@ -207,8 +197,13 @@ export function WorkoutInProgressContent({
   ) => {
     updateSessionExercise(exerciseClientId, (exercise) => ({
       ...exercise,
-      plannedRestTime: value,
+      restTime: value,
     }));
+  };
+
+  // Manage mode
+  const handleOpenManageMode = () => {
+    router.push("/(modal)/workout/session/manage-session-exercises");
   };
 
   // Add exercise
@@ -241,66 +236,56 @@ export function WorkoutInProgressContent({
           text: "Remove",
           style: "destructive",
           onPress: () => {
+            const targetExercise = storedSession?.sessionExercises.find(
+              (exercise) => exercise.clientId === exerciseClientId,
+            );
+
             updateSession((prev) =>
               deleteSessionExercise(prev, exerciseClientId),
             );
+
+            // remove exercise performance from session store
+            if (targetExercise?.exercise.id != null) {
+              removePerformanceByExerciseId(targetExercise.exercise.id);
+            }
           },
         },
       ],
     );
   };
 
-  // Cancel session
-  const handleCancelWorkout = () => {
+  // Remove all exercises
+  const handleRemoveAllExercises = () => {
+    if (exerciseItems.length === 0) return;
+
     Alert.alert(
-      "Cancel workout?",
-      "All progress from this session will be lost.",
+      "Remove all exercises?",
+      "This will remove all exercises and sets from this workout session.",
       [
         {
-          text: "Keep Workout",
+          text: "Cancel",
           style: "cancel",
         },
         {
-          text: "Discard Workout",
+          text: "Remove All",
           style: "destructive",
-          onPress: () => cancelWorkoutMutation.mutate(),
+          onPress: () => {
+            const removedExerciseIds = exerciseItems.map(
+              (item) => item.exercise.id,
+            );
+
+            updateSession((prev) => ({
+              ...prev,
+              sessionExercises: [],
+            }));
+
+            removedExerciseIds.forEach((exerciseId) => {
+              removePerformanceByExerciseId(exerciseId);
+            });
+          },
         },
       ],
     );
-  };
-
-  // finish session
-  const handleFinishWorkoutSession = () => {
-    if (!storedSession) return;
-
-    finishWorkoutSessionMutation.mutate();
-  };
-
-  // Pause/resume session
-  const handleTogglePauseWorkout = () => {
-    updateSession((prev) => {
-      const now = new Date();
-
-      // Resume
-      if (prev.pausedAt) {
-        const pausedSeconds = Math.floor(
-          (now.getTime() - new Date(prev.pausedAt).getTime()) / 1000,
-        );
-
-        return {
-          ...prev,
-          pausedAt: null,
-          totalPausedDuration:
-            prev.totalPausedDuration + Math.max(0, pausedSeconds),
-        };
-      }
-
-      // Pause
-      return {
-        ...prev,
-        pausedAt: now.toISOString(),
-      };
-    });
   };
 
   // TODO: add loading
@@ -309,50 +294,88 @@ export function WorkoutInProgressContent({
   }
 
   return (
-    <>
-      <PageLayout
-        disableContentPadding
-        headerProps={{
+    <PageLayout
+      header={{
+        props: {
           variant: "title",
           title: "Workout",
-        }}
-        containerStyle={{
-          paddingBottom: 200,
+        },
+        scrollEffect: { overlay: true },
+      }}
+    >
+      <DetailHeroImage imageUrl={storedSession.workout?.imageUrl} />
+
+      <View
+        style={{
+          marginTop: -76, // cardHeight / 2
         }}
       >
-        <ImageBackground
-          source={{ uri: fallbackImage }}
-          resizeMode="cover"
-          style={{ height: 240 }}
+        <View
+          className="overflow-hidden rounded-2xl"
+          style={{ backgroundColor: colors.app.cardPrimary }}
         >
-          <LinearGradient
-            colors={["transparent", colors.app.background]}
-            locations={[0.4, 1]}
-            style={StyleSheet.absoluteFillObject}
-          />
-
-          <View className="flex-1 items-center justify-end pb-4">
-            {storedSession?.workout?.workoutFocusType?.name && (
-              <ThemedText type="default" variant="accent">
+          <View
+            className="relative items-center justify-center p-4"
+            style={{ height: 80 }}
+          >
+            {storedSession.workout?.workoutFocusType?.name && (
+              <ThemedText type="small" variant="primary">
                 {storedSession.workout.workoutFocusType.name}
               </ThemedText>
             )}
 
+            <ThemedText type="title" variant="accent">
+              {storedSession.workout?.name ?? "Workout"}
+            </ThemedText>
+
+            <View className="absolute right-0 top-0 p-4">
+              <ExerciseListMenu
+                isDisabled={exerciseItems.length === 0}
+                actions={{
+                  handleOpenManageMode,
+                  handleRemoveAllExercises,
+                }}
+              />
+            </View>
+          </View>
+
+          <RecentMetricList list={summaryMetricList} />
+        </View>
+      </View>
+
+      <View className="flex-1 gap-3 pt-3">
+        {exerciseItems.length === 0 ? (
+          <View
+            className="items-center rounded-2xl p-6"
+            style={{ backgroundColor: colors.app.cardPrimary }}
+          >
+            <View
+              className="mb-3 h-16 w-16 items-center justify-center rounded-2xl"
+              style={{ backgroundColor: colors.app.cardSecondary }}
+            >
+              <Dumbbell size={24} color={colors.app.textAccent} />
+            </View>
+
+            <ThemedText type="default" variant="accent" className="text-center">
+              No exercises yet
+            </ThemedText>
+
             <ThemedText
               type="default"
-              variant="brand"
-              className="text-center text-4xl font-bold"
+              variant="primary"
+              className="text-center"
             >
-              {storedSession?.workout?.name ?? "Workout"}
+              Add your first exercise to start tracking.
             </ThemedText>
           </View>
-        </ImageBackground>
-
-        <View className="flex-1 gap-3 px-4">
-          {exerciseItems.map((exerciseItem) => (
-            <WorkoutExerciseSection
+        ) : (
+          exerciseItems.map((exerciseItem) => (
+            <InProgressWorkoutExerciseSection
               key={exerciseItem.clientId}
               exercise={exerciseItem}
+              performanceSummary={
+                storedPerformanceByExerciseId[String(exerciseItem.exercise.id)]
+              }
               onAddSet={() => handleAddSet(exerciseItem.clientId)}
               onDeleteExercise={() =>
                 handleDeleteExercise(exerciseItem.clientId)
@@ -378,43 +401,16 @@ export function WorkoutInProgressContent({
                 handleUpdateExerciseRestTime(exerciseItem.clientId, value)
               }
             />
-          ))}
-        </View>
+          ))
+        )}
 
-        <View className="mt-3 px-4">
-          <AppButton
-            title="Add exercise"
-            variant="primary"
-            icon={Plus}
-            onPress={handleAddExercise}
-          />
-        </View>
-      </PageLayout>
-
-      <WorkoutTimerBottomSheet
-        startedAt={storedSession.startedAt}
-        pausedAt={storedSession.pausedAt}
-        totalPausedDuration={storedSession.totalPausedDuration}
-        remainingRestSeconds={restTimer.remainingSeconds}
-        stats={timerStats}
-        restAction={{
-          onSkip: restTimer.stop,
-          onIncrease: restTimer.increase,
-          onDecrease: restTimer.decrease,
-        }}
-        pauseAction={{
-          onPress: handleTogglePauseWorkout,
-          isPaused: storedSession.pausedAt != null,
-        }}
-        finishAction={{
-          onPress: handleFinishWorkoutSession,
-          loading: finishWorkoutSessionMutation.isPending,
-        }}
-        discardAction={{
-          onPress: handleCancelWorkout,
-          loading: cancelWorkoutMutation.isPending,
-        }}
-      />
-    </>
+        <AppButton
+          title="Add exercise"
+          variant="primary"
+          icon={Plus}
+          onPress={handleAddExercise}
+        />
+      </View>
+    </PageLayout>
   );
 }

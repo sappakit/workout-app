@@ -1,93 +1,55 @@
-import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { ExerciseType } from "@/types/workout/response/exercise.types";
-import { FieldPath } from "react-hook-form";
 
-export type ExerciseFieldKey =
-  | "plannedSets"
-  | "plannedRepsRange"
-  | "plannedRestTime"
-  | "plannedDuration"
-  | "plannedDistance"
-  | "plannedWeight";
+export type ExerciseFieldKey = "weight" | "reps" | "distance" | "duration";
 
-export interface ExerciseTypeFieldConfig {
-  visibleFields: ExerciseFieldKey[];
-  requiredFields: ExerciseFieldKey[];
+export const exerciseTypeFields: Record<ExerciseType, ExerciseFieldKey[]> = {
+  [ExerciseType.STRENGTH]: ["weight", "reps"],
+  [ExerciseType.CALISTHENICS]: ["weight", "reps"],
+  [ExerciseType.CARDIO]: ["distance", "duration"],
+};
+
+export function getExerciseFields(type: ExerciseType): ExerciseFieldKey[] {
+  return exerciseTypeFields[type] ?? [];
 }
 
-export const exerciseTypeFieldConfig: Record<
-  ExerciseType,
-  ExerciseTypeFieldConfig
+export type ExerciseFieldConfig = {
+  label: string;
+  placeholder: string;
+  allowDecimal: boolean;
+  min: number;
+  max?: number;
+};
+
+export const exerciseFieldConfig: Record<
+  ExerciseFieldKey,
+  ExerciseFieldConfig
 > = {
-  [ExerciseType.STRENGTH]: {
-    visibleFields: [
-      "plannedSets",
-      "plannedRepsRange",
-      "plannedWeight",
-      "plannedRestTime",
-    ],
-    requiredFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
+  weight: {
+    label: "LOAD",
+    placeholder: "-",
+    allowDecimal: true,
+    min: 0,
   },
-
-  [ExerciseType.CARDIO]: {
-    visibleFields: ["plannedDuration", "plannedDistance"],
-    requiredFields: ["plannedDuration"],
+  reps: {
+    label: "REPS",
+    placeholder: "-",
+    allowDecimal: false,
+    min: 0,
   },
-
-  [ExerciseType.CALISTHENICS]: {
-    visibleFields: [
-      "plannedSets",
-      "plannedRepsRange",
-      "plannedWeight",
-      "plannedRestTime",
-    ],
-    requiredFields: ["plannedSets", "plannedRepsRange", "plannedRestTime"],
+  distance: {
+    label: "DIST",
+    placeholder: "-",
+    allowDecimal: true,
+    min: 0,
+  },
+  duration: {
+    label: "TIME",
+    placeholder: "-",
+    allowDecimal: false,
+    min: 0,
   },
 };
 
-export function getVisibleFields(typeConfig: ExerciseTypeFieldConfig) {
-  return new Set(typeConfig.visibleFields);
+export function getExerciseFieldConfig(field: ExerciseFieldKey) {
+  return exerciseFieldConfig[field];
 }
-
-export const getExerciseFieldNames = (
-  index: number,
-  typeConfig: ExerciseTypeFieldConfig,
-): FieldPath<EditPlanForm>[] => {
-  const visibleFields = getVisibleFields(typeConfig);
-  const names: FieldPath<EditPlanForm>[] = [];
-
-  if (visibleFields.has("plannedSets")) {
-    names.push(`workoutExercises.${index}.plannedSets`);
-  }
-
-  if (visibleFields.has("plannedRepsRange")) {
-    names.push(
-      `workoutExercises.${index}.plannedRepsMin`,
-      `workoutExercises.${index}.plannedRepsMax`,
-    );
-  }
-
-  if (visibleFields.has("plannedWeight")) {
-    names.push(`workoutExercises.${index}.plannedWeight`);
-  }
-
-  if (visibleFields.has("plannedRestTime")) {
-    names.push(
-      `workoutExercises.${index}.plannedRestMinutes`,
-      `workoutExercises.${index}.plannedRestSeconds`,
-    );
-  }
-
-  if (visibleFields.has("plannedDuration")) {
-    names.push(
-      `workoutExercises.${index}.plannedDurationMinutes`,
-      `workoutExercises.${index}.plannedDurationSeconds`,
-    );
-  }
-
-  if (visibleFields.has("plannedDistance")) {
-    names.push(`workoutExercises.${index}.plannedDistance`);
-  }
-
-  return names;
-};

@@ -1,40 +1,30 @@
-import {
-  Exercise,
-  ExerciseType,
-} from "@/types/workout/response/exercise.types";
+import { ExerciseType } from "@/types/workout/response/exercise.types";
 import {
   WorkoutExerciseItem,
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { Clock, Dumbbell, LucideIcon } from "lucide-react-native";
-import { exerciseTypeFieldConfig, getVisibleFields } from "./config";
-import {
-  formatRepsRange,
-  hmsToSeconds,
-  parseRepsRange,
-  secondsToHMS,
-} from "./mappers";
+import { ExerciseFieldKey, getExerciseFields } from "./config";
+import { hmsToSeconds, secondsToHMS } from "./mappers";
 
 /* Duration */
 type DurationOptions = {
   timeType?: "seconds" | "minutes";
 };
 
-// Exercise shape for calculations (API [seconds]/form [minutes/seconds])
+// Supports both API shape and edit-plan form shape.
+type ExerciseSetDurationInput = {
+  duration?: number | null;
+  durationMinutes?: number | null;
+  durationSeconds?: number | null;
+};
+
 type ExerciseDurationInput = {
-  plannedSets: number | null;
-
-  plannedRestTime?: number | null;
-  plannedRestMinutes?: number | null;
-  plannedRestSeconds?: number | null;
-
-  plannedDuration?: number | null;
-  plannedDurationMinutes?: number | null;
-  plannedDurationSeconds?: number | null;
+  restTime?: number | null;
+  sets?: ExerciseSetDurationInput[] | null;
 
   exercise: {
     exerciseType: ExerciseType;
-
     defaultSets?: number | null;
     defaultDuration?: number | null;
     defaultRestTime?: number | null;
@@ -45,20 +35,20 @@ function convertDuration(seconds: number, options?: DurationOptions) {
   return options?.timeType === "seconds" ? seconds : Math.round(seconds / 60);
 }
 
-function getPlannedRestTimeSeconds(item: ExerciseDurationInput): number | null {
-  if (item.plannedRestTime != null) return item.plannedRestTime;
+function getSetDurationSeconds(set: ExerciseSetDurationInput): number | null {
+  if (set.duration != null) return set.duration;
 
-  return hmsToSeconds(0, item.plannedRestMinutes, item.plannedRestSeconds);
+  return hmsToSeconds(0, set.durationMinutes, set.durationSeconds);
 }
 
-function getPlannedDurationSeconds(item: ExerciseDurationInput): number | null {
-  if (item.plannedDuration != null) return item.plannedDuration;
+function getTotalSetDurationSeconds(item: ExerciseDurationInput): number {
+  const sets = item.sets ?? [];
 
-  return hmsToSeconds(
-    0,
-    item.plannedDurationMinutes,
-    item.plannedDurationSeconds,
-  );
+  return sets.reduce((total, set) => {
+    const duration = getSetDurationSeconds(set);
+
+    return total + (duration ?? 0);
+  }, 0);
 }
 
 // Calculate the duration of a single exercise
@@ -66,28 +56,31 @@ export function calculateExerciseDuration(
   item: ExerciseDurationInput,
   options?: DurationOptions,
 ): number {
-  const plannedDuration = getPlannedDurationSeconds(item);
-  const plannedRestTime = getPlannedRestTimeSeconds(item);
+  const sets = item.sets ?? [];
+  const setCount = sets.length || item.exercise.defaultSets || 0;
 
+  const totalSetDuration = getTotalSetDurationSeconds(item);
   const defaultDuration = item.exercise.defaultDuration ?? 0;
 
-  // Explicit planned duration always takes priority
-  if (plannedDuration != null && plannedDuration > 0) {
-    return convertDuration(plannedDuration, options);
-  }
-
-  // Cardio: use duration directly
+  // Cardio: use set duration total if available, otherwise exercise default duration
   if (item.exercise.exerciseType === ExerciseType.CARDIO) {
-    return convertDuration(defaultDuration, options);
+    const totalSeconds =
+      totalSetDuration > 0 ? totalSetDuration : defaultDuration;
+
+    return convertDuration(totalSeconds, options);
   }
 
-  const sets = item.plannedSets ?? item.exercise.defaultSets ?? 0;
-  const setTime = defaultDuration;
-  const restTime = plannedRestTime ?? item.exercise.defaultRestTime ?? 0;
+  if (setCount <= 0) return 0;
 
-  if (sets <= 0) return 0;
+  const restTime = item.restTime ?? item.exercise.defaultRestTime ?? 0;
 
-  const totalSeconds = sets * setTime + Math.max(sets - 1, 0) * restTime;
+  // Strength/calisthenics:
+  // If each set has duration, use total set duration.
+  // Otherwise estimate with exercise.defaultDuration per set.
+  const exerciseTime =
+    totalSetDuration > 0 ? totalSetDuration : setCount * defaultDuration;
+
+  const totalSeconds = exerciseTime + Math.max(setCount - 1, 0) * restTime;
 
   return convertDuration(totalSeconds, options);
 }
@@ -116,21 +109,21 @@ export function calculateWorkoutDuration(workout: WorkoutResponse): number {
 }
 
 /* Calories */
-// Calcurate total calories used for the workout program
+// Calculate total calories used for the workout program
 export function calculateWorkoutCalories(workout: WorkoutResponse): number {
   let totalCalories = 0;
 
   workout.workoutExercises.forEach((item) => {
-    const { plannedSets, plannedDuration, exercise } = item;
+    const setCount = item.sets.length || item.exercise.defaultSets || 0;
+    const baseCalories = item.exercise.defaultCaloriesBurned ?? 0;
 
-    const sets = plannedSets ?? exercise.defaultSets ?? 0;
-    const baseCalories = exercise.defaultCaloriesBurned ?? 0;
-
-    switch (exercise.exerciseType) {
+    switch (item.exercise.exerciseType) {
       case ExerciseType.CARDIO: {
         // Calories per minute
         const durationSeconds =
-          plannedDuration ?? exercise.defaultDuration ?? 0;
+          getTotalSetDurationSeconds(item) ||
+          item.exercise.defaultDuration ||
+          0;
 
         const durationMinutes = durationSeconds / 60;
 
@@ -141,7 +134,7 @@ export function calculateWorkoutCalories(workout: WorkoutResponse): number {
       // Calories per set
       case ExerciseType.STRENGTH:
       case ExerciseType.CALISTHENICS:
-        totalCalories += sets * baseCalories;
+        totalCalories += setCount * baseCalories;
         break;
 
       default:
@@ -152,7 +145,7 @@ export function calculateWorkoutCalories(workout: WorkoutResponse): number {
   return Math.round(totalCalories);
 }
 
-// UI
+/* UI */
 export type ExerciseCardInfoItem = {
   key: string;
   label: string;
@@ -177,30 +170,72 @@ export interface ExercisePreviewDisplayModel {
   equipment: string[];
 }
 
+function formatUniqueNumbers(
+  values: Array<number | null | undefined>,
+  suffix = "",
+): string {
+  const uniqueValues = [...new Set(values.filter((value) => value != null))];
+
+  if (uniqueValues.length === 0) return "-";
+
+  if (uniqueValues.length === 1) {
+    return `${uniqueValues[0]}${suffix}`;
+  }
+
+  return uniqueValues.map((value) => `${value}${suffix}`).join(", ");
+}
+
+function formatDurationValue(seconds: number | null | undefined): string {
+  if (seconds == null) return "-";
+
+  const duration = secondsToHMS(seconds);
+
+  if (duration.hours && duration.hours > 0) {
+    return `${duration.hours} hr ${duration.minutes} min`;
+  }
+
+  return `${duration.minutes} min ${duration.seconds} sec`;
+}
+
 export function buildWorkoutExerciseDisplayModel(
   data: WorkoutExerciseItem,
 ): WorkoutExerciseDisplayModel {
-  const typeConfig = exerciseTypeFieldConfig[data.exercise.exerciseType];
-  const visibleFields = getVisibleFields(typeConfig);
+  const fields = getExerciseFields(data.exercise.exerciseType);
+
+  const hasField = (field: ExerciseFieldKey) => fields.includes(field);
 
   // Sets
-  const sets = data.plannedSets ?? data.exercise.defaultSets ?? 0;
+  const sets = data.sets.length;
 
-  // Reps range
-  const fallbackReps = parseRepsRange(data.exercise.defaultRepsRange ?? null);
-  const parsedPlannedReps = parseRepsRange(data.plannedRepsRange ?? null);
+  // Set values
+  const reps = formatUniqueNumbers(
+    data.sets.map((set) => set.reps),
+    " reps",
+  );
 
-  const repsMin = parsedPlannedReps.minReps ?? fallbackReps.minReps;
-  const repsMax = parsedPlannedReps.maxReps ?? fallbackReps.maxReps;
-  const reps = formatRepsRange({ minReps: repsMin, maxReps: repsMax });
+  const weight = formatUniqueNumbers(
+    data.sets.map((set) => set.weight),
+    " kg",
+  );
+
+  const distance = formatUniqueNumbers(data.sets.map((set) => set.distance));
+
+  const durationValues = data.sets
+    .map((set) => set.duration)
+    .filter((value): value is number => value != null);
+
+  const durationText =
+    durationValues.length === 0
+      ? "-"
+      : durationValues.length === 1
+        ? formatDurationValue(durationValues[0])
+        : durationValues.map(formatDurationValue).join(", ");
 
   // Rest time
-  const totalRestSeconds =
-    data.plannedRestTime ?? data.exercise.defaultRestTime ?? 0;
-  const rest = secondsToHMS(totalRestSeconds);
+  const rest = secondsToHMS(data.restTime ?? 0);
 
-  // Duration
-  const duration = calculateExerciseDuration(data);
+  // Estimated duration
+  const estimatedDuration = calculateExerciseDuration(data);
 
   // Equipment
   const equipment = (data.exercise.equipmentLinks ?? []).map(
@@ -208,143 +243,76 @@ export function buildWorkoutExerciseDisplayModel(
   );
 
   const infoData: ExerciseCardInfoItem[] = [
-    ...(visibleFields.has("plannedSets")
-      ? [{ key: "sets", label: "Total Sets", value: `${sets}` }]
+    {
+      key: "sets",
+      label: "Total Sets",
+      value: `${sets}`,
+    },
+
+    ...(hasField("reps")
+      ? [
+          {
+            key: "reps",
+            label: "Reps per Set",
+            value: reps,
+          },
+        ]
       : []),
 
-    ...(visibleFields.has("plannedRepsRange")
-      ? [{ key: "reps", label: "Reps per Set", value: reps ?? "-" }]
-      : []),
-
-    ...(visibleFields.has("plannedWeight")
+    ...(hasField("weight")
       ? [
           {
             key: "weight",
             label: "Load",
-            value:
-              data.plannedWeight != null ? `${data.plannedWeight} kg` : "-",
+            value: weight,
           },
         ]
       : []),
 
-    ...(visibleFields.has("plannedDistance")
+    ...(hasField("distance")
       ? [
           {
             key: "distance",
             label: "Target Distance",
-            value:
-              data.plannedDistance != null ? `${data.plannedDistance}` : "-",
+            value: distance,
           },
         ]
       : []),
 
-    ...(visibleFields.has("plannedRestTime")
+    ...(hasField("duration")
       ? [
           {
-            key: "rest",
-            label: "Rest Between Sets",
-            value: `${rest.minutes} min ${rest.seconds} sec`,
+            key: "duration",
+            label: "Target Duration",
+            value: durationText,
           },
         ]
       : []),
+
+    {
+      key: "rest",
+      label: "Rest Between Sets",
+      value: `${rest.minutes} min ${rest.seconds} sec`,
+    },
 
     {
       key: "time",
       label: "Estimated Duration",
-      value: `${duration} min`,
+      value: `${estimatedDuration} min`,
     },
   ];
 
   const stats: ExerciseCardStatItem[] = [
-    ...(visibleFields.has("plannedSets")
-      ? [
-          {
-            key: "sets",
-            label: `${sets} ${sets !== 1 ? "Sets" : "Set"}`,
-            icon: Dumbbell,
-          },
-        ]
-      : []),
+    {
+      key: "sets",
+      label: `${sets} ${sets !== 1 ? "Sets" : "Set"}`,
+      icon: Dumbbell,
+    },
     {
       key: "duration",
-      label: `${duration} min`,
+      label: `${estimatedDuration} min`,
       icon: Clock,
     },
-  ];
-
-  return {
-    stats,
-    infoData,
-    equipment,
-  };
-}
-
-export function buildExercisePreviewDisplayModel(
-  exercise: Exercise,
-): ExercisePreviewDisplayModel {
-  const typeConfig = exerciseTypeFieldConfig[exercise.exerciseType];
-  const visibleFields = getVisibleFields(typeConfig);
-
-  const defaultSets = exercise.defaultSets ?? 0;
-  const defaultReps = exercise.defaultRepsRange ?? "-";
-  const defaultRest = secondsToHMS(exercise.defaultRestTime ?? 0);
-  const defaultDurationMinutes = Math.ceil(
-    (exercise.defaultDuration ?? 0) / 60,
-  );
-
-  const equipment = (exercise.equipmentLinks ?? []).map(
-    (link) => link.equipment.name,
-  );
-
-  const infoData: ExerciseCardInfoItem[] = [
-    ...(visibleFields.has("plannedSets")
-      ? [{ key: "sets", label: "Default Sets", value: `${defaultSets}` }]
-      : []),
-
-    ...(visibleFields.has("plannedRepsRange")
-      ? [{ key: "reps", label: "Default Reps", value: defaultReps }]
-      : []),
-
-    ...(visibleFields.has("plannedRestTime")
-      ? [
-          {
-            key: "rest",
-            label: "Default Rest",
-            value: `${defaultRest.minutes} min ${defaultRest.seconds} sec`,
-          },
-        ]
-      : []),
-
-    ...(visibleFields.has("plannedDuration")
-      ? [
-          {
-            key: "duration",
-            label: "Default Duration",
-            value: `${defaultDurationMinutes} min`,
-          },
-        ]
-      : []),
-  ];
-
-  const stats: ExerciseCardStatItem[] = [
-    ...(visibleFields.has("plannedSets")
-      ? [
-          {
-            key: "sets",
-            label: `${defaultSets} ${defaultSets !== 1 ? "Sets" : "Set"}`,
-            icon: Dumbbell,
-          },
-        ]
-      : []),
-    ...(visibleFields.has("plannedDuration")
-      ? [
-          {
-            key: "duration",
-            label: `${defaultDurationMinutes} min`,
-            icon: Clock,
-          },
-        ]
-      : []),
   ];
 
   return {

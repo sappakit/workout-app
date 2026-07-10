@@ -1,10 +1,16 @@
-import { api, AuthStorage } from "@/lib/api";
+import { authApi } from "@/lib/api/auth.api";
+import { api, setOnAuthExpired } from "@/lib/api/client";
+import { devLogger } from "@/lib/logger/devLogger";
+import { AuthStorage } from "@/lib/storage/authStorage";
 import { SignInForm } from "@/schemas/auth.schema";
+import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
+import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
 import { SignUpRequest, UserAuth } from "@/types/auth.types";
 import { useRouter } from "expo-router";
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -35,6 +41,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const router = useRouter();
 
+  const clearLocalAuthState = useCallback(async () => {
+    await AuthStorage.clearTokens();
+
+    // Clear workout runtime state
+    useWorkoutSessionStore.getState().clearSession();
+    useWorkoutRestTimerStore.getState().clearRestTimer();
+
+    // Clear persisted Zustand storage
+    useWorkoutSessionStore.persist.clearStorage();
+    useWorkoutRestTimerStore.persist.clearStorage();
+
+    setUser(null);
+  }, []);
+
+  // Let the API layer clear AuthContext when refresh token expires
+  useEffect(() => {
+    setOnAuthExpired(async () => {
+      await clearLocalAuthState();
+      router.replace("/(auth)/sign-in");
+    });
+
+    return () => {
+      setOnAuthExpired(null);
+    };
+  }, [clearLocalAuthState, router]);
+
   // Restore session on app start
   useEffect(() => {
     (async () => {
@@ -48,21 +80,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Token exists -> get user from backend
-        const { data } = await api.get("/auth/me");
-        setUser(data as UserAuth);
+        const { data } = await api.get<UserAuth>(authApi.me());
+        setUser(data);
       } catch {
-        setUser(null);
-        await AuthStorage.clearTokens();
+        await clearLocalAuthState();
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [clearLocalAuthState]);
 
   // Sign up
   async function signUp(values: SignUpRequest) {
-    const { data } = await api.post("/auth/register", values);
-    const { accessToken, refreshToken, user } = data as AuthResponse;
+    const { data } = await api.post<AuthResponse>(authApi.register(), values);
+    const { accessToken, refreshToken, user } = data;
 
     await AuthStorage.setTokens(accessToken, refreshToken);
     setUser(user);
@@ -70,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign in
   async function signIn(values: SignInForm) {
-    const { data } = await api.post<AuthResponse>("/auth/login", values);
+    const { data } = await api.post<AuthResponse>(authApi.login(), values);
     const { accessToken, refreshToken, user } = data;
 
     await AuthStorage.setTokens(accessToken, refreshToken);
@@ -83,20 +114,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (refreshToken) {
       try {
-        await api.post("/auth/logout", { refreshToken });
-      } catch (e) {
-        console.log("Logout failed:", e);
+        await api.post(authApi.logout(), { refreshToken });
+      } catch (error) {
+        devLogger.error("Logout API request failed", error);
       }
     }
 
-    await AuthStorage.clearTokens();
-    setUser(null);
+    await clearLocalAuthState();
+
     router.replace("/(auth)/sign-in");
   }
 
   // Re-fetch user
   async function loadUser() {
-    const { data } = await api.get<UserAuth>("/auth/me");
+    const { data } = await api.get<UserAuth>(authApi.me());
     setUser(data);
   }
 

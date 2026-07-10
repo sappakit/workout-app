@@ -4,13 +4,18 @@ import {
   WorkoutSessionExerciseSetModel,
   WorkoutSessionModel,
 } from "@/types/workout/model/workout.types";
-import { WorkoutSession } from "@/types/workout/response/workout.types";
+import {
+  ExercisePerformanceSummary,
+  WorkoutSession,
+} from "@/types/workout/response/workout.types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-interface WorkoutSessionStore {
+export interface WorkoutSessionStore {
   session: WorkoutSessionModel | null;
+  performanceByExerciseId: Record<string, ExercisePerformanceSummary>;
+
   hydrated: boolean;
 
   // Set/replace the entire session
@@ -31,6 +36,17 @@ interface WorkoutSessionStore {
 
   // Clear current session
   clearSession: () => void;
+
+  // Performance summary
+  setPerformanceByExerciseId: (
+    performanceByExerciseId: Record<string, ExercisePerformanceSummary>,
+  ) => void;
+
+  mergePerformanceByExerciseId: (
+    performanceByExerciseId: Record<string, ExercisePerformanceSummary>,
+  ) => void;
+
+  removePerformanceByExerciseId: (exerciseId: number) => void;
 
   // Update session exercise
   updateSessionExercise: (
@@ -54,6 +70,8 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
   persist(
     (set, get) => ({
       session: null,
+      performanceByExerciseId: {},
+
       hydrated: false,
 
       setSession: (session) => set({ session }),
@@ -67,6 +85,7 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
 
         set({
           session: mapWorkoutSessiontoWorkoutSessionModel(session),
+          performanceByExerciseId: {},
         });
       },
 
@@ -79,7 +98,38 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
         });
       },
 
-      clearSession: () => set({ session: null }),
+      clearSession: () =>
+        set({
+          session: null,
+          performanceByExerciseId: {},
+        }),
+
+      setPerformanceByExerciseId: (performanceByExerciseId) => {
+        set({ performanceByExerciseId });
+      },
+
+      mergePerformanceByExerciseId: (performanceByExerciseId) => {
+        set((state) => ({
+          performanceByExerciseId: {
+            ...state.performanceByExerciseId,
+            ...performanceByExerciseId,
+          },
+        }));
+      },
+
+      removePerformanceByExerciseId: (exerciseId) => {
+        set((state) => {
+          const nextPerformanceByExerciseId = {
+            ...state.performanceByExerciseId,
+          };
+
+          delete nextPerformanceByExerciseId[String(exerciseId)];
+
+          return {
+            performanceByExerciseId: nextPerformanceByExerciseId,
+          };
+        });
+      },
 
       updateSessionExercise: (exerciseClientId, updater) => {
         const current = get().session;
@@ -123,6 +173,7 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         session: state.session,
+        performanceByExerciseId: state.performanceByExerciseId,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
@@ -130,3 +181,16 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
     },
   ),
 );
+
+export const selectWorkoutSessionHydrated = (state: WorkoutSessionStore) =>
+  state.hydrated;
+
+export const selectActiveWorkoutSession = (state: WorkoutSessionStore) =>
+  state.session;
+
+export const selectHasActiveWorkoutSession = (state: WorkoutSessionStore) =>
+  state.hydrated && state.session != null;
+
+export const selectWorkoutSessionPerformanceByExerciseId = (
+  state: WorkoutSessionStore,
+) => state.performanceByExerciseId;

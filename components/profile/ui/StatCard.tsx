@@ -12,10 +12,9 @@ export function StatCard({ value, label }: StatCardProps) {
 
   return (
     <View
-      className="flex-1 items-center justify-center rounded-2xl border px-3 py-4"
+      className="flex-1 items-center justify-center rounded-2xl px-3 py-4"
       style={{
         backgroundColor: colors.app.cardPrimary,
-        borderColor: colors.app.borderPrimary,
       }}
     >
       <ThemedText

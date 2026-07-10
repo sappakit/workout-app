@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
 import { PaginatedResponse } from "@/types/api.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import FormMultiSelectInput, {

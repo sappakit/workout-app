@@ -1,10 +1,16 @@
-import { workoutApi } from "@/app/api/workout.api";
-import { AppButton } from "@/components/custom-ui/AppButton";
+import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
+import { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
+import { SortDirection } from "@/components/filter-option/FilterSortPage";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
-import { ThemedText } from "@/components/themed-text";
+import { ChooseWorkoutPickerSkeleton } from "@/components/workout/ui/workout-card/ChooseWorkoutPickerSkeleton";
+import {
+  mapWorkoutToWorkoutCardItem,
+  WorkoutCard,
+} from "@/components/workout/ui/workout-card/WorkoutCard";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDebounce } from "@/hooks/useDebounce";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/client";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -12,9 +18,19 @@ import { workoutQueryKeys } from "@/lib/workout/keys";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SlidersHorizontal } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
+
+export type WorkoutSortKey = "created_at" | "name" | "duration";
+
+export const DEFAULT_SORT_BY: WorkoutSortKey = "created_at";
+export const DEFAULT_SORT_DIRECTION: SortDirection = "DESC";
+export const DEFAULT_WORKOUT_FILTERS: WorkoutFilterValues = {
+  focusTypeIds: [],
+  muscleIds: [],
+  sortBy: DEFAULT_SORT_BY,
+  sortDirection: DEFAULT_SORT_DIRECTION,
+};
 
 export default function ChooseWorkoutPage() {
   const router = useRouter();
@@ -34,8 +50,16 @@ export default function ChooseWorkoutPage() {
     currentWorkoutId,
   );
 
+  const [filters, setFilters] = useState<WorkoutFilterValues>(
+    DEFAULT_WORKOUT_FILTERS,
+  );
+
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
+
+  const sortByParam = filters.sortBy
+    ? `${filters.sortBy}:${filters.sortDirection}`
+    : undefined;
 
   const {
     data,
@@ -47,10 +71,31 @@ export default function ChooseWorkoutPage() {
     refetch,
   } = useInfiniteOptionsQuery<WorkoutResponse>({
     url: workoutApi.getAll(),
-    queryKey: workoutQueryKeys.all,
+    queryKey: [
+      workoutQueryKeys.all,
+      "today-workout-picker",
+      debouncedSearch,
+      filters.focusTypeIds,
+      filters.muscleIds,
+      filters.sortBy,
+      filters.sortDirection,
+    ],
     search: debouncedSearch,
     limit: 20,
+    params: {
+      focusTypeIds:
+        filters.focusTypeIds.length > 0 ? filters.focusTypeIds : undefined,
+      muscleIds: filters.muscleIds.length > 0 ? filters.muscleIds : undefined,
+      sortBy: sortByParam,
+    },
   });
+
+  const workouts = data?.pages.flatMap((page) => page.data) ?? [];
+
+  const selectedWorkout =
+    workouts.find((workout) => workout.id === selectedWorkoutId) ?? null;
+
+  const isSameWorkout = selectedWorkoutId === currentWorkoutId;
 
   const { mutate: updateScheduleWorkout, isPending } = useMutation({
     mutationFn: async (workoutId: number) => {
@@ -80,12 +125,9 @@ export default function ChooseWorkoutPage() {
     },
   });
 
-  const workouts = data?.pages.flatMap((page) => page.data) ?? [];
-
-  const isSameWorkout = selectedWorkoutId === currentWorkoutId;
-
   const loadMore = () => {
     if (!hasNextPage || isFetchingNextPage) return;
+
     fetchNextPage();
   };
 
@@ -111,37 +153,29 @@ export default function ChooseWorkoutPage() {
       onDone={handleDone}
       doneText="Use Workout"
       doneDisabled={
-        !selectedWorkoutId || !scheduleId || isSameWorkout || isPending
+        !selectedWorkout || !scheduleId || isSameWorkout || isPending
       }
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search workout"
       isLoading={isLoading}
       isError={isError}
+      isEmpty={workouts.length === 0}
       errorText="Failed to load workouts"
+      emptyTitle="No workouts found"
+      emptyText="Try changing your search or filters."
       onRetry={() => refetch()}
+      loadingSkeleton={<ChooseWorkoutPickerSkeleton />}
       searchRight={
-        <AppButton
-          variant="option"
-          icon={SlidersHorizontal}
-          className="h-12 w-12 rounded-full"
-          iconSize={18}
-        />
+        <WorkoutFilterBottomSheet value={filters} onApplyFilters={setFilters} />
       }
     >
       <FlatList
         data={workouts}
         keyExtractor={(item) => String(item.id)}
-        contentContainerClassName="gap-2"
+        contentContainerClassName="gap-3"
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        ListEmptyComponent={
-          <View className="items-center justify-center py-10">
-            <ThemedText type="default" variant="secondary">
-              No workouts found
-            </ThemedText>
-          </View>
-        }
         ListFooterComponent={
           isFetchingNextPage ? (
             <View className="py-4">
@@ -151,22 +185,22 @@ export default function ChooseWorkoutPage() {
         }
         renderItem={({ item }) => {
           const isSelected = selectedWorkoutId === item.id;
+          const cardItem = mapWorkoutToWorkoutCardItem(item);
 
           return (
-            <Pressable
+            <WorkoutCard
+              id={cardItem.id}
+              title={cardItem.title}
+              subtitle={cardItem.subtitle}
+              imageUrl={cardItem.imageUrl}
+              metaItems={cardItem.metaItems}
               onPress={() => handleSelectWorkout(item)}
-              className="flex-row items-center justify-between rounded-2xl border px-4 py-4"
+              disabled={isPending}
+              className="border"
               style={{
-                backgroundColor: colors.app.cardPrimary,
-                borderColor: isSelected
-                  ? colors.app.brand
-                  : colors.app.borderPrimary,
+                borderColor: isSelected ? colors.app.brand : "transparent",
               }}
-            >
-              <ThemedText type="default" variant="primary">
-                {item.name}
-              </ThemedText>
-            </Pressable>
+            />
           );
         }}
       />

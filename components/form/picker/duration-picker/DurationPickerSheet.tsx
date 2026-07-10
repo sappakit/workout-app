@@ -9,20 +9,29 @@ import {
 } from "@gorhom/bottom-sheet";
 import clsx from "clsx";
 import { Check, Timer, X } from "lucide-react-native";
-import { useCallback, useRef, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { twMerge } from "tailwind-merge";
 import { DurationValue, DurationWheelPicker } from "./DurationWheelPicker";
 import { durationToSeconds, formatDuration, secondsToDuration } from "./utils";
 
+type DurationBottomSheetPickerRenderTriggerProps = {
+  value: number;
+  openSheet: () => void;
+  disabled?: boolean;
+};
+
 type DurationBottomSheetPickerProps = {
   value: number;
   title: string;
-  onChange: (value: number) => void;
+  onChange?: (value: number) => void;
   className?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  renderTrigger?: (
+    props: DurationBottomSheetPickerRenderTriggerProps,
+  ) => ReactNode;
 };
 
 export function DurationBottomSheetPicker({
@@ -32,6 +41,7 @@ export function DurationBottomSheetPicker({
   className,
   style,
   disabled,
+  renderTrigger,
 }: DurationBottomSheetPickerProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -77,18 +87,26 @@ export function DurationBottomSheetPicker({
 
   return (
     <>
-      <Pressable
-        onPress={openSheet}
-        disabled={disabled}
-        className={twMerge(clsx("flex-row items-center gap-1", className))}
-        style={[{ opacity: disabled ? 0.5 : 1 }, style]}
-      >
-        <Timer size={20} color={colors.app.brand} />
+      {renderTrigger ? (
+        renderTrigger({
+          value,
+          openSheet,
+          disabled,
+        })
+      ) : (
+        <Pressable
+          onPress={openSheet}
+          disabled={disabled}
+          className={twMerge(clsx("flex-row items-center gap-2", className))}
+          style={[{ opacity: disabled ? 0.5 : 1 }, style]}
+        >
+          <Timer size={20} color={colors.app.brand} />
 
-        <ThemedText type="default" variant="brand">
-          {value ? `Rest: ${formatDuration(value)}` : `No rest`}
-        </ThemedText>
-      </Pressable>
+          <ThemedText type="default" variant="brand">
+            {value ? `Rest: ${formatDuration(value)}` : "No rest"}
+          </ThemedText>
+        </Pressable>
+      )}
 
       <BottomSheetModal
         ref={bottomSheetModalRef}

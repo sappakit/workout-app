@@ -23,11 +23,6 @@ export function ExercisePickerCard({
   const router = useRouter();
   const { colors } = useAppTheme();
 
-  // const display = useMemo(
-  //   () => buildExercisePreviewDisplayModel(exercise),
-  //   [exercise],
-  // );
-
   const selected = status === "selected";
   const alreadyAdded = status === "already-added";
   const handleAdd = alreadyAdded ? undefined : onPressAdd;

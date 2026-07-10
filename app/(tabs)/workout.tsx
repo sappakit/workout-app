@@ -1,54 +1,137 @@
+import { EmptyState } from "@/components/state/EmptyState";
+import { ErrorState } from "@/components/state/ErrorState";
 import { WorkoutInProgressContent } from "@/components/workout-in-progress/WorkoutInProgressContent";
-import { WorkoutContent } from "@/components/workout/WorkoutContent";
+import { mapWorkoutsToPreviewItems } from "@/components/workout/model/workout-preview.mapper";
+import { WorkoutSkeleton } from "@/components/workout/ui/WorkoutSkeleton";
+import WorkoutContent from "@/components/workout/WorkoutContent";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
+import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
   WorkoutCurrent,
   WorkoutCurrentMode,
+  WorkoutResponse,
 } from "@/types/workout/response/workout.types";
-import { workoutApi } from "../api/workout.api";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 
 export default function WorkoutScreen() {
+  const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
-  const url = workoutApi.getCurrent();
 
-  const { data, isLoading, isError, isFetching } = useGetQuery<WorkoutCurrent>(
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>([]);
+
+  const {
+    data: currentWorkoutData,
+    isLoading: isCurrentWorkoutLoading,
+    isError: isCurrentWorkoutError,
+    refetch: refetchCurrentWorkout,
+  } = useGetQuery<WorkoutCurrent>(
     workoutQueryKeys.current,
-    url,
+    workoutApi.getCurrent(),
     {
       staleTime: 0,
     },
   );
 
+  const shouldFetchWorkoutPreviews =
+    !!currentWorkoutData &&
+    currentWorkoutData.mode !== WorkoutCurrentMode.IN_PROGRESS;
+
+  const {
+    data: workoutPreviewData,
+    isLoading: isWorkoutPreviewLoading,
+    isError: isWorkoutPreviewError,
+    isFetching: isWorkoutPreviewFetching,
+    refetch: refetchWorkoutPreview,
+  } = useInfiniteOptionsQuery<WorkoutResponse>({
+    url: workoutApi.getAll(),
+    queryKey: workoutQueryKeys.all,
+    limit: 4,
+    params: {
+      muscleIds: selectedMuscleIds.length > 0 ? selectedMuscleIds : undefined,
+      createdByMe: true,
+    },
+    enabled: shouldFetchWorkoutPreviews,
+  });
+
   const handleRefresh = async () => {
-    await invalidateQueries([workoutQueryKeys.current]);
+    setIsPullRefreshing(true);
+
+    try {
+      await invalidateQueries([workoutQueryKeys.current, workoutQueryKeys.all]);
+    } finally {
+      setIsPullRefreshing(false);
+    }
   };
 
-  // TODO: add loading/error
-  if (isLoading) return null;
-  if (isError || !data) return null;
+  const handleRetry = async () => {
+    await Promise.all([refetchCurrentWorkout(), refetchWorkoutPreview()]);
+  };
 
-  switch (data.mode) {
-    // In-progress session
+  const workoutPreviews =
+    workoutPreviewData?.pages.flatMap((page) => page.data) ?? [];
+
+  const workoutPreviewItems = mapWorkoutsToPreviewItems(workoutPreviews, {
+    onOpenWorkout: (workoutId) => {
+      router.push({
+        pathname: "/(pages)/workout/[id]",
+        params: { id: workoutId },
+      });
+    },
+    onFavoriteWorkout: (workoutId) => {
+      console.log(`favorite workout: ${workoutId}`);
+    },
+  });
+
+  if (isCurrentWorkoutLoading) return <WorkoutSkeleton />;
+
+  if (isCurrentWorkoutError)
+    return (
+      <ErrorState
+        primaryAction={{
+          onPress: handleRetry,
+        }}
+      />
+    );
+
+  if (!currentWorkoutData) return <EmptyState />;
+
+  switch (currentWorkoutData.mode) {
     case WorkoutCurrentMode.IN_PROGRESS:
-      return data.session ? (
-        <WorkoutInProgressContent session={data.session} />
-      ) : null;
+      return currentWorkoutData.session ? (
+        <WorkoutInProgressContent />
+      ) : (
+        <EmptyState />
+      );
 
-    // Scheduled workout
     case WorkoutCurrentMode.SCHEDULED:
-      return data.schedule ? (
-        <WorkoutContent
-          data={data.schedule}
-          pullToRefresh={{ refreshing: isFetching, onRefresh: handleRefresh }}
-        />
-      ) : null;
-
-    // TODO: add scrren for Rest day
-    // Rest day
     case WorkoutCurrentMode.REST_DAY:
+    case WorkoutCurrentMode.UNASSIGNED:
+      return (
+        <WorkoutContent
+          mode={currentWorkoutData.mode}
+          data={currentWorkoutData.schedule}
+          hasCompletedWorkoutToday={currentWorkoutData.hasCompletedWorkoutToday}
+          workoutPreviewSection={{
+            items: workoutPreviewItems,
+            selectedMuscleIds,
+            onChangeMuscleIds: setSelectedMuscleIds,
+            isLoading: isWorkoutPreviewLoading,
+            isError: isWorkoutPreviewError,
+            onRetry: refetchWorkoutPreview,
+          }}
+          pullToRefresh={{
+            refreshing: isPullRefreshing,
+            onRefresh: handleRefresh,
+          }}
+        />
+      );
+
     default:
-      return null;
+      return <EmptyState />;
   }
 }

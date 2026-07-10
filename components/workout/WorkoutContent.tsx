@@ -1,40 +1,90 @@
-import { workoutApi } from "@/app/api/workout.api";
 import { AppButton } from "@/components/custom-ui/AppButton";
 import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
-import { api } from "@/lib/api";
+import { SectionHeader } from "@/components/layout/SectionHeader";
+import { api } from "@/lib/api/client";
+import { workoutApi } from "@/lib/api/workout.api";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import { WorkoutSchedule } from "@/types/workout/response/workout.types";
+import {
+  WorkoutCurrentMode,
+  WorkoutSchedule,
+  WorkoutScheduleStatus,
+} from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Dumbbell, Plus, Search, Zap } from "lucide-react-native";
-import { useState } from "react";
 import { View } from "react-native";
-import { ExpandableToggle } from "../custom-ui/ExpandableToggle";
-import { SectionHeader } from "../layout/SectionHeader";
-import { WorkoutPlanCard } from "./ui/WorkoutPlanCard";
-import { ExerciseCardReadonly } from "./ui/exercise-card/ExerciseCardReadonly";
+import { mapScheduleToWorkoutHeroCardItem } from "./model/workout-content.mapper";
+import { RestDaySection } from "./ui/sections/RestDaySection";
+import { TodayPlanSection } from "./ui/sections/TodayPlanSection";
+import { UnassignedPlanSection } from "./ui/sections/UnassignedPlanSection";
+import {
+  WorkoutPreviewCardItem,
+  WorkoutPreviewSection,
+} from "./ui/workout-preview-card/WorkoutPreviewCard";
+import { WorkoutQuickActions } from "./ui/WorkoutQuickActions";
+
+export type TodayPlanDisplayState =
+  | "not_started"
+  | "completed_scheduled_plan"
+  | "completed_other_workout";
+
+type WorkoutContentMode = Exclude<
+  WorkoutCurrentMode,
+  WorkoutCurrentMode.IN_PROGRESS
+>;
+
+type WorkoutPreviewSectionState = {
+  items: WorkoutPreviewCardItem[];
+  selectedMuscleIds: number[];
+  onChangeMuscleIds: (muscleIds: number[]) => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
+};
 
 interface WorkoutContentProps {
-  data: WorkoutSchedule;
+  mode: WorkoutContentMode;
+  data: WorkoutSchedule | null;
+  hasCompletedWorkoutToday?: boolean;
+  workoutPreviewSection: WorkoutPreviewSectionState;
   pullToRefresh?: PullToRefreshProps;
 }
 
-export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
+export default function WorkoutContent({
+  mode,
+  data,
+  hasCompletedWorkoutToday = false,
+  workoutPreviewSection,
+  pullToRefresh,
+}: WorkoutContentProps) {
   const router = useRouter();
   const invalidateQueries = useInvalidateQueries();
   const toast = useAppToast();
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const workoutHeroItem = data ? mapScheduleToWorkoutHeroCardItem(data) : null;
+
+  const todayPlanState = data
+    ? getTodayPlanDisplayState(data.status, hasCompletedWorkoutToday)
+    : "not_started";
+
+  const isScheduledDay = mode === WorkoutCurrentMode.SCHEDULED;
+  const isRestDay = mode === WorkoutCurrentMode.REST_DAY;
+  const isUnassignedDay = mode === WorkoutCurrentMode.UNASSIGNED;
 
   // Start plan workout
   const { mutate: startWorkout, isPending: isStarting } = useMutation({
-    mutationFn: () => api.post(workoutApi.startSession(data.workout.id)),
+    mutationFn: () => {
+      if (!data) {
+        throw new Error("No scheduled workout found.");
+      }
+
+      return api.post(workoutApi.startSession(data.workout.id));
+    },
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current]);
     },
-    onError: (_err: unknown) => {
+    onError: () => {
       toast.error({
         title: "Failed to start workout",
         message: "Please try again.",
@@ -58,11 +108,12 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
     },
   );
 
-  const handleStartEmptyWorkout = () => {
-    startEmptyWorkout();
-  };
-
   const handleChooseWorkout = () => {
+    if (!data) {
+      router.push("/(modal)/workout/choose-workout");
+      return;
+    }
+
     router.push({
       pathname: "/(modal)/workout/choose-workout",
       params: {
@@ -77,102 +128,119 @@ export function WorkoutContent({ data, pullToRefresh }: WorkoutContentProps) {
   };
 
   const handleEditPlan = () => {
+    if (!data) return;
+
     router.push({
       pathname: "/(pages)/workout/[id]/edit",
       params: { id: data.workout.id },
     });
   };
 
+  const handleOpenWorkoutDetail = () => {
+    if (!data) return;
+
+    router.push({
+      pathname: "/(pages)/workout/[id]",
+      params: { id: data.workout.id },
+    });
+  };
+
+  const handleWeeklyPlan = () => {
+    router.push("/(pages)/weekly-plan");
+  };
+
   return (
     <PageLayout
-      headerProps={{
-        variant: "title",
-        title: "Workout",
-      }}
-      stickyFooter={{
-        content: (
-          <AppButton
-            title="Start Today's Workout"
-            variant="primary"
-            icon={Dumbbell}
-            className="flex-1"
-            onPress={() => startWorkout()}
-            loading={isStarting}
-          />
-        ),
+      header={{
+        props: { variant: "title", title: "Workout" },
       }}
       pullToRefresh={pullToRefresh}
     >
-      <View className="gap-3">
-        {/* Today's scheduled workout */}
-        <SectionHeader
-          title="Today's Plan"
-          subtitle="Your scheduled workout for today"
-        />
-
-        <View>
-          <WorkoutPlanCard
-            data={data.workout}
+      <View className="gap-4">
+        {/* {isScheduledDay && data && workoutHeroItem ? (
+          <TodayPlanSection
+            state={todayPlanState}
+            workoutHeroItem={workoutHeroItem}
+            isStarting={isStarting}
+            onStartTodayPlan={startWorkout}
             onEditPlan={handleEditPlan}
             onSwitchPlan={handleChooseWorkout}
+            onOpenWorkoutDetail={handleOpenWorkoutDetail}
+          />
+        ) : isRestDay ? (
+          <RestDaySection />
+        ) : isUnassignedDay ? (
+          <UnassignedPlanSection />
+        ) : null} */}
+
+        {isScheduledDay && data && workoutHeroItem ? (
+          <TodayPlanSection
+            state={todayPlanState}
+            workoutHeroItem={workoutHeroItem}
+            isStarting={isStarting}
+            onStartTodayPlan={startWorkout}
+            onEditPlan={handleEditPlan}
+            onSwitchPlan={handleChooseWorkout}
+            onWeeklyPlan={handleWeeklyPlan}
+            onOpenWorkoutDetail={handleOpenWorkoutDetail}
+          />
+        ) : null}
+
+        {isRestDay ? <RestDaySection onWeeklyPlan={handleWeeklyPlan} /> : null}
+
+        {isUnassignedDay ? (
+          <UnassignedPlanSection onWeeklyPlan={handleWeeklyPlan} />
+        ) : null}
+
+        <View className="gap-3">
+          <SectionHeader
+            title="Your plan"
+            action={
+              <AppButton
+                title="View All"
+                variant="ghost"
+                onPress={handleChooseWorkout}
+              />
+            }
           />
 
-          {/* Exercise preview */}
-          <View className="mt-2">
-            <ExpandableToggle
-              expandedLabel="Hide exercises"
-              collapsedLabel="Show exercises"
-              expanded={isExpanded}
-              onToggleExpanded={() => setIsExpanded((prev) => !prev)}
-            />
-
-            {isExpanded && (
-              <View>
-                {data.workout.workoutExercises.map((item) => (
-                  <ExerciseCardReadonly
-                    key={item.id}
-                    data={item}
-                    className="mt-2"
-                  />
-                ))}
-              </View>
-            )}
-          </View>
+          <WorkoutPreviewSection
+            items={workoutPreviewSection.items}
+            selectedMuscleIds={workoutPreviewSection.selectedMuscleIds}
+            onChangeMuscleIds={workoutPreviewSection.onChangeMuscleIds}
+            isLoading={workoutPreviewSection.isLoading}
+            isError={workoutPreviewSection.isError}
+            onRetry={workoutPreviewSection.onRetry}
+          />
         </View>
 
-        {/* Other workout options */}
-        <SectionHeader
-          title="Other Options"
-          subtitle="Choose a different way to train today"
+        <WorkoutQuickActions
+          onBrowsePlans={handleChooseWorkout}
+          onCreatePlan={handleCreateWorkout}
+          onStartEmptyWorkoutAction={{
+            onPress: startEmptyWorkout,
+            loading: isStartingEmpty,
+          }}
         />
-
-        <View className="gap-2">
-          <View className="flex-row gap-2">
-            <AppButton
-              className="flex-1"
-              title="New Plan"
-              variant="option"
-              icon={Plus}
-              onPress={handleCreateWorkout}
-            />
-
-            <AppButton
-              className="flex-1"
-              title="Browse Plans"
-              variant="option"
-              icon={Search}
-              onPress={handleChooseWorkout}
-            />
-          </View>
-
-          <AppButton
-            title="Start Empty Workout"
-            variant="option"
-            icon={Zap}
-            onPress={handleStartEmptyWorkout}
-          />
-        </View>
       </View>
     </PageLayout>
   );
+}
+
+function getTodayPlanDisplayState(
+  scheduleStatus: WorkoutScheduleStatus,
+  hasCompletedWorkoutToday: boolean,
+): TodayPlanDisplayState {
+  if (scheduleStatus === WorkoutScheduleStatus.COMPLETED) {
+    return "completed_scheduled_plan";
+  }
+
+  if (
+    scheduleStatus === WorkoutScheduleStatus.PLANNED &&
+    hasCompletedWorkoutToday
+  ) {
+    return "completed_other_workout";
+  }
+
+  return "not_started";
 }

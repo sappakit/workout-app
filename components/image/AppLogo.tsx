@@ -13,12 +13,12 @@ type AppLogoProps = {
 };
 
 const SOURCES = {
-  color: require("../../assets/images/brand/brand_logo_color.png"),
-  mono: require("../../assets/images/brand/brand_logo_mono.png"),
+  color: require("@/assets/images/brand/brand_logo_color.png"),
+  mono: require("@/assets/images/brand/brand_logo_mono.png"),
 } as const;
 
 export function AppLogo({
-  size = 96,
+  size = 144,
   variant = "color",
   className,
   style,

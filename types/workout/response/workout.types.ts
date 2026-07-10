@@ -18,6 +18,7 @@ export enum WorkoutCurrentMode {
   IN_PROGRESS = "in_progress",
   SCHEDULED = "scheduled",
   REST_DAY = "rest_day",
+  UNASSIGNED = "unassigned",
 }
 
 export enum WorkoutProgressOverviewType {
@@ -26,19 +27,30 @@ export enum WorkoutProgressOverviewType {
   ALL_TIME = "all_time",
 }
 
-interface PlannedWorkoutExerciseConfig {
-  plannedSets: number | null;
-  plannedRepsRange: string | null;
-  plannedWeight: number | null;
-  plannedRestTime: number | null;
-  plannedDuration: number | null;
-  plannedDistance: number | null;
+export enum WorkoutWeeklyPlanDayType {
+  WORKOUT = "workout",
+  REST = "rest",
+  UNASSIGNED = "unassigned",
 }
 
-export interface WorkoutExerciseItem extends PlannedWorkoutExerciseConfig {
+export interface WorkoutSetValue {
+  reps: number | null;
+  weight: number | null;
+  distance: number | null;
+  duration: number | null; // seconds
+}
+
+export interface WorkoutExerciseSet extends WorkoutSetValue {
+  id: number | null;
+  setNumber: number;
+}
+
+export interface WorkoutExerciseItem {
   id: number | null;
   orderIndex: number;
+  restTime: number | null; // seconds
   exercise: Exercise;
+  sets: WorkoutExerciseSet[];
 }
 
 export interface WorkoutMuscleItem {
@@ -55,12 +67,13 @@ export interface WorkoutFocusType {
 export interface WorkoutResponse {
   id: number;
   name: string;
-  description: string;
-  duration: number;
+  imageUrl: string | null;
+  description: string | null;
+  duration: number | null;
 
   workoutExercises: WorkoutExerciseItem[];
   muscles: WorkoutMuscleItem[];
-  workoutFocusType: WorkoutFocusType;
+  workoutFocusType: WorkoutFocusType | null;
 }
 
 export interface WorkoutSchedule {
@@ -70,20 +83,19 @@ export interface WorkoutSchedule {
   workout: WorkoutResponse;
 }
 
-export interface WorkoutSessionExerciseSet {
-  id: number;
+export interface WorkoutSessionExerciseSet extends WorkoutSetValue {
+  id: number | null;
+  workoutExerciseSetId?: number | null;
   setNumber: number;
-  reps: number | null;
-  weight: number | null;
-  distance: number | null;
-  duration: number | null; // seconds
   performedAt: string | null;
   completedAt: string | null;
 }
 
-export interface WorkoutSessionExercise extends PlannedWorkoutExerciseConfig {
-  id: number;
+export interface WorkoutSessionExercise {
+  id: number | null;
+  workoutExerciseId?: number | null;
   orderIndex: number;
+  restTime: number | null; // seconds
   completedAt: string | null;
   exercise: Exercise;
   sets: WorkoutSessionExerciseSet[];
@@ -102,16 +114,32 @@ export interface WorkoutSession {
   sessionExercises: WorkoutSessionExercise[];
 }
 
+export interface WorkoutSetPerformance {
+  setNumber: number;
+  weight: number | null;
+  reps: number | null;
+  distance: number | null;
+  duration: number | null;
+}
+
+export interface ExercisePerformanceSummary {
+  previousSets: WorkoutSetPerformance[];
+  bestSets: WorkoutSetPerformance[];
+}
+
 export interface WorkoutCurrent {
   mode: WorkoutCurrentMode;
   session: WorkoutSession | null;
   schedule: WorkoutSchedule | null;
+  performanceByExerciseId: Record<string, ExercisePerformanceSummary>;
+  hasCompletedWorkoutToday: boolean;
 }
 
 export interface WorkoutProgressSummary {
   workoutsCompleted: number;
   totalVolumeKg: number;
   completedSets: number;
+  totalReps: number;
   totalDurationSeconds: number;
 }
 
@@ -121,10 +149,14 @@ export interface WorkoutProgressVolumeTrendItem {
 }
 
 export interface WorkoutProgressBestPerformance {
+  exerciseId: number;
   exerciseName: string;
+  exerciseImageUrl: string | null;
   bestWeightKg: number;
   bestSetVolumeKg: number;
   bestSetLabel: string;
+  completedAt: string | null;
+  setCompletedAt: string | null;
 }
 
 export interface WorkoutProgressOverview {
@@ -135,3 +167,20 @@ export interface WorkoutProgressOverview {
   volumeTrend: WorkoutProgressVolumeTrendItem[];
   bestPerformances: WorkoutProgressBestPerformance[];
 }
+
+export interface WorkoutTodayOverview {
+  todayPlanType: WorkoutWeeklyPlanDayType;
+  schedule: WorkoutSchedule | null;
+  hasCompletedWorkoutToday: boolean;
+}
+
+export type WorkoutWeeklyPlanDay = {
+  id: number | null;
+  dayOfWeek: number;
+  dayType: WorkoutWeeklyPlanDayType;
+  workout: WorkoutResponse | null;
+};
+
+export type WorkoutWeeklyPlan = {
+  days: WorkoutWeeklyPlanDay[];
+};

@@ -1,19 +1,22 @@
-export type SignUpRequest = {
+import { UserProfile } from "./user/response/user.types";
+
+export interface SignUpRequest {
   username: string;
   password: string;
   firstName: string;
   lastName: string;
   email: string;
-};
+}
 
-type Role = {
+interface Role {
   code: string;
-  naame: string;
-};
+  name: string;
+}
 
-export type UserAuth = {
+export interface UserAuth {
   id: number;
   username: string;
   email: string;
+  profile?: UserProfile | null;
   role?: Role;
-};
+}

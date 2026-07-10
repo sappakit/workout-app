@@ -2,7 +2,14 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import clsx from "clsx";
 import { Minus, Plus } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, StyleProp, TextInput, View, ViewStyle } from "react-native";
+import {
+  Pressable,
+  TextInput as RNTextInput,
+  StyleProp,
+  View,
+  ViewStyle,
+} from "react-native";
+import { TextInput as GestureHandlerTextInput } from "react-native-gesture-handler";
 import { twMerge } from "tailwind-merge";
 import { Separator } from "../custom-ui/Separator";
 
@@ -20,6 +27,7 @@ export interface FormNumberInputProps {
   disabled?: boolean;
   allowDecimal?: boolean;
   showStepper?: boolean;
+  inputMode?: "default" | "gesture"; // "gesture" for ReanimatedSwipeable compatibility
 }
 
 export default function FormNumberInput({
@@ -36,8 +44,12 @@ export default function FormNumberInput({
   disabled,
   allowDecimal = false,
   showStepper = true,
+  inputMode = "default",
 }: FormNumberInputProps) {
   const { colors } = useAppTheme();
+
+  const InputComponent =
+    inputMode === "gesture" ? GestureHandlerTextInput : RNTextInput;
 
   const [inputValue, setInputValue] = useState(
     value != null ? String(value) : "",
@@ -92,7 +104,6 @@ export default function FormNumberInput({
       return;
     }
 
-    // Keep temporary decimal input visible while typing.
     const num = allowDecimal ? Number(clean) : parseInt(clean, 10);
 
     if (!Number.isNaN(num)) {
@@ -127,21 +138,20 @@ export default function FormNumberInput({
     <View
       className={twMerge(
         clsx(
-          "h-12 flex-row items-center justify-center rounded-lg border px-2",
+          "h-12 flex-row items-center justify-center rounded-lg px-2",
           className,
         ),
       )}
       style={[
         {
           backgroundColor: colors.app.cardSecondary,
-          borderColor: error ? colors.app.error : colors.app.borderPrimary,
           opacity: disabled ? 0.5 : 1,
         },
         style,
       ]}
     >
-      <TextInput
-        className={twMerge(clsx("min-w-0 flex-1 text-center", inputClassName))}
+      <InputComponent
+        className={twMerge(clsx("flex-1 text-center", inputClassName))}
         style={{
           color: colors.app.textAccent,
         }}

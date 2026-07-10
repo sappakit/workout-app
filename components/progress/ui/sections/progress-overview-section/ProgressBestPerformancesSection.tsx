@@ -3,7 +3,7 @@ import { formatNumber } from "@/components/progress/model/progress-history.mappe
 import { ProgressMetricCard } from "@/components/progress/ui/elements/ProgressMetricCard";
 import { ThemedText } from "@/components/themed-text";
 import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
-import { Award } from "lucide-react-native";
+import { Dumbbell, Trophy, Weight } from "lucide-react-native";
 import { View } from "react-native";
 
 interface ProgressBestPerformancesSectionProps {
@@ -30,25 +30,28 @@ export function ProgressBestPerformancesSection({
         <View className="gap-3">
           {data.map((record) => (
             <ProgressMetricCard
-              key={record.exerciseName}
+              key={record.exerciseId}
               columns={2}
               item={{
-                id: record.exerciseName,
+                id: record.exerciseId,
                 title: record.exerciseName,
-                subtitle: "Strength",
-                icon: Award,
+                subtitle: formatCompletedDate(record.setCompletedAt),
+                imageUrl: record.exerciseImageUrl,
                 list: [
                   {
                     label: "Weight",
                     value: `${formatNumber(record.bestWeightKg)} kg`,
+                    icon: Dumbbell,
                   },
                   {
                     label: "Volume",
                     value: `${formatNumber(record.bestSetVolumeKg)} kg`,
+                    icon: Weight,
                   },
                   {
                     label: "Set",
                     value: record.bestSetLabel,
+                    icon: Trophy,
                   },
                 ],
               }}
@@ -68,4 +71,14 @@ export function ProgressBestPerformancesSection({
       )}
     </>
   );
+}
+
+function formatCompletedDate(value: string | null) {
+  if (!value) return "Completed date unavailable";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
 }

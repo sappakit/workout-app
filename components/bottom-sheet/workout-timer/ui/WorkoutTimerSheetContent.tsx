@@ -1,5 +1,6 @@
 import { BottomSheetView, useBottomSheet } from "@gorhom/bottom-sheet";
-import { View } from "react-native";
+import { useRouter } from "expo-router";
+import { LayoutChangeEvent, Pressable, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -17,27 +18,36 @@ import {
   ExpandedTimerContent,
 } from "./WorkoutTimerContentVariants";
 
+const WORKOUT_TIMER_SHEET_PADDING_TOP = 8;
+const WORKOUT_TIMER_SHEET_PADDING_BOTTOM = 8;
+
+export const WORKOUT_TIMER_SHEET_VERTICAL_PADDING =
+  WORKOUT_TIMER_SHEET_PADDING_TOP + WORKOUT_TIMER_SHEET_PADDING_BOTTOM;
+
 type WorkoutTimerContentProps = {
   sessionElapsedSeconds: number;
   remainingRestSeconds: number;
-  activeIndex: number;
   stats: WorkoutTimerStats;
   restAction: WorkoutTimerRestAction;
   finishAction: WorkoutTimerAction;
   discardAction: WorkoutTimerAction;
   pauseAction: WorkoutTimerPauseAction;
+  onCollapsedLayout?: (height: number) => void;
+  onExpandedLayout?: (height: number) => void;
 };
 
 export function WorkoutTimerSheetContent({
   sessionElapsedSeconds,
   remainingRestSeconds,
-  activeIndex,
   stats,
   restAction,
   finishAction,
   discardAction,
   pauseAction,
+  onCollapsedLayout,
+  onExpandedLayout,
 }: WorkoutTimerContentProps) {
+  const router = useRouter();
   const { animatedIndex } = useBottomSheet();
 
   const isResting = remainingRestSeconds > 0;
@@ -70,6 +80,7 @@ export function WorkoutTimerSheetContent({
           ),
         },
       ],
+      pointerEvents: animatedIndex.value < 0.5 ? "auto" : "none",
     };
   });
 
@@ -91,20 +102,33 @@ export function WorkoutTimerSheetContent({
           ),
         },
       ],
+      pointerEvents: animatedIndex.value >= 0.5 ? "auto" : "none",
     };
   });
+
+  const handleCollapsedLayout = (event: LayoutChangeEvent) => {
+    onCollapsedLayout?.(Math.ceil(event.nativeEvent.layout.height));
+  };
+
+  const handleExpandedLayout = (event: LayoutChangeEvent) => {
+    onExpandedLayout?.(Math.ceil(event.nativeEvent.layout.height));
+  };
+
+  const handleOpenWorkoutPage = () => {
+    router.navigate("/workout");
+  };
 
   return (
     <BottomSheetView
       style={{
         paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 16,
+        paddingTop: WORKOUT_TIMER_SHEET_PADDING_TOP,
+        paddingBottom: WORKOUT_TIMER_SHEET_PADDING_BOTTOM,
       }}
     >
       <View style={{ position: "relative" }}>
         <Animated.View
-          pointerEvents={activeIndex === 0 ? "auto" : "none"}
+          onLayout={handleCollapsedLayout}
           style={[
             {
               position: "absolute",
@@ -115,26 +139,30 @@ export function WorkoutTimerSheetContent({
             collapsedAnimatedStyle,
           ]}
         >
-          <CollapsedTimerContent
-            display={display}
-            restAction={restAction}
-            finishAction={finishAction}
-            discardAction={discardAction}
-            pauseAction={pauseAction}
-          />
+          <Pressable onPress={handleOpenWorkoutPage}>
+            <CollapsedTimerContent
+              display={display}
+              restAction={restAction}
+              finishAction={finishAction}
+              discardAction={discardAction}
+              pauseAction={pauseAction}
+            />
+          </Pressable>
         </Animated.View>
 
         <Animated.View
-          pointerEvents={activeIndex === 1 ? "auto" : "none"}
+          onLayout={handleExpandedLayout}
           style={expandedAnimatedStyle}
         >
-          <ExpandedTimerContent
-            display={display}
-            restAction={restAction}
-            finishAction={finishAction}
-            discardAction={discardAction}
-            pauseAction={pauseAction}
-          />
+          <Pressable onPress={handleOpenWorkoutPage}>
+            <ExpandedTimerContent
+              display={display}
+              restAction={restAction}
+              finishAction={finishAction}
+              discardAction={discardAction}
+              pauseAction={pauseAction}
+            />
+          </Pressable>
         </Animated.View>
       </View>
     </BottomSheetView>
