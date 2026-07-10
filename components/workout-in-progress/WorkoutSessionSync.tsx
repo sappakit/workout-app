@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/api/client";
 import { workoutApi } from "@/lib/api/workout.api";
+import { useGetQuery } from "@/lib/query/useGetQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
@@ -8,7 +8,6 @@ import {
   WorkoutCurrent,
   WorkoutCurrentMode,
 } from "@/types/workout/response/workout.types";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 export function WorkoutSessionSync() {
@@ -28,15 +27,13 @@ export function WorkoutSessionSync() {
     (state) => state.clearRestTimer,
   );
 
-  const { data, isSuccess } = useQuery({
-    queryKey: workoutQueryKeys.current,
-    queryFn: async () => {
-      const response = await api.get<WorkoutCurrent>(workoutApi.getCurrent());
-
-      return response.data;
+  const { data, isSuccess } = useGetQuery<WorkoutCurrent>(
+    workoutQueryKeys.current,
+    workoutApi.getCurrent(),
+    {
+      enabled: hydrated && !!user,
     },
-    enabled: hydrated && !!user,
-  });
+  );
 
   useEffect(() => {
     if (!hydrated || !isSuccess || !data) return;

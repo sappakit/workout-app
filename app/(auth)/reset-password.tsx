@@ -19,9 +19,11 @@ export default function ResetPasswordScreen() {
     enabled: hasToken,
     retry: false,
     queryFn: async () => {
-      return api.post(authApi.verifyResetPasswordToken(), {
+      const { data } = await api.post(authApi.verifyResetPasswordToken(), {
         token,
       });
+
+      return data;
     },
   });
 
