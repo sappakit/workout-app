@@ -10,6 +10,8 @@
 - bug create schedule multiple times
 - validate in-progress workout with zod
   exercise must have at least one set
+- fix bug from 'npm run typecheck'
+- stop session timer when task is killed
 
 # OPTIONAL
 

@@ -41,12 +41,12 @@ export interface WorkoutSetValue {
 }
 
 export interface WorkoutExerciseSet extends WorkoutSetValue {
-  id: number | null;
+  id: number;
   setNumber: number;
 }
 
 export interface WorkoutExerciseItem {
-  id: number | null;
+  id: number;
   orderIndex: number;
   restTime: number | null;
 
@@ -86,16 +86,14 @@ export interface WorkoutSchedule {
 }
 
 export interface WorkoutSessionExerciseSet extends WorkoutSetValue {
-  id: number | null;
-  workoutExerciseSetId?: number | null;
+  id: number;
   setNumber: number;
   performedAt: string | null;
   completedAt: string | null;
 }
 
 export interface WorkoutSessionExercise {
-  id: number | null;
-  workoutExerciseId?: number | null;
+  id: number;
   orderIndex: number;
   restTime: number | null;
   completedAt: string | null;

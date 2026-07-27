@@ -1,21 +1,27 @@
-import { Equipment, Muscle } from "./shared.types";
+import { Equipment, ExerciseMuscleRole, Muscle } from "./shared.types";
 
-export enum ExerciseType {
-  STRENGTH = "strength",
-  CARDIO = "cardio",
-  CALISTHENICS = "calisthenics",
+export enum ExerciseOrigin {
+  SYSTEM = "system",
+  USER = "user",
 }
 
-export const ExerciseTypeLabel: Record<ExerciseType, string> = {
-  [ExerciseType.STRENGTH]: "Strength",
-  [ExerciseType.CARDIO]: "Cardio Training",
-  [ExerciseType.CALISTHENICS]: "Calisthenics",
-};
+export enum ExerciseStatus {
+  DRAFT = "draft",
+  ACTIVE = "active",
+  HIDDEN = "hidden",
+  ARCHIVED = "archived",
+}
 
 export enum DifficultyLevel {
   BEGINNER = "beginner",
   INTERMEDIATE = "intermediate",
   ADVANCED = "advanced",
+}
+
+export enum ExerciseMediaType {
+  IMAGE = "image",
+  VIDEO = "video",
+  GIF = "gif",
 }
 
 export const DifficultyLabel: Record<DifficultyLevel, string> = {
@@ -24,24 +30,64 @@ export const DifficultyLabel: Record<DifficultyLevel, string> = {
   [DifficultyLevel.ADVANCED]: "Advanced",
 };
 
+export interface ExerciseCategory {
+  id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export interface ExerciseSource {
+  id: number;
+  key: string;
+  name: string;
+  sourceUrl: string;
+
+  licenseName: string | null;
+  licenseUrl: string | null;
+  attributionText: string | null;
+  sourceVersion: string | null;
+  sourceCommitHash: string | null;
+  importedAt: string | null;
+}
+
+export interface ExerciseMedia {
+  id: number;
+  mediaType: ExerciseMediaType;
+  url: string;
+
+  publicId: string | null;
+  sourcePath: string | null;
+
+  displayOrder: number;
+  isPrimary: boolean;
+
+  source?: ExerciseSource | null;
+}
+
 export interface ExerciseMuscleItem {
   id: number;
-  muscle: Muscle;
+  role: ExerciseMuscleRole;
+  muscle?: Muscle;
 }
 
 export interface ExerciseEquipmentLink {
   id: number;
-  equipment: Equipment;
+  equipment?: Equipment;
 }
 
 export interface Exercise {
   id: number;
+  origin: ExerciseOrigin;
+  status: ExerciseStatus;
+
   name: string;
   description: string | null;
-  imageUrl: string | null;
 
-  exerciseType: ExerciseType;
-  difficultyLevel: DifficultyLevel;
+  category?: ExerciseCategory;
+  difficultyLevel: DifficultyLevel | null;
 
   defaultCaloriesBurned: number | null;
   defaultDuration: number | null;
@@ -50,8 +96,12 @@ export interface Exercise {
   defaultSets: number | null;
 
   demoLink: string | null;
-  howToPerform: string | null;
+  howToPerform: string[] | null;
 
-  muscles?: ExerciseMuscleItem[] | null;
-  equipmentLinks?: ExerciseEquipmentLink[] | null;
+  sourceExternalId: string | null;
+  source?: ExerciseSource | null;
+
+  media?: ExerciseMedia[];
+  muscles?: ExerciseMuscleItem[];
+  equipmentLinks?: ExerciseEquipmentLink[];
 }
