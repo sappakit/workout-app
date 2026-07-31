@@ -1,5 +1,6 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ThemedText } from "@/components/themed-text";
+import { requireWorkoutExercises } from "@/lib/workout/utils/response-guards.utils";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { View } from "react-native";
 import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
@@ -15,7 +16,7 @@ interface WorkoutDetailContentProps {
 export default function WorkoutDetailContent({
   data,
 }: WorkoutDetailContentProps) {
-  const exercises = data.workoutExercises;
+  const exercises = requireWorkoutExercises(data);
 
   return (
     <PageLayout

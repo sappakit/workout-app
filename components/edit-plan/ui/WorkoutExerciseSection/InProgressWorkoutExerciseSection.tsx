@@ -4,6 +4,7 @@ import {
   getWorkoutSessionSetValue,
 } from "@/components/workout-in-progress/model/helpers";
 import { ExerciseFieldKey } from "@/lib/workout/config";
+import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
 import { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
 import { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
 import { useMemo, useState } from "react";
@@ -49,12 +50,17 @@ export function InProgressWorkoutExerciseSection({
   const [performanceMode, setPerformanceMode] =
     useState<SetPerformanceMode>("previous");
 
+  const categoryCode = exercise.exercise.category?.code;
+  const imageUrl = getExercisePrimaryImageUrl(exercise.exercise);
+
   const columns = useMemo<WorkoutSetColumn[]>(() => {
-    return getWorkoutSetColumns(exercise.exercise.exerciseType);
-  }, [exercise.exercise.exerciseType]);
+    return getWorkoutSetColumns(categoryCode);
+  }, [categoryCode]);
 
   const handleTogglePerformanceMode = () => {
-    setPerformanceMode((prev) => (prev === "previous" ? "best" : "previous"));
+    setPerformanceMode((previousMode) =>
+      previousMode === "previous" ? "best" : "previous",
+    );
   };
 
   return (
@@ -62,7 +68,7 @@ export function InProgressWorkoutExerciseSection({
       exerciseId={exercise.exercise.id}
       exerciseName={exercise.exercise.name}
       subtitle={getExerciseProgressText(exercise)}
-      imageUrl={exercise.exercise.imageUrl}
+      imageUrl={imageUrl}
       sets={exercise.sets}
       restTime={exercise.restTime ?? 0}
       onChangeRestTime={onChangeRestTime}
@@ -109,8 +115,8 @@ export function InProgressWorkoutExerciseSection({
             return (
               <WorkoutSetInput
                 value={value}
-                onChange={(value) =>
-                  onChangeSetValue(setItem.clientId, column.key, value)
+                onChange={(nextValue) =>
+                  onChangeSetValue(setItem.clientId, column.key, nextValue)
                 }
                 placeholder={placeholder}
                 allowDecimal={column.allowDecimal}

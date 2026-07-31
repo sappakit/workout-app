@@ -6,6 +6,7 @@ import { WorkoutMetaPill } from "@/components/workout/ui/workout-card/WorkoutCar
 import { WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { requireWorkoutExercises } from "@/lib/workout/utils/response-guards.utils";
 import { WorkoutWeeklyPlanDayType } from "@/types/workout/response/workout.types";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -34,6 +35,9 @@ export function SelectedWeeklyPlanDayCard({
   const isWorkoutDay = day.dayType === WorkoutWeeklyPlanDayType.WORKOUT;
   const isRestDay = day.dayType === WorkoutWeeklyPlanDayType.REST;
   const hasWorkout = isWorkoutDay && !!day.workout;
+
+  const workoutExercises =
+    hasWorkout && day.workout ? requireWorkoutExercises(day.workout) : null;
 
   const durationLabel = formatWorkoutDuration(day.workout?.duration ?? null);
 
@@ -91,11 +95,13 @@ export function SelectedWeeklyPlanDayCard({
           {subtitle}
         </ThemedText>
 
-        {isWorkoutDay && day.workout ? (
+        {isWorkoutDay && day.workout && workoutExercises ? (
           <View className="mt-2 flex-row flex-wrap gap-2">
             <WorkoutMetaPill
               icon={Dumbbell}
-              label={`${day.workout.workoutExercises.length} exercises`}
+              label={`${workoutExercises.length} ${
+                workoutExercises.length === 1 ? "exercise" : "exercises"
+              }`}
             />
 
             {durationLabel ? (

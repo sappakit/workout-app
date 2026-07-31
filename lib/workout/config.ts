@@ -1,15 +1,17 @@
-import { ExerciseType } from "@/types/workout/response/exercise.types";
-
 export type ExerciseFieldKey = "weight" | "reps" | "distance" | "duration";
 
-export const exerciseTypeFields: Record<ExerciseType, ExerciseFieldKey[]> = {
-  [ExerciseType.STRENGTH]: ["weight", "reps"],
-  [ExerciseType.CALISTHENICS]: ["weight", "reps"],
-  [ExerciseType.CARDIO]: ["distance", "duration"],
+export const exerciseCategoryFields: Record<string, ExerciseFieldKey[]> = {
+  strength: ["weight", "reps"],
+  calisthenics: ["weight", "reps"],
+  cardio: ["distance", "duration"],
 };
 
-export function getExerciseFields(type: ExerciseType): ExerciseFieldKey[] {
-  return exerciseTypeFields[type] ?? [];
+export function getExerciseFields(
+  categoryCode: string | null | undefined,
+): ExerciseFieldKey[] {
+  if (!categoryCode) return [];
+
+  return exerciseCategoryFields[categoryCode] ?? [];
 }
 
 export type ExerciseFieldConfig = {
@@ -50,6 +52,8 @@ export const exerciseFieldConfig: Record<
   },
 };
 
-export function getExerciseFieldConfig(field: ExerciseFieldKey) {
+export function getExerciseFieldConfig(
+  field: ExerciseFieldKey,
+): ExerciseFieldConfig {
   return exerciseFieldConfig[field];
 }

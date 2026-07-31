@@ -12,6 +12,7 @@
   exercise must have at least one set
 - fix bug from 'npm run typecheck'
 - stop session timer when task is killed
+- Right now finishing the session may clear the existing workout_exercise_set_id and workout_exercise_id ()
 
 # OPTIONAL
 

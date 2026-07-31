@@ -2,10 +2,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { ScreenSection } from "@/components/layout/ScreenSection";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ThemedText } from "@/components/themed-text";
-import {
-  Exercise,
-  ExerciseTypeLabel,
-} from "@/types/workout/response/exercise.types";
+import { Exercise } from "@/types/workout/response/exercise.types";
 import { View } from "react-native";
 import { DetailHeroImage } from "../workout-detail/ui/DetailHeroImage";
 
@@ -16,8 +13,19 @@ interface ExerciseDetailContentProps {
 export default function ExerciseDetailContent({
   data,
 }: ExerciseDetailContentProps) {
+  const primaryMedia =
+    data.media?.find((media) => media.isPrimary) ?? data.media?.[0];
+
+  const imageUrl = primaryMedia?.url ?? null;
+
   const muscleNames =
-    data.muscles?.map((item) => item.muscle.name).filter(Boolean) ?? [];
+    data.muscles
+      ?.map((item) => item.muscle?.name)
+      .filter((name): name is string => Boolean(name)) ?? [];
+
+  const exerciseTypeLabel = data.category?.name ?? "Exercise";
+
+  const instructions = data.howToPerform ?? [];
 
   return (
     <PageLayout
@@ -31,12 +39,12 @@ export default function ExerciseDetailContent({
         scrollEffect: { overlay: true },
       }}
     >
-      <DetailHeroImage imageUrl={data.imageUrl} />
+      <DetailHeroImage imageUrl={imageUrl} />
 
       <View className="gap-4">
         <View className="justify-center">
           <ThemedText type="default" variant="primary">
-            {ExerciseTypeLabel[data.exerciseType]}
+            {exerciseTypeLabel}
           </ThemedText>
 
           <ThemedText type="title" variant="accent" className="text-2xl">
@@ -58,16 +66,41 @@ export default function ExerciseDetailContent({
           <ThemedText type="default" variant="primary">
             {muscleNames.length > 0
               ? muscleNames.join(", ")
-              : "No muscles yet."}
+              : data.muscles
+                ? "No muscles yet."
+                : "Muscle information was not included."}
           </ThemedText>
         </ScreenSection>
 
         <ScreenSection>
           <SectionHeader title="How to perform" />
 
-          <ThemedText type="default" variant="primary">
-            {data.howToPerform ?? "No instructions yet."}
-          </ThemedText>
+          {instructions.length > 0 ? (
+            <View className="gap-2">
+              {instructions.map((instruction, index) => (
+                <View
+                  key={`${index}-${instruction}`}
+                  className="flex-row items-start gap-2"
+                >
+                  <ThemedText type="default" variant="primary">
+                    {index + 1}.
+                  </ThemedText>
+
+                  <ThemedText
+                    type="default"
+                    variant="primary"
+                    className="flex-1"
+                  >
+                    {instruction}
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <ThemedText type="default" variant="primary">
+              No instructions yet.
+            </ThemedText>
+          )}
         </ScreenSection>
       </View>
     </PageLayout>

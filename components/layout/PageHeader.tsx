@@ -46,8 +46,8 @@ export default function PageHeader(props: PageHeaderRootProps) {
     !!props.scrollY && !!props.scrollEffect
       ? props.scrollY.interpolate({
           inputRange: [
-            props.scrollEffect?.backgroundFadeStart ?? 0,
-            props.scrollEffect?.backgroundFadeEnd ?? 80,
+            props.scrollEffect.backgroundFadeStart ?? 0,
+            props.scrollEffect.backgroundFadeEnd ?? 80,
           ],
           outputRange: [0, 1],
           extrapolate: "clamp",
@@ -58,8 +58,8 @@ export default function PageHeader(props: PageHeaderRootProps) {
     !!props.scrollY && !!props.scrollEffect
       ? props.scrollY.interpolate({
           inputRange: [
-            props.scrollEffect?.titleFadeStart ?? 40,
-            props.scrollEffect?.titleFadeEnd ?? 100,
+            props.scrollEffect.titleFadeStart ?? 40,
+            props.scrollEffect.titleFadeEnd ?? 100,
           ],
           outputRange: [0, 1],
           extrapolate: "clamp",
@@ -121,7 +121,7 @@ export default function PageHeader(props: PageHeaderRootProps) {
 
 type HomeHeaderProps = {
   greeting: string;
-  firstName?: string;
+  firstName?: string | null;
   imageUrl?: string | null;
 };
 
@@ -165,14 +165,14 @@ function TitleHeader({
 }: TitleHeaderProps) {
   return (
     <>
-      {showBackButton && (
+      {showBackButton ? (
         <AppButton
           variant="option"
           icon={ArrowLeft}
           className="z-10 h-10 w-10"
           onPress={onBackPress}
         />
-      )}
+      ) : null}
 
       <Animated.View
         style={[
@@ -189,11 +189,11 @@ function TitleHeader({
           {title}
         </ThemedText>
 
-        {subtitle && (
+        {subtitle ? (
           <ThemedText type="extraSmall" variant="primary">
             {subtitle}
           </ThemedText>
-        )}
+        ) : null}
       </Animated.View>
     </>
   );

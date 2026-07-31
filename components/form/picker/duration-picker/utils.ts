@@ -1,4 +1,4 @@
-import { hmsToSeconds, secondsToHMS } from "@/lib/workout/mappers";
+import { hmsToSeconds, secondsToHMS } from "@/lib/workout/duration.utils";
 import { DurationValue, PickerItem } from "./DurationWheelPicker";
 
 export function durationToSeconds(value: DurationValue) {

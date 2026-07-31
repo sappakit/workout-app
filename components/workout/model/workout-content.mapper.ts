@@ -3,26 +3,37 @@ import {
   mapWorkoutToWorkoutCardItem,
   WorkoutCardItem,
 } from "@/components/workout/ui/workout-card/WorkoutCard";
-import { WorkoutSchedule } from "@/types/workout/response/workout.types";
+import {
+  requireScheduleWorkout,
+  requireWorkoutExercises,
+  requireWorkoutExerciseSets,
+} from "@/lib/workout/utils/response-guards.utils";
+import {
+  WorkoutResponse,
+  WorkoutSchedule,
+} from "@/types/workout/response/workout.types";
 import { Clock, Dumbbell, Layers } from "lucide-react-native";
 
 export function mapScheduleToWorkoutHeroCardItem(
   schedule: WorkoutSchedule,
 ): WorkoutCardItem {
-  const workout = schedule.workout;
+  const workout = requireScheduleWorkout(schedule);
+  const workoutExercises = requireWorkoutExercises(workout);
+
   const cardItem = mapWorkoutToWorkoutCardItem(workout);
   const durationLabel = formatWorkoutDuration(workout.duration);
+  const setCount = getWorkoutSetCount(workoutExercises);
 
   return {
     ...cardItem,
     metaItems: [
       {
         icon: Dumbbell,
-        label: formatExerciseCount(workout.workoutExercises.length),
+        label: formatExerciseCount(workoutExercises.length),
       },
       {
         icon: Layers,
-        label: `${getWorkoutSetCount(workout.workoutExercises)} sets`,
+        label: `${setCount} ${setCount === 1 ? "set" : "sets"}`,
       },
       ...(durationLabel
         ? [
@@ -37,15 +48,21 @@ export function mapScheduleToWorkoutHeroCardItem(
 }
 
 function getWorkoutSetCount(
-  workoutExercises: WorkoutSchedule["workout"]["workoutExercises"],
-) {
+  workoutExercises: ReturnType<typeof requireWorkoutExercises>,
+): number {
   return workoutExercises.reduce((total, workoutExercise) => {
-    return total + workoutExercise.sets.length;
+    const sets = requireWorkoutExerciseSets(workoutExercise);
+
+    return total + sets.length;
   }, 0);
 }
 
-export function formatWorkoutDuration(duration: number | null) {
-  if (!duration) return null;
+export function formatWorkoutDuration(
+  duration: WorkoutResponse["duration"],
+): string | null {
+  if (duration == null || duration <= 0) {
+    return null;
+  }
 
   if (duration < 60) {
     return `${duration} sec`;

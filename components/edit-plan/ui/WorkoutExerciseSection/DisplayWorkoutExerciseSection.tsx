@@ -1,4 +1,9 @@
 import { ExerciseFieldKey } from "@/lib/workout/config";
+import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
+import {
+  requireWorkoutExercise,
+  requireWorkoutExerciseSets,
+} from "@/lib/workout/utils/response-guards.utils";
 import {
   WorkoutExerciseItem,
   WorkoutExerciseSet,
@@ -22,30 +27,34 @@ type DisplayWorkoutExerciseSet = WorkoutExerciseSet & {
 };
 
 export function DisplayWorkoutExerciseSection({
-  exercise,
+  exercise: workoutExercise,
 }: DisplayWorkoutExerciseSectionProps) {
+  const exercise = requireWorkoutExercise(workoutExercise);
+  const workoutExerciseSets = requireWorkoutExerciseSets(workoutExercise);
+
+  const categoryCode = exercise.category?.code;
+  const imageUrl = getExercisePrimaryImageUrl(exercise);
+
   const columns = useMemo<WorkoutSetColumn[]>(() => {
-    return getWorkoutSetColumns(exercise.exercise.exerciseType);
-  }, [exercise.exercise.exerciseType]);
+    return getWorkoutSetColumns(categoryCode);
+  }, [categoryCode]);
 
   const sets = useMemo<DisplayWorkoutExerciseSet[]>(() => {
-    return exercise.sets.map((set) => ({
+    return workoutExerciseSets.map((set) => ({
       ...set,
       clientId: String(set.id),
     }));
-  }, [exercise.sets]);
+  }, [workoutExerciseSets]);
 
   return (
     <BaseWorkoutExerciseSection
       mode="readonly"
-      exerciseId={exercise.exercise.id}
-      exerciseName={exercise.exercise.name}
-      subtitle={`${exercise.sets.length} ${
-        exercise.sets.length === 1 ? "set" : "sets"
-      }`}
-      imageUrl={exercise.exercise.imageUrl}
+      exerciseId={exercise.id}
+      exerciseName={exercise.name}
+      subtitle={`${sets.length} ${sets.length === 1 ? "set" : "sets"}`}
+      imageUrl={imageUrl}
       sets={sets}
-      restTime={exercise.restTime ?? 0}
+      restTime={workoutExercise.restTime ?? 0}
       emptyTitle="No sets"
       emptyDescription="This exercise has no planned sets."
       renderSetHeader={() => (

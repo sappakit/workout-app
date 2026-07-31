@@ -3,9 +3,10 @@ import { ThemedText } from "@/components/themed-text";
 import { EXERCISE_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
-  Exercise,
-  ExerciseTypeLabel,
-} from "@/types/workout/response/exercise.types";
+  requireExerciseMuscle,
+  requireExerciseMuscles,
+} from "@/lib/workout/utils/response-guards.utils";
+import { Exercise } from "@/types/workout/response/exercise.types";
 import clsx from "clsx";
 import { LucideIcon } from "lucide-react-native";
 import { Pressable, StyleProp, View, ViewStyle } from "react-native";
@@ -92,15 +93,23 @@ export function ExerciseCard({
 export function mapExerciseToExerciseCardItem(
   exercise: Exercise,
 ): ExerciseCardItem {
-  const muscleMetaItems =
-    exercise.muscles?.map((item) => ({
-      label: item.muscle.name,
-    })) ?? [];
+  const exerciseMuscles = requireExerciseMuscles(exercise);
+
+  const muscleMetaItems = exerciseMuscles.map((item) => {
+    const muscle = requireExerciseMuscle(item);
+
+    return {
+      label: muscle.name,
+    };
+  });
+
+  const primaryMedia =
+    exercise.media?.find((media) => media.isPrimary) ?? exercise.media?.[0];
 
   return {
     title: exercise.name,
-    subtitle: ExerciseTypeLabel[exercise.exerciseType],
-    imageUrl: exercise.imageUrl,
+    subtitle: exercise.category?.name ?? "Exercise",
+    imageUrl: primaryMedia?.url ?? null,
     metaItems:
       muscleMetaItems.length > 0 ? muscleMetaItems : [{ label: "General" }],
   };

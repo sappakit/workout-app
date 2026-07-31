@@ -2,6 +2,11 @@ import { getPausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
 import { createClientId } from "@/lib/id/utils";
 import { ExerciseFieldKey, getExerciseFields } from "@/lib/workout/config";
 import {
+  requireSessionExercise,
+  requireSessionExercises,
+  requireSessionExerciseSets,
+} from "@/lib/workout/utils/response-guards.utils";
+import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
   WorkoutSessionModel,
@@ -96,7 +101,7 @@ export function addSessionExercise(
   session: WorkoutSessionModel,
   exercises: Exercise[],
 ): WorkoutSessionModel {
-  const currentExercises = session.sessionExercises ?? [];
+  const currentExercises = session.sessionExercises;
 
   const nextSessionExercises: WorkoutSessionExerciseModel[] = [
     ...currentExercises,
@@ -137,7 +142,10 @@ export function replaceSessionExercise(
 
       return {
         ...sessionExercise,
+
+        // The replacement no longer corresponds to the original workout-plan row.
         workoutExerciseId: null,
+
         exercise: selectedExercise,
         restTime: selectedExercise.defaultRestTime ?? null,
         completedAt: null,
@@ -145,7 +153,10 @@ export function replaceSessionExercise(
           sessionExercise.sets.length > 0
             ? sessionExercise.sets.map((set) => ({
                 ...set,
+
+                // The set no longer corresponds to the original workout-plan set.
                 workoutExerciseSetId: null,
+
                 completedAt: null,
               }))
             : [createEmptySessionSet(1)],
@@ -177,7 +188,10 @@ function createEmptySessionSet(setNumber = 1): WorkoutSessionExerciseSetModel {
   return {
     id: null,
     clientId: createClientId("new-session-set"),
+
+    // A set created during the session has no source workout-plan set.
     workoutExerciseSetId: null,
+
     setNumber,
     reps: null,
     weight: null,
@@ -189,25 +203,40 @@ function createEmptySessionSet(setNumber = 1): WorkoutSessionExerciseSetModel {
 }
 
 // API payload -> Workout Session UI
-export const mapWorkoutSessiontoWorkoutSessionModel = (
+export const mapWorkoutSessionToWorkoutSessionModel = (
   session: WorkoutSession,
-): WorkoutSessionModel => ({
-  ...session,
-  sessionExercises: session.sessionExercises.map((exercise) => {
-    const mappedSets: WorkoutSessionExerciseSetModel[] = exercise.sets.map(
-      (set) => ({
+): WorkoutSessionModel => {
+  const sessionExercises = requireSessionExercises(session);
+
+  return {
+    ...session,
+    sessionExercises: sessionExercises.map((sessionExercise) => {
+      const exercise = requireSessionExercise(sessionExercise);
+      const sets = requireSessionExerciseSets(sessionExercise);
+
+      const mappedSets: WorkoutSessionExerciseSetModel[] = sets.map((set) => ({
         ...set,
         clientId: `existing-session-set-${set.id}`,
-      }),
-    );
 
-    return {
-      ...exercise,
-      clientId: `existing-session-exercise-${exercise.id}`,
-      sets: mappedSets.length > 0 ? mappedSets : [createEmptySessionSet(1)],
-    };
-  }),
-});
+        // TODO: Return and preserve this ID from the backend later.
+        // Right now finishing the session may clear the existing workout_exercise_set_id
+        workoutExerciseSetId: null,
+      }));
+
+      return {
+        ...sessionExercise,
+        clientId: `existing-session-exercise-${sessionExercise.id}`,
+
+        // TODO: Return and preserve this ID from the backend later.
+        // Right now finishing the session may clear the existing workout_exercise_id
+        workoutExerciseId: null,
+
+        exercise,
+        sets: mappedSets.length > 0 ? mappedSets : [createEmptySessionSet(1)],
+      };
+    }),
+  };
+};
 
 // Exercise -> Workout Session Exercise UI
 function mapExerciseToSessionExerciseModel(
@@ -219,7 +248,10 @@ function mapExerciseToSessionExerciseModel(
   return {
     id: null,
     clientId: createClientId("new-session-exercise"),
+
+    // An exercise added during the session has no source workout-plan row.
     workoutExerciseId: null,
+
     orderIndex,
     restTime: exercise.defaultRestTime ?? null,
     completedAt: null,
@@ -259,15 +291,27 @@ export const mapWorkoutSessionModelToFinishPayload = (
     totalPausedDuration,
     caloriesBurned: session.caloriesBurned,
     sessionExercises: session.sessionExercises.map((sessionExercise) => ({
-      id: sessionExercise.id ?? null,
-      workoutExerciseId: sessionExercise.workoutExerciseId ?? null,
+      id: sessionExercise.id,
+
+      // TODO: Existing planned exercises are currently mapped to null because
+      // the backend response does not expose workoutExerciseId. The finish
+      // endpoint may therefore clear workout_exercise_id. Preserve the ID once
+      // the backend includes it in WorkoutSessionExerciseDto.
+      workoutExerciseId: sessionExercise.workoutExerciseId,
+
       exerciseId: sessionExercise.exercise.id,
       orderIndex: sessionExercise.orderIndex,
-      restTime: sessionExercise.restTime ?? null,
+      restTime: sessionExercise.restTime,
       completedAt: sessionExercise.completedAt,
       sets: sessionExercise.sets.map((set) => ({
-        id: set.id ?? null,
-        workoutExerciseSetId: set.workoutExerciseSetId ?? null,
+        id: set.id,
+
+        // TODO: Existing planned sets are currently mapped to null because the
+        // backend response does not expose workoutExerciseSetId. The finish
+        // endpoint may therefore clear workout_exercise_set_id. Preserve the
+        // ID once the backend includes it in WorkoutSessionExerciseSetDto.
+        workoutExerciseSetId: set.workoutExerciseSetId,
+
         setNumber: set.setNumber,
         reps: set.reps,
         weight: set.weight,
@@ -293,7 +337,9 @@ export function commitInheritedSetValues({
   currentIndex: number;
   exercise: WorkoutSessionExerciseModel;
 }): WorkoutSessionExerciseSetModel {
-  const fields = Array.from(getExerciseFields(exercise.exercise.exerciseType));
+  const fields = Array.from(
+    getExerciseFields(exercise.exercise.category?.code),
+  );
 
   return fields.reduce<WorkoutSessionExerciseSetModel>((updatedSet, field) => {
     const currentValue = getWorkoutSessionSetValue(updatedSet, field);

@@ -1,15 +1,24 @@
-import { secondsToHMS } from "@/lib/workout/mappers";
+import { secondsToHMS } from "@/lib/workout/duration.utils";
+import {
+  requireSessionExercises,
+  requireSessionExerciseSets,
+} from "@/lib/workout/utils/response-guards.utils";
 import { WorkoutSession } from "@/types/workout/response/workout.types";
 import { Layers, Timer, Weight } from "lucide-react-native";
 import { RecentWorkoutCardItem } from "../ui/sections/progress-history-section/RecentWorkoutCard";
+
+type SessionStats = {
+  volumeKg: number;
+  completedSets: number;
+  totalSets: number;
+};
 
 export function mapWorkoutSessionsToHistoryItems(
   sessions: WorkoutSession[],
 ): RecentWorkoutCardItem[] {
   return sessions.map((session) => {
-    const volumeKg = getSessionVolumeKg(session);
-    const completedSets = getCompletedSetCount(session);
-    const totalSets = getTotalSetCount(session);
+    const { volumeKg, completedSets, totalSets } =
+      calculateSessionStats(session);
 
     return {
       id: session.id,
@@ -40,33 +49,33 @@ export function mapWorkoutSessionsToHistoryItems(
   });
 }
 
-function getSessionVolumeKg(session: WorkoutSession) {
-  return session.sessionExercises.reduce((exerciseTotal, exercise) => {
-    const setVolume = exercise.sets.reduce((setTotal, set) => {
-      if (!set.completedAt) return setTotal;
+function calculateSessionStats(session: WorkoutSession): SessionStats {
+  const sessionExercises = requireSessionExercises(session);
 
-      const reps = set.reps ?? 0;
-      const weight = set.weight ?? 0;
+  return sessionExercises.reduce<SessionStats>(
+    (stats, exercise) => {
+      const sets = requireSessionExerciseSets(exercise);
 
-      return setTotal + reps * weight;
-    }, 0);
+      sets.forEach((set) => {
+        stats.totalSets += 1;
 
-    return exerciseTotal + setVolume;
-  }, 0);
-}
+        if (!set.completedAt) return;
 
-function getCompletedSetCount(session: WorkoutSession) {
-  return session.sessionExercises.reduce((exerciseTotal, exercise) => {
-    const completedSets = exercise.sets.filter((set) => set.completedAt).length;
+        const reps = set.reps ?? 0;
+        const weight = set.weight ?? 0;
 
-    return exerciseTotal + completedSets;
-  }, 0);
-}
+        stats.completedSets += 1;
+        stats.volumeKg += reps * weight;
+      });
 
-function getTotalSetCount(session: WorkoutSession) {
-  return session.sessionExercises.reduce((exerciseTotal, exercise) => {
-    return exerciseTotal + exercise.sets.length;
-  }, 0);
+      return stats;
+    },
+    {
+      volumeKg: 0,
+      completedSets: 0,
+      totalSets: 0,
+    },
+  );
 }
 
 export function formatNumber(value: number) {

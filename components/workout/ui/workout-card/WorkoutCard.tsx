@@ -2,6 +2,7 @@ import { ThemedText } from "@/components/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
 import { hexWithOpacity } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { requireWorkoutExercises } from "@/lib/workout/utils/response-guards.utils";
 import { WorkoutResponse } from "@/types/workout/response/workout.types";
 import clsx from "clsx";
 import { Clock, Dumbbell, LucideIcon } from "lucide-react-native";
@@ -86,7 +87,7 @@ export function WorkoutCard({
           <View className="flex-row flex-wrap gap-2">
             {metaItems.map((item) => (
               <WorkoutMetaPill
-                key={`${item.label}`}
+                key={item.label}
                 icon={item.icon}
                 label={item.label}
               />
@@ -96,11 +97,6 @@ export function WorkoutCard({
       </View>
     </Pressable>
   );
-}
-
-interface WorkoutMetaPillProps {
-  icon?: LucideIcon;
-  label: string;
 }
 
 interface WorkoutMetaPillProps {
@@ -148,6 +144,7 @@ export function formatExerciseCount(count: number) {
 export function mapWorkoutToWorkoutCardItem(
   workout: WorkoutResponse,
 ): WorkoutCardItem {
+  const workoutExercises = requireWorkoutExercises(workout);
   const durationLabel = formatWorkoutDuration(workout.duration);
 
   return {
@@ -158,7 +155,7 @@ export function mapWorkoutToWorkoutCardItem(
     metaItems: [
       {
         icon: Dumbbell,
-        label: formatExerciseCount(workout.workoutExercises.length),
+        label: formatExerciseCount(workoutExercises.length),
       },
       ...(durationLabel
         ? [

@@ -1,4 +1,4 @@
-import { mapWorkoutSessiontoWorkoutSessionModel } from "@/components/workout-in-progress/model/helpers";
+import { mapWorkoutSessionToWorkoutSessionModel } from "@/components/workout-in-progress/model/helpers";
 import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
@@ -84,7 +84,7 @@ export const useWorkoutSessionStore = create<WorkoutSessionStore>()(
         if (current?.id === session.id) return;
 
         set({
-          session: mapWorkoutSessiontoWorkoutSessionModel(session),
+          session: mapWorkoutSessionToWorkoutSessionModel(session),
           performanceByExerciseId: {},
         });
       },

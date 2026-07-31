@@ -1,11 +1,7 @@
-import { ExerciseType } from "@/types/workout/response/exercise.types";
-import {
-  WorkoutExerciseItem,
-  WorkoutResponse,
-} from "@/types/workout/response/workout.types";
-import { Clock, Dumbbell, LucideIcon } from "lucide-react-native";
-import { ExerciseFieldKey, getExerciseFields } from "./config";
-import { hmsToSeconds, secondsToHMS } from "./mappers";
+import { requireWorkoutExercises } from "@/lib/workout/utils/response-guards.utils";
+import { Exercise } from "@/types/workout/response/exercise.types";
+import { WorkoutResponse } from "@/types/workout/response/workout.types";
+import { hmsToSeconds } from "./duration.utils";
 
 /* Duration */
 type DurationOptions = {
@@ -21,10 +17,13 @@ type ExerciseSetDurationInput = {
 
 type ExerciseDurationInput = {
   restTime?: number | null;
-  sets?: ExerciseSetDurationInput[] | null;
+  sets?: ExerciseSetDurationInput[];
 
-  exercise: {
-    exerciseType: ExerciseType;
+  exercise?: {
+    category?: {
+      code: string;
+    };
+
     defaultSets?: number | null;
     defaultDuration?: number | null;
     defaultRestTime?: number | null;
@@ -36,7 +35,9 @@ function convertDuration(seconds: number, options?: DurationOptions) {
 }
 
 function getSetDurationSeconds(set: ExerciseSetDurationInput): number | null {
-  if (set.duration != null) return set.duration;
+  if (set.duration != null) {
+    return set.duration;
+  }
 
   return hmsToSeconds(0, set.durationMinutes, set.durationSeconds);
 }
@@ -52,25 +53,36 @@ function getTotalSetDurationSeconds(item: ExerciseDurationInput): number {
 }
 
 // Calculate the duration of a single exercise
-export function calculateExerciseDuration(
+function calculateExerciseDuration(
   item: ExerciseDurationInput,
   options?: DurationOptions,
 ): number {
+  if (!item.exercise) {
+    throw new Error(
+      "Exercise relation was not included when calculating exercise duration.",
+    );
+  }
+
   const sets = item.sets ?? [];
   const setCount = sets.length || item.exercise.defaultSets || 0;
 
   const totalSetDuration = getTotalSetDurationSeconds(item);
+
   const defaultDuration = item.exercise.defaultDuration ?? 0;
 
+  const exerciseCategoryCode = item.exercise.category?.code;
+
   // Cardio: use set duration total if available, otherwise exercise default duration
-  if (item.exercise.exerciseType === ExerciseType.CARDIO) {
+  if (exerciseCategoryCode === "cardio") {
     const totalSeconds =
       totalSetDuration > 0 ? totalSetDuration : defaultDuration;
 
     return convertDuration(totalSeconds, options);
   }
 
-  if (setCount <= 0) return 0;
+  if (setCount <= 0) {
+    return 0;
+  }
 
   const restTime = item.restTime ?? item.exercise.defaultRestTime ?? 0;
 
@@ -92,7 +104,10 @@ export function calculateWorkoutDurationFromExercises(
 ): number {
   const totalSeconds = exercises.reduce(
     (sum, item) =>
-      sum + calculateExerciseDuration(item, { timeType: "seconds" }),
+      sum +
+      calculateExerciseDuration(item, {
+        timeType: "seconds",
+      }),
     0,
   );
 
@@ -102,222 +117,28 @@ export function calculateWorkoutDurationFromExercises(
 // Calculate the duration of the entire workout program
 export function calculateWorkoutDuration(workout: WorkoutResponse): number {
   if (workout.duration != null && workout.duration > 0) {
-    return convertDuration(workout.duration, { timeType: "minutes" });
+    return convertDuration(workout.duration, {
+      timeType: "minutes",
+    });
   }
 
-  return calculateWorkoutDurationFromExercises(workout.workoutExercises);
+  const workoutExercises = requireWorkoutExercises(workout);
+
+  return calculateWorkoutDurationFromExercises(workoutExercises);
 }
 
-/* Calories */
-// Calculate total calories used for the workout program
-export function calculateWorkoutCalories(workout: WorkoutResponse): number {
-  let totalCalories = 0;
+export function getExercisePrimaryImageUrl(exercise: Exercise): string | null {
+  const media = exercise.media ?? [];
 
-  workout.workoutExercises.forEach((item) => {
-    const setCount = item.sets.length || item.exercise.defaultSets || 0;
-    const baseCalories = item.exercise.defaultCaloriesBurned ?? 0;
+  const primaryImage = media.find(
+    (item) => item.mediaType === "image" && item.isPrimary,
+  );
 
-    switch (item.exercise.exerciseType) {
-      case ExerciseType.CARDIO: {
-        // Calories per minute
-        const durationSeconds =
-          getTotalSetDurationSeconds(item) ||
-          item.exercise.defaultDuration ||
-          0;
-
-        const durationMinutes = durationSeconds / 60;
-
-        totalCalories += durationMinutes * baseCalories;
-        break;
-      }
-
-      // Calories per set
-      case ExerciseType.STRENGTH:
-      case ExerciseType.CALISTHENICS:
-        totalCalories += setCount * baseCalories;
-        break;
-
-      default:
-        break;
-    }
-  });
-
-  return Math.round(totalCalories);
-}
-
-/* UI */
-export type ExerciseCardInfoItem = {
-  key: string;
-  label: string;
-  value: string;
-};
-
-export type ExerciseCardStatItem = {
-  key: string;
-  label: string;
-  icon: LucideIcon;
-};
-
-export interface WorkoutExerciseDisplayModel {
-  stats: ExerciseCardStatItem[];
-  infoData: ExerciseCardInfoItem[];
-  equipment: string[];
-}
-
-export interface ExercisePreviewDisplayModel {
-  stats: ExerciseCardStatItem[];
-  infoData: ExerciseCardInfoItem[];
-  equipment: string[];
-}
-
-function formatUniqueNumbers(
-  values: Array<number | null | undefined>,
-  suffix = "",
-): string {
-  const uniqueValues = [...new Set(values.filter((value) => value != null))];
-
-  if (uniqueValues.length === 0) return "-";
-
-  if (uniqueValues.length === 1) {
-    return `${uniqueValues[0]}${suffix}`;
+  if (primaryImage) {
+    return primaryImage.url;
   }
 
-  return uniqueValues.map((value) => `${value}${suffix}`).join(", ");
-}
+  const firstImage = media.find((item) => item.mediaType === "image");
 
-function formatDurationValue(seconds: number | null | undefined): string {
-  if (seconds == null) return "-";
-
-  const duration = secondsToHMS(seconds);
-
-  if (duration.hours && duration.hours > 0) {
-    return `${duration.hours} hr ${duration.minutes} min`;
-  }
-
-  return `${duration.minutes} min ${duration.seconds} sec`;
-}
-
-export function buildWorkoutExerciseDisplayModel(
-  data: WorkoutExerciseItem,
-): WorkoutExerciseDisplayModel {
-  const fields = getExerciseFields(data.exercise.exerciseType);
-
-  const hasField = (field: ExerciseFieldKey) => fields.includes(field);
-
-  // Sets
-  const sets = data.sets.length;
-
-  // Set values
-  const reps = formatUniqueNumbers(
-    data.sets.map((set) => set.reps),
-    " reps",
-  );
-
-  const weight = formatUniqueNumbers(
-    data.sets.map((set) => set.weight),
-    " kg",
-  );
-
-  const distance = formatUniqueNumbers(data.sets.map((set) => set.distance));
-
-  const durationValues = data.sets
-    .map((set) => set.duration)
-    .filter((value): value is number => value != null);
-
-  const durationText =
-    durationValues.length === 0
-      ? "-"
-      : durationValues.length === 1
-        ? formatDurationValue(durationValues[0])
-        : durationValues.map(formatDurationValue).join(", ");
-
-  // Rest time
-  const rest = secondsToHMS(data.restTime ?? 0);
-
-  // Estimated duration
-  const estimatedDuration = calculateExerciseDuration(data);
-
-  // Equipment
-  const equipment = (data.exercise.equipmentLinks ?? []).map(
-    (link) => link.equipment.name,
-  );
-
-  const infoData: ExerciseCardInfoItem[] = [
-    {
-      key: "sets",
-      label: "Total Sets",
-      value: `${sets}`,
-    },
-
-    ...(hasField("reps")
-      ? [
-          {
-            key: "reps",
-            label: "Reps per Set",
-            value: reps,
-          },
-        ]
-      : []),
-
-    ...(hasField("weight")
-      ? [
-          {
-            key: "weight",
-            label: "Load",
-            value: weight,
-          },
-        ]
-      : []),
-
-    ...(hasField("distance")
-      ? [
-          {
-            key: "distance",
-            label: "Target Distance",
-            value: distance,
-          },
-        ]
-      : []),
-
-    ...(hasField("duration")
-      ? [
-          {
-            key: "duration",
-            label: "Target Duration",
-            value: durationText,
-          },
-        ]
-      : []),
-
-    {
-      key: "rest",
-      label: "Rest Between Sets",
-      value: `${rest.minutes} min ${rest.seconds} sec`,
-    },
-
-    {
-      key: "time",
-      label: "Estimated Duration",
-      value: `${estimatedDuration} min`,
-    },
-  ];
-
-  const stats: ExerciseCardStatItem[] = [
-    {
-      key: "sets",
-      label: `${sets} ${sets !== 1 ? "Sets" : "Set"}`,
-      icon: Dumbbell,
-    },
-    {
-      key: "duration",
-      label: `${estimatedDuration} min`,
-      icon: Clock,
-    },
-  ];
-
-  return {
-    stats,
-    infoData,
-    equipment,
-  };
+  return firstImage?.url ?? null;
 }

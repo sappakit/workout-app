@@ -76,6 +76,7 @@ export function ExercisePickerScreen({
     : addDescription;
 
   const selectedCount = tempSelectedExercises.length;
+
   const doneText = isReplaceMode
     ? "Replace"
     : selectedCount > 0
@@ -95,7 +96,7 @@ export function ExercisePickerScreen({
     queryKey: [
       exerciseQueryKeys.all,
       debouncedSearch,
-      filters.exerciseTypes,
+      filters.categoryIds,
       filters.muscleIds,
       filters.sortBy,
       filters.sortDirection,
@@ -103,8 +104,8 @@ export function ExercisePickerScreen({
     search: debouncedSearch,
     limit: 20,
     params: {
-      exerciseTypes:
-        filters.exerciseTypes.length > 0 ? filters.exerciseTypes : undefined,
+      categoryIds:
+        filters.categoryIds.length > 0 ? filters.categoryIds : undefined,
       muscleIds: filters.muscleIds.length > 0 ? filters.muscleIds : undefined,
       sortBy: sortByParam,
     },
@@ -124,18 +125,18 @@ export function ExercisePickerScreen({
 
     if (isReplacingWithSameExercise) return;
 
-    setTempSelectedExercises((prev) => {
-      const exists = prev.some((item) => item.id === exercise.id);
+    setTempSelectedExercises((previousExercises) => {
+      const exists = previousExercises.some((item) => item.id === exercise.id);
 
       if (exists) {
-        return prev.filter((item) => item.id !== exercise.id);
+        return previousExercises.filter((item) => item.id !== exercise.id);
       }
 
       if (isReplaceMode) {
         return [exercise];
       }
 
-      return [...prev, exercise];
+      return [...previousExercises, exercise];
     });
   };
 

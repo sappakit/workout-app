@@ -261,10 +261,16 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       }
     : undefined;
 
-  const selectedTargetMuscleOptions = data.muscles.map((item) => ({
-    label: item.muscle.name,
-    value: item.muscle.id,
-  }));
+  const selectedTargetMuscleOptions = data.muscles?.map((item) => {
+    if (!item.muscle) {
+      throw new Error("Workout muscle relation was not loaded.");
+    }
+
+    return {
+      label: item.muscle.name,
+      value: item.muscle.id,
+    };
+  });
 
   const footer = (
     <>

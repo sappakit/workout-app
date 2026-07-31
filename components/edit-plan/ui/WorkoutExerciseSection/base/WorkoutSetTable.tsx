@@ -6,7 +6,6 @@ import {
   getExerciseFieldConfig,
   getExerciseFields,
 } from "@/lib/workout/config";
-import { ExerciseType } from "@/types/workout/response/exercise.types";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react-native";
 import { ReactElement } from "react";
 import {
@@ -29,9 +28,9 @@ export type WorkoutSetColumn = {
 };
 
 export function getWorkoutSetColumns(
-  exerciseType: ExerciseType,
+  categoryCode: string | null | undefined,
 ): WorkoutSetColumn[] {
-  return Array.from(getExerciseFields(exerciseType)).map((field) => {
+  return Array.from(getExerciseFields(categoryCode)).map((field) => {
     const config = getExerciseFieldConfig(field);
 
     return {

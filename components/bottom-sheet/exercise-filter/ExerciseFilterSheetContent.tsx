@@ -8,14 +8,11 @@ import {
   SortDirection,
   SortOption,
 } from "@/components/filter-option/FilterSortPage";
-import { FilterOptionPage } from "@/components/filter-option/option-page/FilterOptionPage";
 import { RemoteFilterOptionPage } from "@/components/filter-option/option-page/RemoteFilterOptionPage";
+import { exerciseApi } from "@/lib/api/exercise.api";
 import { muscleApi } from "@/lib/api/muscle.api";
-import { muscleQueryKeys } from "@/lib/exercise/keys";
-import {
-  ExerciseType,
-  ExerciseTypeLabel,
-} from "@/types/workout/response/exercise.types";
+import { exerciseQueryKeys, muscleQueryKeys } from "@/lib/exercise/keys";
+import { ExerciseCategory } from "@/types/workout/response/exercise.types";
 import { Muscle } from "@/types/workout/response/shared.types";
 import {
   BicepsFlexed,
@@ -34,29 +31,24 @@ import Animated, {
 
 export type ExerciseSortKey = "created_at" | "name";
 
-type FilterPage = "main" | "type" | "muscle" | "sort";
+type FilterPage = "main" | "category" | "muscle" | "sort";
 
 export const DEFAULT_EXERCISE_SORT_BY: ExerciseSortKey = "name";
 export const DEFAULT_EXERCISE_SORT_DIRECTION: SortDirection = "ASC";
 
 export type ExerciseFilterValues = {
-  exerciseTypes: ExerciseType[];
+  categoryIds: number[];
   muscleIds: number[];
   sortBy: ExerciseSortKey | null;
   sortDirection: SortDirection;
 };
 
 export const DEFAULT_EXERCISE_FILTERS: ExerciseFilterValues = {
-  exerciseTypes: [],
+  categoryIds: [],
   muscleIds: [],
   sortBy: DEFAULT_EXERCISE_SORT_BY,
   sortDirection: DEFAULT_EXERCISE_SORT_DIRECTION,
 };
-
-const exerciseTypeOptions = Object.values(ExerciseType).map((type) => ({
-  id: type,
-  label: ExerciseTypeLabel[type],
-}));
 
 const sortOptions: SortOption<ExerciseSortKey>[] = [
   {
@@ -91,9 +83,9 @@ export function ExerciseFilterSheetContent({
   const [page, setPage] = useState<FilterPage>("main");
   const [hasNavigated, setHasNavigated] = useState(false);
 
-  const [selectedExerciseTypes, setSelectedExerciseTypes] = useState<
-    ExerciseType[]
-  >(value.exerciseTypes);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>(
+    value.categoryIds,
+  );
 
   const [selectedMuscleIds, setSelectedMuscleIds] = useState<number[]>(
     value.muscleIds,
@@ -108,18 +100,18 @@ export function ExerciseFilterSheetContent({
   );
 
   useEffect(() => {
-    setSelectedExerciseTypes(value.exerciseTypes);
+    setSelectedCategoryIds(value.categoryIds);
     setSelectedMuscleIds(value.muscleIds);
     setSelectedSortBy(value.sortBy);
     setSortDirection(value.sortDirection);
-  }, [value.exerciseTypes, value.muscleIds, value.sortBy, value.sortDirection]);
+  }, [value.categoryIds, value.muscleIds, value.sortBy, value.sortDirection]);
 
   const selectedFilterCount =
-    selectedExerciseTypes.length + selectedMuscleIds.length;
+    selectedCategoryIds.length + selectedMuscleIds.length;
 
-  const exerciseTypeSummary = getSelectedCountSummary(
-    selectedExerciseTypes,
-    "Any type",
+  const categorySummary = getSelectedCountSummary(
+    selectedCategoryIds,
+    "Any category",
   );
 
   const muscleSummary = getSelectedCountSummary(
@@ -149,7 +141,7 @@ export function ExerciseFilterSheetContent({
   };
 
   const handleReset = () => {
-    setSelectedExerciseTypes([]);
+    setSelectedCategoryIds([]);
     setSelectedMuscleIds([]);
     setSelectedSortBy(DEFAULT_EXERCISE_SORT_BY);
     setSortDirection(DEFAULT_EXERCISE_SORT_DIRECTION);
@@ -157,7 +149,7 @@ export function ExerciseFilterSheetContent({
 
   const handleApply = () => {
     onApplyFilters({
-      exerciseTypes: selectedExerciseTypes,
+      categoryIds: selectedCategoryIds,
       muscleIds: selectedMuscleIds,
       sortBy: selectedSortBy,
       sortDirection,
@@ -193,9 +185,9 @@ export function ExerciseFilterSheetContent({
         >
           <FilterNavigationItem
             icon={Target}
-            title="Exercise type"
-            description={exerciseTypeSummary}
-            onPress={() => openPage("type")}
+            title="Exercise category"
+            description={categorySummary}
+            onPress={() => openPage("category")}
           />
 
           <FilterNavigationItem
@@ -214,15 +206,19 @@ export function ExerciseFilterSheetContent({
         </FilterOverviewPage>
       )}
 
-      {page === "type" && (
-        <FilterOptionPage<ExerciseType>
-          title="Exercise type"
-          options={exerciseTypeOptions}
-          selectionMode="multiple"
-          selectedIds={selectedExerciseTypes}
-          onChangeSelectedIds={setSelectedExerciseTypes}
+      {page === "category" && (
+        <RemoteFilterOptionPage<ExerciseCategory>
+          title="Exercise category"
+          url={exerciseApi.getCategories()}
+          queryKey={exerciseQueryKeys.categories}
+          selectedIds={selectedCategoryIds}
           bottomInset={bottomInset}
           onBack={handleBackToMain}
+          onChangeSelectedIds={setSelectedCategoryIds}
+          mapOption={(item) => ({
+            id: item.id,
+            label: item.name,
+          })}
         />
       )}
 
