@@ -7,12 +7,14 @@
 - some cardio shouldn't have distance (jump rope, boxing)
   Fix: add fieldConfigOverride in exercise-level
 - text input still leaves blank space
-- bug create schedule multiple times
 - validate in-progress workout with zod
   exercise must have at least one set
-- fix bug from 'npm run typecheck'
 - stop session timer when task is killed
-- Right now finishing the session may clear the existing workout_exercise_set_id and workout_exercise_id ()
+- add empty state for recent workout
+- add set row/header for all exercise category (Stretching, Powerlifting, etc.)
+- workout in progress - add exercise ui padding bug
+- exercise card show all muscle tags
+  fix: show only 2-3
 
 # OPTIONAL
 

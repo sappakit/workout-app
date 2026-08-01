@@ -4,8 +4,8 @@ import {
   MenuSectionLabel,
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
-import { WorkoutImageAvatar } from "@/components/progress/ui/sections/progress-history-section/RecentWorkoutCard";
 import { ThemedText } from "@/components/themed-text";
+import { EXERCISE_IMAGE } from "@/constants/images";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useExerciseCardExpandedState } from "@/hooks/useExerciseCardExpandedState";
 import { useRouter } from "expo-router";
@@ -18,7 +18,7 @@ import {
   Trash2,
 } from "lucide-react-native";
 import { ReactElement } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, TouchableOpacity, View } from "react-native";
 
 type BaseSetItem = {
   clientId: string;
@@ -104,7 +104,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
             });
           }}
         >
-          <WorkoutImageAvatar imageUrl={imageUrl} />
+          <ExerciseImageAvatar imageUrl={imageUrl} />
 
           <View className="flex-1">
             <ThemedText type="default" variant="accent" className="text-base">
@@ -235,5 +235,26 @@ function BaseWorkoutExerciseSectionMenu({
         onSelect={onDeleteExercise}
       />
     </OptionsMenu>
+  );
+}
+
+type ExerciseImageAvatarProps = {
+  imageUrl?: string | null;
+};
+
+function ExerciseImageAvatar({ imageUrl }: ExerciseImageAvatarProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View
+      className="h-14 w-14 items-center justify-center overflow-hidden rounded-full"
+      style={{ backgroundColor: colors.app.cardSecondary }}
+    >
+      <Image
+        source={{ uri: imageUrl ?? EXERCISE_IMAGE }}
+        className="h-full w-full"
+        resizeMode="cover"
+      />
+    </View>
   );
 }

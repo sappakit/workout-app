@@ -90,7 +90,10 @@ function WorkoutPreviewFeedback({
   return (
     <View
       className="items-center justify-center gap-3 rounded-2xl px-4 py-6"
-      style={{ backgroundColor: colors.app.cardPrimary }}
+      style={{
+        backgroundColor: colors.app.cardPrimary,
+        marginHorizontal: CONTENT_PADDING_HORIZONTAL,
+      }}
     >
       <View
         className="h-12 w-12 items-center justify-center rounded-2xl"

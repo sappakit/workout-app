@@ -11,9 +11,6 @@ export interface WorkoutSessionExerciseSetModel extends Omit<
 > {
   id: number | null;
   clientId: string;
-
-  // References the original workout-plan set; null if added during the session.
-  workoutExerciseSetId: number | null;
 }
 
 export interface WorkoutSessionExerciseModel extends Omit<
@@ -22,9 +19,6 @@ export interface WorkoutSessionExerciseModel extends Omit<
 > {
   id: number | null;
   clientId: string;
-
-  // References the original workout-plan exercise; null if added during the session.
-  workoutExerciseId: number | null;
 
   exercise: Exercise;
   sets: WorkoutSessionExerciseSetModel[];
