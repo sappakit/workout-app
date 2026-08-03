@@ -9,4 +9,7 @@ config.resolver.unstable_conditionNames = [
   "react-native",
 ];
 
-module.exports = withNativeWind(config, { input: "./app/global.css" });
+module.exports = withNativeWind(config, {
+  input: "./app/global.css",
+  inlineRem: 16,
+});

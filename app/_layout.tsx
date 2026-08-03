@@ -5,6 +5,7 @@ import { createToastConfig } from "@/lib/toast/config";
 import { useThemeStore } from "@/stores/themeStore";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
+import { PortalHost } from "@rn-primitives/portal";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -34,25 +35,23 @@ export default function RootLayout() {
           <BottomSheetModalProvider>
             <MenuProvider>
               <AuthProvider>
-                <>
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      animation: "slide_from_right",
-                    }}
-                  >
-                    <Stack.Screen name="(auth)" />
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="(pages)" />
-                    <Stack.Screen name="(modal)" />
-                  </Stack>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: "slide_from_right",
+                  }}
+                >
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="(pages)" />
+                  <Stack.Screen name="(modal)" />
+                </Stack>
 
-                  <StatusBar
-                    style={colorScheme === "dark" ? "light" : "dark"}
-                  />
+                <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
-                  <Toast config={toastConfig} />
-                </>
+                <Toast config={toastConfig} />
+
+                <PortalHost />
               </AuthProvider>
             </MenuProvider>
           </BottomSheetModalProvider>
