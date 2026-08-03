@@ -1,6 +1,7 @@
 # TODO
 
 - Add keyboard focus
+- migrate from Lucide icons -> AppIcon
 
 # BUG
 

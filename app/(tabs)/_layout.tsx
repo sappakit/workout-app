@@ -1,16 +1,11 @@
 import WorkoutTimerBottomSheet from "@/components/bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { HapticTab } from "@/components/haptic-tab";
 import { AppLoadingScreen } from "@/components/state/AppLoadingScreen";
 import { WorkoutSessionSync } from "@/components/workout-in-progress/WorkoutSessionSync";
 import { useAuth } from "@/context/AuthContext";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Redirect, Tabs } from "expo-router";
-import {
-  ChartNoAxesColumnIncreasing,
-  Dumbbell,
-  Home,
-  User,
-} from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TAB_BAR_BASE_HEIGHT = 64;
@@ -60,7 +55,7 @@ export default function TabLayout() {
             shadowRadius: 0,
             elevation: 0,
 
-            // remove separator line
+            // Remove separator line
             borderTopWidth: 0,
           },
         }}
@@ -69,7 +64,14 @@ export default function TabLayout() {
           name="index"
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+            tabBarIcon: ({ focused, color, size }) => (
+              <AppIcon
+                name="home"
+                variant={focused ? "filled" : "outline"}
+                color={color}
+                size={size}
+              />
+            ),
           }}
         />
 
@@ -77,8 +79,13 @@ export default function TabLayout() {
           name="workout"
           options={{
             title: "Workout",
-            tabBarIcon: ({ color, size }) => (
-              <Dumbbell color={color} size={size} />
+            tabBarIcon: ({ focused, color, size }) => (
+              <AppIcon
+                name="workout"
+                variant={focused ? "filled" : "outline"}
+                color={color}
+                size={size}
+              />
             ),
           }}
         />
@@ -87,8 +94,13 @@ export default function TabLayout() {
           name="progress"
           options={{
             title: "Progress",
-            tabBarIcon: ({ color, size }) => (
-              <ChartNoAxesColumnIncreasing color={color} size={size} />
+            tabBarIcon: ({ focused, color, size }) => (
+              <AppIcon
+                name="progress"
+                variant={focused ? "filled" : "outline"}
+                color={color}
+                size={size}
+              />
             ),
           }}
         />
@@ -97,7 +109,14 @@ export default function TabLayout() {
           name="profile"
           options={{
             title: "Profile",
-            tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+            tabBarIcon: ({ focused, color, size }) => (
+              <AppIcon
+                name="profile"
+                variant={focused ? "filled" : "outline"}
+                color={color}
+                size={size}
+              />
+            ),
           }}
         />
       </Tabs>
