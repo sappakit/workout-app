@@ -2,57 +2,139 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Both colors in 'lib/theme.ts' and in 'global.css' must match */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 63%;
+    /* Page */
+    --background: #f7f5f2;
+    --foreground: #171717;
+
+    /* Surfaces */
+    --card: #ffffff;
+    --card-foreground: #171717;
+
+    --popover: #ffffff;
+    --popover-foreground: #171717;
+
+    /* Main brand actions */
+    --primary: #ef6131;
+    --primary-foreground: #ffffff;
+
+    /* Secondary surfaces and controls */
+    --secondary: #f1efec;
+    --secondary-foreground: #171717;
+
+    /* Muted surfaces and lower-priority text */
+    --muted: #f1efec;
+    --muted-foreground: #76716c;
+    --subtle-foreground: #a29d98;
+
+    /* High-contrast controls */
+    --accent: #111111;
+    --accent-foreground: #ffffff;
+
+    /* Feedback */
+    --success: #1b9a59;
+    --success-foreground: #ffffff;
+
+    --warning: #e5a11a;
+    --warning-foreground: #171717;
+
+    --destructive: #dc3f3f;
+    --destructive-foreground: #ffffff;
+
+    /* Structure */
+    --border: #dedad6;
+    --border-strong: #a9a49f;
+    --input: #dedad6;
+    --ring: #ef6131;
+
+    /* Image content */
+    --image-overlay: rgba(0, 0, 0, 0.48);
+    --image-overlay-strong: rgba(0, 0, 0, 0.68);
+
+    /* Effects */
+    --shadow: rgba(39, 31, 25, 0.1);
+
+    /* Loading */
+    --skeleton: #e9e5e1;
+    --skeleton-highlight: #f5f3f0;
+
+    /* Shared component radius */
     --radius: 0.625rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+
+    /* Charts */
+    --chart-1: #ef6131;
+    --chart-2: #111111;
+    --chart-3: #1b9a59;
+    --chart-4: #e5a11a;
+    --chart-5: #dc3f3f;
   }
 
   .dark:root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 70.9% 59.4%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 300 0% 45%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Page */
+    --background: #0d0e0e;
+    --foreground: #f5f5f3;
+
+    /* Surfaces */
+    --card: #171818;
+    --card-foreground: #f5f5f3;
+
+    --popover: #171818;
+    --popover-foreground: #f5f5f3;
+
+    /* Main brand actions */
+    --primary: #ef6131;
+    --primary-foreground: #ffffff;
+
+    /* Secondary surfaces and controls */
+    --secondary: #202121;
+    --secondary-foreground: #f5f5f3;
+
+    /* Muted surfaces and lower-priority text */
+    --muted: #202121;
+    --muted-foreground: #a5a5a1;
+    --subtle-foreground: #747572;
+
+    /* High-contrast controls */
+    --accent: #f4f4f2;
+    --accent-foreground: #171717;
+
+    /* Feedback */
+    --success: #2ab66b;
+    --success-foreground: #ffffff;
+
+    --warning: #e8ac32;
+    --warning-foreground: #171717;
+
+    --destructive: #ef5555;
+    --destructive-foreground: #ffffff;
+
+    /* Structure */
+    --border: #303130;
+    --border-strong: #484947;
+    --input: #303130;
+    --ring: #ef6131;
+
+    /* Image content */
+    --image-overlay: rgba(0, 0, 0, 0.32);
+    --image-overlay-strong: rgba(0, 0, 0, 0.62);
+
+    /* Effects */
+    --shadow: rgba(0, 0, 0, 0.45);
+
+    /* Loading */
+    --skeleton: #202121;
+    --skeleton-highlight: #2a2b2b;
+
+    /* Shared component radius */
+    --radius: 0.625rem;
+
+    /* Charts */
+    --chart-1: #ef6131;
+    --chart-2: #f4f4f2;
+    --chart-3: #2ab66b;
+    --chart-4: #e8ac32;
+    --chart-5: #ef5555;
   }
 }

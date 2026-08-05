@@ -1,4 +1,4 @@
-import type { AppIconName, IconVariantDefinition } from "./app-icon.types";
+import type { IconVariantDefinition } from "./app-icon.types";
 
 export const appIconRegistry = {
   add: {
@@ -184,10 +184,28 @@ export const appIconRegistry = {
     },
   },
 
+  reps: {
+    filled: {
+      family: "material-design-icons",
+      name: "repeat",
+    },
+  },
+
   search: {
     filled: {
       family: "ionicons",
       name: "search",
+    },
+  },
+
+  sets: {
+    filled: {
+      family: "material-design-icons",
+      name: "layers",
+    },
+    outline: {
+      family: "material-design-icons",
+      name: "layers-outline",
     },
   },
 
@@ -241,4 +259,6 @@ export const appIconRegistry = {
       name: "barbell-outline",
     },
   },
-} satisfies Record<AppIconName, IconVariantDefinition>;
+} as const satisfies Record<string, IconVariantDefinition>;
+
+export type AppIconName = keyof typeof appIconRegistry;

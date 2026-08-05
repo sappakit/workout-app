@@ -1,10 +1,3 @@
-import {
-  ChartBar,
-  Dumbbell,
-  Layers,
-  Repeat2,
-  Timer,
-} from "lucide-react-native";
 import { View } from "react-native";
 import { WorkoutStatsModel } from "../../model/workout-stats.mapper";
 import { SimpleStatCard, VolumeStatCard } from "./StatCard";
@@ -18,14 +11,14 @@ export function ProgressStatsCards({ data }: ProgressStatsCardsProps) {
     <View className="gap-3">
       <View className="flex-row gap-3">
         <SimpleStatCard
-          icon={Dumbbell}
+          icon="workout"
           label="Workouts"
           value={data.workoutsCompletedText}
           className="flex-1"
         />
 
         <SimpleStatCard
-          icon={Timer}
+          icon="timer"
           label="Time"
           value={data.totalDurationText}
           className="flex-1"
@@ -34,14 +27,14 @@ export function ProgressStatsCards({ data }: ProgressStatsCardsProps) {
 
       <View className="flex-row gap-3">
         <SimpleStatCard
-          icon={Layers}
+          icon="sets"
           label="Sets"
           value={data.completedSetsText}
           className="flex-1"
         />
 
         <SimpleStatCard
-          icon={Repeat2}
+          icon="reps"
           label="Reps"
           value={data.totalRepsText}
           className="flex-1"
@@ -49,10 +42,10 @@ export function ProgressStatsCards({ data }: ProgressStatsCardsProps) {
       </View>
 
       <VolumeStatCard
-        label={"Volume Trend"}
+        label="Volume Trend"
         value={data.totalVolumeText}
         volumeTrend={data.volumeTrend}
-        icon={ChartBar}
+        icon="progress"
         barMaxHeight={80}
         barWidth={24}
         className="min-h-52"

@@ -4,7 +4,7 @@ import { HapticTab } from "@/components/haptic-tab";
 import { AppLoadingScreen } from "@/components/state/AppLoadingScreen";
 import { WorkoutSessionSync } from "@/components/workout-in-progress/WorkoutSessionSync";
 import { useAuth } from "@/context/AuthContext";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { Redirect, Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,17 +13,20 @@ const WORKOUT_TIMER_SHEET_TAB_OVERLAP = 1;
 
 export default function TabLayout() {
   const { user, loading } = useAuth();
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const insets = useSafeAreaInsets();
 
   const tabBarHeight = TAB_BAR_BASE_HEIGHT + insets.bottom;
+
   const sheetBottomInset = Math.max(
     0,
     tabBarHeight - WORKOUT_TIMER_SHEET_TAB_OVERLAP,
   );
 
   // Block tabs before auth is restored
-  if (loading) return <AppLoadingScreen />;
+  if (loading) {
+    return <AppLoadingScreen />;
+  }
 
   if (!user) {
     return <Redirect href="/(auth)/sign-in" />;
@@ -36,16 +39,16 @@ export default function TabLayout() {
           headerShown: false,
           tabBarButton: HapticTab,
 
-          // Active/inactive icon + label colors
-          tabBarActiveTintColor: colors.app.brand,
-          tabBarInactiveTintColor: colors.app.textPrimary,
+          // Active/inactive icon and label colors
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.mutedForeground,
 
-          // Tab bar container styling
+          // Tab bar container
           tabBarStyle: {
             height: tabBarHeight,
             paddingTop: 8,
             paddingBottom: insets.bottom,
-            backgroundColor: colors.app.cardPrimary,
+            backgroundColor: colors.card,
             borderTopColor: colors.border,
 
             // Disable library shadow
@@ -64,12 +67,12 @@ export default function TabLayout() {
           name="index"
           options={{
             title: "Home",
-            tabBarIcon: ({ focused, color, size }) => (
+            tabBarIcon: ({ focused, color }) => (
               <AppIcon
                 name="home"
                 variant={focused ? "filled" : "outline"}
                 color={color}
-                size={size}
+                size="lg"
               />
             ),
           }}
@@ -79,12 +82,12 @@ export default function TabLayout() {
           name="workout"
           options={{
             title: "Workout",
-            tabBarIcon: ({ focused, color, size }) => (
+            tabBarIcon: ({ focused, color }) => (
               <AppIcon
                 name="workout"
                 variant={focused ? "filled" : "outline"}
                 color={color}
-                size={size}
+                size="lg"
               />
             ),
           }}
@@ -94,12 +97,12 @@ export default function TabLayout() {
           name="progress"
           options={{
             title: "Progress",
-            tabBarIcon: ({ focused, color, size }) => (
+            tabBarIcon: ({ focused, color }) => (
               <AppIcon
                 name="progress"
                 variant={focused ? "filled" : "outline"}
                 color={color}
-                size={size}
+                size="lg"
               />
             ),
           }}
@@ -109,12 +112,12 @@ export default function TabLayout() {
           name="profile"
           options={{
             title: "Profile",
-            tabBarIcon: ({ focused, color, size }) => (
+            tabBarIcon: ({ focused, color }) => (
               <AppIcon
                 name="profile"
                 variant={focused ? "filled" : "outline"}
                 color={color}
-                size={size}
+                size="lg"
               />
             ),
           }}

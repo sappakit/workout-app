@@ -1,13 +1,13 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
+import { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { cn } from "@/lib/utils";
 import { LinearGradient } from "expo-linear-gradient";
-import { ChartBar, LucideIcon } from "lucide-react-native";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import { twMerge } from "tailwind-merge";
 
 interface SimpleStatCardProps {
-  icon: LucideIcon;
+  icon: AppIconName;
   label: string;
   value: string;
   className?: string;
@@ -15,21 +15,16 @@ interface SimpleStatCardProps {
 }
 
 export function SimpleStatCard({
-  icon: Icon,
+  icon,
   label,
   value,
   className,
   style,
 }: SimpleStatCardProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className={twMerge(clsx("rounded-2xl p-4", className))}
-      style={[{ backgroundColor: colors.app.cardPrimary }, style]}
-    >
+    <View className={cn("rounded-2xl bg-card p-4", className)} style={style}>
       <View className="flex-row items-center gap-3">
-        <StatIcon icon={Icon} />
+        <StatIcon icon={icon} />
 
         <View className="flex-1">
           <StatValue label={label} value={value} />
@@ -47,7 +42,7 @@ type VolumeStatTrendItem = {
 interface VolumeStatCardProps {
   value: string;
   volumeTrend: VolumeStatTrendItem[];
-  icon?: LucideIcon;
+  icon?: AppIconName;
   label?: string;
   className?: string;
   style?: StyleProp<ViewStyle>;
@@ -58,26 +53,22 @@ interface VolumeStatCardProps {
 export function VolumeStatCard({
   value,
   volumeTrend,
-  icon: Icon = ChartBar,
+  icon = "progress",
   label = "Volume",
   className,
   style,
   barMaxHeight = 36,
   barWidth = 20,
 }: VolumeStatCardProps) {
-  const { colors } = useAppTheme();
-
   const maxValue = Math.max(...volumeTrend.map((item) => item.value), 0);
 
   return (
     <View
-      className={twMerge(
-        clsx("justify-between gap-4 rounded-2xl p-4", className),
-      )}
-      style={[{ backgroundColor: colors.app.cardPrimary }, style]}
+      className={cn("justify-between gap-4 rounded-2xl bg-card p-4", className)}
+      style={style}
     >
       <View className="flex-row items-center gap-3">
-        <StatIcon icon={Icon} />
+        <StatIcon icon={icon} />
 
         <StatValue label={label} value={value} />
       </View>
@@ -92,15 +83,14 @@ export function VolumeStatCard({
           return (
             <View key={`${item.label}-${index}`} className="items-center gap-2">
               <View
-                className="rounded-md"
+                className="rounded-md bg-primary"
                 style={{
                   width: barWidth,
                   height,
-                  backgroundColor: colors.app.brand,
                 }}
               />
 
-              <ThemedText type="small" variant="primary">
+              <ThemedText type="caption" tone="muted">
                 {item.label}
               </ThemedText>
             </View>
@@ -111,24 +101,19 @@ export function VolumeStatCard({
   );
 }
 
-function StatIcon({ icon: Icon }: { icon: LucideIcon }) {
-  const { colors } = useAppTheme();
+function StatIcon({ icon }: { icon: AppIconName }) {
+  const colors = useAppColors();
 
   return (
-    <View
-      className="h-11 w-11 items-center justify-center overflow-hidden rounded-2xl"
-      style={{ backgroundColor: colors.app.brand }}
-    >
+    <View className="h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-primary">
       <LinearGradient
-        colors={[colors.app.brandLight, colors.app.brand, colors.app.brandDark]}
+        colors={[colors.primaryHover, colors.primary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View>
-        <Icon size={20} color={colors.app.textWhite} />
-      </View>
+      <AppIcon name={icon} size="md" color={colors.primaryForeground} />
     </View>
   );
 }
@@ -136,13 +121,11 @@ function StatIcon({ icon: Icon }: { icon: LucideIcon }) {
 function StatValue({ label, value }: { label: string; value: string }) {
   return (
     <View>
-      <ThemedText type="extraSmall" variant="primary">
+      <ThemedText type="caption" tone="muted">
         {label}
       </ThemedText>
 
-      <ThemedText type="subtitle" variant="accent">
-        {value}
-      </ThemedText>
+      <ThemedText type="heading">{value}</ThemedText>
     </View>
   );
 }

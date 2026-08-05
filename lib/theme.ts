@@ -1,83 +1,185 @@
-import { AppDarkTheme, AppLightTheme, Colors } from "@/constants/theme";
-import type { Theme } from "@react-navigation/native";
+import { AppTheme, Colors } from "@/constants/theme";
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 
+// Both colors in 'lib/theme.ts' and in 'global.css' must match
 export const THEME = {
   light: {
-    background: Colors.appLight.background,
-    foreground: Colors.appLight.textPrimary,
+    // Page
+    background: "#F7F5F2",
+    foreground: "#171717",
 
-    card: Colors.appLight.cardPrimary,
-    cardForeground: Colors.appLight.textPrimary,
+    // Surfaces
+    card: "#FFFFFF",
+    cardForeground: "#171717",
 
-    popover: Colors.appLight.cardPrimary,
-    popoverForeground: Colors.appLight.textPrimary,
+    popover: "#FFFFFF",
+    popoverForeground: "#171717",
 
-    primary: Colors.appLight.brand,
-    primaryForeground: Colors.appLight.textWhite,
+    // Main brand actions
+    primary: "#EF6131",
+    primaryForeground: "#FFFFFF",
+    primaryHover: "#D95227",
 
-    secondary: Colors.appLight.cardSecondary,
-    secondaryForeground: Colors.appLight.textPrimary,
+    // Secondary surfaces and controls
+    secondary: "#F1EFEC",
+    secondaryForeground: "#171717",
 
-    muted: Colors.appLight.cardTertiary,
-    mutedForeground: Colors.appLight.textBlackMuted,
+    // Muted surfaces and lower-priority text
+    muted: "#F1EFEC",
+    mutedForeground: "#76716C",
+    subtleForeground: "#A29D98",
 
-    accent: Colors.appLight.brandAccent,
-    accentForeground: Colors.appLight.textWhite,
+    // High-contrast controls
+    accent: "#111111",
+    accentForeground: "#FFFFFF",
 
-    destructive: Colors.appLight.error,
+    // Feedback
+    success: "#1B9A59",
+    successForeground: "#FFFFFF",
 
-    border: Colors.appLight.borderPrimary,
-    input: Colors.appLight.borderPrimary,
-    ring: Colors.appLight.brand,
+    warning: "#E5A11A",
+    warningForeground: "#171717",
 
+    destructive: "#DC3F3F",
+    destructiveForeground: "#FFFFFF",
+
+    // Structure
+    border: "#DEDAD6",
+    borderStrong: "#A9A49F",
+    input: "#DEDAD6",
+    ring: "#EF6131",
+
+    // Image content
+    imageOverlay: "rgba(0, 0, 0, 0.48)",
+    imageOverlayStrong: "rgba(0, 0, 0, 0.68)",
+
+    // Effects
+    shadow: "rgba(39, 31, 25, 0.10)",
+
+    // Loading
+    skeleton: "#E9E5E1",
+    skeletonHighlight: "#F5F3F0",
+
+    // Shared component radius
     radius: "0.625rem",
 
-    chart1: Colors.appLight.brand,
-    chart2: Colors.appLight.brandAccent,
-    chart3: Colors.appLight.success,
-    chart4: Colors.appLight.warning,
-    chart5: Colors.appLight.error,
+    // Charts
+    chart1: "#EF6131",
+    chart2: "#111111",
+    chart3: "#1B9A59",
+    chart4: "#E5A11A",
+    chart5: "#DC3F3F",
   },
 
   dark: {
-    background: Colors.appDark.background,
-    foreground: Colors.appDark.textWhite,
+    // Page
+    background: "#0D0E0E",
+    foreground: "#F5F5F3",
 
-    card: Colors.appDark.cardPrimary,
-    cardForeground: Colors.appDark.textWhite,
+    // Surfaces
+    card: "#171818",
+    cardForeground: "#F5F5F3",
 
-    popover: Colors.appDark.cardPrimary,
-    popoverForeground: Colors.appDark.textWhite,
+    popover: "#171818",
+    popoverForeground: "#F5F5F3",
 
-    primary: Colors.appDark.brand,
-    primaryForeground: Colors.appDark.textWhite,
+    // Main brand actions
+    primary: "#EF6131",
+    primaryForeground: "#FFFFFF",
+    primaryHover: "#FA7E49",
 
-    secondary: Colors.appDark.cardSecondary,
-    secondaryForeground: Colors.appDark.textWhite,
+    // Secondary surfaces and controls
+    secondary: "#202121",
+    secondaryForeground: "#F5F5F3",
 
-    muted: Colors.appDark.cardTertiary,
-    mutedForeground: Colors.appDark.textPrimary,
+    // Muted surfaces and lower-priority text
+    muted: "#202121",
+    mutedForeground: "#A5A5A1",
+    subtleForeground: "#747572",
 
-    accent: Colors.appDark.brandAccent,
-    accentForeground: Colors.appDark.textWhite,
+    // High-contrast controls
+    accent: "#F4F4F2",
+    accentForeground: "#171717",
 
-    destructive: Colors.appDark.error,
+    // Feedback
+    success: "#2AB66B",
+    successForeground: "#FFFFFF",
 
-    border: Colors.appDark.borderPrimary,
-    input: Colors.appDark.borderPrimary,
-    ring: Colors.appDark.brand,
+    warning: "#E8AC32",
+    warningForeground: "#171717",
 
+    destructive: "#EF5555",
+    destructiveForeground: "#FFFFFF",
+
+    // Structure
+    border: "#303130",
+    borderStrong: "#484947",
+    input: "#303130",
+    ring: "#EF6131",
+
+    // Image content
+    imageOverlay: "rgba(0, 0, 0, 0.32)",
+    imageOverlayStrong: "rgba(0, 0, 0, 0.62)",
+
+    // Effects
+    shadow: "rgba(0, 0, 0, 0.45)",
+
+    // Loading
+    skeleton: "#202121",
+    skeletonHighlight: "#2A2B2B",
+
+    // Shared component radius
     radius: "0.625rem",
 
-    chart1: Colors.appDark.brand,
-    chart2: Colors.appDark.brandAccent,
-    chart3: Colors.appDark.success,
-    chart4: Colors.appDark.warning,
-    chart5: Colors.appDark.error,
+    // Charts
+    chart1: "#EF6131",
+    chart2: "#F4F4F2",
+    chart3: "#2AB66B",
+    chart4: "#E8AC32",
+    chart5: "#EF5555",
   },
 } as const;
 
+export type AppColorScheme = keyof typeof THEME;
+
+export type SemanticTheme = {
+  [Key in keyof typeof THEME.light]: string;
+};
+
 export const NAV_THEME = {
-  light: AppLightTheme,
-  dark: AppDarkTheme,
-} satisfies Record<"light" | "dark", Theme>;
+  light: {
+    ...DefaultTheme,
+
+    colors: {
+      ...DefaultTheme.colors,
+
+      background: THEME.light.background,
+      card: THEME.light.card,
+      text: THEME.light.foreground,
+      border: THEME.light.border,
+      primary: THEME.light.primary,
+      notification: THEME.light.destructive,
+
+      // TODO: Temporary legacy compatibility (remove after migrate)
+      app: Colors.appLight,
+    },
+  },
+
+  dark: {
+    ...DarkTheme,
+
+    colors: {
+      ...DarkTheme.colors,
+
+      background: THEME.dark.background,
+      card: THEME.dark.card,
+      text: THEME.dark.foreground,
+      border: THEME.dark.border,
+      primary: THEME.dark.primary,
+      notification: THEME.dark.destructive,
+
+      // TODO: Temporary legacy compatibility (remove after migrate)
+      app: Colors.appDark,
+    },
+  },
+} satisfies Record<AppColorScheme, AppTheme>;
