@@ -1,11 +1,13 @@
 import { PageLayout } from "@/components/layout/PageLayout";
-import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
+import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
+import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { ScrollView, View } from "react-native";
 
 export function WeeklyPlanSkeleton() {
   return (
     <PageLayout
+      scrollable={false}
       header={{
         props: {
           variant: "title",
@@ -15,32 +17,86 @@ export function WeeklyPlanSkeleton() {
       }}
     >
       <View className="gap-4">
-        <SkeletonPlaceholder className="aspect-[2.75] w-full rounded-3xl" />
+        <WeeklyPlanSummarySkeleton />
 
-        <View className="gap-3">
-          <View className="gap-2">
-            <TextSkeleton type="subtitle" className="w-28" />
-            <TextSkeleton type="small" className="w-64" />
-          </View>
+        <WeeklyPlanDaySelectorSkeleton />
 
-          <ScrollView
-            horizontal
-            scrollEnabled={false}
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-3"
-          >
-            {Array.from({ length: 7 }).map((_, index) => (
-              <DayPillSkeleton key={index} />
-            ))}
-          </ScrollView>
-        </View>
-
-        <SkeletonPlaceholder className="aspect-[2.25] w-full rounded-3xl" />
+        <SelectedWeeklyPlanDaySkeleton />
       </View>
     </PageLayout>
   );
 }
 
+function WeeklyPlanSummarySkeleton() {
+  return (
+    <View className="gap-4 rounded-3xl bg-card p-4">
+      <View className="flex-row items-center gap-3">
+        <SkeletonPlaceholderV2
+          containerClassName="h-12 w-12"
+          skeletonClassName="rounded-2xl"
+        />
+
+        <View className="flex-1">
+          <TextSkeleton type="title" className="w-52" />
+
+          <TextSkeleton type="small" className="w-64" />
+        </View>
+      </View>
+
+      <View className="flex-row gap-3">
+        <SummaryStatSkeleton />
+
+        <SummaryStatSkeleton />
+
+        <SummaryStatSkeleton />
+      </View>
+    </View>
+  );
+}
+
+function SummaryStatSkeleton() {
+  return (
+    <View className="flex-1 gap-1 rounded-2xl bg-secondary p-3">
+      <TextSkeleton type="caption" className="w-16" />
+
+      <TextSkeleton type="title" className="w-8" />
+    </View>
+  );
+}
+
+function WeeklyPlanDaySelectorSkeleton() {
+  return (
+    <View className="gap-3">
+      <SectionHeaderSkeleton titleWidthClassName="w-28" />
+
+      <ScrollView
+        horizontal
+        scrollEnabled={false}
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="gap-3"
+      >
+        {Array.from({ length: 7 }).map((_, index) => (
+          <DayPillSkeleton key={index} />
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
 function DayPillSkeleton() {
-  return <SkeletonPlaceholder className="aspect-[0.9] w-20 rounded-3xl" />;
+  return (
+    <SkeletonPlaceholderV2
+      containerClassName="h-24 w-20"
+      skeletonClassName="rounded-3xl"
+    />
+  );
+}
+
+function SelectedWeeklyPlanDaySkeleton() {
+  return (
+    <SkeletonPlaceholderV2
+      containerClassName="h-48 w-full"
+      skeletonClassName="rounded-3xl"
+    />
+  );
 }

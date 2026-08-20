@@ -1,18 +1,17 @@
 import {
   formatExerciseCount,
   mapWorkoutToWorkoutCardItem,
-  WorkoutCardItem,
+  type WorkoutCardItem,
 } from "@/components/workout/ui/workout-card/WorkoutCard";
 import {
   requireScheduleWorkout,
   requireWorkoutExercises,
   requireWorkoutExerciseSets,
 } from "@/lib/workout/utils/response-guards.utils";
-import {
+import type {
   WorkoutResponse,
   WorkoutSchedule,
 } from "@/types/workout/response/workout.types";
-import { Clock, Dumbbell, Layers } from "lucide-react-native";
 
 export function mapScheduleToWorkoutHeroCardItem(
   schedule: WorkoutSchedule,
@@ -28,17 +27,20 @@ export function mapScheduleToWorkoutHeroCardItem(
     ...cardItem,
     metaItems: [
       {
-        icon: Dumbbell,
+        key: "exercise-count",
+        icon: "workout",
         label: formatExerciseCount(workoutExercises.length),
       },
       {
-        icon: Layers,
+        key: "set-count",
+        icon: "sets",
         label: `${setCount} ${setCount === 1 ? "set" : "sets"}`,
       },
       ...(durationLabel
         ? [
             {
-              icon: Clock,
+              key: "duration",
+              icon: "duration" as const,
               label: durationLabel,
             },
           ]

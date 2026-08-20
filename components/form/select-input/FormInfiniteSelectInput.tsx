@@ -1,10 +1,10 @@
-import { api } from "@/lib/api/client";
-import { PaginatedResponse } from "@/types/api.types";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import FormSelectInput, {
-  FormSelectInputProps,
-  SelectOption,
-} from "./FormSelectInput";
+  type FormSelectInputProps,
+  type SelectOption,
+} from "@/components/form/select-input/FormSelectInput";
+import { api } from "@/lib/api/client";
+import type { PaginatedResponse } from "@/types/api.types";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface FormInfiniteSelectInputProps<T> extends Omit<
   FormSelectInputProps,
@@ -33,9 +33,13 @@ export default function FormInfiniteSelectInput<T>({
   } = useInfiniteQuery<PaginatedResponse<T>>({
     initialPageParam: 1,
     queryKey,
+
     queryFn: async ({ pageParam }) => {
       const { data } = await api.get<PaginatedResponse<T>>(url, {
-        params: { page: pageParam, limit: 20 },
+        params: {
+          page: pageParam,
+          limit: 20,
+        },
       });
 
       return data;
@@ -43,6 +47,7 @@ export default function FormInfiniteSelectInput<T>({
 
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.meta;
+
       return page < totalPages ? page + 1 : undefined;
     },
   });
@@ -52,12 +57,16 @@ export default function FormInfiniteSelectInput<T>({
 
   // Merged with selected option
   const mergedOptions =
-    selectedOption && !options.some((o) => o.value === selectedOption.value)
+    selectedOption &&
+    !options.some((option) => option.value === selectedOption.value)
       ? [selectedOption, ...options]
       : options;
 
   const loadMore = () => {
-    if (!hasNextPage || isFetchingNextPage) return;
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
     fetchNextPage();
   };
 

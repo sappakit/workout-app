@@ -6,7 +6,6 @@ import { api } from "@/lib/api/client";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { LogIn, MailPlus } from "lucide-react-native";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -34,12 +33,12 @@ export default function ResetPasswordScreen() {
         message="This password reset link doesn't include a valid token. Please request a new reset link."
         primaryAction={{
           label: "Resend Email",
-          icon: MailPlus,
+          icon: "send",
           onPress: () => router.replace("/(auth)/forgot-password"),
         }}
         secondaryAction={{
           label: "Sign In",
-          icon: LogIn,
+          icon: "sign-in",
           onPress: () => router.replace("/(auth)/sign-in"),
         }}
       />
@@ -60,12 +59,12 @@ export default function ResetPasswordScreen() {
           message="This password reset link is invalid or has expired. Please request a new reset link."
           primaryAction={{
             label: "Resend Email",
-            icon: MailPlus,
+            icon: "send",
             onPress: () => router.replace("/(auth)/forgot-password"),
           }}
           secondaryAction={{
             label: "Sign In",
-            icon: LogIn,
+            icon: "sign-in",
             onPress: () => router.replace("/(auth)/sign-in"),
           }}
         />
@@ -81,7 +80,7 @@ export default function ResetPasswordScreen() {
         }}
         secondaryAction={{
           label: "Sign In",
-          icon: LogIn,
+          icon: "sign-in",
           onPress: () => router.replace("/(auth)/sign-in"),
         }}
       />

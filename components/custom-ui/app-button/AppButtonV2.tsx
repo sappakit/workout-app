@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { useAppColors } from "@/hooks/useAppTheme";
 import { cn } from "@/lib/utils";
 import { ActivityIndicator, View } from "react-native";
+import type { AppIconSize } from "../app-icon/app-icon.styles";
 import { AppIcon } from "../app-icon/AppIcon";
-import type { AppIconSize } from "../app-icon/app-icon.types";
 import { ThemedText } from "../themed-text";
 import { buttonVariantConfigMap } from "./app-button.styles";
 import type { AppButtonV2Props } from "./app-button.types";
@@ -51,14 +51,14 @@ export function AppButtonV2({
         <View className="flex-row items-center justify-center gap-2">
           {iconPosition === "left" && iconElement}
 
-          {title && (
+          {title ? (
             <ThemedText
               type="label"
               className={cn(variantConfig.textClassName, textClassName)}
             >
               {title}
             </ThemedText>
-          )}
+          ) : null}
 
           {iconPosition === "right" && iconElement}
         </View>

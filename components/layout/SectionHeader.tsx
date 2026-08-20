@@ -1,20 +1,26 @@
-import clsx from "clsx";
-import { ReactNode } from "react";
-import { StyleProp, TextStyle, View } from "react-native";
-import { twMerge } from "tailwind-merge";
-import { ThemedText } from "../themed-text";
+import type { AppTextType } from "@/components/custom-ui/themed-text";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+import { type StyleProp, type TextStyle, View } from "react-native";
 
 type SectionHeaderSize = "small" | "default";
 
-type SectionHeaderSizeClasses = {
-  title: string;
-  subtitle: string;
+type SectionHeaderTextTypes = {
+  title: AppTextType;
+  subtitle: AppTextType;
 };
 
-const sizeClassMap = {
-  small: { title: "text-lg", subtitle: "text-xs" },
-  default: { title: "text-xl", subtitle: "text-sm" },
-} satisfies Record<SectionHeaderSize, SectionHeaderSizeClasses>;
+const sizeTextTypeMap = {
+  small: {
+    title: "heading",
+    subtitle: "caption",
+  },
+  default: {
+    title: "title",
+    subtitle: "small",
+  },
+} satisfies Record<SectionHeaderSize, SectionHeaderTextTypes>;
 
 interface SectionHeaderProps {
   title: string;
@@ -39,13 +45,14 @@ export function SectionHeader({
   subtitleStyle,
   action,
 }: SectionHeaderProps) {
+  const textTypes = sizeTextTypeMap[size];
+
   return (
     <View className={className}>
-      <View className="flex-row items-center justify-between">
+      <View className="flex-row items-center justify-between gap-3">
         <ThemedText
-          type="defaultSemiBold"
-          variant="accent"
-          className={twMerge(clsx(sizeClassMap[size].title, titleClassName))}
+          type={textTypes.title}
+          className={cn("flex-1", titleClassName)}
           style={titleStyle}
         >
           {title}
@@ -56,11 +63,9 @@ export function SectionHeader({
 
       {subtitle && (
         <ThemedText
-          type="default"
-          variant="primary"
-          className={twMerge(
-            clsx(sizeClassMap[size].subtitle, subtitleClassName),
-          )}
+          type={textTypes.subtitle}
+          tone="muted"
+          className={subtitleClassName}
           style={subtitleStyle}
         >
           {subtitle}

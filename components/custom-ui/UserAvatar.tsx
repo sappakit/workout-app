@@ -1,5 +1,5 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { User } from "lucide-react-native";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { Image, View } from "react-native";
 
 type UserAvatarProps = {
@@ -7,15 +7,10 @@ type UserAvatarProps = {
 };
 
 export function UserAvatar({ imageUrl }: UserAvatarProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
-    <View
-      className="h-12 w-12 items-center justify-center overflow-hidden rounded-full"
-      style={{
-        backgroundColor: colors.app.cardPrimary,
-      }}
-    >
+    <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-card">
       {imageUrl ? (
         <Image
           source={{ uri: imageUrl }}
@@ -23,7 +18,12 @@ export function UserAvatar({ imageUrl }: UserAvatarProps) {
           resizeMode="cover"
         />
       ) : (
-        <User size={28} color={colors.app.borderPrimary} />
+        <AppIcon
+          name="profile"
+          variant="filled"
+          size="lg"
+          color={colors.mutedForeground}
+        />
       )}
     </View>
   );

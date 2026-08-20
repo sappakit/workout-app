@@ -1,8 +1,8 @@
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ScreenSection } from "@/components/layout/ScreenSection";
 import { SectionHeader } from "@/components/layout/SectionHeader";
-import { ThemedText } from "@/components/themed-text";
-import { Exercise } from "@/types/workout/response/exercise.types";
+import type { Exercise } from "@/types/workout/response/exercise.types";
 import { View } from "react-native";
 import { DetailHeroImage } from "../workout-detail/ui/DetailHeroImage";
 
@@ -36,26 +36,26 @@ export default function ExerciseDetailContent({
           title: data.name,
           showBackButton: true,
         },
-        scrollEffect: { overlay: true },
+        scrollEffect: {
+          overlay: true,
+        },
       }}
     >
-      <DetailHeroImage imageUrl={imageUrl} />
-
       <View className="gap-4">
+        <DetailHeroImage imageUrl={imageUrl} />
+
         <View className="justify-center">
-          <ThemedText type="default" variant="primary">
+          <ThemedText type="small" tone="muted">
             {exerciseTypeLabel}
           </ThemedText>
 
-          <ThemedText type="title" variant="accent" className="text-2xl">
-            {data.name}
-          </ThemedText>
+          <ThemedText type="title">{data.name}</ThemedText>
         </View>
 
         <ScreenSection>
           <SectionHeader title="Description" />
 
-          <ThemedText type="default" variant="primary">
+          <ThemedText type="body" tone="muted">
             {data.description ?? "No description yet."}
           </ThemedText>
         </ScreenSection>
@@ -63,7 +63,7 @@ export default function ExerciseDetailContent({
         <ScreenSection>
           <SectionHeader title="Muscles" />
 
-          <ThemedText type="default" variant="primary">
+          <ThemedText type="body" tone="muted">
             {muscleNames.length > 0
               ? muscleNames.join(", ")
               : data.muscles
@@ -82,22 +82,18 @@ export default function ExerciseDetailContent({
                   key={`${index}-${instruction}`}
                   className="flex-row items-start gap-2"
                 >
-                  <ThemedText type="default" variant="primary">
+                  <ThemedText type="body" tone="muted">
                     {index + 1}.
                   </ThemedText>
 
-                  <ThemedText
-                    type="default"
-                    variant="primary"
-                    className="flex-1"
-                  >
+                  <ThemedText type="body" tone="muted" className="flex-1">
                     {instruction}
                   </ThemedText>
                 </View>
               ))}
             </View>
           ) : (
-            <ThemedText type="default" variant="primary">
+            <ThemedText type="body" tone="muted">
               No instructions yet.
             </ThemedText>
           )}

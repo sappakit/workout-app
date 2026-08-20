@@ -3,9 +3,8 @@ import {
   requireSessionExercises,
   requireSessionExerciseSets,
 } from "@/lib/workout/utils/response-guards.utils";
-import { WorkoutSession } from "@/types/workout/response/workout.types";
-import { Layers, Timer, Weight } from "lucide-react-native";
-import { RecentWorkoutCardItem } from "../ui/sections/progress-history-section/RecentWorkoutCard";
+import type { WorkoutSession } from "@/types/workout/response/workout.types";
+import type { RecentWorkoutCardItem } from "../ui/sections/progress-history-section/RecentWorkoutCard";
 
 type SessionStats = {
   volumeKg: number;
@@ -26,23 +25,24 @@ export function mapWorkoutSessionsToHistoryItems(
       subtitle: formatHistoryDate(session.endedAt ?? session.startedAt),
       imageUrl: session.workout?.imageUrl,
       action: () => {
+        // TODO: add session workout page
         console.log(`session: ${session.id}`);
       },
       list: [
         {
           label: "Sets",
           value: `${completedSets}/${totalSets}`,
-          icon: Layers,
+          icon: "sets",
         },
         {
           label: "Volume",
           value: `${formatNumber(volumeKg)} kg`,
-          icon: Weight,
+          icon: "volume",
         },
         {
           label: "Duration",
           value: formatDurationShort(session.totalDuration ?? 0),
-          icon: Timer,
+          icon: "timer",
         },
       ],
     };

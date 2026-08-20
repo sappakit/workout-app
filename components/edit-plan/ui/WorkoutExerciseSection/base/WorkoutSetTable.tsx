@@ -1,19 +1,14 @@
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import FormNumberInput from "@/components/form/FormNumberInput";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
 import {
-  ExerciseFieldKey,
+  type ExerciseFieldKey,
   getExerciseFieldConfig,
   getExerciseFields,
 } from "@/lib/workout/config";
-import { Check, ChevronsUpDown, Trash2 } from "lucide-react-native";
-import { ReactElement } from "react";
-import {
-  Pressable,
-  TouchableOpacity,
-  TouchableOpacityProps,
-  View,
-} from "react-native";
+import type { ReactElement } from "react";
+import { Pressable, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 export type SetPerformanceMode = "previous" | "best";
@@ -57,47 +52,36 @@ export function WorkoutSetHeader({
   performanceMode,
   onTogglePerformanceMode,
 }: WorkoutSetHeaderProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <View className="flex-row items-center gap-2 p-2">
       <View className="w-12 items-center">
-        <ThemedText type="small" variant="accent">
-          SET
-        </ThemedText>
+        <ThemedText type="label">SET</ThemedText>
       </View>
 
       {performanceMode ? (
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           onPress={onTogglePerformanceMode}
           className="flex-1 flex-row items-center justify-center gap-1"
         >
-          <ThemedText type="small" variant="accent">
+          <ThemedText type="label">
             {performanceMode === "previous" ? "PREVIOUS" : "BEST"}
           </ThemedText>
 
-          <ChevronsUpDown
-            size={12}
-            style={{ minWidth: 12 }}
-            color={colors.app.textAccent}
-          />
-        </TouchableOpacity>
+          <AppIcon name="switch-vertical" size="xs" color={colors.foreground} />
+        </Pressable>
       ) : null}
 
       {columns.map((column) => (
         <View key={column.key} className="flex-1 items-center">
-          <ThemedText type="small" variant="accent">
-            {column.label}
-          </ThemedText>
+          <ThemedText type="label">{column.label}</ThemedText>
         </View>
       ))}
 
       {trailingHeaderLabel ? (
         <View className="w-12 items-center">
-          <ThemedText type="small" variant="accent">
-            {trailingHeaderLabel}
-          </ThemedText>
+          <ThemedText type="label">{trailingHeaderLabel}</ThemedText>
         </View>
       ) : null}
     </View>
@@ -168,17 +152,10 @@ function WorkoutSetRowContent({
   renderTrailingCell,
   renderPerformanceCell,
 }: WorkoutSetRowContentProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className="flex-row items-center gap-2 p-2"
-      style={{ backgroundColor: colors.app.cardPrimaryDark }}
-    >
+    <View className="flex-row items-center gap-2 bg-card p-2">
       <View className="w-12 items-center">
-        <ThemedText type="default" variant="primary">
-          {setNumber}
-        </ThemedText>
+        <ThemedText type="body">{setNumber}</ThemedText>
       </View>
 
       {renderPerformanceCell ? (
@@ -241,60 +218,23 @@ type WorkoutSetValueTextProps = {
 
 export function WorkoutSetValueText({ value }: WorkoutSetValueTextProps) {
   return (
-    <View className="h-12 items-center justify-center rounded-lg">
-      <ThemedText type="default" variant="primary" numberOfLines={1}>
+    <View className="h-10 items-center justify-center rounded-lg">
+      <ThemedText type="body" numberOfLines={1}>
         {value ?? "-"}
       </ThemedText>
     </View>
   );
 }
 
-type WorkoutSetDoneCheckboxProps = TouchableOpacityProps & {
-  checked: boolean;
-};
-
-export function WorkoutSetDoneCheckbox({
-  checked,
-  style,
-  disabled,
-  onPress,
-  ...props
-}: WorkoutSetDoneCheckboxProps) {
-  const { colors } = useAppTheme();
-
-  const baseStyle = {
-    backgroundColor: checked ? colors.app.brand : colors.app.cardSecondary,
-    borderColor: checked ? colors.app.brand : colors.app.borderPrimary,
-  };
-
-  return (
-    <TouchableOpacity
-      {...props}
-      onPress={onPress}
-      activeOpacity={0.8}
-      className="h-6 w-6 items-center justify-center rounded-md border"
-      style={[baseStyle, { opacity: disabled ? 0.6 : 1 }, style]}
-      disabled={disabled}
-    >
-      {checked ? (
-        <Check size={14} color={colors.app.textWhite} strokeWidth={3} />
-      ) : null}
-    </TouchableOpacity>
-  );
-}
-
 function DeleteSetAction({ onPress }: { onPress: () => void }) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <Pressable
       onPress={onPress}
-      className="items-center justify-center px-6"
-      style={{
-        backgroundColor: colors.app.error,
-      }}
+      className="items-center justify-center bg-destructive px-6"
     >
-      <Trash2 size={16} color={colors.app.textWhite} strokeWidth={3} />
+      <AppIcon name="delete" size="sm" color={colors.destructiveForeground} />
     </Pressable>
   );
 }
@@ -306,9 +246,5 @@ type WorkoutSetPerformanceTextProps = {
 export function WorkoutSetPerformanceText({
   value,
 }: WorkoutSetPerformanceTextProps) {
-  return (
-    <ThemedText type="default" variant="primary">
-      {value ?? "-"}
-    </ThemedText>
-  );
+  return <ThemedText type="body">{value ?? "-"}</ThemedText>;
 }

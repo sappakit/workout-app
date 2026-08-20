@@ -1,8 +1,8 @@
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { SectionHeader } from "@/components/layout/SectionHeader";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { LinearGradient } from "expo-linear-gradient";
-import { CalendarDays } from "lucide-react-native";
 import { StyleSheet, View } from "react-native";
 
 interface WeeklyPlanSummaryProps {
@@ -16,34 +16,31 @@ export function WeeklyPlanSummary({
   restDayCount,
   unassignedDayCount,
 }: WeeklyPlanSummaryProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
-    <View
-      className="gap-4 rounded-3xl p-4"
-      style={{
-        backgroundColor: colors.app.cardPrimary,
-      }}
-    >
+    <View className="gap-4 rounded-3xl bg-card p-4">
       <View className="flex-row items-center gap-3">
-        <View
-          className="h-12 w-12 items-center justify-center overflow-hidden rounded-2xl"
-          style={{ backgroundColor: colors.app.brand }}
-        >
+        <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-primary">
           <LinearGradient
-            colors={[
-              colors.app.brandLight,
-              colors.app.brand,
-              colors.app.brandDark,
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            colors={[colors.primary, colors.primaryHover]}
+            start={{
+              x: 0,
+              y: 0,
+            }}
+            end={{
+              x: 1,
+              y: 1,
+            }}
             style={StyleSheet.absoluteFillObject}
           />
 
-          <View>
-            <CalendarDays size={20} color={colors.app.textWhite} />
-          </View>
+          <AppIcon
+            name="weekly-plan"
+            variant="outline"
+            size="md"
+            color={colors.primaryForeground}
+          />
         </View>
 
         <View className="flex-1">
@@ -56,7 +53,9 @@ export function WeeklyPlanSummary({
 
       <View className="flex-row gap-3">
         <SummaryStatCard label="Workout days" value={assignedWorkoutCount} />
+
         <SummaryStatCard label="Rest days" value={restDayCount} />
+
         <SummaryStatCard label="Unassigned" value={unassignedDayCount} />
       </View>
     </View>
@@ -69,22 +68,13 @@ interface SummaryStatCardProps {
 }
 
 function SummaryStatCard({ label, value }: SummaryStatCardProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className="flex-1 rounded-2xl p-3"
-      style={{
-        backgroundColor: colors.app.cardSecondary,
-      }}
-    >
-      <ThemedText type="extraSmall" variant="primary" numberOfLines={1}>
+    <View className="flex-1 rounded-2xl bg-secondary p-3">
+      <ThemedText type="caption" tone="muted" numberOfLines={1}>
         {label}
       </ThemedText>
 
-      <ThemedText type="title" variant="accent">
-        {value}
-      </ThemedText>
+      <ThemedText type="title">{value}</ThemedText>
     </View>
   );
 }

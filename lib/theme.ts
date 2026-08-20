@@ -5,33 +5,39 @@ import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 export const THEME = {
   light: {
     // Page
-    background: "#F7F5F2",
-    foreground: "#171717",
+    background: "#F3F2F0",
+    foreground: "#161616",
 
     // Surfaces
     card: "#FFFFFF",
-    cardForeground: "#171717",
+    cardForeground: "#161616",
 
     popover: "#FFFFFF",
-    popoverForeground: "#171717",
+    popoverForeground: "#161616",
 
     // Main brand actions
     primary: "#EF6131",
+    primaryHover: "#D9572C",
     primaryForeground: "#FFFFFF",
-    primaryHover: "#D95227",
 
     // Secondary surfaces and controls
-    secondary: "#F1EFEC",
-    secondaryForeground: "#171717",
+    secondary: "#E8E7E4",
+    secondaryHover: "#DEDDDA",
+    secondaryForeground: "#1B1B1B",
 
     // Muted surfaces and lower-priority text
-    muted: "#F1EFEC",
-    mutedForeground: "#76716C",
-    subtleForeground: "#A29D98",
+    muted: "#EFEEEB",
+    mutedForeground: "#6F6E6A",
+    subtleForeground: "#999792",
+
+    // Interactive highlight
+    accent: "#E8E7E4",
+    accentForeground: "#161616",
 
     // High-contrast controls
-    accent: "#111111",
-    accentForeground: "#FFFFFF",
+    contrast: "#111111",
+    contrastHover: "#2A2A2A",
+    contrastForeground: "#FFFFFF",
 
     // Feedback
     success: "#1B9A59",
@@ -41,31 +47,32 @@ export const THEME = {
     warningForeground: "#171717",
 
     destructive: "#DC3F3F",
+    destructiveHover: "#C93636",
     destructiveForeground: "#FFFFFF",
 
     // Structure
-    border: "#DEDAD6",
-    borderStrong: "#A9A49F",
-    input: "#DEDAD6",
+    border: "#D8D7D3",
+    borderStrong: "#AAA8A3",
+    input: "#E2E1DE",
     ring: "#EF6131",
 
     // Image content
-    imageOverlay: "rgba(0, 0, 0, 0.48)",
-    imageOverlayStrong: "rgba(0, 0, 0, 0.68)",
+    imageOverlay: "rgba(0, 0, 0, 0.42)",
+    imageOverlayStrong: "rgba(0, 0, 0, 0.62)",
 
     // Effects
-    shadow: "rgba(39, 31, 25, 0.10)",
+    shadow: "rgba(25, 25, 23, 0.08)",
 
     // Loading
-    skeleton: "#E9E5E1",
-    skeletonHighlight: "#F5F3F0",
+    skeleton: "#E9E8E5",
+    skeletonHighlight: "#F6F5F3",
 
     // Shared component radius
     radius: "0.625rem",
 
     // Charts
     chart1: "#EF6131",
-    chart2: "#111111",
+    chart2: "#555553",
     chart3: "#1B9A59",
     chart4: "#E5A11A",
     chart5: "#DC3F3F",
@@ -73,33 +80,39 @@ export const THEME = {
 
   dark: {
     // Page
-    background: "#0D0E0E",
+    background: "#1D1D1D",
     foreground: "#F5F5F3",
 
     // Surfaces
-    card: "#171818",
+    card: "#252525",
     cardForeground: "#F5F5F3",
 
-    popover: "#171818",
+    popover: "#252525",
     popoverForeground: "#F5F5F3",
 
     // Main brand actions
     primary: "#EF6131",
+    primaryHover: "#D9572C",
     primaryForeground: "#FFFFFF",
-    primaryHover: "#FA7E49",
 
     // Secondary surfaces and controls
-    secondary: "#202121",
+    secondary: "#2E2E2E",
+    secondaryHover: "#3A3A3A",
     secondaryForeground: "#F5F5F3",
 
     // Muted surfaces and lower-priority text
-    muted: "#202121",
-    mutedForeground: "#A5A5A1",
-    subtleForeground: "#747572",
+    muted: "#2E2E2E",
+    mutedForeground: "#A8A8A4",
+    subtleForeground: "#7F7F7A",
+
+    // Interactive highlight
+    accent: "#2E2E2E",
+    accentForeground: "#F5F5F3",
 
     // High-contrast controls
-    accent: "#F4F4F2",
-    accentForeground: "#171717",
+    contrast: "#F4F4F2",
+    contrastHover: "#DDDDDA",
+    contrastForeground: "#171717",
 
     // Feedback
     success: "#2AB66B",
@@ -109,12 +122,13 @@ export const THEME = {
     warningForeground: "#171717",
 
     destructive: "#EF5555",
+    destructiveHover: "#D94A4A",
     destructiveForeground: "#FFFFFF",
 
     // Structure
-    border: "#303130",
-    borderStrong: "#484947",
-    input: "#303130",
+    border: "#3A3A3A",
+    borderStrong: "#555555",
+    input: "#3A3A3A",
     ring: "#EF6131",
 
     // Image content
@@ -122,11 +136,11 @@ export const THEME = {
     imageOverlayStrong: "rgba(0, 0, 0, 0.62)",
 
     // Effects
-    shadow: "rgba(0, 0, 0, 0.45)",
+    shadow: "rgba(0, 0, 0, 0.40)",
 
     // Loading
-    skeleton: "#202121",
-    skeletonHighlight: "#2A2B2B",
+    skeleton: "#2B2B2B",
+    skeletonHighlight: "#353535",
 
     // Shared component radius
     radius: "0.625rem",

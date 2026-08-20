@@ -1,11 +1,12 @@
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { cn } from "@/lib/utils";
 import { WorkoutWeeklyPlanDayType } from "@/types/workout/response/workout.types";
-import { CircleDashed, Dumbbell, Moon } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { FlatList, Pressable } from "react-native";
-import { WeeklyPlanDay } from "../model/weekly-plan.mapper";
+import type { WeeklyPlanDay } from "../model/weekly-plan.mapper";
 
 interface WeeklyPlanDaySelectorProps {
   weeklyPlan: WeeklyPlanDay[];
@@ -25,7 +26,9 @@ export function WeeklyPlanDaySelector({
       (day) => day.dayOfWeek === selectedDayOfWeek,
     );
 
-    if (selectedIndex < 0) return;
+    if (selectedIndex < 0) {
+      return;
+    }
 
     requestAnimationFrame(() => {
       listRef.current?.scrollToIndex({
@@ -44,9 +47,10 @@ export function WeeklyPlanDaySelector({
       keyExtractor={(item) => String(item.dayOfWeek)}
       showsHorizontalScrollIndicator={false}
       contentContainerClassName="gap-2"
-      style={{ marginHorizontal: -CONTENT_PADDING_HORIZONTAL }}
+      style={{
+        marginHorizontal: -CONTENT_PADDING_HORIZONTAL,
+      }}
       contentContainerStyle={{
-        gap: 12,
         paddingHorizontal: CONTENT_PADDING_HORIZONTAL,
       }}
       onScrollToIndexFailed={(info) => {
@@ -75,30 +79,47 @@ interface DayPillProps {
 }
 
 function DayPill({ day, isSelected, onPress }: DayPillProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
-  const textColor = isSelected ? colors.app.textWhite : colors.app.textPrimary;
+  const isAssigned = day.dayType !== WorkoutWeeklyPlanDayType.UNASSIGNED;
+
+  const iconName =
+    day.dayType === WorkoutWeeklyPlanDayType.WORKOUT
+      ? "workout"
+      : day.dayType === WorkoutWeeklyPlanDayType.REST
+        ? "recovery"
+        : "unassigned";
+
+  const contentColor = isSelected
+    ? colors.primaryForeground
+    : isAssigned
+      ? colors.foreground
+      : colors.mutedForeground;
 
   return (
     <Pressable
       onPress={onPress}
-      className="w-20 items-center justify-between gap-3 rounded-3xl p-4"
-      style={{
-        backgroundColor: isSelected ? colors.app.brand : colors.app.cardPrimary,
-      }}
-    >
-      {day.dayType === WorkoutWeeklyPlanDayType.WORKOUT ? (
-        <Dumbbell size={20} color={textColor} />
-      ) : day.dayType === WorkoutWeeklyPlanDayType.REST ? (
-        <Moon size={20} color={textColor} />
-      ) : (
-        <CircleDashed size={20} color={textColor} />
+      className={cn(
+        "h-24 w-[68px] items-center justify-center gap-2 rounded-full border active:opacity-80",
+
+        isSelected && "border-primary bg-primary",
+
+        !isSelected && isAssigned && "border-secondary bg-secondary",
+
+        !isSelected && !isAssigned && "border-border bg-card",
       )}
+    >
+      <AppIcon
+        name={iconName}
+        variant="outline"
+        size="md"
+        color={contentColor}
+      />
 
       <ThemedText
-        type="default"
+        type="small"
         style={{
-          color: textColor,
+          color: contentColor,
         }}
       >
         {day.shortLabel}

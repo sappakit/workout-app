@@ -1,10 +1,10 @@
-import { ExerciseFieldKey } from "@/lib/workout/config";
+import type { ExerciseFieldKey } from "@/lib/workout/config";
 import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
 import {
   requireWorkoutExercise,
   requireWorkoutExerciseSets,
 } from "@/lib/workout/utils/response-guards.utils";
-import {
+import type {
   WorkoutExerciseItem,
   WorkoutExerciseSet,
 } from "@/types/workout/response/workout.types";
@@ -12,7 +12,7 @@ import { useMemo } from "react";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
 import {
   getWorkoutSetColumns,
-  WorkoutSetColumn,
+  type WorkoutSetColumn,
   WorkoutSetHeader,
   WorkoutSetRow,
   WorkoutSetValueText,
@@ -57,14 +57,11 @@ export function DisplayWorkoutExerciseSection({
       restTime={workoutExercise.restTime ?? 0}
       emptyTitle="No sets"
       emptyDescription="This exercise has no planned sets."
-      renderSetHeader={() => (
-        <WorkoutSetHeader columns={columns} trailingHeaderLabel="" />
-      )}
+      renderSetHeader={() => <WorkoutSetHeader columns={columns} />}
       renderSetRow={(setItem) => (
         <WorkoutSetRow
           setNumber={setItem.setNumber}
           columns={columns}
-          onDelete={undefined}
           renderInput={(column) => {
             const value = getWorkoutExerciseSetValue(setItem, column.key);
 

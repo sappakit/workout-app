@@ -3,9 +3,8 @@ import {
   MenuSectionLabel,
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
-import { PanelTopOpen, Settings2, Trash2 } from "lucide-react-native";
 
 type ExerciseListMenuProps = {
   actions?: {
@@ -19,11 +18,12 @@ export function ExerciseListMenu({
   isDisabled,
   actions,
 }: ExerciseListMenuProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const showFullExerciseDetails = useExerciseDisplayStore(
     (state) => state.showFullExerciseDetails,
   );
+
   const toggleShowFullExerciseDetails = useExerciseDisplayStore(
     (state) => state.toggleShowFullExerciseDetails,
   );
@@ -35,7 +35,7 @@ export function ExerciseListMenu({
       <DropdownItem
         isToggleItem
         label="Show full details"
-        icon={PanelTopOpen}
+        icon="details"
         checked={showFullExerciseDetails}
         onSelect={toggleShowFullExerciseDetails}
       />
@@ -46,14 +46,14 @@ export function ExerciseListMenu({
 
           <DropdownItem
             label="Manage exercises"
-            icon={Settings2}
+            icon="settings"
             onSelect={actions.handleOpenManageMode}
           />
 
           <DropdownItem
             label="Remove all"
-            color={colors.app.error}
-            icon={Trash2}
+            icon="delete"
+            color={colors.destructive}
             onSelect={actions.handleRemoveAllExercises}
           />
         </>

@@ -21,19 +21,22 @@ export const buttonVariantConfigMap: Record<
 > = {
   primary: {
     buttonVariant: "default",
+    containerClassName: "hover:bg-primary-hover active:bg-primary-hover",
     getContentColor: (colors) => colors.primaryForeground,
   },
 
   secondary: {
     buttonVariant: "secondary",
+    containerClassName: "hover:bg-secondary-hover active:bg-secondary-hover",
     getContentColor: (colors) => colors.secondaryForeground,
   },
 
   contrast: {
-    buttonVariant: "ghost",
-    containerClassName: "bg-accent active:opacity-90",
-    textClassName: "text-accent-foreground",
-    getContentColor: (colors) => colors.accentForeground,
+    buttonVariant: "default",
+    containerClassName:
+      "bg-contrast hover:bg-contrast-hover active:bg-contrast-hover",
+    textClassName: "text-contrast-foreground",
+    getContentColor: (colors) => colors.contrastForeground,
   },
 
   outline: {
@@ -43,6 +46,8 @@ export const buttonVariantConfigMap: Record<
 
   destructive: {
     buttonVariant: "destructive",
+    containerClassName:
+      "hover:bg-destructive-hover active:bg-destructive-hover",
     getContentColor: (colors) => colors.destructiveForeground,
   },
 

@@ -1,22 +1,10 @@
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { User as UserResponse } from "@/types/user/response/user.types";
+import { useAppColors } from "@/hooks/useAppTheme";
+import type { User as UserResponse } from "@/types/user/response/user.types";
 import { useRouter } from "expo-router";
-import {
-  Activity,
-  BarChart3,
-  CircleHelp,
-  Dumbbell,
-  LockKeyhole,
-  LogOut,
-  Mail,
-  MessageCircle,
-  Shield,
-  User,
-} from "lucide-react-native";
-import React from "react";
 import { View } from "react-native";
 import { ProfileAvatar } from "./ui/ProfileAvatar";
 import { ProfileMenuItem, ProfileSection } from "./ui/ProfileMenu";
@@ -27,12 +15,12 @@ interface ProfileContentProps {
 }
 
 export default function ProfileContent({ data }: ProfileContentProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const { signOut } = useAuth();
   const router = useRouter();
 
   const fullName =
-    `${data.profile?.firstName} ${data.profile?.lastName}`.trim();
+    `${data.profile?.firstName ?? ""} ${data.profile?.lastName ?? ""}`.trim();
 
   return (
     <PageLayout
@@ -54,22 +42,13 @@ export default function ProfileContent({ data }: ProfileContentProps) {
             />
           </View>
 
-          <View className="items-center">
-            <ThemedText type="subtitle" variant="accent">
-              {fullName}
-            </ThemedText>
+          <View className="items-center gap-1">
+            <ThemedText type="heading">{fullName}</ThemedText>
 
-            <View className="flex-row items-center gap-2">
-              <Mail size={14} color={colors.app.textPrimary} />
+            <View className="flex-row items-center gap-1.5">
+              <AppIcon name="email" size="xs" color={colors.mutedForeground} />
 
-              <ThemedText
-                type="default"
-                variant="secondary"
-                className="text-sm"
-                style={{
-                  color: colors.app.textPrimary,
-                }}
-              >
+              <ThemedText type="small" tone="muted">
                 {data.email}
               </ThemedText>
             </View>
@@ -79,15 +58,18 @@ export default function ProfileContent({ data }: ProfileContentProps) {
         {/* Stats */}
         <View className="flex-row gap-2">
           <StatCard value="170 cm" label="Height" />
+
           <StatCard value="52" label="Weight" />
+
           <StatCard value="26" label="Age" />
         </View>
 
+        {/* Menu */}
         <View className="gap-4">
           <ProfileSection title="Account">
             <ProfileMenuItem
               label="Personal Info"
-              icon={User}
+              icon="profile"
               onPress={() => {
                 router.push("/(pages)/profile/edit");
               }}
@@ -95,7 +77,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
 
             <ProfileMenuItem
               label="Change Password"
-              icon={LockKeyhole}
+              icon="password"
               onPress={() => {
                 router.push("/(pages)/profile/change-password");
               }}
@@ -104,7 +86,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
             {/* TODO: add more menu */}
             <ProfileMenuItem
               label="Daily Activity"
-              icon={Activity}
+              icon="activity"
               onPress={() => {
                 // router.push("/(pages)/profile/daily-activity");
               }}
@@ -112,7 +94,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
 
             <ProfileMenuItem
               label="Progress"
-              icon={BarChart3}
+              icon="progress"
               onPress={() => {
                 // router.push("/(pages)/profile/progress");
               }}
@@ -122,7 +104,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
           <ProfileSection title="Training">
             <ProfileMenuItem
               label="Workout Preferences"
-              icon={Dumbbell}
+              icon="workout"
               onPress={() => {
                 // router.push("/(pages)/profile/workout-preferences");
               }}
@@ -130,7 +112,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
 
             <ProfileMenuItem
               label="Privacy & Data"
-              icon={Shield}
+              icon="privacy"
               onPress={() => {
                 // router.push("/(pages)/profile/privacy");
               }}
@@ -140,7 +122,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
           <ProfileSection title="Help">
             <ProfileMenuItem
               label="Live Support"
-              icon={MessageCircle}
+              icon="support"
               onPress={() => {
                 // router.push("/(pages)/profile/support");
               }}
@@ -148,7 +130,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
 
             <ProfileMenuItem
               label="FAQ"
-              icon={CircleHelp}
+              icon="help"
               onPress={() => {
                 // router.push("/(pages)/profile/faq");
               }}
@@ -158,7 +140,7 @@ export default function ProfileContent({ data }: ProfileContentProps) {
           <ProfileSection>
             <ProfileMenuItem
               label="Sign Out"
-              icon={LogOut}
+              icon="sign-out"
               destructive
               onPress={signOut}
             />

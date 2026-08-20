@@ -1,6 +1,7 @@
 import { BottomSheetView, useBottomSheet } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
-import { LayoutChangeEvent, Pressable, View } from "react-native";
+import type { LayoutChangeEvent } from "react-native";
+import { Pressable, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -8,10 +9,10 @@ import Animated, {
 } from "react-native-reanimated";
 import {
   getWorkoutTimerDisplay,
-  WorkoutTimerAction,
-  WorkoutTimerPauseAction,
-  WorkoutTimerRestAction,
-  WorkoutTimerStats,
+  type WorkoutTimerAction,
+  type WorkoutTimerPauseAction,
+  type WorkoutTimerRestAction,
+  type WorkoutTimerStats,
 } from "../model/workoutTimerDisplay";
 import {
   CollapsedTimerContent,
@@ -51,6 +52,7 @@ export function WorkoutTimerSheetContent({
   const { animatedIndex } = useBottomSheet();
 
   const isResting = remainingRestSeconds > 0;
+
   const displaySeconds = isResting
     ? remainingRestSeconds
     : sessionElapsedSeconds;
@@ -62,49 +64,45 @@ export function WorkoutTimerSheetContent({
     stats,
   });
 
-  const collapsedAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(
-        animatedIndex.value,
-        [0, 0.4, 1],
-        [1, 0.4, 0],
-        Extrapolation.CLAMP,
-      ),
-      transform: [
-        {
-          translateY: interpolate(
-            animatedIndex.value,
-            [0, 1],
-            [0, -6],
-            Extrapolation.CLAMP,
-          ),
-        },
-      ],
-      pointerEvents: animatedIndex.value < 0.5 ? "auto" : "none",
-    };
-  });
+  const collapsedAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      animatedIndex.value,
+      [0, 0.4, 1],
+      [1, 0.4, 0],
+      Extrapolation.CLAMP,
+    ),
+    transform: [
+      {
+        translateY: interpolate(
+          animatedIndex.value,
+          [0, 1],
+          [0, -6],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+    pointerEvents: animatedIndex.value < 0.5 ? "auto" : "none",
+  }));
 
-  const expandedAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(
-        animatedIndex.value,
-        [0, 0.6, 1],
-        [0, 0.3, 1],
-        Extrapolation.CLAMP,
-      ),
-      transform: [
-        {
-          translateY: interpolate(
-            animatedIndex.value,
-            [0, 1],
-            [8, 0],
-            Extrapolation.CLAMP,
-          ),
-        },
-      ],
-      pointerEvents: animatedIndex.value >= 0.5 ? "auto" : "none",
-    };
-  });
+  const expandedAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      animatedIndex.value,
+      [0, 0.6, 1],
+      [0, 0.3, 1],
+      Extrapolation.CLAMP,
+    ),
+    transform: [
+      {
+        translateY: interpolate(
+          animatedIndex.value,
+          [0, 1],
+          [8, 0],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+    pointerEvents: animatedIndex.value >= 0.5 ? "auto" : "none",
+  }));
 
   const handleCollapsedLayout = (event: LayoutChangeEvent) => {
     onCollapsedLayout?.(Math.ceil(event.nativeEvent.layout.height));

@@ -1,14 +1,13 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { ThemeToggle } from "@/components/custom-ui/ThemeToggle";
 import { UserAvatar } from "@/components/custom-ui/UserAvatar";
-import { PageHeaderScrollEffect } from "@/components/layout/PageLayout";
-import { ThemedText } from "@/components/themed-text";
+import type { PageHeaderScrollEffect } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
-import { ReactNode } from "react";
-import { Animated, StyleSheet, View, ViewStyle } from "react-native";
+import type { ReactNode } from "react";
+import { Animated, StyleSheet, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type HomePageHeaderProps = {
@@ -36,14 +35,14 @@ type PageHeaderRootProps = PageHeaderProps & {
 export default function PageHeader(props: PageHeaderRootProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const insets = useSafeAreaInsets();
 
   const handleBackPress =
     props.variant === "title" ? (props.onBackPress ?? router.back) : undefined;
 
   const backgroundOpacity =
-    !!props.scrollY && !!props.scrollEffect
+    props.scrollY && props.scrollEffect
       ? props.scrollY.interpolate({
           inputRange: [
             props.scrollEffect.backgroundFadeStart ?? 0,
@@ -55,7 +54,7 @@ export default function PageHeader(props: PageHeaderRootProps) {
       : 1;
 
   const titleOpacity =
-    !!props.scrollY && !!props.scrollEffect
+    props.scrollY && props.scrollEffect
       ? props.scrollY.interpolate({
           inputRange: [
             props.scrollEffect.titleFadeStart ?? 40,
@@ -88,7 +87,7 @@ export default function PageHeader(props: PageHeaderRootProps) {
         style={[
           StyleSheet.absoluteFillObject,
           {
-            backgroundColor: colors.app.background,
+            backgroundColor: colors.background,
             opacity: backgroundOpacity,
           },
         ]}
@@ -114,7 +113,7 @@ export default function PageHeader(props: PageHeaderRootProps) {
         <ThemeToggle className="z-10 ml-auto" />
       </View>
 
-      {props.headerBottom ? props.headerBottom : null}
+      {props.headerBottom ?? null}
     </View>
   );
 }
@@ -129,18 +128,15 @@ function HomeHeader({ greeting, firstName, imageUrl }: HomeHeaderProps) {
   const displayName = firstName?.trim() || "there";
 
   return (
-    <View className="flex-row items-center gap-4">
+    <View className="flex-row items-center gap-3">
       <UserAvatar imageUrl={imageUrl} />
 
       <View>
-        <ThemedText type="default" variant="accent">
-          Welcome back,{" "}
-          <ThemedText type="defaultSemiBold" variant="accent">
-            {displayName}
-          </ThemedText>
+        <ThemedText type="body">
+          Welcome back, <ThemedText type="bodyStrong">{displayName}</ThemedText>
         </ThemedText>
 
-        <ThemedText type="extraSmall" variant="primary">
+        <ThemedText type="caption" tone="muted">
           {greeting}
         </ThemedText>
       </View>
@@ -167,30 +163,40 @@ function TitleHeader({
     <>
       {showBackButton ? (
         <AppButton
-          variant="option"
-          icon={ArrowLeft}
-          className="z-10 h-10 w-10"
+          variant="ghost"
+          size="icon"
+          className="z-10 h-10 w-10 rounded-full"
+          icon={{
+            name: "back",
+            size: "lg",
+          }}
           onPress={onBackPress}
         />
       ) : null}
 
       <Animated.View
+        pointerEvents="none"
         style={[
           {
             position: "absolute",
-            left: 0,
-            right: 0,
+            left: 56,
+            right: 56,
             alignItems: "center",
           },
           titleStyle,
         ]}
       >
-        <ThemedText type="subtitle" variant="accent">
+        <ThemedText type="heading" className="text-center" numberOfLines={1}>
           {title}
         </ThemedText>
 
         {subtitle ? (
-          <ThemedText type="extraSmall" variant="primary">
+          <ThemedText
+            type="caption"
+            tone="muted"
+            className="text-center"
+            numberOfLines={1}
+          >
             {subtitle}
           </ThemedText>
         ) : null}

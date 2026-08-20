@@ -1,7 +1,7 @@
 import {
   DEFAULT_SORT_BY,
   DEFAULT_SORT_DIRECTION,
-  WorkoutSortKey,
+  type WorkoutSortKey,
 } from "@/app/(modal)/workout/choose-workout";
 import {
   FilterNavigationItem,
@@ -10,24 +10,17 @@ import {
 import {
   FilterSortPage,
   getSortDirectionLabel,
-  SortDirection,
-  SortOption,
+  type SortDirection,
+  type SortOption,
 } from "@/components/filter-option/FilterSortPage";
 import { RemoteFilterOptionPage } from "@/components/filter-option/option-page/RemoteFilterOptionPage";
 import { muscleApi } from "@/lib/api/muscle.api";
 import { workoutApi } from "@/lib/api/workout.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import { Muscle } from "@/types/workout/response/shared.types";
-import { WorkoutFocusType } from "@/types/workout/response/workout.types";
-import {
-  BicepsFlexed,
-  Calendar,
-  Dumbbell,
-  Sparkles,
-  Target,
-  Timer,
-} from "lucide-react-native";
+import type { Muscle } from "@/types/workout/response/shared.types";
+import type { WorkoutFocusType } from "@/types/workout/response/workout.types";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Animated, {
   SlideInLeft,
@@ -42,21 +35,21 @@ const sortOptions: SortOption<WorkoutSortKey>[] = [
   {
     value: "created_at",
     label: "Date",
-    icon: Calendar,
+    icon: "calendar",
     ascLabel: "Oldest first",
     descLabel: "Newest first",
   },
   {
     value: "name",
     label: "Name",
-    icon: Dumbbell,
+    icon: "workout",
     ascLabel: "A to Z",
     descLabel: "Z to A",
   },
   {
     value: "duration",
     label: "Duration",
-    icon: Timer,
+    icon: "duration",
     ascLabel: "Low to high",
     descLabel: "High to low",
   },
@@ -186,21 +179,21 @@ export function WorkoutFilterSheetContent({
           onApply={handleApply}
         >
           <FilterNavigationItem
-            icon={Target}
+            icon="workout"
             title="Workout focus"
             description={focusSummary}
             onPress={() => openPage("focus")}
           />
 
           <FilterNavigationItem
-            icon={BicepsFlexed}
+            icon="exercise"
             title="Target muscles"
             description={muscleSummary}
             onPress={() => openPage("muscle")}
           />
 
           <FilterNavigationItem
-            icon={Sparkles}
+            icon="filter"
             title="Sort by"
             description={sortSummary}
             onPress={() => openPage("sort")}
@@ -259,7 +252,7 @@ export function WorkoutFilterSheetContent({
 type AnimatedFilterPageProps = {
   pageKey: FilterPage;
   shouldAnimate: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 // TODO: new animation
@@ -318,9 +311,13 @@ export function AnimatedFilterPage({
 }
 
 function getSelectedCountSummary(selectedIds: number[], emptyLabel: string) {
-  if (selectedIds.length === 0) return emptyLabel;
+  if (selectedIds.length === 0) {
+    return emptyLabel;
+  }
 
-  if (selectedIds.length === 1) return "1 selected";
+  if (selectedIds.length === 1) {
+    return "1 selected";
+  }
 
   return `${selectedIds.length} selected`;
 }

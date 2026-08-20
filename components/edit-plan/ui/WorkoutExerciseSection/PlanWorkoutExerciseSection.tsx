@@ -1,18 +1,18 @@
 import { createEmptyWorkoutExerciseFormSet } from "@/lib/workout/mappers";
 import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
-import { EditPlanForm } from "@/schemas/edit-plan.schema";
+import type { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { useMemo } from "react";
 import {
   Controller,
-  FieldPath,
-  UseFormReturn,
+  type FieldPath,
+  type UseFormReturn,
   useFormState,
   useWatch,
 } from "react-hook-form";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
 import {
   getWorkoutSetColumns,
-  WorkoutSetColumn,
+  type WorkoutSetColumn,
   WorkoutSetHeader,
   WorkoutSetInput,
   WorkoutSetRow,
@@ -46,12 +46,16 @@ export function PlanWorkoutExerciseSection({
     errors.workoutExercises?.[index]?.sets?.root?.message;
 
   const columns = useMemo<WorkoutSetColumn[]>(() => {
-    if (!exercise) return [];
+    if (!exercise) {
+      return [];
+    }
 
     return getWorkoutSetColumns(exercise.exercise.category?.code);
   }, [exercise]);
 
-  if (!exercise) return null;
+  if (!exercise) {
+    return null;
+  }
 
   const imageUrl = getExercisePrimaryImageUrl(exercise.exercise);
 

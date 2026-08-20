@@ -1,6 +1,11 @@
+import { AppButton } from "@/components/custom-ui/app-button";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { ExerciseListMenu } from "@/components/edit-plan/ui/ExerciseListMenu";
+import { InProgressWorkoutExerciseSection } from "@/components/edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { RecentMetricList } from "@/components/progress/ui/sections/progress-history-section/RecentWorkoutCard";
+import { ContentFeedback } from "@/components/state/ContentFeedback";
+import { DetailHeroImage } from "@/components/workout-detail/ui/DetailHeroImage";
 import { ExerciseFieldKey } from "@/lib/workout/config";
 import { useWorkoutRestTimerStore } from "@/stores/workoutRestTimerStore";
 import {
@@ -10,7 +15,6 @@ import {
   useWorkoutSessionStore,
 } from "@/stores/workoutSessionStore";
 import { useRouter } from "expo-router";
-import { Dumbbell, Layers, Plus, Weight } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import {
@@ -18,11 +22,6 @@ import {
   getWorkoutTimerStats,
   INITIAL_TIMER_STATS,
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
-import { AppButton } from "../custom-ui/AppButton";
-import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
-import { InProgressWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
-import { RecentMetricList } from "../progress/ui/sections/progress-history-section/RecentWorkoutCard";
-import { DetailHeroImage } from "../workout-detail/ui/DetailHeroImage";
 import {
   addSessionSet,
   commitInheritedSetValues,
@@ -32,8 +31,6 @@ import {
 } from "./model/helpers";
 
 export function WorkoutInProgressContent() {
-  const { colors } = useAppTheme();
-
   const router = useRouter();
 
   // Workout rest timer store
@@ -43,17 +40,23 @@ export function WorkoutInProgressContent() {
 
   // Workout session store
   const hydrated = useWorkoutSessionStore(selectWorkoutSessionHydrated);
+
   const storedSession = useWorkoutSessionStore(selectActiveWorkoutSession);
+
   const storedPerformanceByExerciseId = useWorkoutSessionStore(
     selectWorkoutSessionPerformanceByExerciseId,
   );
+
   const removePerformanceByExerciseId = useWorkoutSessionStore(
     (state) => state.removePerformanceByExerciseId,
   );
+
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
+
   const updateSessionExercise = useWorkoutSessionStore(
     (state) => state.updateSessionExercise,
   );
+
   const updateSessionSet = useWorkoutSessionStore(
     (state) => state.updateSessionSet,
   );
@@ -68,7 +71,6 @@ export function WorkoutInProgressContent() {
 
   // Refresh exercise list layout after session exercises change
   useEffect(() => {
-    // Wait for the page to fully mount
     const frame = requestAnimationFrame(() => {
       setExerciseItems(storedSession?.sessionExercises ?? []);
     });
@@ -88,21 +90,20 @@ export function WorkoutInProgressContent() {
     {
       label: timerMetrics.exercises.label,
       value: timerMetrics.exercises.value,
-      icon: Dumbbell,
+      icon: "workout" as const,
     },
     {
       label: timerMetrics.sets.label,
       value: timerMetrics.sets.value,
-      icon: Layers,
+      icon: "sets" as const,
     },
     {
       label: timerMetrics.volume.label,
       value: timerMetrics.volume.value,
-      icon: Weight,
+      icon: "volume" as const,
     },
   ];
 
-  /* Functions */
   // Add set
   const handleAddSet = (exerciseClientId: string) => {
     updateSession((prev) => addSessionSet(prev, exerciseClientId));
@@ -244,7 +245,7 @@ export function WorkoutInProgressContent() {
               deleteSessionExercise(prev, exerciseClientId),
             );
 
-            // remove exercise performance from session store
+            // Remove exercise performance from session store
             if (targetExercise?.exercise.id != null) {
               removePerformanceByExerciseId(targetExercise.exercise.id);
             }
@@ -256,7 +257,9 @@ export function WorkoutInProgressContent() {
 
   // Remove all exercises
   const handleRemoveAllExercises = () => {
-    if (exerciseItems.length === 0) return;
+    if (exerciseItems.length === 0) {
+      return;
+    }
 
     Alert.alert(
       "Remove all exercises?",
@@ -288,7 +291,7 @@ export function WorkoutInProgressContent() {
     );
   };
 
-  // TODO: add loading
+  // TODO: add loading state
   if (!isActiveSessionReady) {
     return null;
   }
@@ -300,7 +303,9 @@ export function WorkoutInProgressContent() {
           variant: "title",
           title: "Workout",
         },
-        scrollEffect: { overlay: true },
+        scrollEffect: {
+          overlay: true,
+        },
       }}
     >
       <DetailHeroImage imageUrl={storedSession.workout?.imageUrl} />
@@ -310,21 +315,20 @@ export function WorkoutInProgressContent() {
           marginTop: -76, // cardHeight / 2
         }}
       >
-        <View
-          className="overflow-hidden rounded-2xl"
-          style={{ backgroundColor: colors.app.cardPrimary }}
-        >
+        <View className="overflow-hidden rounded-2xl bg-card">
           <View
             className="relative items-center justify-center p-4"
-            style={{ height: 80 }}
+            style={{
+              height: 80,
+            }}
           >
-            {storedSession.workout?.workoutFocusType?.name && (
-              <ThemedText type="small" variant="primary">
+            {storedSession.workout?.workoutFocusType?.name ? (
+              <ThemedText type="small" tone="muted">
                 {storedSession.workout.workoutFocusType.name}
               </ThemedText>
-            )}
+            ) : null}
 
-            <ThemedText type="title" variant="accent">
+            <ThemedText type="title" className="text-center">
               {storedSession.workout?.name ?? "Workout"}
             </ThemedText>
 
@@ -345,29 +349,11 @@ export function WorkoutInProgressContent() {
 
       <View className="flex-1 gap-3 pt-3">
         {exerciseItems.length === 0 ? (
-          <View
-            className="items-center rounded-2xl p-6"
-            style={{ backgroundColor: colors.app.cardPrimary }}
-          >
-            <View
-              className="mb-3 h-16 w-16 items-center justify-center rounded-2xl"
-              style={{ backgroundColor: colors.app.cardSecondary }}
-            >
-              <Dumbbell size={24} color={colors.app.textAccent} />
-            </View>
-
-            <ThemedText type="default" variant="accent" className="text-center">
-              No exercises yet
-            </ThemedText>
-
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="text-center"
-            >
-              Add your first exercise to start tracking.
-            </ThemedText>
-          </View>
+          <ContentFeedback
+            icon="workout"
+            title="No exercises yet"
+            subtitle="Add your first exercise to start tracking."
+          />
         ) : (
           exerciseItems.map((exerciseItem) => (
             <InProgressWorkoutExerciseSection
@@ -407,7 +393,10 @@ export function WorkoutInProgressContent() {
         <AppButton
           title="Add exercise"
           variant="primary"
-          icon={Plus}
+          icon={{
+            name: "add",
+            size: "sm",
+          }}
           onPress={handleAddExercise}
         />
       </View>

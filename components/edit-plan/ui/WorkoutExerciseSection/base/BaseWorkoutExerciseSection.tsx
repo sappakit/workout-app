@@ -1,24 +1,20 @@
+import { AppButton } from "@/components/custom-ui/app-button";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { FormErrorMessage } from "@/components/form/FormField";
 import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
 import {
   DropdownItem,
   MenuSectionLabel,
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
-import { ThemedText } from "@/components/themed-text";
 import { EXERCISE_IMAGE } from "@/constants/images";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { useExerciseCardExpandedState } from "@/hooks/useExerciseCardExpandedState";
+import { cn } from "@/lib/utils";
 import { useRouter } from "expo-router";
-import {
-  ChevronDown,
-  ChevronUp,
-  MoreVertical,
-  Plus,
-  Repeat,
-  Trash2,
-} from "lucide-react-native";
-import { ReactElement } from "react";
-import { FlatList, Image, TouchableOpacity, View } from "react-native";
+import type { ReactElement } from "react";
+import { FlatList, Image, Pressable, View } from "react-native";
 
 type BaseSetItem = {
   clientId: string;
@@ -73,73 +69,82 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
   renderSetHeader,
   renderSetRow,
 }: BaseWorkoutExerciseSectionProps<TSet>) {
-  const { colors } = useAppTheme();
   const router = useRouter();
 
   const { expanded, toggleExpanded } = useExerciseCardExpandedState();
 
   const isEditable = mode === "editable";
-  const canShowMenu = isEditable && onReplaceExercise && onDeleteExercise;
-  const canShowAddSetFooter = isEditable && onAddSet;
-  const hasError = !!errorMessage;
 
-  const ExpansionIcon = expanded ? ChevronUp : ChevronDown;
+  const canShowMenu = isEditable && !!onReplaceExercise && !!onDeleteExercise;
+
+  const canShowAddSetFooter = isEditable && !!onAddSet;
+
+  const hasError = !!errorMessage;
 
   return (
     <View
-      className="overflow-hidden rounded-2xl border"
-      style={{
-        backgroundColor: colors.app.cardPrimary,
-        borderColor: hasError ? colors.app.error : "transparent",
-      }}
+      className={cn(
+        "overflow-hidden rounded-2xl border bg-card",
+        hasError ? "border-destructive" : "border-transparent",
+      )}
     >
       <View className="flex-row items-center justify-between p-4">
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           className="flex-1 flex-row items-center gap-3"
           onPress={() => {
             router.push({
               pathname: "/(pages)/exercise/[id]",
-              params: { id: exerciseId },
+              params: {
+                id: exerciseId,
+              },
             });
           }}
         >
           <ExerciseImageAvatar imageUrl={imageUrl} />
 
           <View className="flex-1">
-            <ThemedText type="default" variant="accent" className="text-base">
+            <ThemedText type="bodyStrong" numberOfLines={1}>
               {exerciseName}
             </ThemedText>
 
-            <ThemedText type="default" variant="primary" className="text-xs">
+            <ThemedText type="caption" tone="muted" numberOfLines={1}>
               {subtitle}
             </ThemedText>
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
-        <View className="flex-row items-center gap-3">
-          {canShowMenu && (
+        <View className="flex-row items-center gap-2">
+          {canShowMenu ? (
             <BaseWorkoutExerciseSectionMenu
               onReplaceExercise={onReplaceExercise}
               onDeleteExercise={onDeleteExercise}
             />
-          )}
+          ) : null}
 
-          <TouchableOpacity onPress={toggleExpanded}>
-            <ExpansionIcon size={24} color={colors.app.textPrimary} />
-          </TouchableOpacity>
+          <AppButton
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            icon={{
+              name: expanded ? "chevron-up" : "chevron-down",
+              size: "md",
+            }}
+            onPress={toggleExpanded}
+          />
         </View>
       </View>
 
-      {expanded && (
-        <View style={{ backgroundColor: colors.app.cardPrimaryDark }}>
+      {expanded ? (
+        <View>
           <View className="p-4">
             <DurationBottomSheetPicker
               title={restTimerTitle}
               value={restTime ?? 0}
               onChange={onChangeRestTime}
               disabled={!isEditable || !onChangeRestTime}
-              style={{ opacity: 1 }}
+              style={{
+                opacity: 1,
+              }}
             />
           </View>
 
@@ -150,19 +155,16 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
             renderItem={({ item, index }) => renderSetRow(item, index)}
             ListEmptyComponent={
               <View className="items-center gap-1 p-4">
-                <ThemedText type="default" variant="accent">
-                  {emptyTitle}
-                </ThemedText>
+                <ThemedText type="bodyStrong">{emptyTitle}</ThemedText>
 
-                <ThemedText type="extraSmall" variant="primary">
+                <ThemedText type="caption" tone="muted" className="text-center">
                   {emptyDescription}
                 </ThemedText>
 
-                {hasError && (
-                  <ThemedText type="extraSmall" variant="error">
-                    {errorMessage}
-                  </ThemedText>
-                )}
+                <FormErrorMessage
+                  message={errorMessage}
+                  className="text-center"
+                />
               </View>
             }
             ListHeaderComponent={
@@ -175,7 +177,7 @@ export function BaseWorkoutExerciseSection<TSet extends BaseSetItem>({
             }
           />
         </View>
-      )}
+      ) : null}
     </View>
   );
 }
@@ -187,19 +189,19 @@ function WorkoutSetFooter({
   label: string;
   onPress: () => void;
 }) {
-  const { colors } = useAppTheme();
-
   return (
-    <TouchableOpacity
-      className="flex-row items-center justify-center gap-2 py-2"
-      onPress={onPress}
-    >
-      <Plus size={16} color={colors.app.brand} />
-
-      <ThemedText type="default" variant="brand">
-        {label}
-      </ThemedText>
-    </TouchableOpacity>
+    <View className="px-2 pb-2">
+      <AppButton
+        title={label}
+        variant="ghost"
+        size="sm"
+        icon={{
+          name: "add",
+          size: "sm",
+        }}
+        onPress={onPress}
+      />
+    </View>
   );
 }
 
@@ -212,26 +214,28 @@ function BaseWorkoutExerciseSectionMenu({
   onReplaceExercise,
   onDeleteExercise,
 }: BaseWorkoutExerciseSectionMenuProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <OptionsMenu
       menuTrigger={() => (
-        <MoreVertical size={18} color={colors.app.textPrimary} />
+        <View className="h-9 w-9 items-center justify-center rounded-full">
+          <AppIcon name="more" size="md" color={colors.mutedForeground} />
+        </View>
       )}
     >
       <MenuSectionLabel label="Actions" />
 
       <DropdownItem
         label="Replace exercise"
-        icon={Repeat}
+        icon="switch"
         onSelect={onReplaceExercise}
       />
 
       <DropdownItem
         label="Remove exercise"
-        color={colors.app.error}
-        icon={Trash2}
+        icon="delete"
+        color={colors.destructive}
         onSelect={onDeleteExercise}
       />
     </OptionsMenu>
@@ -243,15 +247,12 @@ type ExerciseImageAvatarProps = {
 };
 
 function ExerciseImageAvatar({ imageUrl }: ExerciseImageAvatarProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className="h-14 w-14 items-center justify-center overflow-hidden rounded-full"
-      style={{ backgroundColor: colors.app.cardSecondary }}
-    >
+    <View className="h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-secondary">
       <Image
-        source={{ uri: imageUrl ?? EXERCISE_IMAGE }}
+        source={{
+          uri: imageUrl ?? EXERCISE_IMAGE,
+        }}
         className="h-full w-full"
         resizeMode="cover"
       />

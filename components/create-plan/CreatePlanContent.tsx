@@ -1,4 +1,4 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { usePlanFormAutoFill } from "@/hooks/usePlanFormAutoFill";
 import { api } from "@/lib/api/client";
@@ -7,12 +7,14 @@ import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import { mapEditPlanFormToUpdateWorkoutPayload } from "@/lib/workout/mappers";
-import { EditPlanForm, editPlanFormSchema } from "@/schemas/edit-plan.schema";
+import {
+  editPlanFormSchema,
+  type EditPlanForm,
+} from "@/schemas/edit-plan.schema";
 import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Plus, Save } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Alert } from "react-native";
@@ -73,7 +75,9 @@ export default function CreatePlanContent() {
   });
 
   const { workoutExercises, autoFillMuscles, autoFillDuration, hasExercises } =
-    usePlanFormAutoFill({ form });
+    usePlanFormAutoFill({
+      form,
+    });
 
   // Initialize the Zustand draft once for create mode.
   useEffect(() => {
@@ -85,7 +89,9 @@ export default function CreatePlanContent() {
 
   // Refresh RHF when the draft changes from another page, like add/manage exercises.
   useEffect(() => {
-    if (draftMode !== "create" || !draft) return;
+    if (draftMode !== "create" || !draft) {
+      return;
+    }
 
     const frame = requestAnimationFrame(() => {
       reset(draft, {
@@ -105,6 +111,7 @@ export default function CreatePlanContent() {
 
       return await api.post(url, payload);
     },
+
     onSuccess: async () => {
       resetDraft();
 
@@ -117,6 +124,7 @@ export default function CreatePlanContent() {
 
       router.back();
     },
+
     onError: () => {
       toast.error({
         title: "Create failed",
@@ -160,7 +168,9 @@ export default function CreatePlanContent() {
 
   // Remove all exercises.
   const handleRemoveAllExercises = () => {
-    if (workoutExercises.length === 0) return;
+    if (workoutExercises.length === 0) {
+      return;
+    }
 
     Alert.alert(
       "Remove all exercises?",
@@ -250,17 +260,24 @@ export default function CreatePlanContent() {
       <AppButton
         title="Create Plan"
         variant="primary"
-        icon={Save}
         className="flex-1"
-        textClassName="font-medium"
+        icon={{
+          name: "save",
+          size: "sm",
+        }}
         onPress={handleSubmit(onSubmit)}
         loading={isPending}
+        disabled={isPending}
       />
 
       <AppButton
         variant="secondary"
-        icon={Plus}
-        className="h-12 w-12"
+        size="icon"
+        className="h-10 w-10"
+        icon={{
+          name: "add",
+          size: "sm",
+        }}
         onPress={handleOpenAddExercise}
       />
     </>

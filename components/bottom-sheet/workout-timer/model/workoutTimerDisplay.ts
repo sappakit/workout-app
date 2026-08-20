@@ -1,5 +1,5 @@
 import { formatDuration } from "@/components/form/picker/duration-picker/utils";
-import { WorkoutSessionModel } from "@/types/workout/model/workout.types";
+import type { WorkoutSessionModel } from "@/types/workout/model/workout.types";
 
 export const SessionStatus = {
   TRAINING: "training",
@@ -45,8 +45,11 @@ export function getWorkoutTimerStats(
   const sessionExercises = session.sessionExercises ?? [];
 
   const sets = sessionExercises.flatMap((exercise) => exercise.sets ?? []);
+
   const completedSetsList = sets.filter((set) => !!set.completedAt);
+
   const completedSets = completedSetsList.length;
+
   const totalSets = sets.length;
 
   const completedExercises = sessionExercises.filter(
@@ -93,6 +96,7 @@ export function getWorkoutTimerDisplay({
   const metrics = getWorkoutTimerMetricDisplay(stats);
 
   let status: SessionStatus;
+
   if (isPaused) {
     status = SessionStatus.PAUSED;
   } else if (isResting) {

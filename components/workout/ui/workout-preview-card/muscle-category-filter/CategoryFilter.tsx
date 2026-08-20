@@ -1,4 +1,4 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
 import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
 import { ScrollView } from "react-native";
 
@@ -40,10 +40,10 @@ export function CategoryFilter<TValue extends string | number = number>({
       }}
     >
       <AppButton
-        className="h-8 px-6"
         title={allLabel}
-        variant={isAllActive ? "primary" : "secondary"}
-        shape="pill"
+        variant={isAllActive ? "contrast" : "secondary"}
+        size="sm"
+        className="h-8 rounded-full px-6"
         onPress={() => onChange([])}
       />
 
@@ -53,10 +53,10 @@ export function CategoryFilter<TValue extends string | number = number>({
         return (
           <AppButton
             key={String(option.value)}
-            className="h-8 px-6"
             title={option.label}
-            variant={isActive ? "primary" : "secondary"}
-            shape="pill"
+            variant={isActive ? "contrast" : "secondary"}
+            size="sm"
+            className="h-8 rounded-full px-6"
             onPress={() => handleSelect(option.value)}
           />
         );

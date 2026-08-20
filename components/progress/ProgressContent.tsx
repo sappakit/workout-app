@@ -1,12 +1,12 @@
 import { PageLayout } from "@/components/layout/PageLayout";
+import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
-import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
+import type { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
 import { ScrollView, View } from "react-native";
-import { EmptyState } from "../state/EmptyState";
-import { ProgressTab, ProgressTabs } from "./ui/elements/ProgressTabs";
+import { type ProgressTab, ProgressTabs } from "./ui/elements/ProgressTabs";
 import { ProgressHistorySection } from "./ui/sections/progress-history-section/ProgressHistorySection";
 import { ProgressHistorySkeleton } from "./ui/sections/progress-history-section/ProgressHistorySkeleton";
-import { RecentWorkoutCardItem } from "./ui/sections/progress-history-section/RecentWorkoutCard";
+import type { RecentWorkoutCardItem } from "./ui/sections/progress-history-section/RecentWorkoutCard";
 import { ProgressOverviewSection } from "./ui/sections/progress-overview-section/ProgressOverviewSection";
 import { ProgressOverviewSkeleton } from "./ui/sections/progress-overview-section/ProgressOverviewSkeleton";
 import { ProgressPager } from "./ui/sections/progress-pager/ProgressPager";
@@ -60,6 +60,7 @@ export default function ProgressContent({
         onChangeTab={onChangeTab}
         overviewContent={
           <ScrollView
+            scrollEnabled={!overviewState.isLoading}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1 }}
           >
@@ -67,7 +68,7 @@ export default function ProgressContent({
           </ScrollView>
         }
         historyContent={
-          <View style={{ flex: 1 }}>
+          <View className="flex-1">
             <ProgressHistoryContent state={historyState} />
           </View>
         }
@@ -77,7 +78,9 @@ export default function ProgressContent({
 }
 
 function ProgressOverviewContent({ state }: { state: ProgressOverviewState }) {
-  if (state.isLoading) return <ProgressOverviewSkeleton />;
+  if (state.isLoading) {
+    return <ProgressOverviewSkeleton />;
+  }
 
   if (state.isError) {
     return (
@@ -85,6 +88,7 @@ function ProgressOverviewContent({ state }: { state: ProgressOverviewState }) {
         primaryAction={{
           onPress: state.onRetry,
         }}
+        secondaryAction={{ hidden: true }}
       />
     );
   }
@@ -92,8 +96,10 @@ function ProgressOverviewContent({ state }: { state: ProgressOverviewState }) {
   if (!state.data) {
     return (
       <EmptyState
+        icon="progress"
         title="No progress yet"
         message="Complete a workout to start seeing your weekly progress."
+        secondaryAction={{ hidden: true }}
       />
     );
   }
@@ -102,7 +108,9 @@ function ProgressOverviewContent({ state }: { state: ProgressOverviewState }) {
 }
 
 function ProgressHistoryContent({ state }: { state: ProgressHistoryState }) {
-  if (state.isLoading) return <ProgressHistorySkeleton />;
+  if (state.isLoading) {
+    return <ProgressHistorySkeleton />;
+  }
 
   if (state.isError) {
     return (
@@ -110,6 +118,7 @@ function ProgressHistoryContent({ state }: { state: ProgressHistoryState }) {
         primaryAction={{
           onPress: state.onRetry,
         }}
+        secondaryAction={{ hidden: true }}
       />
     );
   }
@@ -117,8 +126,10 @@ function ProgressHistoryContent({ state }: { state: ProgressHistoryState }) {
   if (state.data.length === 0) {
     return (
       <EmptyState
+        icon="history"
         title="No workout history"
-        message="Your completed workouts will appear here."
+        message="Complete a workout to start building your workout history."
+        secondaryAction={{ hidden: true }}
       />
     );
   }

@@ -1,0 +1,105 @@
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { FlatList, View } from "react-native";
+import { WorkoutImageAvatar } from "../sections/progress-history-section/RecentWorkoutCard";
+import { cn } from "@/lib/utils";
+
+export interface ProgressMetricCardListItem {
+  label: string;
+  value: string;
+  icon: AppIconName;
+}
+
+export interface ProgressMetricCardItem {
+  id: number | string;
+  title: string;
+  subtitle: string;
+  imageUrl?: string | null;
+  list: ProgressMetricCardListItem[];
+}
+
+interface ProgressMetricCardProps {
+  item: ProgressMetricCardItem;
+  columns?: number;
+}
+
+export function ProgressMetricCard({
+  item,
+  columns = 3,
+}: ProgressMetricCardProps) {
+  return (
+    <View className="overflow-hidden rounded-2xl bg-card">
+      <View className="flex-row items-center gap-3 p-4 pb-2">
+        <WorkoutImageAvatar imageUrl={item.imageUrl} />
+
+        <View className="flex-1">
+          <ThemedText type="bodyStrong" numberOfLines={1}>
+            {item.title}
+          </ThemedText>
+
+          <ThemedText type="caption" tone="muted" numberOfLines={1}>
+            {item.subtitle}
+          </ThemedText>
+        </View>
+      </View>
+
+      <View className="p-4 pt-2">
+        <ProgressMetricList list={item.list} columns={columns} />
+      </View>
+    </View>
+  );
+}
+
+function ProgressMetricList({
+  list,
+  columns,
+}: {
+  list: ProgressMetricCardItem["list"];
+  columns: number;
+}) {
+  return (
+    <FlatList
+      data={list}
+      keyExtractor={(item) => item.label}
+      numColumns={columns}
+      scrollEnabled={false}
+      columnWrapperClassName="gap-2"
+      contentContainerClassName="gap-2"
+      renderItem={({ item,index }) => (
+        <MiniMetric label={item.label} value={item.value} icon={item.icon} index={index} />
+      )}
+    />
+  );
+}
+
+function MiniMetric({
+  label,
+  value,
+  icon,
+  index
+}: {
+  label: string;
+  value: string;
+  icon: AppIconName;
+  index:number
+}) {
+  const colors = useAppColors();
+
+  return (
+    <View className={cn("flex-1 items-center gap-3 rounded-xl bg-secondary px-2 py-3", index === 2 && 'flex-[1.5]')}>
+      <AppIcon name={icon} size="md" color={colors.primary} />
+
+      <View className="flex-1 items-center">
+        <ThemedText type="bodyStrong" numberOfLines={1}>
+          {value}
+        </ThemedText>
+
+        <ThemedText type="caption" tone="muted" numberOfLines={1}>
+          {label}
+        </ThemedText>
+      </View>
+    </View>
+  );
+}

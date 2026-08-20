@@ -1,83 +1,69 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { ChevronRight } from "lucide-react-native";
-import { TouchableOpacity, View } from "react-native";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
+import type { ReactNode } from "react";
+import { Pressable, View } from "react-native";
 
 type ProfileMenuItemProps = {
   label: string;
-  icon: React.ComponentType<{
-    size?: number;
-    color?: string;
-    strokeWidth?: number;
-  }>;
+  icon: AppIconName;
   onPress?: () => void;
   destructive?: boolean;
 };
 
 export function ProfileMenuItem({
   label,
-  icon: Icon,
+  icon,
   onPress,
   destructive = false,
 }: ProfileMenuItemProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
-  const textColor = destructive ? colors.app.error : colors.app.textAccent;
-  const iconColor = destructive ? colors.app.error : colors.app.textPrimary;
+  const contentColor = destructive ? colors.destructive : colors.foreground;
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <Pressable
       onPress={onPress}
-      className="flex-row items-center px-4 py-4"
+      disabled={!onPress}
+      className="h-14 flex-row items-center px-4 active:bg-accent"
     >
       <View className="mr-3">
-        <Icon size={20} color={iconColor} />
+        <AppIcon name={icon} variant="outline" size="md" color={contentColor} />
       </View>
 
       <View className="flex-1 flex-row items-center justify-between">
-        <ThemedText
-          type="default"
-          variant="primary"
-          style={{
-            color: textColor,
-          }}
-        >
+        <ThemedText type="body" style={{ color: contentColor }}>
           {label}
         </ThemedText>
 
         {!destructive ? (
-          <ChevronRight size={20} color={colors.app.borderSecondary} />
+          <AppIcon
+            name="chevron-right"
+            size="sm"
+            color={colors.mutedForeground}
+          />
         ) : null}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
 type ProfileSectionProps = {
   title?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export function ProfileSection({ title, children }: ProfileSectionProps) {
-  const { colors } = useAppTheme();
-
   return (
     <View className="gap-2">
       {title ? (
-        <ThemedText type="default" variant="primary">
+        <ThemedText type="label" tone="muted">
           {title}
         </ThemedText>
       ) : null}
 
-      <View
-        className="overflow-hidden rounded-2xl"
-        style={{
-          backgroundColor: colors.app.cardPrimary,
-        }}
-      >
-        {children}
-      </View>
+      <View className="overflow-hidden rounded-2xl bg-card">{children}</View>
     </View>
   );
 }

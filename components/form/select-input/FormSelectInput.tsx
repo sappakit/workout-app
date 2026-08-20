@@ -1,18 +1,19 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
+import { cn, hexWithOpacity } from "@/lib/utils";
 import {
   BottomSheetBackdrop,
   BottomSheetFlatList,
-  BottomSheetFlatListMethods,
+  type BottomSheetFlatListMethods,
   BottomSheetModal,
 } from "@gorhom/bottom-sheet";
-import clsx from "clsx";
-import { Check, ChevronDown } from "lucide-react-native";
 import { useCallback, useMemo, useRef } from "react";
-import { ListRenderItem, Pressable, View, ViewStyle } from "react-native";
+import type { ListRenderItem, StyleProp, ViewStyle } from "react-native";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { twMerge } from "tailwind-merge";
 
 export interface SelectOption {
   label: string;
@@ -31,9 +32,29 @@ export interface FormSelectInputProps {
   value?: FormSelectValue;
   onChange?: (value: FormSelectValue) => void;
   placeholder?: string;
+
+  /**
+   * Shows the destructive/error input state.
+   */
   validationError?: boolean;
+
+  /**
+   * Controls the outer select trigger.
+   */
   className?: string;
-  style?: ViewStyle;
+
+  /**
+   * Controls inline styles for the outer select trigger.
+   */
+  style?: StyleProp<ViewStyle>;
+
+  /**
+   * Optional leading semantic app icon.
+   */
+  icon?: AppIconName;
+
+  disabled?: boolean;
+
   title?: string;
   isLoading?: boolean;
   isError?: boolean;
@@ -49,9 +70,11 @@ export default function FormSelectInput({
   value,
   onChange,
   placeholder = "Select an option",
-  validationError,
+  validationError = false,
   className,
   style,
+  icon,
+  disabled = false,
   title,
   isLoading,
   isError,
@@ -61,13 +84,18 @@ export default function FormSelectInput({
   allowEmpty = false,
   emptySelectionLabel = "No selection",
 }: FormSelectInputProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const insets = useSafeAreaInsets();
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const listRef = useRef<BottomSheetFlatListMethods>(null);
+
   const animationConfigs = useDefaultBottomSheetAnimation();
 
   const displayOptions = useMemo<DisplaySelectOption[]>(() => {
-    if (!allowEmpty) return options;
+    if (!allowEmpty) {
+      return options;
+    }
 
     return [
       {
@@ -80,18 +108,24 @@ export default function FormSelectInput({
 
   const selectedLabel =
     value !== null && value !== undefined
-      ? displayOptions.find((o) => o.value === value)?.label
+      ? displayOptions.find((option) => option.value === value)?.label
       : undefined;
 
-  const listRef = useRef<BottomSheetFlatListMethods>(null);
-
-  const selectedIndex = displayOptions.findIndex((o) => o.value === value);
+  const selectedIndex = displayOptions.findIndex(
+    (option) => option.value === value,
+  );
 
   const openSheet = () => {
+    if (disabled) {
+      return;
+    }
+
     bottomSheetModalRef.current?.present();
   };
 
-  const closeSheet = () => bottomSheetModalRef.current?.dismiss();
+  const closeSheet = () => {
+    bottomSheetModalRef.current?.dismiss();
+  };
 
   const handleSheetChange = (index: number) => {
     if (index === 0 && selectedIndex >= 0) {
@@ -103,7 +137,7 @@ export default function FormSelectInput({
     }
   };
 
-  const onScrollToIndexFailed = (info: any) => {
+  const onScrollToIndexFailed = (info: { index: number }) => {
     setTimeout(() => {
       listRef.current?.scrollToIndex({
         index: info.index,
@@ -133,7 +167,8 @@ export default function FormSelectInput({
     [],
   );
 
-  let content;
+  let content: string | undefined;
+
   if (isLoading) {
     content = "Loading options...";
   } else if (isError) {
@@ -147,26 +182,31 @@ export default function FormSelectInput({
     const isEmptySelection = item.value === null;
 
     return (
-      <View className={twMerge(clsx("px-2", index > 0 && "pt-1"))}>
+      <View className={cn("px-2", index > 0 && "pt-1")}>
         <Pressable
           onPress={() => handleSelect(item.value)}
-          className="flex-row items-center justify-between rounded-xl p-4"
-          style={{
-            backgroundColor: isSelected
-              ? colors.app.brand + "20"
-              : "transparent",
-          }}
+          className="flex-row items-center justify-between rounded-xl p-4 active:opacity-80"
+          style={
+            isSelected
+              ? {
+                  backgroundColor: hexWithOpacity(colors.primary, 13),
+                }
+              : undefined
+          }
         >
           <ThemedText
-            type="default"
-            variant={
-              isSelected ? "brand" : isEmptySelection ? "primary" : "accent"
+            type="body"
+            tone={
+              isSelected ? "primary" : isEmptySelection ? "muted" : "default"
             }
+            className="flex-1"
           >
             {item.label}
           </ThemedText>
 
-          {isSelected && <Check size={18} color={colors.app.brand} />}
+          {isSelected ? (
+            <AppIcon name="check" size="sm" color={colors.primary} />
+          ) : null}
         </Pressable>
       </View>
     );
@@ -174,7 +214,7 @@ export default function FormSelectInput({
 
   const listFooterComponent = isFetchingNextPage ? (
     <View className="px-2">
-      <ThemedText type="default" variant="primary" className="p-4">
+      <ThemedText type="body" tone="muted" className="p-4">
         Loading more...
       </ThemedText>
     </View>
@@ -185,31 +225,34 @@ export default function FormSelectInput({
       {/* Trigger */}
       <Pressable
         onPress={openSheet}
-        className={twMerge(
-          clsx(
-            "h-12 flex-row items-center justify-between rounded-lg border px-4",
-            className,
-          ),
+        disabled={disabled}
+        className={cn(
+          "h-10 flex-row items-center gap-2 rounded-lg border bg-secondary px-3 active:opacity-80",
+          validationError ? "border-destructive" : "border-input",
+          disabled && "opacity-50",
+          className,
         )}
-        style={[
-          {
-            backgroundColor: colors.app.cardSecondary,
-            borderColor: validationError
-              ? colors.app.error
-              : colors.app.borderPrimary,
-          },
-          style,
-        ]}
+        style={style}
       >
+        {icon ? (
+          <AppIcon
+            name={icon}
+            variant="outline"
+            size="sm"
+            color={colors.mutedForeground}
+          />
+        ) : null}
+
         <ThemedText
-          className="flex-1 text-sm"
-          variant={selectedLabel ? "accent" : "primary"}
+          type="small"
+          tone={selectedLabel ? "default" : "muted"}
+          className="min-w-0 flex-1"
           numberOfLines={1}
         >
           {selectedLabel ?? placeholder}
         </ThemedText>
 
-        <ChevronDown size={16} color={colors.app.textPrimary} />
+        <AppIcon name="chevron-down" size="sm" color={colors.mutedForeground} />
       </Pressable>
 
       {/* Bottom Sheet Modal */}
@@ -225,26 +268,28 @@ export default function FormSelectInput({
         enableContentPanningGesture
         backdropComponent={renderBackdrop}
         backgroundStyle={{
-          backgroundColor: colors.app.toastBackground,
+          backgroundColor: colors.popover,
         }}
         handleIndicatorStyle={{
-          backgroundColor: colors.app.borderSecondary,
+          backgroundColor: colors.borderStrong,
         }}
       >
         {/* Title */}
-        {title && (
-          <ThemedText type="title" variant="accent" className="px-6 py-3">
-            {title}
-          </ThemedText>
-        )}
+        {title ? (
+          <View className="px-6 py-3">
+            <ThemedText type="title">{title}</ThemedText>
+          </View>
+        ) : null}
 
         {/* Options display */}
         {isLoading || isError || displayOptions.length === 0 ? (
           <View
-            className={clsx("px-2")}
-            style={{ paddingBottom: insets.bottom + 16 }}
+            className="px-2"
+            style={{
+              paddingBottom: insets.bottom + 16,
+            }}
           >
-            <ThemedText type="default" variant="primary" className="p-4">
+            <ThemedText type="body" tone="muted" className="p-4">
               {content}
             </ThemedText>
           </View>
@@ -253,7 +298,7 @@ export default function FormSelectInput({
             ref={listRef}
             data={displayOptions}
             keyExtractor={(item: DisplaySelectOption) =>
-              item.value === null ? "__empty__" : item.value.toString()
+              item.value === null ? "__empty__" : String(item.value)
             }
             renderItem={renderItem}
             onEndReached={onEndReached}

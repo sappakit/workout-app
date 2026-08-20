@@ -1,13 +1,26 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { History, LayoutDashboard, LucideIcon } from "lucide-react-native";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { Pressable, View } from "react-native";
 
 export type ProgressTab = "overview" | "history";
 
-const tabs: { label: string; value: ProgressTab; icon: LucideIcon }[] = [
-  { label: "Overview", value: "overview", icon: LayoutDashboard },
-  { label: "History", value: "history", icon: History },
+const tabs: {
+  label: string;
+  value: ProgressTab;
+  icon: AppIconName;
+}[] = [
+  {
+    label: "Overview",
+    value: "overview",
+    icon: "progress",
+  },
+  {
+    label: "History",
+    value: "history",
+    icon: "history",
+  },
 ];
 
 interface ProgressTabsProps {
@@ -16,32 +29,32 @@ interface ProgressTabsProps {
 }
 
 export function ProgressTabs({ activeTab, onChangeTab }: ProgressTabsProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <View className="h-12 flex-row">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.value;
-        const Icon = tab.icon;
-        const textColor = isActive ? colors.app.brand : colors.app.textPrimary;
+
+        const contentColor = isActive ? colors.primary : colors.mutedForeground;
 
         return (
           <Pressable
             key={tab.value}
             onPress={() => onChangeTab(tab.value)}
-            className="flex-1 flex-row items-center justify-center gap-2 border-b-2"
+            className="flex-1 flex-row items-center justify-center gap-2 border-b-2 active:opacity-80"
             style={{
-              borderColor: isActive
-                ? colors.app.brand
-                : colors.app.borderPrimary,
+              borderBottomColor: isActive ? colors.primary : colors.border,
             }}
           >
-            <Icon size={16} color={textColor} />
+            <AppIcon name={tab.icon} size="sm" color={contentColor} />
 
             <ThemedText
-              type="defaultSemiBold"
-              className="text-sm"
-              style={{ color: textColor }}
+              type="label"
+              numberOfLines={1}
+              style={{
+                color: contentColor,
+              }}
             >
               {tab.label}
             </ThemedText>

@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import type { ComponentProps } from "react";
 import type { ColorValue } from "react-native";
-import { AppIconName } from "../app-icon/app-icon.registry";
-import { AppIconSize, AppIconVariant } from "../app-icon/app-icon.types";
+import type { AppIconName } from "../app-icon/app-icon.registry";
+import type { AppIconSize } from "../app-icon/app-icon.styles";
+import type { AppIconVariant } from "../app-icon/app-icon.types";
 
 type ReusableButtonProps = ComponentProps<typeof Button>;
 

@@ -3,7 +3,7 @@ import { authApi } from "@/lib/api/auth.api";
 import { api } from "@/lib/api/client";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import {
-  ResetPasswordForm as ResetPasswordFormValues,
+  type ResetPasswordForm as ResetPasswordFormValues,
   resetPasswordSchema,
 } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,11 +24,7 @@ export default function ResetPasswordContent({
 
   const [isPasswordReset, setIsPasswordReset] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ResetPasswordFormValues>({
+  const { control, handleSubmit } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     mode: "onTouched",
     defaultValues: {
@@ -62,9 +58,7 @@ export default function ResetPasswordContent({
       ) : (
         <ResetPasswordForm
           control={control}
-          errors={errors}
           loading={isPending}
-          disabled={false}
           onSubmit={handleSubmit((values) => mutate(values))}
         />
       )}

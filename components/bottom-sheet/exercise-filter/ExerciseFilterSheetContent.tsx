@@ -5,22 +5,16 @@ import {
 import {
   FilterSortPage,
   getSortDirectionLabel,
-  SortDirection,
-  SortOption,
+  type SortDirection,
+  type SortOption,
 } from "@/components/filter-option/FilterSortPage";
 import { RemoteFilterOptionPage } from "@/components/filter-option/option-page/RemoteFilterOptionPage";
 import { exerciseApi } from "@/lib/api/exercise.api";
 import { muscleApi } from "@/lib/api/muscle.api";
 import { exerciseQueryKeys, muscleQueryKeys } from "@/lib/exercise/keys";
-import { ExerciseCategory } from "@/types/workout/response/exercise.types";
-import { Muscle } from "@/types/workout/response/shared.types";
-import {
-  BicepsFlexed,
-  Calendar,
-  Dumbbell,
-  Sparkles,
-  Target,
-} from "lucide-react-native";
+import type { ExerciseCategory } from "@/types/workout/response/exercise.types";
+import type { Muscle } from "@/types/workout/response/shared.types";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Animated, {
   SlideInLeft,
@@ -34,6 +28,7 @@ export type ExerciseSortKey = "created_at" | "name";
 type FilterPage = "main" | "category" | "muscle" | "sort";
 
 export const DEFAULT_EXERCISE_SORT_BY: ExerciseSortKey = "name";
+
 export const DEFAULT_EXERCISE_SORT_DIRECTION: SortDirection = "ASC";
 
 export type ExerciseFilterValues = {
@@ -54,14 +49,14 @@ const sortOptions: SortOption<ExerciseSortKey>[] = [
   {
     value: "created_at",
     label: "Date",
-    icon: Calendar,
+    icon: "calendar",
     ascLabel: "Oldest first",
     descLabel: "Newest first",
   },
   {
     value: "name",
     label: "Name",
-    icon: Dumbbell,
+    icon: "exercise",
     ascLabel: "A to Z",
     descLabel: "Z to A",
   },
@@ -81,6 +76,7 @@ export function ExerciseFilterSheetContent({
   onApplyFilters,
 }: ExerciseFilterSheetContentProps) {
   const [page, setPage] = useState<FilterPage>("main");
+
   const [hasNavigated, setHasNavigated] = useState(false);
 
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>(
@@ -101,8 +97,11 @@ export function ExerciseFilterSheetContent({
 
   useEffect(() => {
     setSelectedCategoryIds(value.categoryIds);
+
     setSelectedMuscleIds(value.muscleIds);
+
     setSelectedSortBy(value.sortBy);
+
     setSortDirection(value.sortDirection);
   }, [value.categoryIds, value.muscleIds, value.sortBy, value.sortDirection]);
 
@@ -184,21 +183,21 @@ export function ExerciseFilterSheetContent({
           onApply={handleApply}
         >
           <FilterNavigationItem
-            icon={Target}
+            icon="exercise"
             title="Exercise category"
             description={categorySummary}
             onPress={() => openPage("category")}
           />
 
           <FilterNavigationItem
-            icon={BicepsFlexed}
+            icon="workout"
             title="Target muscles"
             description={muscleSummary}
             onPress={() => openPage("muscle")}
           />
 
           <FilterNavigationItem
-            icon={Sparkles}
+            icon="filter"
             title="Sort by"
             description={sortSummary}
             onPress={() => openPage("sort")}
@@ -257,7 +256,7 @@ export function ExerciseFilterSheetContent({
 type AnimatedFilterPageProps = {
   pageKey: FilterPage;
   shouldAnimate: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 function AnimatedFilterPage({
@@ -268,6 +267,7 @@ function AnimatedFilterPage({
   const isBackToMain = pageKey === "main";
 
   const entering = isBackToMain ? SlideInLeft : SlideInRight;
+
   const exiting = isBackToMain ? SlideOutLeft : SlideOutRight;
 
   return (
@@ -275,7 +275,9 @@ function AnimatedFilterPage({
       key={pageKey}
       entering={shouldAnimate ? entering.duration(350) : undefined}
       exiting={exiting.duration(350)}
-      style={{ flex: 1 }}
+      style={{
+        flex: 1,
+      }}
     >
       {children}
     </Animated.View>
@@ -286,9 +288,13 @@ function getSelectedCountSummary<TValue>(
   selectedValues: TValue[],
   emptyLabel: string,
 ) {
-  if (selectedValues.length === 0) return emptyLabel;
+  if (selectedValues.length === 0) {
+    return emptyLabel;
+  }
 
-  if (selectedValues.length === 1) return "1 selected";
+  if (selectedValues.length === 1) {
+    return "1 selected";
+  }
 
   return `${selectedValues.length} selected`;
 }

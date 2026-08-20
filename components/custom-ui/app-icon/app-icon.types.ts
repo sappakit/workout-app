@@ -10,8 +10,6 @@ export type MaterialDesignIconName = ComponentProps<
 
 export type AppIconVariant = "filled" | "outline";
 
-export type AppIconSize = "xs" | "sm" | "md" | "lg" | "xl";
-
 export type IconDefinition =
   | {
       family: "ionicons";

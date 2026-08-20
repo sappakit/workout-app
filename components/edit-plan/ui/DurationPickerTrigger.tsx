@@ -1,6 +1,7 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { ChevronDown } from "lucide-react-native";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { cn } from "@/lib/utils";
 import { Pressable } from "react-native";
 
 type DurationPickerTriggerProps = {
@@ -8,15 +9,17 @@ type DurationPickerTriggerProps = {
   onPress: () => void;
   disabled?: boolean;
   error?: boolean;
+  className?: string;
 };
 
 export function DurationPickerTrigger({
   value,
   onPress,
-  disabled,
-  error,
+  disabled = false,
+  error = false,
+  className,
 }: DurationPickerTriggerProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const selectedLabel = formatEstimatedDurationLabel(value);
 
@@ -24,24 +27,26 @@ export function DurationPickerTrigger({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className="h-12 flex-row items-center justify-between rounded-lg border px-4"
-      style={{
-        backgroundColor: colors.app.cardSecondary,
-        borderColor: error ? colors.app.error : colors.app.borderPrimary,
-        opacity: disabled ? 0.5 : 1,
-      }}
+      className={cn(
+        "h-10 flex-row items-center gap-2 rounded-lg border bg-secondary px-3 active:opacity-80",
+        error ? "border-destructive" : "border-input",
+        disabled && "opacity-50",
+        className,
+      )}
     >
-      <ThemedText className="flex-1 text-sm" variant="accent" numberOfLines={1}>
+      <ThemedText type="small" className="min-w-0 flex-1" numberOfLines={1}>
         {selectedLabel}
       </ThemedText>
 
-      <ChevronDown size={16} color={colors.app.textPrimary} />
+      <AppIcon name="chevron-down" size="sm" color={colors.mutedForeground} />
     </Pressable>
   );
 }
 
 function formatEstimatedDurationLabel(seconds: number) {
-  if (seconds === 0) return "0 sec";
+  if (seconds === 0) {
+    return "0 sec";
+  }
 
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);

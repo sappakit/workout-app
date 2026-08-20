@@ -34,6 +34,7 @@ module.exports = {
 
         secondary: {
           DEFAULT: "var(--secondary)",
+          hover: "var(--secondary-hover)",
           foreground: "var(--secondary-foreground)",
         },
 
@@ -50,13 +51,21 @@ module.exports = {
         // Main brand actions
         primary: {
           DEFAULT: "var(--primary)",
+          hover: "var(--primary-hover)",
           foreground: "var(--primary-foreground)",
         },
 
-        // High-contrast controls
+        // Interactive highlight
         accent: {
           DEFAULT: "var(--accent)",
           foreground: "var(--accent-foreground)",
+        },
+
+        // High-contrast controls
+        contrast: {
+          DEFAULT: "var(--contrast)",
+          hover: "var(--contrast-hover)",
+          foreground: "var(--contrast-foreground)",
         },
 
         // Feedback
@@ -72,6 +81,7 @@ module.exports = {
 
         destructive: {
           DEFAULT: "var(--destructive)",
+          hover: "var(--destructive-hover)",
           foreground: "var(--destructive-foreground)",
         },
 
@@ -122,6 +132,14 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+
+      boxShadow: {
+        subtle: "0 2px 8px rgba(0, 0, 0, 0.06)",
+        raised: "0 8px 24px rgba(0, 0, 0, 0.10)",
+        floating: "0 20px 40px -10px rgba(0, 0, 0, 0.14)",
+
+        glow: "0 16px 40px rgba(239, 97, 49, 0.22)",
       },
     },
   },

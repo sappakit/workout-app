@@ -1,19 +1,19 @@
+import FormCheckbox from "@/components/form/FormCheckbox";
 import {
   getExerciseProgressText,
   getPreviousSetValue,
   getWorkoutSessionSetValue,
 } from "@/components/workout-in-progress/model/helpers";
-import { ExerciseFieldKey } from "@/lib/workout/config";
+import type { ExerciseFieldKey } from "@/lib/workout/config";
 import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
-import { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
-import { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
+import type { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
+import type { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
 import { useMemo, useState } from "react";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
 import {
   getWorkoutSetColumns,
-  SetPerformanceMode,
-  WorkoutSetColumn,
-  WorkoutSetDoneCheckbox,
+  type SetPerformanceMode,
+  type WorkoutSetColumn,
   WorkoutSetHeader,
   WorkoutSetInput,
   WorkoutSetPerformanceText,
@@ -126,9 +126,9 @@ export function InProgressWorkoutExerciseSection({
             );
           }}
           renderTrailingCell={() => (
-            <WorkoutSetDoneCheckbox
-              checked={!!setItem.completedAt}
-              onPress={() => onToggleSetCompleted(setItem.clientId)}
+            <FormCheckbox
+              value={!!setItem.completedAt}
+              onChange={() => onToggleSetCompleted(setItem.clientId)}
             />
           )}
         />

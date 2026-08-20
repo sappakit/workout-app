@@ -1,6 +1,5 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
 import { useRouter } from "expo-router";
-import { LogIn } from "lucide-react-native";
 import { View } from "react-native";
 import { AuthHeader } from "../../ui/AuthHeader";
 
@@ -18,8 +17,10 @@ export function ResetPasswordSuccess() {
         <AppButton
           title="Back to Sign In"
           variant="primary"
-          icon={LogIn}
-          textClassName="font-medium"
+          icon={{
+            name: "sign-in",
+            size: "sm",
+          }}
           onPress={() => router.replace("/(auth)/sign-in")}
         />
       </View>

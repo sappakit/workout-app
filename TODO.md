@@ -25,3 +25,5 @@
   schedule workout, user afk
 - update every fields to use FormField (there's ProfileFormField)
 - make stickyFooter (pageLayout) follow keyboard
+- Add text for EmptyState/ErrorState
+- refactor FormMulti/SelectInput to one file

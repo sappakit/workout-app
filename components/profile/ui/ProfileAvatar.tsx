@@ -1,8 +1,7 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { Pencil, User } from "lucide-react-native";
-import { Image, TouchableOpacity, View } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { cn } from "@/lib/utils";
+import { Image, Pressable, View } from "react-native";
 
 type ProfileAvatarProps = {
   image?: string | null;
@@ -17,42 +16,43 @@ export function ProfileAvatar({
   onPressEdit,
   showEditIcon = false,
 }: ProfileAvatarProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPressEdit}
-      activeOpacity={0.8}
-      className={twMerge(clsx("relative", className))}
+      disabled={!onPressEdit}
+      className={cn("relative", className)}
     >
-      <View className="h-24 w-24 overflow-hidden rounded-full">
+      <View className="h-24 w-24 overflow-hidden rounded-full bg-secondary">
         {image ? (
           <Image
             source={{ uri: image }}
-            className="flex-1"
+            className="h-full w-full"
             resizeMode="cover"
           />
         ) : (
-          <View
-            className="flex-1 items-center justify-center"
-            style={{ backgroundColor: colors.app.cardSecondary }}
-          >
-            <User size={44} color={colors.app.textPrimary} />
+          <View className="flex-1 items-center justify-center">
+            <AppIcon
+              name="profile"
+              variant="filled"
+              size="xl"
+              color={colors.secondaryForeground}
+            />
           </View>
         )}
       </View>
 
       {showEditIcon ? (
         <View
-          className="absolute bottom-0 right-0 h-10 w-10 translate-y-1/4 items-center justify-center rounded-full border-4"
+          className="absolute bottom-0 right-0 h-10 w-10 translate-y-1/4 items-center justify-center rounded-full border-4 bg-primary"
           style={{
-            backgroundColor: colors.app.brand,
-            borderColor: colors.app.background,
+            borderColor: colors.background,
           }}
         >
-          <Pencil size={14} color={colors.app.white} />
+          <AppIcon name="edit" size="sm" color={colors.primaryForeground} />
         </View>
       ) : null}
-    </TouchableOpacity>
+    </Pressable>
   );
 }

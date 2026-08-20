@@ -1,19 +1,20 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
+import { cn } from "@/lib/utils";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import clsx from "clsx";
-import { Check, Timer, X } from "lucide-react-native";
-import { ReactNode, useCallback, useRef, useState } from "react";
-import { Pressable, StyleProp, View, ViewStyle } from "react-native";
+import type { ReactNode } from "react";
+import { useCallback, useRef, useState } from "react";
+import type { StyleProp, ViewStyle } from "react-native";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { twMerge } from "tailwind-merge";
-import { DurationValue, DurationWheelPicker } from "./DurationWheelPicker";
+import { type DurationValue, DurationWheelPicker } from "./DurationWheelPicker";
 import { durationToSeconds, formatDuration, secondsToDuration } from "./utils";
 
 type DurationBottomSheetPickerRenderTriggerProps = {
@@ -40,12 +41,14 @@ export function DurationBottomSheetPicker({
   onChange,
   className,
   style,
-  disabled,
+  disabled = false,
   renderTrigger,
 }: DurationBottomSheetPickerProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const insets = useSafeAreaInsets();
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
   const animationConfigs = useDefaultBottomSheetAnimation();
 
   const [draftValue, setDraftValue] = useState<DurationValue>(
@@ -55,8 +58,12 @@ export function DurationBottomSheetPicker({
   const hasChanges = durationToSeconds(draftValue) !== value;
 
   const openSheet = () => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
+
     setDraftValue(secondsToDuration(value));
+
     bottomSheetModalRef.current?.present();
   };
 
@@ -66,11 +73,13 @@ export function DurationBottomSheetPicker({
 
   const handleCancel = () => {
     setDraftValue(secondsToDuration(value));
+
     closeSheet();
   };
 
   const handleDone = () => {
     onChange?.(durationToSeconds(draftValue));
+
     closeSheet();
   };
 
@@ -97,12 +106,16 @@ export function DurationBottomSheetPicker({
         <Pressable
           onPress={openSheet}
           disabled={disabled}
-          className={twMerge(clsx("flex-row items-center gap-2", className))}
-          style={[{ opacity: disabled ? 0.5 : 1 }, style]}
+          className={cn(
+            "flex-row items-center gap-2",
+            disabled && "opacity-50",
+            className,
+          )}
+          style={style}
         >
-          <Timer size={20} color={colors.app.brand} />
+          <AppIcon name="timer" size="md" color={colors.primary} />
 
-          <ThemedText type="default" variant="brand">
+          <ThemedText type="body" tone="primary">
             {value ? `Rest: ${formatDuration(value)}` : "No rest"}
           </ThemedText>
         </Pressable>
@@ -118,39 +131,45 @@ export function DurationBottomSheetPicker({
         animationConfigs={animationConfigs}
         backdropComponent={renderBackdrop}
         backgroundStyle={{
-          backgroundColor: colors.app.toastBackground,
+          backgroundColor: colors.popover,
         }}
         handleIndicatorStyle={{
-          backgroundColor: colors.app.borderSecondary,
+          backgroundColor: colors.borderStrong,
         }}
         onDismiss={() => setDraftValue(secondsToDuration(value))}
       >
         <BottomSheetView>
           <View className="px-6 py-3">
-            <ThemedText type="title" variant="accent">
-              {title}
-            </ThemedText>
+            <ThemedText type="title">{title}</ThemedText>
           </View>
 
           <DurationWheelPicker value={draftValue} onChange={setDraftValue} />
 
           <View
             className="flex-row gap-3 px-4 pt-3"
-            style={{ paddingBottom: insets.bottom }}
+            style={{
+              paddingBottom: insets.bottom,
+            }}
           >
             <AppButton
               title="Cancel"
               variant="secondary"
-              icon={X}
               className="flex-1"
+              icon={{
+                name: "close",
+                size: "sm",
+              }}
               onPress={handleCancel}
             />
 
             <AppButton
               title="Done"
               variant="primary"
-              icon={Check}
               className="flex-1"
+              icon={{
+                name: "check",
+                size: "sm",
+              }}
               onPress={handleDone}
               disabled={!hasChanges}
             />

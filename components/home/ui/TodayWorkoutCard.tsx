@@ -22,16 +22,16 @@ export function TodayWorkoutCard({ todayOverview }: TodayWorkoutCardProps) {
   const content = getTodayWorkoutCardContent(todayOverview);
 
   return (
-    <View className="relative h-44 overflow-hidden rounded-3xl bg-primary">
+    <View className="relative h-44 overflow-hidden rounded-3xl bg-primary shadow-raised">
       <LinearGradient
-        colors={[colors.primaryHover, colors.primary]}
+        colors={[colors.primary, colors.primaryHover]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
 
       <View className="flex-1 flex-row justify-between gap-4">
-        <View className="flex-1 justify-between p-4">
+        <View className="z-10 flex-1 justify-between p-4">
           <View>
             <ThemedText type="display" className="text-primary-foreground">
               {content.title}

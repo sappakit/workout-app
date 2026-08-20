@@ -1,15 +1,15 @@
 import { useRouter } from "expo-router";
-import { House, LucideIcon, SearchX } from "lucide-react-native";
+import { AppIconName } from "../custom-ui/app-icon/app-icon.registry";
 import {
   PageState,
-  PageStateAction,
-  PageStateActionOverride,
+  type PageStateAction,
+  type PageStateActionOverride,
 } from "./base/PageState";
 
 type EmptyStateProps = {
   title?: string;
   message?: string;
-  icon?: LucideIcon;
+  icon?: AppIconName;
   primaryAction?: PageStateAction;
   secondaryAction?: PageStateActionOverride;
 };
@@ -17,7 +17,7 @@ type EmptyStateProps = {
 export function EmptyState({
   title = "No data found",
   message = "There's nothing to show here yet.",
-  icon = SearchX,
+  icon = "search-off",
   primaryAction,
   secondaryAction,
 }: EmptyStateProps) {
@@ -25,7 +25,7 @@ export function EmptyState({
 
   const defaultSecondaryAction: PageStateAction = {
     label: "Home",
-    icon: House,
+    icon: "home",
     onPress: () => router.replace("/(tabs)"),
   };
 

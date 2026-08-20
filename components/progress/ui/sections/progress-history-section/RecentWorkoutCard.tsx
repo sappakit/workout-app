@@ -1,18 +1,18 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { Separator } from "@/components/custom-ui/Separator";
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { ArrowUpRight, LucideIcon } from "lucide-react-native";
-import React from "react";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { cn } from "@/lib/utils";
+import { Fragment } from "react";
 import { Image, Pressable, View } from "react-native";
-import { twMerge } from "tailwind-merge";
 
 interface ListItem {
   label: string;
   value: string;
-  icon: LucideIcon;
+  icon: AppIconName;
 }
 
 export interface RecentWorkoutCardItem {
@@ -29,31 +29,32 @@ interface RecentWorkoutCardProps {
 }
 
 export function RecentWorkoutCard({ item }: RecentWorkoutCardProps) {
-  const { colors } = useAppTheme();
-
   return (
     <Pressable
-      className="overflow-hidden rounded-2xl"
-      style={{ backgroundColor: colors.app.cardPrimary }}
+      className="gap-3 overflow-hidden rounded-3xl bg-card p-3"
+      onPress={item.action}
     >
-      <View className="flex-row items-center gap-3 p-4">
+      <View className="flex-row items-center gap-3">
         <WorkoutImageAvatar imageUrl={item.imageUrl} />
 
         <View className="flex-1">
-          <ThemedText type="subtitle" variant="accent">
+          <ThemedText type="bodyStrong" numberOfLines={1}>
             {item.title}
           </ThemedText>
 
-          <ThemedText type="extraSmall" variant="primary">
+          <ThemedText type="caption" tone="muted" numberOfLines={1}>
             {item.subtitle}
           </ThemedText>
         </View>
 
         <AppButton
-          variant="tertiary"
-          icon={ArrowUpRight}
-          className="h-9 w-9 self-start"
-          shape="pill"
+          variant="contrast"
+          size="icon"
+          className="h-9 w-9 self-start rounded-full"
+          icon={{
+            name: "open",
+            size: "md",
+          }}
           onPress={item.action}
         />
       </View>
@@ -68,52 +69,48 @@ type RecentMetricListProps = {
   className?: string;
 };
 
-export function RecentMetricList({
-  list,
-  className = "p-4",
-}: RecentMetricListProps) {
-  const { colors } = useAppTheme();
-
+export function RecentMetricList({ list, className }: RecentMetricListProps) {
   return (
     <View
-      className={twMerge(
-        clsx("flex-row items-center justify-between", className),
+      className={cn(
+        "flex-row items-center gap-3 rounded-lg bg-secondary p-3",
+        className,
       )}
-      style={{ backgroundColor: colors.app.cardPrimaryDark }}
     >
-      {list.map((metric, index) => (
-        <React.Fragment key={metric.label}>
-          {index > 0 && <Separator className="h-8" />}
+      {list.map((item, index) => (
+        <Fragment key={item.label}>
+          {index > 0 ? <Separator className="h-8" /> : null}
 
           <RecentMetric
-            icon={metric.icon}
-            label={metric.label}
-            value={metric.value}
+            icon={item.icon}
+            label={item.label}
+            value={item.value}
           />
-        </React.Fragment>
+        </Fragment>
       ))}
     </View>
   );
 }
 
 type RecentMetricProps = {
-  icon: LucideIcon;
+  icon: AppIconName;
   label: string;
   value: string;
 };
 
-function RecentMetric({ icon: Icon, label, value }: RecentMetricProps) {
-  const { colors } = useAppTheme();
+function RecentMetric({ icon, label, value }: RecentMetricProps) {
+  const colors = useAppColors();
 
   return (
-    <View className="flex-row items-center gap-4">
-      <Icon size={24} color={colors.app.brand} />
+    <View className="flex-1 flex-row items-center justify-center gap-3">
+      <AppIcon name={icon} size="lg" color={colors.primary} />
 
       <View>
-        <ThemedText type="extraSmall" variant="primary">
+        <ThemedText type="caption" tone="muted" numberOfLines={1}>
           {label}
         </ThemedText>
-        <ThemedText type="default" variant="accent">
+
+        <ThemedText type="bodyStrong" numberOfLines={1}>
           {value}
         </ThemedText>
       </View>
@@ -126,15 +123,12 @@ type WorkoutImageAvatarProps = {
 };
 
 export function WorkoutImageAvatar({ imageUrl }: WorkoutImageAvatarProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className="h-14 w-14 items-center justify-center overflow-hidden rounded-full"
-      style={{ backgroundColor: colors.app.cardSecondary }}
-    >
+    <View className="h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-secondary">
       <Image
-        source={{ uri: imageUrl ?? WORKOUT_IMAGE }}
+        source={{
+          uri: imageUrl ?? WORKOUT_IMAGE,
+        }}
         className="h-full w-full"
         resizeMode="cover"
       />

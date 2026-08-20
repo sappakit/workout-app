@@ -10,9 +10,9 @@ import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
-  WorkoutCurrent,
   WorkoutCurrentMode,
-  WorkoutResponse,
+  type WorkoutCurrent,
+  type WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -45,7 +45,6 @@ export default function WorkoutScreen() {
     data: workoutPreviewData,
     isLoading: isWorkoutPreviewLoading,
     isError: isWorkoutPreviewError,
-    isFetching: isWorkoutPreviewFetching,
     refetch: refetchWorkoutPreview,
   } = useInfiniteOptionsQuery<WorkoutResponse>({
     url: workoutApi.getAll(),
@@ -79,7 +78,9 @@ export default function WorkoutScreen() {
     onOpenWorkout: (workoutId) => {
       router.push({
         pathname: "/(pages)/workout/[id]",
-        params: { id: workoutId },
+        params: {
+          id: workoutId,
+        },
       });
     },
     onFavoriteWorkout: (workoutId) => {
@@ -87,25 +88,42 @@ export default function WorkoutScreen() {
     },
   });
 
-  if (isCurrentWorkoutLoading) return <WorkoutSkeleton />;
+  if (isCurrentWorkoutLoading) {
+    return <WorkoutSkeleton />;
+  }
 
-  if (isCurrentWorkoutError)
+  if (isCurrentWorkoutError) {
     return (
       <ErrorState
         primaryAction={{
           onPress: handleRetry,
         }}
+        secondaryAction={{ hidden: true }}
       />
     );
+  }
 
-  if (!currentWorkoutData) return <EmptyState />;
+  if (!currentWorkoutData) {
+    return (
+      <EmptyState
+        icon="workout"
+        title="Workout unavailable"
+        message="Your workout information isn't available right now."
+        secondaryAction={{ hidden: true }}
+      />
+    );
+  }
 
   switch (currentWorkoutData.mode) {
     case WorkoutCurrentMode.IN_PROGRESS:
       return currentWorkoutData.session ? (
         <WorkoutInProgressContent />
       ) : (
-        <EmptyState />
+        <EmptyState
+          icon="workout"
+          title="Workout session unavailable"
+          message="We couldn't find your active workout session."
+        />
       );
 
     case WorkoutCurrentMode.SCHEDULED:
@@ -132,6 +150,12 @@ export default function WorkoutScreen() {
       );
 
     default:
-      return <EmptyState />;
+      return (
+        <EmptyState
+          icon="workout"
+          title="Workout unavailable"
+          message="Your workout information isn't available right now."
+        />
+      );
   }
 }

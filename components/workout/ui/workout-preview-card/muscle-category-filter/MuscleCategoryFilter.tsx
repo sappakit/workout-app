@@ -1,8 +1,8 @@
 import { muscleApi } from "@/lib/api/muscle.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
-import { Muscle } from "@/types/workout/response/shared.types";
-import { CategoryFilter, CategoryFilterOption } from "./CategoryFilter";
+import type { Muscle } from "@/types/workout/response/shared.types";
+import { CategoryFilter, type CategoryFilterOption } from "./CategoryFilter";
 import { CategoryFilterSkeleton } from "./CategoryFilterSkeleton";
 
 interface MuscleCategoryFilterProps {
@@ -27,9 +27,13 @@ export function MuscleCategoryFilter({
     value: muscle.id,
   }));
 
-  if (isLoading) return <CategoryFilterSkeleton />;
+  if (isLoading) {
+    return <CategoryFilterSkeleton />;
+  }
 
-  if (isError || options.length === 0) return null;
+  if (isError || options.length === 0) {
+    return null;
+  }
 
   return (
     <CategoryFilter

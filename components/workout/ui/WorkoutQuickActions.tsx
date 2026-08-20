@@ -1,6 +1,4 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { Plus, Search, Zap } from "lucide-react-native";
-import React from "react";
+import { AppButton } from "@/components/custom-ui/app-button";
 import { View } from "react-native";
 
 type ButtonAction = {
@@ -24,25 +22,34 @@ export function WorkoutQuickActions({
       <View className="flex-row gap-3">
         <AppButton
           title="Browse plans"
-          icon={Search}
           variant="secondary"
-          onPress={onBrowsePlans}
           className="flex-1"
+          icon={{
+            name: "search",
+            size: "sm",
+          }}
+          onPress={onBrowsePlans}
         />
 
         <AppButton
           title="New plan"
-          icon={Plus}
           variant="secondary"
-          onPress={onCreatePlan}
           className="flex-1"
+          icon={{
+            name: "add",
+            size: "sm",
+          }}
+          onPress={onCreatePlan}
         />
       </View>
 
       <AppButton
         title="Start Empty Workout"
-        icon={Zap}
-        variant="tertiary"
+        variant="contrast"
+        icon={{
+          name: "quick-start",
+          size: "sm",
+        }}
         onPress={onStartEmptyWorkoutAction.onPress}
         loading={onStartEmptyWorkoutAction.loading}
       />

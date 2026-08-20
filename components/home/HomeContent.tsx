@@ -1,9 +1,9 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
-import { SectionHeader } from "@/components/layout/SectionHeader";
 import { WorkoutTodayOverview } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
+import { SectionHeader } from "../layout/SectionHeader";
 import {
   RecentWorkoutCard,
   RecentWorkoutCardItem,
@@ -14,7 +14,6 @@ import {
   WorkoutPreviewSection,
   WorkoutPreviewSectionProps,
 } from "../workout/ui/workout-preview-card/WorkoutPreviewCard";
-import { ThemeDebug } from "./ThemeDebug";
 import { TodayWorkoutCard } from "./ui/TodayWorkoutCard";
 
 interface HomeContentProps {
@@ -50,8 +49,6 @@ export default function HomeContent({
       pullToRefresh={pullToRefresh}
     >
       <View className="gap-4">
-        <ThemeDebug />
-
         <TodayWorkoutCard todayOverview={todayOverview} />
 
         <HomeStatsCards data={workoutStats} />

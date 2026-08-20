@@ -1,7 +1,7 @@
 import { FilterBottomSheet } from "@/components/filter-option/FilterBottomSheet";
 import {
   ExerciseFilterSheetContent,
-  ExerciseFilterValues,
+  type ExerciseFilterValues,
 } from "./ExerciseFilterSheetContent";
 
 type ExerciseFilterBottomSheetProps = {

@@ -1,30 +1,25 @@
-// components/auth/ForgotPasswordForm.tsx
-import { AppButton } from "@/components/custom-ui/AppButton";
-import FormTextInput from "@/components/form/FormTextInput";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { ForgotPasswordForm as ForgotPasswordFormValues } from "@/schemas/auth.schema";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { FormField } from "@/components/form/FormField";
+import FormTextInputV2 from "@/components/form/FormTextInputV2";
+import type { ForgotPasswordForm as ForgotPasswordFormValues } from "@/schemas/auth.schema";
 import { useRouter } from "expo-router";
-import { Send } from "lucide-react-native";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import type { Control } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { View } from "react-native";
 import { AuthHeader } from "../../ui/AuthHeader";
 
 interface ForgotPasswordFormProps {
   control: Control<ForgotPasswordFormValues>;
-  errors: FieldErrors<ForgotPasswordFormValues>;
   loading: boolean;
   onSubmit: () => void;
 }
 
 export function ForgotPasswordForm({
   control,
-  errors,
   loading,
   onSubmit,
 }: ForgotPasswordFormProps) {
   const router = useRouter();
-  const { colors } = useAppTheme();
 
   return (
     <View>
@@ -33,17 +28,13 @@ export function ForgotPasswordForm({
         subtitle="Enter your email and we'll send you a link to reset your password."
       />
 
-      <View className="mt-4">
-        <View className="mt-3">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Email
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <FormTextInput
+      <View className="mt-7">
+        <Controller
+          control={control}
+          name="email"
+          render={({ field, fieldState }) => (
+            <FormField label="Email" errorMessage={fieldState.error?.message}>
+              <FormTextInputV2
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -51,42 +42,33 @@ export function ForgotPasswordForm({
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
-                error={!!errors.email}
+                error={!!fieldState.error}
+                icon="email"
+                clearable
               />
-            )}
-          />
-
-          {errors.email?.message ? (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{ color: colors.app.error }}
-            >
-              {errors.email.message}
-            </ThemedText>
-          ) : null}
-        </View>
+            </FormField>
+          )}
+        />
 
         <View className="mt-6 gap-4">
           <AppButton
             title="Send Reset Link"
             variant="primary"
-            icon={Send}
-            textClassName="font-medium"
+            icon={{
+              name: "send",
+              size: "sm",
+            }}
             loading={loading}
             disabled={loading}
             onPress={onSubmit}
           />
 
-          <ThemedText
-            type="small"
-            variant="primary"
-            className="text-center"
+          <AppButton
+            title="Back to Sign In"
+            variant="ghost"
+            size="sm"
             onPress={() => router.back()}
-          >
-            Back to Sign In
-          </ThemedText>
+          />
         </View>
       </View>
     </View>

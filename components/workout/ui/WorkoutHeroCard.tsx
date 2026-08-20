@@ -1,23 +1,17 @@
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import {
   DropdownItem,
   MenuSectionLabel,
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
-import { ThemedText } from "@/components/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { hexWithOpacity } from "@/constants/theme";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { hexWithOpacity } from "@/lib/utils";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  CalendarCheck,
-  CalendarClock,
-  CalendarDays,
-  LucideIcon,
-  Repeat,
-  Settings2,
-} from "lucide-react-native";
 import { ImageBackground, Pressable, StyleSheet, View } from "react-native";
-import { WorkoutCardItem } from "./workout-card/WorkoutCard";
+import type { WorkoutCardItem } from "./workout-card/WorkoutCard";
 
 export type WorkoutHeroStatusIcon = "scheduled" | "completed";
 
@@ -40,7 +34,7 @@ export function WorkoutHeroCard({
   onWeeklyPlan,
   isDisabled,
 }: WorkoutHeroCardProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <Pressable
@@ -49,25 +43,29 @@ export function WorkoutHeroCard({
       className="overflow-hidden rounded-3xl"
     >
       <ImageBackground
-        source={{ uri: item.imageUrl ?? WORKOUT_IMAGE }}
+        source={{
+          uri: item.imageUrl ?? WORKOUT_IMAGE,
+        }}
         resizeMode="cover"
         className="h-56 justify-between overflow-hidden p-5"
       >
         <View
           style={[
             StyleSheet.absoluteFillObject,
-            { backgroundColor: hexWithOpacity(colors.app.black, 30) },
+            {
+              backgroundColor: colors.imageOverlay,
+            },
           ]}
         />
 
         <LinearGradient
-          colors={["transparent", hexWithOpacity(colors.app.black, 80)]}
+          colors={["transparent", colors.imageOverlayStrong]}
           locations={[0.4, 1]}
           style={StyleSheet.absoluteFillObject}
         />
 
         <View className="z-10 flex-row justify-between">
-          {statusIcon ? <WorkoutHeroStatusIcon icon={statusIcon} /> : <View />}
+          {statusIcon ? <WorkoutHeroStatus icon={statusIcon} /> : <View />}
 
           <WorkoutHeroCardMenu
             isDisabled={isDisabled}
@@ -82,15 +80,12 @@ export function WorkoutHeroCard({
         <View className="gap-2">
           <View>
             {item.subtitle ? (
-              <ThemedText
-                type="small"
-                style={{ color: colors.app.textWhiteMuted }}
-              >
+              <ThemedText type="small" className="text-white opacity-80">
                 {item.subtitle}
               </ThemedText>
             ) : null}
 
-            <ThemedText type="title" variant="white" className="text-2xl">
+            <ThemedText type="title" className="text-white">
               {item.title}
             </ThemedText>
           </View>
@@ -99,7 +94,7 @@ export function WorkoutHeroCard({
             <View className="flex-row flex-wrap items-center gap-3">
               {item.metaItems.map((metaItem) => (
                 <WorkoutHeroMetaItem
-                  key={metaItem.label}
+                  key={String(metaItem.key)}
                   icon={metaItem.icon}
                   label={metaItem.label}
                 />
@@ -112,41 +107,42 @@ export function WorkoutHeroCard({
   );
 }
 
-type WorkoutHeroStatusIconProps = {
+type WorkoutHeroStatusProps = {
   icon: WorkoutHeroStatusIcon;
 };
 
-function WorkoutHeroStatusIcon({ icon }: WorkoutHeroStatusIconProps) {
-  const { colors } = useAppTheme();
+function WorkoutHeroStatus({ icon }: WorkoutHeroStatusProps) {
+  const colors = useAppColors();
 
-  const Icon = icon === "completed" ? CalendarCheck : CalendarClock;
+  const iconName: AppIconName =
+    icon === "completed" ? "calendar-completed" : "calendar-scheduled";
 
   return (
     <View
       className="h-16 w-16 items-center justify-center rounded-2xl border"
       style={{
-        borderColor: colors.app.white,
-        backgroundColor: hexWithOpacity(colors.app.black, 18),
+        backgroundColor: hexWithOpacity(colors.imageOverlayStrong, 35),
+        borderColor: hexWithOpacity(colors.primaryForeground, 35),
       }}
     >
-      <Icon size={28} color={colors.app.white} />
+      <AppIcon name={iconName} size="xl" color={colors.primaryForeground} />
     </View>
   );
 }
 
 type WorkoutHeroMetaItemProps = {
-  icon: LucideIcon;
+  icon?: AppIconName;
   label: string;
 };
 
-function WorkoutHeroMetaItem({ icon: Icon, label }: WorkoutHeroMetaItemProps) {
-  const { colors } = useAppTheme();
+function WorkoutHeroMetaItem({ icon, label }: WorkoutHeroMetaItemProps) {
+  const colors = useAppColors();
 
   return (
     <View className="flex-row items-center gap-1.5">
-      <Icon size={14} color={colors.app.brand} />
+      {icon ? <AppIcon name={icon} size="xs" color={colors.primary} /> : null}
 
-      <ThemedText type="small" style={{ color: colors.app.textWhiteMuted }}>
+      <ThemedText type="small" className="text-white opacity-80">
         {label}
       </ThemedText>
     </View>
@@ -172,19 +168,19 @@ export function WorkoutHeroCardMenu({
 
       <DropdownItem
         label="Edit workout"
-        icon={Settings2}
+        icon="settings"
         onSelect={actions.onEditPlan}
       />
 
       <DropdownItem
         label="Switch workout"
-        icon={Repeat}
+        icon="switch"
         onSelect={actions.onSwitchPlan}
       />
 
       <DropdownItem
         label="Edit weekly plan"
-        icon={CalendarDays}
+        icon="weekly-plan"
         onSelect={actions.onWeeklyPlan}
       />
     </OptionsMenu>

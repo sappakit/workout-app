@@ -1,18 +1,19 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { Separator } from "@/components/custom-ui/Separator";
-import { ThemedText } from "@/components/themed-text";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { MetaPill } from "@/components/custom-ui/MetaPill";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { formatWorkoutDuration } from "@/components/workout/model/workout-content.mapper";
-import { WorkoutMetaPill } from "@/components/workout/ui/workout-card/WorkoutCard";
+import { formatExerciseCount } from "@/components/workout/ui/workout-card/WorkoutCard";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { hexWithOpacity } from "@/constants/theme";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppTheme";
+import { cn } from "@/lib/utils";
 import { requireWorkoutExercises } from "@/lib/workout/utils/response-guards.utils";
 import { WorkoutWeeklyPlanDayType } from "@/types/workout/response/workout.types";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { CircleDashed, Clock, Dumbbell, Moon } from "lucide-react-native";
+import type { ColorValue } from "react-native";
 import { ImageBackground, Pressable, StyleSheet, View } from "react-native";
-import { WeeklyPlanDay } from "../model/weekly-plan.mapper";
+import type { WeeklyPlanDay } from "../model/weekly-plan.mapper";
 
 interface SelectedWeeklyPlanDayCardProps {
   day: WeeklyPlanDay;
@@ -24,16 +25,18 @@ interface SelectedWeeklyPlanDayCardProps {
 
 export function SelectedWeeklyPlanDayCard({
   day,
-  disabled,
+  disabled = false,
   onChooseWorkout,
   onSetRestDay,
   onClearDay,
 }: SelectedWeeklyPlanDayCardProps) {
   const router = useRouter();
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const isWorkoutDay = day.dayType === WorkoutWeeklyPlanDayType.WORKOUT;
+
   const isRestDay = day.dayType === WorkoutWeeklyPlanDayType.REST;
+
   const hasWorkout = isWorkoutDay && !!day.workout;
 
   const workoutExercises =
@@ -55,7 +58,9 @@ export function SelectedWeeklyPlanDayCard({
       : "Choose a workout or mark this as a rest day.";
 
   const handleOpenWorkout = () => {
-    if (!hasWorkout || !day.workout || disabled) return;
+    if (!hasWorkout || !day.workout || disabled) {
+      return;
+    }
 
     router.push({
       pathname: "/(pages)/workout/[id]",
@@ -69,43 +74,68 @@ export function SelectedWeeklyPlanDayCard({
     <Pressable
       disabled={!hasWorkout || disabled}
       onPress={handleOpenWorkout}
-      className="flex-row p-5"
-      style={({ pressed }) => ({
-        opacity: pressed && hasWorkout ? 0.85 : 1,
-      })}
+      className={cn("flex-row p-5 active:opacity-80", disabled && "opacity-50")}
     >
-      <View className="flex-1">
+      <View className="min-w-0 flex-1">
         <ThemedText
-          type="default"
-          variant={hasWorkout ? "white" : "primary"}
-          style={hasWorkout ? { color: colors.app.textWhiteMuted } : undefined}
+          type="small"
+          tone={hasWorkout ? "default" : "muted"}
+          style={
+            hasWorkout
+              ? {
+                  color: colors.primaryForeground,
+                  opacity: 0.75,
+                }
+              : undefined
+          }
         >
           {day.label}
         </ThemedText>
 
-        <ThemedText type="subtitle" variant={hasWorkout ? "white" : "accent"}>
+        <ThemedText
+          type="heading"
+          numberOfLines={1}
+          style={
+            hasWorkout
+              ? {
+                  color: colors.primaryForeground,
+                }
+              : undefined
+          }
+        >
           {title}
         </ThemedText>
 
         <ThemedText
           type="small"
-          variant={hasWorkout ? "white" : "primary"}
-          style={hasWorkout ? { color: colors.app.textWhiteMuted } : undefined}
+          tone={hasWorkout ? "default" : "muted"}
+          numberOfLines={2}
+          style={
+            hasWorkout
+              ? {
+                  color: colors.primaryForeground,
+                  opacity: 0.75,
+                }
+              : undefined
+          }
         >
           {subtitle}
         </ThemedText>
 
         {isWorkoutDay && day.workout && workoutExercises ? (
-          <View className="mt-2 flex-row flex-wrap gap-2">
-            <WorkoutMetaPill
-              icon={Dumbbell}
-              label={`${workoutExercises.length} ${
-                workoutExercises.length === 1 ? "exercise" : "exercises"
-              }`}
+          <View className="mt-3 flex-row flex-wrap gap-2">
+            <MetaPill
+              variant="overlay"
+              icon="exercise"
+              label={formatExerciseCount(workoutExercises.length)}
             />
 
             {durationLabel ? (
-              <WorkoutMetaPill icon={Clock} label={durationLabel} />
+              <MetaPill
+                variant="overlay"
+                icon="duration"
+                label={durationLabel}
+              />
             ) : null}
           </View>
         ) : null}
@@ -114,26 +144,25 @@ export function SelectedWeeklyPlanDayCard({
   );
 
   return (
-    <View
-      className="overflow-hidden rounded-3xl"
-      style={{
-        backgroundColor: colors.app.cardPrimary,
-      }}
-    >
+    <View className="overflow-hidden rounded-3xl bg-card">
       {hasWorkout ? (
         <ImageBackground
-          source={{ uri: day.workout?.imageUrl ?? WORKOUT_IMAGE }}
+          source={{
+            uri: day.workout?.imageUrl ?? WORKOUT_IMAGE,
+          }}
           resizeMode="cover"
         >
           <View
             style={[
               StyleSheet.absoluteFillObject,
-              { backgroundColor: hexWithOpacity(colors.app.black, 40) },
+              {
+                backgroundColor: colors.imageOverlay,
+              },
             ]}
           />
 
           <LinearGradient
-            colors={["transparent", hexWithOpacity(colors.app.black, 80)]}
+            colors={["transparent", colors.imageOverlayStrong]}
             locations={[0.25, 1]}
             style={StyleSheet.absoluteFillObject}
           />
@@ -144,45 +173,73 @@ export function SelectedWeeklyPlanDayCard({
         topContent
       )}
 
-      <View
-        className="flex-row items-center justify-between p-2"
-        style={{ backgroundColor: colors.app.cardPrimaryDark }}
-      >
-        <AppButton
+      <View className="flex-row items-center bg-secondary p-2">
+        <WeeklyPlanActionButton
           title={isWorkoutDay ? "Change" : "Choose"}
-          icon={Dumbbell}
-          iconColor={colors.app.brand}
-          variant="ghost"
-          className="h-12 flex-1"
-          textStyle={{ color: colors.app.brand }}
+          icon="workout"
+          color={colors.primary}
           disabled={disabled}
           onPress={onChooseWorkout}
         />
 
-        <Separator className="h-6" />
+        <View className="h-6 w-px bg-border" />
 
-        <AppButton
+        <WeeklyPlanActionButton
           title="Rest"
-          icon={Moon}
-          iconColor={colors.app.textAccent}
-          variant="ghost"
-          className="h-12 flex-1"
-          textStyle={{ color: colors.app.textAccent }}
+          icon="recovery"
+          color={colors.foreground}
           disabled={disabled}
           onPress={onSetRestDay}
         />
 
-        <Separator className="h-6" />
+        <View className="h-6 w-px bg-border" />
 
-        <AppButton
+        <WeeklyPlanActionButton
           title="Clear"
-          icon={CircleDashed}
-          variant="ghost"
-          className="h-12 flex-1"
+          icon="unassigned"
+          color={colors.mutedForeground}
           disabled={disabled}
           onPress={onClearDay}
         />
       </View>
     </View>
+  );
+}
+
+type WeeklyPlanActionButtonProps = {
+  title: string;
+  icon: AppIconName;
+  color: ColorValue;
+  disabled?: boolean;
+  onPress: () => void;
+};
+
+function WeeklyPlanActionButton({
+  title,
+  icon,
+  color,
+  disabled = false,
+  onPress,
+}: WeeklyPlanActionButtonProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      className={cn(
+        "h-12 flex-1 flex-row items-center justify-center gap-2 rounded-lg active:opacity-80",
+        disabled && "opacity-50",
+      )}
+    >
+      <AppIcon name={icon} variant="outline" size="sm" color={color} />
+
+      <ThemedText
+        type="label"
+        style={{
+          color,
+        }}
+      >
+        {title}
+      </ThemedText>
+    </Pressable>
   );
 }

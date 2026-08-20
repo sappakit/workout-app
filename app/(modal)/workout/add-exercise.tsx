@@ -1,11 +1,13 @@
+import { PageLayout } from "@/components/layout/PageLayout";
 import {
-  ExercisePickerMode,
   ExercisePickerScreen,
+  type ExercisePickerMode,
 } from "@/components/picker/exercise-picker/ExercisePickerScreen";
+import { ErrorState } from "@/components/state/ErrorState";
 import { mapExerciseToCreateWorkoutExerciseFormItem } from "@/lib/workout/mappers";
-import { EditPlanForm } from "@/schemas/edit-plan.schema";
+import type { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { usePlanFormDraftStore } from "@/stores/planFormDraftStore";
-import { Exercise } from "@/types/workout/response/exercise.types";
+import type { Exercise } from "@/types/workout/response/exercise.types";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 type WorkoutExerciseDraftItem = EditPlanForm["workoutExercises"][number];
@@ -22,10 +24,12 @@ export default function AddExercisesPage() {
 
   const mode: ExercisePickerMode =
     params.mode === "replace" ? "replace" : "add";
+
   const isReplaceMode = mode === "replace";
   const targetExerciseClientId = params.exerciseClientId;
 
   const draft = usePlanFormDraftStore((state) => state.draft);
+
   const replaceDraft = usePlanFormDraftStore((state) => state.replaceDraft);
 
   const currentExercises = draft?.workoutExercises ?? [];
@@ -121,14 +125,41 @@ export default function AddExercisesPage() {
     router.back();
   };
 
+  if (!draft) {
+    return (
+      <PageLayout scrollable={false} includeInsets>
+        <ErrorState
+          icon="details"
+          title="No plan draft found"
+          message="We couldn't find the workout plan you were editing."
+          primaryAction={{
+            hidden: true,
+          }}
+        />
+      </PageLayout>
+    );
+  }
+
+  if (isReplaceMode && !targetWorkoutExercise) {
+    return (
+      <PageLayout scrollable={false} includeInsets>
+        <ErrorState
+          icon="exercise"
+          title="Exercise not found"
+          message="We couldn't find the exercise you were trying to replace."
+          primaryAction={{
+            hidden: true,
+          }}
+        />
+      </PageLayout>
+    );
+  }
+
   return (
     <ExercisePickerScreen
       mode={mode}
-      hasSource={!!draft}
       targetExercise={targetWorkoutExercise?.exercise}
       addDescription="Select one or more exercises to add to this workout plan."
-      missingSourceText="No plan draft found."
-      missingTargetText="Exercise not found in this workout plan."
       onClose={handleClose}
       onDone={handleDone}
     />

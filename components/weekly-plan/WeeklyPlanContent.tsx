@@ -1,4 +1,4 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { useWeeklyPlanWorkoutPickerStore } from "@/components/weekly-plan/weeklyPlanWorkoutSelectionStore";
@@ -8,19 +8,18 @@ import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import {
-  WorkoutWeeklyPlan,
   WorkoutWeeklyPlanDayType,
+  type WorkoutWeeklyPlan,
 } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Save } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import {
   getTodayDayOfWeek,
   mapWeeklyPlanResponseToState,
   mapWeeklyPlanStateToUpdatePayload,
-  UpdateWeeklyPlanPayload,
+  type UpdateWeeklyPlanPayload,
 } from "./model/weekly-plan.mapper";
 import { SelectedWeeklyPlanDayCard } from "./ui/SelectedWeeklyPlanDayCard";
 import { WeeklyPlanDaySelector } from "./ui/WeeklyPlanDaySelector";
@@ -36,6 +35,7 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
   const invalidateQueries = useInvalidateQueries();
 
   const pickerResult = useWeeklyPlanWorkoutPickerStore((state) => state.result);
+
   const clearPickerResult = useWeeklyPlanWorkoutPickerStore(
     (state) => state.clearResult,
   );
@@ -46,10 +46,13 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
   );
 
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState(getTodayDayOfWeek);
+
   const [weeklyPlan, setWeeklyPlan] = useState(() => initialWeeklyPlan);
 
   useEffect(() => {
-    if (!pickerResult) return;
+    if (!pickerResult) {
+      return;
+    }
 
     setWeeklyPlan((currentPlan) =>
       currentPlan.map((day) =>
@@ -73,6 +76,7 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
     mutationFn: async (payload: UpdateWeeklyPlanPayload) => {
       return api.patch(workoutApi.updateWeeklyPlan(), payload);
     },
+
     onSuccess: async () => {
       await invalidateQueries([
         workoutQueryKeys.weeklyPlan,
@@ -86,6 +90,7 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
 
       router.back();
     },
+
     onError: () => {
       toast.error({
         title: "Update failed",
@@ -111,7 +116,9 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
   ).length;
 
   const handleChooseWorkout = () => {
-    if (!selectedDay || isPending) return;
+    if (!selectedDay || isPending) {
+      return;
+    }
 
     router.push({
       pathname: "/(modal)/weekly-plan/choose-weekly-plan-workout",
@@ -125,7 +132,9 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
   };
 
   const handleSetRestDay = () => {
-    if (isPending) return;
+    if (isPending) {
+      return;
+    }
 
     setWeeklyPlan((currentPlan) =>
       currentPlan.map((day) =>
@@ -142,7 +151,9 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
   };
 
   const handleClearDay = () => {
-    if (isPending) return;
+    if (isPending) {
+      return;
+    }
 
     setWeeklyPlan((currentPlan) =>
       currentPlan.map((day) =>
@@ -165,13 +176,16 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
   };
 
   const handleCancel = () => {
-    if (isPending) return;
+    if (isPending) {
+      return;
+    }
 
     const resetAndBack = () => {
       router.back();
     };
 
     const initialPayload = mapWeeklyPlanStateToUpdatePayload(initialWeeklyPlan);
+
     const currentPayload = mapWeeklyPlanStateToUpdatePayload(weeklyPlan);
 
     const isDirty =
@@ -212,10 +226,13 @@ export default function WeeklyPlanContent({ data }: WeeklyPlanContentProps) {
       }}
       stickyFooter={
         <AppButton
-          title="Save weekly plan"
+          title="Save Weekly Plan"
           variant="primary"
-          icon={Save}
           className="flex-1"
+          icon={{
+            name: "save",
+            size: "sm",
+          }}
           loading={isPending}
           disabled={isPending}
           onPress={handleSave}

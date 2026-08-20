@@ -1,6 +1,13 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
+import { AppButton } from "@/components/custom-ui/app-button";
+import {
+  PageLayout,
+  type PullToRefreshProps,
+} from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import {
+  WORKOUT_REST_IMAGE,
+  WORKOUT_UNASSIGNED_IMAGE,
+} from "@/constants/images";
 import { api } from "@/lib/api/client";
 import { workoutApi } from "@/lib/api/workout.api";
 import { useInvalidateQueries } from "@/lib/query/utils";
@@ -16,11 +23,10 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
 import { mapScheduleToWorkoutHeroCardItem } from "./model/workout-content.mapper";
-import { RestDaySection } from "./ui/sections/RestDaySection";
 import { TodayPlanSection } from "./ui/sections/TodayPlanSection";
-import { UnassignedPlanSection } from "./ui/sections/UnassignedPlanSection";
+import { WorkoutDayStateSection } from "./ui/sections/WorkoutDayStateSection";
 import {
-  WorkoutPreviewCardItem,
+  type WorkoutPreviewCardItem,
   WorkoutPreviewSection,
 } from "./ui/workout-preview-card/WorkoutPreviewCard";
 import { WorkoutQuickActions } from "./ui/WorkoutQuickActions";
@@ -161,27 +167,14 @@ export default function WorkoutContent({
   return (
     <PageLayout
       header={{
-        props: { variant: "title", title: "Workout" },
+        props: {
+          variant: "title",
+          title: "Workout",
+        },
       }}
       pullToRefresh={pullToRefresh}
     >
       <View className="gap-4">
-        {/* {isScheduledDay && data && workoutHeroItem ? (
-          <TodayPlanSection
-            state={todayPlanState}
-            workoutHeroItem={workoutHeroItem}
-            isStarting={isStarting}
-            onStartTodayPlan={startWorkout}
-            onEditPlan={handleEditPlan}
-            onSwitchPlan={handleChooseWorkout}
-            onOpenWorkoutDetail={handleOpenWorkoutDetail}
-          />
-        ) : isRestDay ? (
-          <RestDaySection />
-        ) : isUnassignedDay ? (
-          <UnassignedPlanSection />
-        ) : null} */}
-
         {isScheduledDay && data && scheduledWorkout && workoutHeroItem ? (
           <TodayPlanSection
             state={todayPlanState}
@@ -195,10 +188,32 @@ export default function WorkoutContent({
           />
         ) : null}
 
-        {isRestDay ? <RestDaySection onWeeklyPlan={handleWeeklyPlan} /> : null}
+        {isRestDay ? (
+          <WorkoutDayStateSection
+            sectionTitle="Rest Day"
+            sectionSubtitle="No scheduled workout today. Recover, or choose a workout if you feel ready."
+            imageUrl={WORKOUT_REST_IMAGE}
+            icon="recovery"
+            title="Recharge, then rise"
+            description="Recovery helps your body rebuild. Take it easy today, or move if your body feels good."
+            actionTitle="Edit weekly plan"
+            actionIcon="calendar"
+            onAction={handleWeeklyPlan}
+          />
+        ) : null}
 
         {isUnassignedDay ? (
-          <UnassignedPlanSection onWeeklyPlan={handleWeeklyPlan} />
+          <WorkoutDayStateSection
+            sectionTitle="No Plan Assigned"
+            sectionSubtitle="This weekday does not have a plan yet. Set a day plan, choose a workout, or build your own."
+            imageUrl={WORKOUT_UNASSIGNED_IMAGE}
+            icon="calendar-add"
+            title="Build your routine"
+            description="Assign a workout to this weekday, pick one to train, or start freely with an empty workout."
+            actionTitle="Assign weekly plan"
+            actionIcon="calendar"
+            onAction={handleWeeklyPlan}
+          />
         ) : null}
 
         <View className="gap-3">
@@ -208,6 +223,7 @@ export default function WorkoutContent({
               <AppButton
                 title="View All"
                 variant="ghost"
+                size="sm"
                 onPress={handleChooseWorkout}
               />
             }

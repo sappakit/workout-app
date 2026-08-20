@@ -1,22 +1,21 @@
 import FormCheckbox from "@/components/form/FormCheckbox";
-import { FormErrorMessage } from "@/components/form/FormErrorMessage";
-import { FormField } from "@/components/form/FormField";
-import FormTextInput from "@/components/form/FormTextInput";
+import { FormErrorMessage, FormField } from "@/components/form/FormField";
+import FormTextInputV2 from "@/components/form/FormTextInputV2";
 import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
 import FormInfiniteMultiSelectInput from "@/components/form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "@/components/form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "@/components/layout/SectionHeader";
-import { ThemedText } from "@/components/themed-text";
+import { ContentFeedback } from "@/components/state/ContentFeedback";
 import { muscleApi } from "@/lib/api/muscle.api";
 import { workoutApi } from "@/lib/api/workout.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
-import { EditPlanForm } from "@/schemas/edit-plan.schema";
-import { Muscle } from "@/types/workout/response/shared.types";
-import { WorkoutFocusType } from "@/types/workout/response/workout.types";
+import type { EditPlanForm } from "@/schemas/edit-plan.schema";
+import type { Muscle } from "@/types/workout/response/shared.types";
+import type { WorkoutFocusType } from "@/types/workout/response/workout.types";
 import {
   Controller,
-  FieldArrayWithId,
-  UseFormReturn,
+  type FieldArrayWithId,
+  type UseFormReturn,
   useFormState,
 } from "react-hook-form";
 import { View } from "react-native";
@@ -57,7 +56,10 @@ export function PlanFormFields({
   onReplaceExercise,
 }: PlanFormFieldsProps) {
   const { control } = form;
-  const { errors } = useFormState({ control });
+
+  const { errors } = useFormState({
+    control,
+  });
 
   return (
     <View className="gap-4">
@@ -73,10 +75,11 @@ export function PlanFormFields({
               label="Plan Name"
               errorMessage={fieldState.error?.message}
             >
-              <FormTextInput
+              <FormTextInputV2
                 placeholder="Enter plan name"
                 value={field.value}
                 onChangeText={field.onChange}
+                onBlur={field.onBlur}
                 error={!!fieldState.error}
               />
             </FormField>
@@ -97,7 +100,10 @@ export function PlanFormFields({
                 emptySelectionLabel="No workout type"
                 url={workoutApi.getTypes()}
                 queryKey={["workout-types"]}
-                mapOption={(item) => ({ label: item.name, value: item.id })}
+                mapOption={(item) => ({
+                  label: item.name,
+                  value: item.id,
+                })}
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Select workout type"
@@ -127,9 +133,7 @@ export function PlanFormFields({
                   <FormCheckbox
                     label="Auto-filled"
                     value={autoFillField.value}
-                    onChange={(value) => {
-                      autoFillField.onChange(value);
-                    }}
+                    onChange={autoFillField.onChange}
                     error={!!errors.autoFillMuscles}
                     disabled={!hasExercises}
                   />
@@ -139,7 +143,10 @@ export function PlanFormFields({
               <FormInfiniteMultiSelectInput<Muscle>
                 url={muscleApi.getAll()}
                 queryKey={muscleQueryKeys.all}
-                mapOption={(item) => ({ label: item.name, value: item.id })}
+                mapOption={(item) => ({
+                  label: item.name,
+                  value: item.id,
+                })}
                 value={field.value}
                 onChange={field.onChange}
                 selectedOptions={selectedTargetMuscleOptions}
@@ -170,9 +177,7 @@ export function PlanFormFields({
                   <FormCheckbox
                     label="Auto-filled"
                     value={autoFillField.value}
-                    onChange={(value) => {
-                      autoFillField.onChange(value);
-                    }}
+                    onChange={autoFillField.onChange}
                     error={!!errors.autoFillDuration}
                     disabled={!hasExercises}
                   />
@@ -182,9 +187,7 @@ export function PlanFormFields({
               <DurationBottomSheetPicker
                 title="Select Estimated Duration"
                 value={field.value ?? 0}
-                onChange={(value) => {
-                  field.onChange(value);
-                }}
+                onChange={field.onChange}
                 disabled={autoFillDuration}
                 renderTrigger={({ value, openSheet, disabled }) => (
                   <DurationPickerTrigger
@@ -216,27 +219,24 @@ export function PlanFormFields({
         />
 
         {fields.length === 0 ? (
-          <View>
-            <ThemedText type="default" variant="accent">
-              No exercises added yet
-            </ThemedText>
-
-            <ThemedText type="default" variant="primary">
-              Tap the + button to add your first exercise
-            </ThemedText>
+          <View className="gap-2">
+            <ContentFeedback
+              icon="exercise"
+              title="No exercises added yet"
+              subtitle="Tap the + button to add your first exercise"
+            />
 
             <FormErrorMessage message={errors.workoutExercises?.message} />
           </View>
         ) : (
           fields.map((item, index) => (
-            <View key={item.fieldId}>
-              <PlanWorkoutExerciseSection
-                form={form}
-                index={index}
-                onDeleteExercise={() => onRemoveExercise(index)}
-                onReplaceExercise={() => onReplaceExercise(item.clientId)}
-              />
-            </View>
+            <PlanWorkoutExerciseSection
+              key={item.fieldId}
+              form={form}
+              index={index}
+              onDeleteExercise={() => onRemoveExercise(index)}
+              onReplaceExercise={() => onReplaceExercise(item.clientId)}
+            />
           ))
         )}
       </View>

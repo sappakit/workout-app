@@ -1,25 +1,23 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { AppButton } from "@/components/custom-ui/app-button";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { MetaPill, MetaPillList } from "@/components/custom-ui/MetaPill";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppTheme";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
+import { cn, hexWithOpacity } from "@/lib/utils";
 import {
   BottomSheetBackdrop,
   BottomSheetFlatList,
-  BottomSheetFlatListMethods,
+  type BottomSheetFlatListMethods,
   BottomSheetModal,
 } from "@gorhom/bottom-sheet";
-import clsx from "clsx";
-import { Check, ChevronDown, ChevronUp, X } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  ListRenderItem,
-  Pressable,
-  PressableProps,
-  View,
-  ViewStyle,
-} from "react-native";
+import type { ListRenderItem, StyleProp, ViewStyle } from "react-native";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { twMerge } from "tailwind-merge";
+
+const MAX_VISIBLE_SELECTED_OPTIONS = 3;
 
 export interface SelectOption {
   label: string;
@@ -31,9 +29,27 @@ export interface FormMultiSelectInputProps {
   value?: (string | number)[];
   onChange?: (value: (string | number)[]) => void;
   placeholder?: string;
+
+  /**
+   * Shows the destructive/error input state.
+   */
   validationError?: boolean;
+
+  /**
+   * Controls the outer select trigger.
+   */
   className?: string;
-  style?: ViewStyle;
+
+  /**
+   * Controls inline styles for the outer select trigger.
+   */
+  style?: StyleProp<ViewStyle>;
+
+  /**
+   * Optional leading semantic app icon.
+   */
+  icon?: AppIconName;
+
   title?: string;
   isLoading?: boolean;
   isError?: boolean;
@@ -48,50 +64,70 @@ export default function FormMultiSelectInput({
   value = [],
   onChange,
   placeholder = "Select options",
-  validationError,
+  validationError = false,
   className,
   style,
+  icon,
   title,
   isLoading,
   isError,
   isFetchingNextPage,
   onEndReached,
   snapPoints,
-  disabled,
+  disabled = false,
 }: FormMultiSelectInputProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const insets = useSafeAreaInsets();
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
+
   const animationConfigs = useDefaultBottomSheetAnimation();
+
+  const [showAll, setShowAll] = useState(false);
 
   const selectedValues = value ?? [];
 
   const selectedOptions = useMemo(() => {
     const selectedSet = new Set(selectedValues);
+
     return options.filter((option) => selectedSet.has(option.value));
   }, [options, selectedValues]);
 
+  const selectedPillOptions = useMemo(
+    () =>
+      selectedOptions.map((option) => ({
+        ...option,
+        key: option.value,
+      })),
+    [selectedOptions],
+  );
+
   const selectedLabel = useMemo(() => {
-    if (selectedOptions.length === 0) return undefined;
-    if (selectedOptions.length === 1) return "1 muscle group selected";
+    if (selectedOptions.length === 0) {
+      return undefined;
+    }
+
+    if (selectedOptions.length === 1) {
+      return "1 muscle group selected";
+    }
+
     return `${selectedOptions.length} muscle groups selected`;
   }, [selectedOptions]);
 
   const firstSelectedIndex = useMemo(() => {
-    if (selectedValues.length === 0) return -1;
+    if (selectedValues.length === 0) {
+      return -1;
+    }
+
     return options.findIndex((option) => selectedValues.includes(option.value));
   }, [options, selectedValues]);
 
-  // Chips display
-  const [showAll, setShowAll] = useState(false);
-
-  const visibleOptions = showAll
-    ? selectedOptions
-    : selectedOptions.slice(0, 3);
-  const remainingCount = selectedOptions.length - 3;
-
   const openSheet = () => {
+    if (disabled) {
+      return;
+    }
+
     bottomSheetModalRef.current?.present();
   };
 
@@ -130,7 +166,10 @@ export default function FormMultiSelectInput({
   };
 
   const handleRemove = (optionValue: string | number) => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
+
     onChange?.(selectedValues.filter((item) => item !== optionValue));
   };
 
@@ -146,6 +185,7 @@ export default function FormMultiSelectInput({
   );
 
   let content: string | undefined;
+
   if (isLoading) {
     content = "Loading options...";
   } else if (isError) {
@@ -158,21 +198,30 @@ export default function FormMultiSelectInput({
     const isSelected = selectedValues.includes(item.value);
 
     return (
-      <View className={twMerge(clsx("px-2", index > 0 && "pt-1"))}>
+      <View className={cn("px-2", index > 0 && "pt-1")}>
         <Pressable
           onPress={() => handleToggle(item.value)}
-          className="h-14 flex-row items-center justify-between rounded-xl p-4"
-          style={{
-            backgroundColor: isSelected
-              ? colors.app.brand + "20"
-              : "transparent",
-          }}
+          className="h-14 flex-row items-center justify-between rounded-xl p-4 active:opacity-80"
+          style={
+            isSelected
+              ? {
+                  backgroundColor: hexWithOpacity(colors.primary, 13),
+                }
+              : undefined
+          }
         >
-          <ThemedText type="default" variant={isSelected ? "brand" : "accent"}>
+          <ThemedText
+            type="body"
+            tone={isSelected ? "primary" : "default"}
+            className="min-w-0 flex-1"
+            numberOfLines={1}
+          >
             {item.label}
           </ThemedText>
 
-          {isSelected && <Check size={18} color={colors.app.brand} />}
+          {isSelected ? (
+            <AppIcon name="check" size="sm" color={colors.primary} />
+          ) : null}
         </Pressable>
       </View>
     );
@@ -180,7 +229,7 @@ export default function FormMultiSelectInput({
 
   const listFooterComponent = isFetchingNextPage ? (
     <View className="px-2">
-      <ThemedText type="default" variant="primary" className="p-4">
+      <ThemedText type="body" tone="muted" className="p-4">
         Loading more...
       </ThemedText>
     </View>
@@ -192,81 +241,74 @@ export default function FormMultiSelectInput({
       <Pressable
         onPress={openSheet}
         disabled={disabled}
-        className={twMerge(
-          clsx(
-            "h-12 flex-row items-center justify-between rounded-lg border px-4",
-            className,
-          ),
+        className={cn(
+          "h-10 flex-row items-center gap-2 rounded-lg border bg-secondary px-3 active:opacity-80",
+          validationError ? "border-destructive" : "border-input",
+          disabled && "opacity-50",
+          className,
         )}
-        style={[
-          {
-            opacity: disabled ? 0.5 : 1,
-            backgroundColor: colors.app.cardSecondary,
-            borderColor: validationError
-              ? colors.app.error
-              : colors.app.borderPrimary,
-          },
-          style,
-        ]}
+        style={style}
       >
+        {icon ? (
+          <AppIcon
+            name={icon}
+            variant="outline"
+            size="sm"
+            color={colors.mutedForeground}
+          />
+        ) : null}
+
         <ThemedText
-          className="flex-1 text-sm"
-          variant={selectedLabel ? "accent" : "primary"}
+          type="small"
+          tone={selectedLabel ? "default" : "muted"}
+          className="min-w-0 flex-1"
           numberOfLines={1}
         >
           {selectedLabel ?? placeholder}
         </ThemedText>
 
-        <ChevronDown size={16} color={colors.app.textPrimary} />
+        <AppIcon name="chevron-down" size="sm" color={colors.mutedForeground} />
       </Pressable>
 
       {/* Selected chips display */}
-      {selectedOptions.length > 0 && (
-        <View className="mt-2">
+      {selectedOptions.length > 0 ? (
+        <View>
           {/* Show all */}
-          {selectedOptions.length > 3 && (
+          {selectedOptions.length > MAX_VISIBLE_SELECTED_OPTIONS ? (
             <Pressable
-              className="mb-2 flex-row items-center gap-1"
-              onPress={() => setShowAll((prev) => !prev)}
+              className="mb-2 flex-row items-center gap-1 self-start active:opacity-80"
+              onPress={() => setShowAll((previous) => !previous)}
             >
-              <ThemedText type="default" variant="primary" className="text-sm">
+              <ThemedText type="small" tone="muted">
                 {showAll ? "Show less" : "Show all"}
               </ThemedText>
 
-              <View>
-                {showAll ? (
-                  <ChevronUp size={12} color={colors.app.textPrimary} />
-                ) : (
-                  <ChevronDown size={12} color={colors.app.textPrimary} />
-                )}
-              </View>
-            </Pressable>
-          )}
-
-          <View className="flex-row flex-wrap items-center gap-2">
-            {visibleOptions.map((option) => (
-              <SelectedMuscleBadge
-                key={option.value}
-                option={option}
-                handleRemove={handleRemove}
-                disabled={disabled}
+              <AppIcon
+                name={showAll ? "chevron-up" : "chevron-down"}
+                size="xs"
+                color={colors.mutedForeground}
               />
-            ))}
+            </Pressable>
+          ) : null}
 
-            {!showAll && remainingCount > 0 && (
-              <Pressable onPress={() => setShowAll(true)}>
-                <ThemedText
-                  type="default"
-                  variant="primary"
-                  className="text-sm"
-                >
-                  +{remainingCount} more
-                </ThemedText>
-              </Pressable>
+          <MetaPillList
+            items={selectedPillOptions}
+            maxVisibleItems={
+              showAll
+                ? selectedPillOptions.length
+                : MAX_VISIBLE_SELECTED_OPTIONS
+            }
+            className={showAll ? "flex-wrap overflow-visible" : undefined}
+            renderItem={(option) => (
+              <MetaPill
+                label={option.label}
+                disabled={disabled}
+                onRemove={() => handleRemove(option.value)}
+              />
             )}
-          </View>
+          />
         </View>
-      )}
+      ) : null}
 
       {/* Bottom Sheet Modal */}
       <BottomSheetModal
@@ -281,31 +323,32 @@ export default function FormMultiSelectInput({
         enableContentPanningGesture
         backdropComponent={renderBackdrop}
         backgroundStyle={{
-          backgroundColor: colors.app.toastBackground,
+          backgroundColor: colors.popover,
         }}
         handleIndicatorStyle={{
-          backgroundColor: colors.app.borderSecondary,
+          backgroundColor: colors.borderStrong,
         }}
       >
         {/* Header */}
         <View className="px-6 py-3">
-          {title && (
-            <ThemedText type="title" variant="accent">
-              {title}
-            </ThemedText>
-          )}
+          {title ? <ThemedText type="title">{title}</ThemedText> : null}
 
-          {!isLoading && !isError && options.length > 0 && (
-            <ThemedText type="default" variant="primary" className="mt-1">
+          {!isLoading && !isError && options.length > 0 ? (
+            <ThemedText type="small" tone="muted" className="mt-1">
               {selectedValues.length} selected
             </ThemedText>
-          )}
+          ) : null}
         </View>
 
         {/* Content */}
         {isLoading || isError || options.length === 0 ? (
-          <View className="px-2" style={{ paddingBottom: insets.bottom + 16 }}>
-            <ThemedText type="default" variant="primary" className="p-4">
+          <View
+            className="px-2"
+            style={{
+              paddingBottom: insets.bottom + 16,
+            }}
+          >
+            <ThemedText type="body" tone="muted" className="p-4">
               {content}
             </ThemedText>
           </View>
@@ -314,7 +357,7 @@ export default function FormMultiSelectInput({
             <BottomSheetFlatList
               ref={listRef}
               data={options}
-              keyExtractor={(item: SelectOption) => item.value.toString()}
+              keyExtractor={(item: SelectOption) => String(item.value)}
               renderItem={renderItem}
               onEndReached={onEndReached}
               onEndReachedThreshold={0.4}
@@ -328,57 +371,23 @@ export default function FormMultiSelectInput({
 
             <View
               className="px-4 pt-2"
-              style={{ paddingBottom: insets.bottom }}
+              style={{
+                paddingBottom: insets.bottom,
+              }}
             >
               <AppButton
                 title="Done"
                 variant="primary"
+                icon={{
+                  name: "check",
+                  size: "sm",
+                }}
                 onPress={closeSheet}
-                icon={Check}
               />
             </View>
           </View>
         )}
       </BottomSheetModal>
     </>
-  );
-}
-
-interface BaseDisplayProps extends PressableProps {
-  option: SelectOption;
-  handleRemove: (optionValue: string | number) => void;
-  className?: string;
-}
-
-function SelectedMuscleBadge({
-  option,
-  handleRemove,
-  disabled,
-  className,
-}: BaseDisplayProps) {
-  const { colors } = useAppTheme();
-
-  return (
-    <View
-      className={twMerge(
-        clsx(
-          "flex-shrink-0 flex-row items-center justify-center gap-1 rounded-full border py-1 pl-4 pr-3",
-          className,
-        ),
-      )}
-      style={{
-        backgroundColor: colors.app.cardSecondary,
-        borderColor: colors.app.borderTertiary,
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      <ThemedText type="default" variant="primary" className="text-xs">
-        {option.label}
-      </ThemedText>
-
-      <Pressable onPress={() => handleRemove(option.value)}>
-        <X size={14} color={colors.app.textPrimary} />
-      </Pressable>
-    </View>
   );
 }

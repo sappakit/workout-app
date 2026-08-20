@@ -2,8 +2,8 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { MaterialDesignIcons } from "@react-native-vector-icons/material-design-icons";
 import { ColorValue, StyleProp, TextStyle } from "react-native";
 import { AppIconName, appIconRegistry } from "./app-icon.registry";
-import { appIconSizeMap } from "./app-icon.styles";
-import { AppIconSize, AppIconVariant } from "./app-icon.types";
+import { AppIconSize, appIconSizeMap } from "./app-icon.styles";
+import { AppIconVariant } from "./app-icon.types";
 
 const DEFAULT_ICON_COLOR = "#000000";
 

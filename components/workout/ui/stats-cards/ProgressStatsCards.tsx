@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import { WorkoutStatsModel } from "../../model/workout-stats.mapper";
+import type { WorkoutStatsModel } from "../../model/workout-stats.mapper";
 import { SimpleStatCard, VolumeStatCard } from "./StatCard";
 
 interface ProgressStatsCardsProps {
