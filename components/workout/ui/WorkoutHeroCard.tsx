@@ -7,7 +7,7 @@ import {
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { hexWithOpacity } from "@/lib/utils";
 import { LinearGradient } from "expo-linear-gradient";
 import { ImageBackground, Pressable, StyleSheet, View } from "react-native";

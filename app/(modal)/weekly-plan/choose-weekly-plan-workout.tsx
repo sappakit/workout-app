@@ -1,5 +1,5 @@
 import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
-import { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
+import type { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
 import { useWeeklyPlanWorkoutPickerStore } from "@/components/weekly-plan/weeklyPlanWorkoutSelectionStore";
 import { ChooseWorkoutPickerSkeleton } from "@/components/workout/ui/workout-card/ChooseWorkoutPickerSkeleton";
@@ -7,12 +7,12 @@ import {
   mapWorkoutToWorkoutCardItem,
   WorkoutCard,
 } from "@/components/workout/ui/workout-card/WorkoutCard";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useDebounce } from "@/hooks/useDebounce";
 import { workoutApi } from "@/lib/api/workout.api";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import { WorkoutResponse } from "@/types/workout/response/workout.types";
+import type { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
@@ -20,7 +20,7 @@ import { DEFAULT_WORKOUT_FILTERS } from "../workout/choose-workout";
 
 export default function ChooseWeeklyPlanWorkoutPage() {
   const router = useRouter();
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const params = useLocalSearchParams<{
     dayOfWeek?: string;
@@ -28,6 +28,7 @@ export default function ChooseWeeklyPlanWorkoutPage() {
   }>();
 
   const dayOfWeek = params.dayOfWeek ? Number(params.dayOfWeek) : null;
+
   const currentWorkoutId = params.workoutId ? Number(params.workoutId) : null;
 
   const setPickerResult = useWeeklyPlanWorkoutPickerStore(
@@ -140,12 +141,13 @@ export default function ChooseWeeklyPlanWorkoutPage() {
         ListFooterComponent={
           isFetchingNextPage ? (
             <View className="py-4">
-              <ActivityIndicator />
+              <ActivityIndicator color={colors.primary} />
             </View>
           ) : null
         }
         renderItem={({ item }) => {
           const isSelected = selectedWorkoutId === item.id;
+
           const cardItem = mapWorkoutToWorkoutCardItem(item);
 
           return (
@@ -158,7 +160,7 @@ export default function ChooseWeeklyPlanWorkoutPage() {
               onPress={() => handleSelectWorkout(item)}
               className="border"
               style={{
-                borderColor: isSelected ? colors.app.brand : "transparent",
+                borderColor: isSelected ? colors.primary : "transparent",
               }}
             />
           );

@@ -1,6 +1,6 @@
-import type { AppTextType } from "@/components/custom-ui/themed-text";
+import type { ThemedTextType } from "@/components/custom-ui/themed-text";
 import { cn } from "@/lib/utils";
-import { SkeletonPlaceholderV2 } from "./SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "./SkeletonPlaceholder";
 
 const textSkeletonClassMap = {
   display: "h-9",
@@ -11,16 +11,16 @@ const textSkeletonClassMap = {
   label: "h-5",
   small: "h-5",
   caption: "h-4",
-} satisfies Record<AppTextType, string>;
+} satisfies Record<ThemedTextType, string>;
 
 type TextSkeletonProps = {
-  type?: AppTextType;
+  type?: ThemedTextType;
   className?: string;
 };
 
 export function TextSkeleton({ type = "body", className }: TextSkeletonProps) {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName={cn("w-full", textSkeletonClassMap[type], className)}
       skeletonClassName="rounded-full"
     />

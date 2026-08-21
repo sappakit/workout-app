@@ -9,7 +9,7 @@ import {
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
 import { EXERCISE_IMAGE } from "@/constants/images";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useExerciseCardExpandedState } from "@/hooks/useExerciseCardExpandedState";
 import { cn } from "@/lib/utils";
 import { useRouter } from "expo-router";

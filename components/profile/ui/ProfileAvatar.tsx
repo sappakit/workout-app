@@ -1,5 +1,5 @@
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import { Image, Pressable, View } from "react-native";
 

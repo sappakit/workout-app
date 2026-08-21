@@ -1,7 +1,8 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/themeStore";
-import { Moon, Sun } from "lucide-react-native";
-import { TouchableOpacity } from "react-native";
+import { Pressable } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,14 +10,14 @@ import Animated, {
 } from "react-native-reanimated";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
-  const colorScheme = useThemeStore((s) => s.colorScheme);
-  const setMode = useThemeStore((s) => s.setMode);
+  const colorScheme = useThemeStore((state) => state.colorScheme);
+  const setMode = useThemeStore((state) => state.setMode);
 
   const rotation = useSharedValue(0);
+
   const isDark = colorScheme === "dark";
-  const Icon = isDark ? Moon : Sun;
 
   const toggleTheme = () => {
     rotation.value = withTiming(isDark ? 180 : 0, {
@@ -35,17 +36,20 @@ export function ThemeToggle({ className }: { className?: string }) {
   }));
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={toggleTheme}
-      activeOpacity={0.8}
-      className={className}
+      className={cn("active:opacity-80", className)}
     >
       <Animated.View
         className="items-center justify-center rounded-full p-2"
         style={animatedStyle}
       >
-        <Icon size={24} color={colors.app.borderPrimary} />
+        <AppIcon
+          name={isDark ? "moon" : "sun"}
+          size="lg"
+          color={colors.foreground}
+        />
       </Animated.View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }

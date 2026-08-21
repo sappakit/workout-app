@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import type { SemanticTheme } from "@/lib/theme";
 import type { ComponentProps } from "react";
 import type { ColorValue } from "react-native";
-import type { AppButtonV2Variant } from "./app-button.types";
 
 type ReusableButtonVariant = NonNullable<
   ComponentProps<typeof Button>["variant"]
@@ -15,10 +14,7 @@ type AppButtonVariantConfig = {
   getContentColor: (colors: SemanticTheme) => ColorValue;
 };
 
-export const buttonVariantConfigMap: Record<
-  AppButtonV2Variant,
-  AppButtonVariantConfig
-> = {
+export const buttonVariantConfigMap = {
   primary: {
     buttonVariant: "default",
     containerClassName: "hover:bg-primary-hover active:bg-primary-hover",
@@ -55,4 +51,6 @@ export const buttonVariantConfigMap: Record<
     buttonVariant: "ghost",
     getContentColor: (colors) => colors.foreground,
   },
-};
+} as const satisfies Record<string, AppButtonVariantConfig>;
+
+export type AppButtonVariant = keyof typeof buttonVariantConfigMap;

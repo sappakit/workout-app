@@ -1,6 +1,6 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { ScrollView, View } from "react-native";
 
@@ -31,7 +31,7 @@ function WeeklyPlanSummarySkeleton() {
   return (
     <View className="gap-4 rounded-3xl bg-card p-4">
       <View className="flex-row items-center gap-3">
-        <SkeletonPlaceholderV2
+        <SkeletonPlaceholder
           containerClassName="h-12 w-12"
           skeletonClassName="rounded-2xl"
         />
@@ -85,7 +85,7 @@ function WeeklyPlanDaySelectorSkeleton() {
 
 function DayPillSkeleton() {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName="h-24 w-20"
       skeletonClassName="rounded-3xl"
     />
@@ -94,7 +94,7 @@ function DayPillSkeleton() {
 
 function SelectedWeeklyPlanDaySkeleton() {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName="h-48 w-full"
       skeletonClassName="rounded-3xl"
     />

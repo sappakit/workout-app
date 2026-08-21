@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import { ActivityIndicator, View } from "react-native";
 import type { AppIconSize } from "../app-icon/app-icon.styles";
 import { AppIcon } from "../app-icon/AppIcon";
 import { ThemedText } from "../themed-text";
 import { buttonVariantConfigMap } from "./app-button.styles";
-import type { AppButtonV2Props } from "./app-button.types";
+import type { AppButtonProps } from "./app-button.types";
 
 const DEFAULT_ICON_SIZE: AppIconSize = "sm";
 
-export function AppButtonV2({
+export function AppButton({
   title,
   variant = "primary",
   loading = false,
@@ -19,11 +19,20 @@ export function AppButtonV2({
   className,
   textClassName,
   ...props
-}: AppButtonV2Props) {
+}: AppButtonProps) {
   const colors = useAppColors();
 
   const isDisabled = disabled || loading;
+
   const variantConfig = buttonVariantConfigMap[variant];
+
+  const containerClassName =
+    "containerClassName" in variantConfig
+      ? variantConfig.containerClassName
+      : undefined;
+
+  const variantTextClassName =
+    "textClassName" in variantConfig ? variantConfig.textClassName : undefined;
 
   const contentColor = icon?.color ?? variantConfig.getContentColor(colors);
 
@@ -43,7 +52,7 @@ export function AppButtonV2({
       {...props}
       variant={variantConfig.buttonVariant}
       disabled={isDisabled}
-      className={cn(variantConfig.containerClassName, className)}
+      className={cn(containerClassName, className)}
     >
       {loading ? (
         <ActivityIndicator color={contentColor} />
@@ -54,7 +63,7 @@ export function AppButtonV2({
           {title ? (
             <ThemedText
               type="label"
-              className={cn(variantConfig.textClassName, textClassName)}
+              className={cn(variantTextClassName, textClassName)}
             >
               {title}
             </ThemedText>

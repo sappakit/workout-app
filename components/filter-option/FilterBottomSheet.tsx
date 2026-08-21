@@ -1,5 +1,5 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import {
   BottomSheetBackdrop,

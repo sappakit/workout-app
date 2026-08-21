@@ -1,5 +1,4 @@
-import { AppTheme, Colors } from "@/constants/theme";
-import { DarkTheme, DefaultTheme } from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, type Theme } from "@react-navigation/native";
 
 // Both colors in 'lib/theme.ts' and in 'global.css' must match
 export const THEME = {
@@ -173,9 +172,6 @@ export const NAV_THEME = {
       border: THEME.light.border,
       primary: THEME.light.primary,
       notification: THEME.light.destructive,
-
-      // TODO: Temporary legacy compatibility (remove after migrate)
-      app: Colors.appLight,
     },
   },
 
@@ -191,9 +187,6 @@ export const NAV_THEME = {
       border: THEME.dark.border,
       primary: THEME.dark.primary,
       notification: THEME.dark.destructive,
-
-      // TODO: Temporary legacy compatibility (remove after migrate)
-      app: Colors.appDark,
     },
   },
-} satisfies Record<AppColorScheme, AppTheme>;
+} satisfies Record<AppColorScheme, Theme>;

@@ -1,7 +1,7 @@
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import FormNumberInput from "@/components/form/FormNumberInput";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import {
   type ExerciseFieldKey,
   getExerciseFieldConfig,

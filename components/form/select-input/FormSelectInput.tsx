@@ -1,7 +1,7 @@
 import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { cn, hexWithOpacity } from "@/lib/utils";
 import {

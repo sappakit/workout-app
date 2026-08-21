@@ -600,6 +600,39 @@ export const appIconRegistry = {
       name: "check-decagram-outline",
     },
   },
+
+  sun: {
+    filled: {
+      family: "ionicons",
+      name: "sunny",
+    },
+    outline: {
+      family: "ionicons",
+      name: "sunny-outline",
+    },
+  },
+
+  moon: {
+    filled: {
+      family: "ionicons",
+      name: "moon",
+    },
+    outline: {
+      family: "ionicons",
+      name: "moon-outline",
+    },
+  },
+
+  image: {
+    filled: {
+      family: "ionicons",
+      name: "image",
+    },
+    outline: {
+      family: "ionicons",
+      name: "image-outline",
+    },
+  },
 } as const satisfies Record<string, IconVariantDefinition>;
 
 export type AppIconName = keyof typeof appIconRegistry;

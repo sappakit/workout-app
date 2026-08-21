@@ -1,7 +1,7 @@
 import PageHeader, {
   type PageHeaderProps,
 } from "@/components/layout/PageHeader";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import {
   selectHasActiveWorkoutSession,

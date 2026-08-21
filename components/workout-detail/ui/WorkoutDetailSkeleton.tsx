@@ -5,7 +5,7 @@ import {
 } from "@/components/layout/PageLayout";
 import { ScreenSection } from "@/components/layout/ScreenSection";
 import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { View } from "react-native";
 
@@ -26,7 +26,7 @@ export function WorkoutDetailSkeleton() {
       }}
     >
       <View className="gap-4">
-        <SkeletonPlaceholderV2
+        <SkeletonPlaceholder
           containerClassName="h-64"
           skeletonClassName="rounded-none rounded-b-2xl"
           containerStyle={{
@@ -85,7 +85,7 @@ function WorkoutExerciseListSkeleton() {
 
 function WorkoutExerciseCardSkeleton() {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName="aspect-[4.5] w-full"
       skeletonClassName="rounded-2xl"
     />

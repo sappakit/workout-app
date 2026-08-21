@@ -1,6 +1,6 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import { FormField } from "@/components/form/FormField";
-import FormTextInputV2 from "@/components/form/FormTextInputV2";
+import FormTextInput from "@/components/form/FormTextInput";
 import type { ForgotPasswordForm as ForgotPasswordFormValues } from "@/schemas/auth.schema";
 import { useRouter } from "expo-router";
 import type { Control } from "react-hook-form";
@@ -34,7 +34,7 @@ export function ForgotPasswordForm({
           name="email"
           render={({ field, fieldState }) => (
             <FormField label="Email" errorMessage={fieldState.error?.message}>
-              <FormTextInputV2
+              <FormTextInput
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"

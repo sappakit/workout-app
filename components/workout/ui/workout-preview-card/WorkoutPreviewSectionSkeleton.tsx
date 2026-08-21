@@ -1,4 +1,4 @@
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { ScrollView, StyleProp, ViewStyle } from "react-native";
 
 type WorkoutPreviewSectionSkeletonProps = {
@@ -26,7 +26,7 @@ export function WorkoutPreviewSectionSkeleton({
 
 function WorkoutPreviewCardSkeleton() {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName="aspect-[1.17] w-56"
       skeletonClassName="rounded-2xl"
     />

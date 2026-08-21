@@ -1,7 +1,9 @@
-export { AppButtonV2 as AppButton } from "./AppButtonV2";
+export { AppButton } from "./AppButton";
+
+export type { AppButtonVariant } from "./app-button.styles";
 
 export type {
-  AppButtonV2IconPosition as AppButtonIconPosition,
-  AppButtonV2Props as AppButtonProps,
-  AppButtonV2Variant as AppButtonVariant,
+  AppButtonIcon,
+  AppButtonIconPosition,
+  AppButtonProps,
 } from "./app-button.types";

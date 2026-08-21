@@ -4,7 +4,7 @@ import { HapticTab } from "@/components/haptic-tab";
 import { AppLoadingScreen } from "@/components/state/AppLoadingScreen";
 import { WorkoutSessionSync } from "@/components/workout-in-progress/WorkoutSessionSync";
 import { useAuth } from "@/context/AuthContext";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { Redirect, Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

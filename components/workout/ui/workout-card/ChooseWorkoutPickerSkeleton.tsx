@@ -1,4 +1,4 @@
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { View } from "react-native";
 
 export function ChooseWorkoutPickerSkeleton() {
@@ -15,7 +15,7 @@ export function ChooseWorkoutPickerSkeleton() {
 
 function WorkoutCardSkeleton() {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName="aspect-[3.75] w-full"
       skeletonClassName="rounded-3xl"
     />

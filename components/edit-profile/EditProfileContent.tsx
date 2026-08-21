@@ -1,6 +1,6 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import { FormField } from "@/components/form/FormField";
-import FormTextInputV2 from "@/components/form/FormTextInputV2";
+import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api/client";
@@ -241,7 +241,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
                 label="First Name"
                 errorMessage={fieldState.error?.message}
               >
-                <FormTextInputV2
+                <FormTextInput
                   placeholder="Enter your first name"
                   value={field.value}
                   onChangeText={field.onChange}
@@ -260,7 +260,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
                 label="Last Name"
                 errorMessage={fieldState.error?.message}
               >
-                <FormTextInputV2
+                <FormTextInput
                   placeholder="Enter your last name"
                   value={field.value}
                   onChangeText={field.onChange}
@@ -276,7 +276,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
             name="email"
             render={({ field, fieldState }) => (
               <FormField label="Email" errorMessage={fieldState.error?.message}>
-                <FormTextInputV2
+                <FormTextInput
                   placeholder="Enter your email"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -297,7 +297,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
                 label="Phone Number"
                 errorMessage={fieldState.error?.message}
               >
-                <FormTextInputV2
+                <FormTextInput
                   placeholder="Enter your phone number"
                   keyboardType="phone-pad"
                   value={field.value}

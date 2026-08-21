@@ -1,5 +1,5 @@
 import { PageLayout } from "@/components/layout/PageLayout";
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { View } from "react-native";
 
@@ -8,7 +8,7 @@ export function ResetPasswordSkeleton() {
     <PageLayout includeInsets scrollable={false}>
       {/* Logo */}
       <View className="items-center py-2">
-        <SkeletonPlaceholderV2
+        <SkeletonPlaceholder
           containerClassName="h-36 w-36"
           skeletonClassName="rounded-3xl"
         />
@@ -27,7 +27,7 @@ export function ResetPasswordSkeleton() {
         <View className="gap-2">
           <TextSkeleton type="label" className="w-28" />
 
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="h-12 w-full"
             skeletonClassName="rounded-lg"
           />
@@ -37,7 +37,7 @@ export function ResetPasswordSkeleton() {
         <View className="gap-2">
           <TextSkeleton type="label" className="w-36" />
 
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="h-12 w-full"
             skeletonClassName="rounded-lg"
           />
@@ -45,7 +45,7 @@ export function ResetPasswordSkeleton() {
 
         {/* Reset button */}
         <View className="mt-2">
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="h-12 w-full"
             skeletonClassName="rounded-xl"
           />
@@ -53,7 +53,7 @@ export function ResetPasswordSkeleton() {
 
         {/* Back button */}
         <View className="items-center">
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="h-9 w-32"
             skeletonClassName="rounded-lg"
           />

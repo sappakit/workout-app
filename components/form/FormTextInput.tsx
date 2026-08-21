@@ -1,37 +1,54 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { LucideIcon, X } from "lucide-react-native";
-import React from "react";
-import {
-  TextInput,
-  TextInputProps,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { twMerge } from "tailwind-merge";
+import { AppButton } from "@/components/custom-ui/app-button";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { Input } from "@/components/ui/input";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
+import type { ComponentProps } from "react";
+import { View } from "react-native";
 
-export interface FormTextInputProps extends TextInputProps {
-  className?: string;
+type RNRInputProps = ComponentProps<typeof Input>;
+
+export interface FormTextInputProps extends Omit<RNRInputProps, "className"> {
+  /**
+   * Controls the outer input container.
+   */
+  containerClassName?: string;
+
+  /**
+   * Controls the RNR Input itself.
+   */
   inputClassName?: string;
+
+  /**
+   * Shows the destructive/error input state.
+   */
   error?: boolean;
-  icon?: LucideIcon;
+
+  /**
+   * Optional leading semantic app icon.
+   */
+  icon?: AppIconName;
+
+  /**
+   * Shows a clear button when the input has a value.
+   */
   clearable?: boolean;
 }
 
 export default function FormTextInput({
-  className,
+  containerClassName,
   inputClassName,
-  error,
-  icon: Icon,
-  placeholderTextColor,
-  style,
+  error = false,
+  icon,
   clearable = false,
   value,
   onChangeText,
   editable = true,
+  placeholderTextColor,
   ...props
 }: FormTextInputProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const shouldShowClearButton =
     clearable &&
@@ -45,41 +62,46 @@ export default function FormTextInput({
 
   return (
     <View
-      className={twMerge(
-        clsx(
-          "h-12 flex-row items-center gap-2 rounded-lg border px-4",
-          className,
-        ),
+      className={cn(
+        "h-10 flex-row items-center gap-2 rounded-lg border bg-secondary px-3",
+        error ? "border-destructive" : "border-input",
+        editable === false && "opacity-50",
+        containerClassName,
       )}
-      style={{
-        backgroundColor: colors.app.cardSecondary,
-        borderColor: error
-          ? colors.app.error || "red"
-          : colors.app.borderPrimary,
-      }}
     >
-      {Icon && <Icon size={18} color={colors.app.textPrimary} />}
+      {icon ? (
+        <AppIcon
+          name={icon}
+          variant="outline"
+          size="sm"
+          color={colors.mutedForeground}
+        />
+      ) : null}
 
-      <TextInput
+      <Input
         {...props}
         value={value}
         onChangeText={onChangeText}
         editable={editable}
-        className={twMerge(clsx("min-w-0 flex-1 text-sm", inputClassName))}
-        style={[{ color: colors.app.textAccent }, style]}
-        placeholderTextColor={placeholderTextColor ?? colors.app.textPrimary}
+        placeholderTextColor={placeholderTextColor ?? colors.mutedForeground}
+        className={cn(
+          "h-full min-w-0 flex-1 border-0 bg-transparent px-0 text-sm opacity-100 shadow-none",
+          inputClassName,
+        )}
       />
 
-      {shouldShowClearButton && (
-        <TouchableOpacity
-          activeOpacity={0.8}
-          hitSlop={10}
-          className="items-center justify-center"
+      {shouldShowClearButton ? (
+        <AppButton
+          variant="outline"
+          size="icon"
+          className="h-7 w-7 rounded-full"
+          icon={{
+            name: "close",
+            size: "sm",
+          }}
           onPress={handleClear}
-        >
-          <X size={18} color={colors.app.textPrimary} />
-        </TouchableOpacity>
-      )}
+        />
+      ) : null}
     </View>
   );
 }

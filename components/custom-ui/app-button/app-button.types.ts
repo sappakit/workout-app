@@ -4,44 +4,37 @@ import type { ColorValue } from "react-native";
 import type { AppIconName } from "../app-icon/app-icon.registry";
 import type { AppIconSize } from "../app-icon/app-icon.styles";
 import type { AppIconVariant } from "../app-icon/app-icon.types";
+import type { AppButtonVariant } from "./app-button.styles";
 
 type ReusableButtonProps = ComponentProps<typeof Button>;
 
-export type AppButtonV2Variant =
-  | "primary"
-  | "secondary"
-  | "contrast"
-  | "outline"
-  | "destructive"
-  | "ghost";
+export type AppButtonIconPosition = "left" | "right";
 
-export type AppButtonV2IconPosition = "left" | "right";
-
-export type AppButtonV2Icon = {
+export type AppButtonIcon = {
   name: AppIconName;
   variant?: AppIconVariant;
-  position?: AppButtonV2IconPosition;
+  position?: AppButtonIconPosition;
   size?: AppIconSize;
   color?: ColorValue;
 };
 
-interface BaseAppButtonV2Props extends Omit<
+interface BaseAppButtonProps extends Omit<
   ReusableButtonProps,
   "children" | "variant"
 > {
-  variant?: AppButtonV2Variant;
+  variant?: AppButtonVariant;
   loading?: boolean;
   textClassName?: string;
 }
 
-type AppButtonV2Content =
+type AppButtonContent =
   | {
       title: string;
-      icon?: AppButtonV2Icon;
+      icon?: AppButtonIcon;
     }
   | {
       title?: string;
-      icon: AppButtonV2Icon;
+      icon: AppButtonIcon;
     };
 
-export type AppButtonV2Props = BaseAppButtonV2Props & AppButtonV2Content;
+export type AppButtonProps = BaseAppButtonProps & AppButtonContent;

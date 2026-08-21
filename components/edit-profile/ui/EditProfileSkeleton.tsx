@@ -1,5 +1,5 @@
 import { PageLayout } from "@/components/layout/PageLayout";
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { View } from "react-native";
 
@@ -19,7 +19,7 @@ export function EditProfileSkeleton() {
         {/* Avatar */}
         <View className="items-center">
           <View className="p-6">
-            <SkeletonPlaceholderV2
+            <SkeletonPlaceholder
               containerClassName="h-24 w-24"
               skeletonClassName="rounded-full"
             />
@@ -52,7 +52,7 @@ function EditProfileFieldSkeleton({
     <View className="gap-2">
       <TextSkeleton type="label" className={labelWidthClassName} />
 
-      <SkeletonPlaceholderV2
+      <SkeletonPlaceholder
         containerClassName="h-10 w-full"
         skeletonClassName="rounded-lg"
       />

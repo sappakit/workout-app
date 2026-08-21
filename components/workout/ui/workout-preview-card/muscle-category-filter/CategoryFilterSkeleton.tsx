@@ -1,4 +1,4 @@
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { cn } from "@/lib/utils";
 import { ScrollView, type StyleProp, type ViewStyle } from "react-native";
 
@@ -33,7 +33,7 @@ function CategoryPillSkeleton({
   widthClassName?: string;
 }) {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName={cn("h-8", widthClassName)}
       skeletonClassName="rounded-full"
     />

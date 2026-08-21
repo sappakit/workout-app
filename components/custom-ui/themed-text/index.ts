@@ -1,7 +1,5 @@
-export { ThemedTextV2 as ThemedText } from "./ThemedTextV2";
+export { ThemedText } from "./ThemedText";
 
-export type {
-  AppTextTone,
-  AppTextType,
-  ThemedTextV2Props as ThemedTextProps,
-} from "./themed-text.types";
+export type { ThemedTextTone, ThemedTextType } from "./themed-text.styles";
+
+export type { ThemedTextProps } from "./themed-text.types";

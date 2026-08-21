@@ -1,4 +1,4 @@
-import type { AppTextType } from "@/components/custom-ui/themed-text";
+import type { ThemedTextType } from "@/components/custom-ui/themed-text";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
@@ -7,8 +7,8 @@ import { type StyleProp, type TextStyle, View } from "react-native";
 type SectionHeaderSize = "small" | "default";
 
 type SectionHeaderTextTypes = {
-  title: AppTextType;
-  subtitle: AppTextType;
+  title: ThemedTextType;
+  subtitle: ThemedTextType;
 };
 
 const sizeTextTypeMap = {

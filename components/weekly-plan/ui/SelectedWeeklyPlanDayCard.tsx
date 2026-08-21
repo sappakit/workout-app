@@ -2,10 +2,11 @@ import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.regis
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { MetaPill } from "@/components/custom-ui/MetaPill";
 import { ThemedText } from "@/components/custom-ui/themed-text";
+import { Separator } from "@/components/ui/separator";
 import { formatWorkoutDuration } from "@/components/workout/model/workout-content.mapper";
 import { formatExerciseCount } from "@/components/workout/ui/workout-card/WorkoutCard";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import { requireWorkoutExercises } from "@/lib/workout/utils/response-guards.utils";
 import { WorkoutWeeklyPlanDayType } from "@/types/workout/response/workout.types";
@@ -182,7 +183,7 @@ export function SelectedWeeklyPlanDayCard({
           onPress={onChooseWorkout}
         />
 
-        <View className="h-6 w-px bg-border" />
+        <Separator orientation="vertical" className="h-6" />
 
         <WeeklyPlanActionButton
           title="Rest"
@@ -192,7 +193,7 @@ export function SelectedWeeklyPlanDayCard({
           onPress={onSetRestDay}
         />
 
-        <View className="h-6 w-px bg-border" />
+        <Separator orientation="vertical" className="h-6" />
 
         <WeeklyPlanActionButton
           title="Clear"
@@ -232,12 +233,7 @@ function WeeklyPlanActionButton({
     >
       <AppIcon name={icon} variant="outline" size="sm" color={color} />
 
-      <ThemedText
-        type="label"
-        style={{
-          color,
-        }}
-      >
+      <ThemedText type="label" style={{ color }}>
         {title}
       </ThemedText>
     </Pressable>

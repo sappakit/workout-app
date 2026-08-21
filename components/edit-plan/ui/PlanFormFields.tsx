@@ -1,6 +1,6 @@
 import FormCheckbox from "@/components/form/FormCheckbox";
 import { FormErrorMessage, FormField } from "@/components/form/FormField";
-import FormTextInputV2 from "@/components/form/FormTextInputV2";
+import FormTextInput from "@/components/form/FormTextInput";
 import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
 import FormInfiniteMultiSelectInput from "@/components/form/select-input/FormInfiniteMultiSelectInput";
 import FormInfiniteSelectInput from "@/components/form/select-input/FormInfiniteSelectInput";
@@ -75,7 +75,7 @@ export function PlanFormFields({
               label="Plan Name"
               errorMessage={fieldState.error?.message}
             >
-              <FormTextInputV2
+              <FormTextInput
                 placeholder="Enter plan name"
                 value={field.value}
                 onChangeText={field.onChange}

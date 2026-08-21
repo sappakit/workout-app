@@ -2,10 +2,10 @@ import { AppButton } from "@/components/custom-ui/app-button";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { FormField } from "@/components/form/FormField";
 import FormPasswordInputV2 from "@/components/form/FormPasswordInput";
-import FormTextInputV2 from "@/components/form/FormTextInputV2";
+import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { type SignInForm, signInSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +70,7 @@ export default function SignInContent() {
               label="Email or username"
               errorMessage={fieldState.error?.message}
             >
-              <FormTextInputV2
+              <FormTextInput
                 placeholder="Enter your email or username"
                 autoCapitalize="none"
                 autoCorrect={false}

@@ -1,10 +1,10 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
-import { Separator } from "@/components/custom-ui/Separator";
 import { ThemedText } from "@/components/custom-ui/themed-text";
+import { Separator } from "@/components/ui/separator";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import { Fragment } from "react";
 import { Image, Pressable, View } from "react-native";
@@ -79,7 +79,9 @@ export function RecentMetricList({ list, className }: RecentMetricListProps) {
     >
       {list.map((item, index) => (
         <Fragment key={item.label}>
-          {index > 0 ? <Separator className="h-8" /> : null}
+          {index > 0 ? (
+            <Separator orientation="vertical" className="h-8" />
+          ) : null}
 
           <RecentMetric
             icon={item.icon}

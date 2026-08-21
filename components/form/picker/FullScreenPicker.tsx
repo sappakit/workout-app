@@ -1,5 +1,5 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import FormTextInputV2 from "@/components/form/FormTextInputV2";
+import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { EmptyState } from "@/components/state/EmptyState";
@@ -143,7 +143,7 @@ export default function FullScreenPicker({
 
         {shouldShowSearch ? (
           <View className="flex-row items-center gap-2">
-            <FormTextInputV2
+            <FormTextInput
               clearable
               containerClassName="flex-1 rounded-full"
               value={searchValue}

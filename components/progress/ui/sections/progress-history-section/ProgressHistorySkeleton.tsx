@@ -1,4 +1,4 @@
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { View } from "react-native";
 
@@ -20,7 +20,7 @@ export function ProgressHistorySkeleton() {
 
 export function RecentWorkoutCardSkeleton() {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName="aspect-[2.55] w-full"
       skeletonClassName="rounded-3xl"
     />

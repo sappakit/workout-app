@@ -3,7 +3,7 @@ import {
   MenuSectionLabel,
   OptionsMenu,
 } from "@/components/options-menu/OptionsMenu";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 
 type ExerciseListMenuProps = {

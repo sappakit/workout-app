@@ -2,7 +2,7 @@ import { AppButton } from "@/components/custom-ui/app-button";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { FormField } from "@/components/form/FormField";
 import FormPasswordInputV2 from "@/components/form/FormPasswordInput";
-import FormTextInputV2 from "@/components/form/FormTextInputV2";
+import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -80,7 +80,7 @@ export default function SignUpContent() {
               label="Username"
               errorMessage={fieldState.error?.message}
             >
-              <FormTextInputV2
+              <FormTextInput
                 placeholder="Choose a username"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -146,7 +146,7 @@ export default function SignUpContent() {
               label="First Name"
               errorMessage={fieldState.error?.message}
             >
-              <FormTextInputV2
+              <FormTextInput
                 placeholder="Enter your first name"
                 value={field.value}
                 onChangeText={field.onChange}
@@ -168,7 +168,7 @@ export default function SignUpContent() {
               label="Last Name"
               errorMessage={fieldState.error?.message}
             >
-              <FormTextInputV2
+              <FormTextInput
                 placeholder="Enter your last name"
                 value={field.value}
                 onChangeText={field.onChange}
@@ -187,7 +187,7 @@ export default function SignUpContent() {
           name="email"
           render={({ field, fieldState }) => (
             <FormField label="Email" errorMessage={fieldState.error?.message}>
-              <FormTextInputV2
+              <FormTextInput
                 placeholder="Enter your email"
                 autoCapitalize="none"
                 autoCorrect={false}

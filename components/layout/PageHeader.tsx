@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/custom-ui/ThemeToggle";
 import { UserAvatar } from "@/components/custom-ui/UserAvatar";
 import type { PageHeaderScrollEffect } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import { Animated, StyleSheet, View, type ViewStyle } from "react-native";

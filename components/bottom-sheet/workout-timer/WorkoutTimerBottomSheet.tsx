@@ -1,5 +1,5 @@
 import { mapWorkoutSessionModelToFinishPayload } from "@/components/workout-in-progress/model/helpers";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { usePausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
 import { useRestCompleteAlert } from "@/hooks/useRestCompleteAlert";

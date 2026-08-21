@@ -1,5 +1,3 @@
-import type { AppTextTone, AppTextType } from "./themed-text.types";
-
 export const textTypeClassMap = {
   display: "text-3xl font-bold leading-9",
   title: "text-2xl font-bold leading-8",
@@ -9,7 +7,9 @@ export const textTypeClassMap = {
   label: "text-sm font-semibold leading-5",
   small: "text-sm font-normal leading-5",
   caption: "text-xs font-normal leading-4",
-} satisfies Record<AppTextType, string>;
+} as const;
+
+export type ThemedTextType = keyof typeof textTypeClassMap;
 
 export const textToneClassMap = {
   default: "text-foreground",
@@ -20,4 +20,6 @@ export const textToneClassMap = {
   success: "text-success",
   warning: "text-warning",
   destructive: "text-destructive",
-} satisfies Record<AppTextTone, string>;
+} as const;
+
+export type ThemedTextTone = keyof typeof textToneClassMap;

@@ -3,7 +3,7 @@ import {
   PageLayout,
 } from "@/components/layout/PageLayout";
 import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { WorkoutPreviewSectionSkeleton } from "@/components/workout/ui/workout-preview-card/WorkoutPreviewSectionSkeleton";
 import { View } from "react-native";
@@ -55,12 +55,12 @@ function TodayPlanSkeleton() {
         <TextSkeleton type="small" className="w-80" />
       </View>
 
-      <SkeletonPlaceholderV2
+      <SkeletonPlaceholder
         containerClassName="h-56 w-full"
         skeletonClassName="rounded-3xl"
       />
 
-      <SkeletonPlaceholderV2
+      <SkeletonPlaceholder
         containerClassName="h-10 w-full"
         skeletonClassName="rounded-xl"
       />
@@ -72,18 +72,18 @@ function WorkoutActionsSkeleton() {
   return (
     <View className="gap-3">
       <View className="flex-row gap-3">
-        <SkeletonPlaceholderV2
+        <SkeletonPlaceholder
           containerClassName="h-10 flex-1"
           skeletonClassName="rounded-xl"
         />
 
-        <SkeletonPlaceholderV2
+        <SkeletonPlaceholder
           containerClassName="h-10 flex-1"
           skeletonClassName="rounded-xl"
         />
       </View>
 
-      <SkeletonPlaceholderV2
+      <SkeletonPlaceholder
         containerClassName="h-10 w-full"
         skeletonClassName="rounded-xl"
       />

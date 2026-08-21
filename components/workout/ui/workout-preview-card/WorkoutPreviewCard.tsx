@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/custom-ui/themed-text";
 import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
 import { ContentFeedback } from "@/components/state/ContentFeedback";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import type { WorkoutCardItem } from "../workout-card/WorkoutCard";

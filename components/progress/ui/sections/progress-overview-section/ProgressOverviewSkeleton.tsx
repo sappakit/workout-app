@@ -1,4 +1,4 @@
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
 import { View } from "react-native";
 
@@ -14,24 +14,24 @@ export function ProgressOverviewSkeleton() {
       {/* Summary cards */}
       <View className="gap-3">
         <View className="flex-row gap-3">
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="aspect-[2.5] flex-1"
             skeletonClassName="rounded-2xl"
           />
 
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="aspect-[2.5] flex-1"
             skeletonClassName="rounded-2xl"
           />
         </View>
 
         <View className="flex-row gap-3">
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="aspect-[2.5] flex-1"
             skeletonClassName="rounded-2xl"
           />
 
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             containerClassName="aspect-[2.5] flex-1"
             skeletonClassName="rounded-2xl"
           />
@@ -39,7 +39,7 @@ export function ProgressOverviewSkeleton() {
       </View>
 
       {/* Volume trend chart */}
-      <SkeletonPlaceholderV2
+      <SkeletonPlaceholder
         containerClassName="aspect-[1.9] w-full"
         skeletonClassName="rounded-2xl"
       />
@@ -53,7 +53,7 @@ export function ProgressOverviewSkeleton() {
       {/* Best performance cards */}
       <View className="gap-3">
         {Array.from({ length: 3 }).map((_, index) => (
-          <SkeletonPlaceholderV2
+          <SkeletonPlaceholder
             key={index}
             containerClassName="aspect-[2.05] w-full"
             skeletonClassName="rounded-3xl"

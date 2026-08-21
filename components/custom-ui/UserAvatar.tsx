@@ -1,5 +1,5 @@
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { Image, View } from "react-native";
 
 type UserAvatarProps = {

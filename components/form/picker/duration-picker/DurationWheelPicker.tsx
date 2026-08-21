@@ -1,5 +1,5 @@
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import WheelPicker from "@quidone/react-native-wheel-picker";
 import { View } from "react-native";
 import { buildNumberData } from "./utils";

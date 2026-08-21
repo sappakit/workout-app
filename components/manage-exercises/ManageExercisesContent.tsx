@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/custom-ui/themed-text";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ContentFeedback } from "@/components/state/ContentFeedback";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { Pressable, View } from "react-native";
 import ReorderableList, {
   type ReorderableListReorderEvent,

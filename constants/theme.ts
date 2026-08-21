@@ -3,41 +3,10 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-import { DarkTheme, DefaultTheme, Theme } from "@react-navigation/native";
 import { Platform } from "react-native";
 
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
-
-// TODO: remove old app theme (migrate to RNR theme system)
-const appColors = {
-  // Base
-  white: "#FFFFFF",
-  black: "#000000",
-
-  // Text
-  textWhite: "#FFFFFF",
-  textWhiteMuted: "#D1D1D1",
-  textBlack: "#2D2D2D",
-  textBlackMuted: "#7A7A7A",
-
-  // Brand
-  // #FD8036, #FA3469, #DB4B4B, #E37531, #F36840
-  brand: "#EF6131",
-  brandLight: "#FA7E49",
-  brandDark: "#BF4F28",
-  brandAccent: "#246CD1",
-
-  // Status
-  success: "#01B008",
-  warning: "#FFC107",
-  error: "#F44336",
-
-  // Icons / Tabs
-  icon: "#687076",
-  tabIconDefault: "#687076",
-  tabIconSelected: "#D1AD70",
-};
 
 export const Colors = {
   light: {
@@ -48,7 +17,6 @@ export const Colors = {
     tabIconDefault: "#687076",
     tabIconSelected: tintColorLight,
   },
-
   dark: {
     text: "#ECEDEE",
     background: "#151718",
@@ -56,80 +24,6 @@ export const Colors = {
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",
     tabIconSelected: tintColorDark,
-  },
-
-  appLight: {
-    ...appColors,
-
-    // Base
-    background: "#F1F1F1",
-    backgroundDark: "#EFEFEF",
-    shadow: "rgba(0, 0, 0, 0.1)",
-
-    // Text
-    textPrimary: "#323232",
-    textSecondary: "#D9D9D9",
-    textAccent: "#2D2D2D",
-
-    // Border
-    borderPrimary: "#D3D3D3",
-    borderSecondary: "#C3C3C3",
-    borderTertiary: "#AAAAAA",
-
-    // Card
-    cardPrimary: "#FFFFFF",
-    cardPrimaryDark: "#F8F8F8",
-    cardSecondary: "#F0F0F0",
-    cardTertiary: "#EFEFEF",
-
-    // Button background
-    buttonBgPrimary: "#EF6131",
-    buttonBgSecondary: "#F0F0F0",
-    buttonBgTertiary: "#EFEFEF",
-
-    // Toast
-    toastBackground: "#FFFFFF",
-
-    // Skeleton
-    skeletonBase: "#FFFFFF",
-    skeletonHighlight: "#F8F8F8",
-  },
-
-  appDark: {
-    ...appColors,
-
-    // Base
-    background: "#1D1D1D",
-    backgroundDark: "#171717",
-    shadow: "rgba(0, 0, 0, 0.1)",
-
-    // Text
-    textPrimary: "#9C9C9C",
-    textSecondary: "#D9D9D9",
-    textAccent: "#FFFFFF",
-
-    // Border
-    borderPrimary: "#3B3B3B",
-    borderSecondary: "#8F8F8F",
-    borderTertiary: "#3B3B3B",
-
-    // Card
-    cardPrimary: "#222222",
-    cardPrimaryDark: "#1D1D1D",
-    cardSecondary: "#323232",
-    cardTertiary: "#3B3B3B",
-
-    // Button background
-    buttonBgPrimary: "#EF6131",
-    buttonBgSecondary: "#222222",
-    buttonBgTertiary: "#323232",
-
-    // Toast
-    toastBackground: "#222222",
-
-    // Skeleton
-    skeletonBase: "#222222",
-    skeletonHighlight: "#2B2B2B",
   },
 };
 
@@ -158,56 +52,3 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
-
-export const AppLightTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-
-    // Navigation
-    background: Colors.appLight.background,
-    card: Colors.appLight.cardPrimary,
-    text: Colors.appLight.textPrimary,
-    border: Colors.appLight.borderPrimary,
-    primary: Colors.appLight.brand,
-
-    // App-specific (custom)
-    app: Colors.appLight,
-  },
-};
-
-export const AppDarkTheme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-
-    background: Colors.appDark.background,
-    card: Colors.appDark.cardPrimary,
-    text: Colors.appDark.textWhite,
-    border: Colors.appDark.borderPrimary,
-    primary: Colors.appDark.brand,
-
-    app: Colors.appDark,
-  },
-};
-
-export type AppColors = typeof Colors.appLight;
-
-export type AppTheme = Theme & {
-  colors: Theme["colors"] & {
-    app: AppColors;
-  };
-};
-
-// helpers
-export const hexWithOpacity = (hexColor: string, opacity: number) => {
-  const normalizedHex = hexColor.replace("#", "").slice(0, 6);
-  const normalizedOpacity = Math.max(0, Math.min(100, opacity));
-
-  const alpha = Math.round((normalizedOpacity / 100) * 255)
-    .toString(16)
-    .padStart(2, "0")
-    .toUpperCase();
-
-  return `#${normalizedHex}${alpha}`;
-};

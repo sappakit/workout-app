@@ -3,7 +3,7 @@ import {
   PageLayout,
 } from "@/components/layout/PageLayout";
 import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
-import { SkeletonPlaceholderV2 } from "@/components/loading/SkeletonPlaceholderV2";
+import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { RecentWorkoutCardSkeleton } from "@/components/progress/ui/sections/progress-history-section/ProgressHistorySkeleton";
 import { CategoryFilterSkeleton } from "@/components/workout/ui/workout-preview-card/muscle-category-filter/CategoryFilterSkeleton";
 import { WorkoutPreviewSectionSkeleton } from "@/components/workout/ui/workout-preview-card/WorkoutPreviewSectionSkeleton";
@@ -51,7 +51,7 @@ export function HomeSkeleton() {
 
 export function HeroCardSkeleton() {
   return (
-    <SkeletonPlaceholderV2
+    <SkeletonPlaceholder
       containerClassName="h-44 w-full"
       skeletonClassName="rounded-3xl"
     />
@@ -61,18 +61,18 @@ export function HeroCardSkeleton() {
 function HomeStatsSkeleton() {
   return (
     <View className="aspect-[2.4] flex-row gap-3">
-      <SkeletonPlaceholderV2
+      <SkeletonPlaceholder
         containerClassName="w-[55%]"
         skeletonClassName="rounded-2xl"
       />
 
       <View className="flex-1 gap-3">
-        <SkeletonPlaceholderV2
+        <SkeletonPlaceholder
           containerClassName="flex-1"
           skeletonClassName="rounded-2xl"
         />
 
-        <SkeletonPlaceholderV2
+        <SkeletonPlaceholder
           containerClassName="flex-1"
           skeletonClassName="rounded-2xl"
         />

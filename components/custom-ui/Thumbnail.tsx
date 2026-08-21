@@ -1,67 +1,47 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { ImageIcon } from "lucide-react-native";
-import { Image, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import type { AppIconSize } from "@/components/custom-ui/app-icon/app-icon.styles";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
+import type { ColorValue, StyleProp, ViewStyle } from "react-native";
+import { Image, View } from "react-native";
 
 interface ThumbnailProps {
   imageUri?: string | null;
   className?: string;
   style?: StyleProp<ViewStyle>;
-  iconSize?: number;
-  iconColor?: string;
+  iconSize?: AppIconSize;
+  iconColor?: ColorValue;
 }
 
 export default function Thumbnail({
   imageUri,
   className,
   style,
-  iconSize = 28,
+  iconSize = "lg",
   iconColor,
 }: ThumbnailProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <View
-      className={twMerge(clsx("rounded-2xl", className))}
-      style={[
-        styles.imageWrapper,
-        {
-          backgroundColor: colors.app.cardSecondary,
-        },
-        style,
-      ]}
+      className={cn("w-28 overflow-hidden rounded-2xl bg-secondary", className)}
+      style={style}
     >
       {imageUri ? (
         <Image
           source={{ uri: imageUri }}
-          style={styles.image}
+          className="h-full w-full"
           resizeMode="cover"
         />
       ) : (
-        <View
-          style={[styles.image, { backgroundColor: colors.app.cardSecondary }]}
-        >
-          <ImageIcon
+        <View className="h-full w-full items-center justify-center bg-secondary">
+          <AppIcon
+            name="image"
             size={iconSize}
-            color={iconColor ?? colors.app.textPrimary}
+            color={iconColor ?? colors.mutedForeground}
           />
         </View>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  imageWrapper: {
-    overflow: "hidden",
-    // borderWidth: 1,
-    // borderRadius: 14,
-    width: 112,
-  },
-  image: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

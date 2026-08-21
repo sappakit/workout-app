@@ -1,7 +1,7 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { Separator } from "@/components/custom-ui/Separator";
 import { Input } from "@/components/ui/input";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { Separator } from "@/components/ui/separator";
+import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
@@ -212,7 +212,7 @@ export default function FormNumberInput({
             onPress={() => adjustValue(-step)}
           />
 
-          <Separator className="h-6" />
+          <Separator orientation="vertical" className="h-6" />
 
           <AppButton
             variant="ghost"

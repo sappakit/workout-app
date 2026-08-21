@@ -1,7 +1,7 @@
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import FormCheckbox from "@/components/form/FormCheckbox";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import type { ListRenderItem } from "react-native";
 import { Pressable, View } from "react-native";

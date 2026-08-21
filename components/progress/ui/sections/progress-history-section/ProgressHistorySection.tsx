@@ -1,5 +1,5 @@
 import { SectionHeader } from "@/components/layout/SectionHeader";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { ActivityIndicator, FlatList, View } from "react-native";
 import {
   RecentWorkoutCard,

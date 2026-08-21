@@ -2,7 +2,7 @@ import heroImage from "@/assets/images/home-screen/hero_image.png";
 import { AppButton } from "@/components/custom-ui/app-button";
 import { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { useAppColors } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import {
   WorkoutTodayOverview,
   WorkoutWeeklyPlanDayType,
