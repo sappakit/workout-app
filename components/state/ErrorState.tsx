@@ -1,15 +1,15 @@
 import { useRouter } from "expo-router";
-import { CircleAlert, House, LucideIcon, RefreshCw } from "lucide-react-native";
+import { AppIconName } from "../custom-ui/app-icon/app-icon.registry";
 import {
   PageState,
-  PageStateAction,
-  PageStateActionOverride,
+  type PageStateAction,
+  type PageStateActionOverride,
 } from "./base/PageState";
 
 type ErrorStateProps = {
   title?: string;
   message?: string;
-  icon?: LucideIcon;
+  icon?: AppIconName;
   primaryAction?: PageStateActionOverride;
   secondaryAction?: PageStateActionOverride;
 };
@@ -17,7 +17,7 @@ type ErrorStateProps = {
 export function ErrorState({
   title = "Something went wrong",
   message = "We couldn't load this page. Please try again.",
-  icon = CircleAlert,
+  icon = "warning",
   primaryAction,
   secondaryAction,
 }: ErrorStateProps) {
@@ -25,13 +25,13 @@ export function ErrorState({
 
   const defaultPrimaryAction: PageStateAction = {
     label: "Try Again",
-    icon: RefreshCw,
+    icon: "refresh",
     onPress: () => {},
   };
 
   const defaultSecondaryAction: PageStateAction = {
     label: "Home",
-    icon: House,
+    icon: "home",
     onPress: () => router.replace("/(tabs)"),
   };
 

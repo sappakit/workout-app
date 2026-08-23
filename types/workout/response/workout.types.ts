@@ -37,25 +37,26 @@ export interface WorkoutSetValue {
   reps: number | null;
   weight: number | null;
   distance: number | null;
-  duration: number | null; // seconds
+  duration: number | null;
 }
 
 export interface WorkoutExerciseSet extends WorkoutSetValue {
-  id: number | null;
+  id: number;
   setNumber: number;
 }
 
 export interface WorkoutExerciseItem {
-  id: number | null;
+  id: number;
   orderIndex: number;
-  restTime: number | null; // seconds
-  exercise: Exercise;
-  sets: WorkoutExerciseSet[];
+  restTime: number | null;
+
+  exercise?: Exercise;
+  sets?: WorkoutExerciseSet[];
 }
 
 export interface WorkoutMuscleItem {
   id: number;
-  muscle: Muscle;
+  muscle?: Muscle;
 }
 
 export interface WorkoutFocusType {
@@ -71,47 +72,50 @@ export interface WorkoutResponse {
   description: string | null;
   duration: number | null;
 
-  workoutExercises: WorkoutExerciseItem[];
-  muscles: WorkoutMuscleItem[];
-  workoutFocusType: WorkoutFocusType | null;
+  workoutExercises?: WorkoutExerciseItem[];
+  muscles?: WorkoutMuscleItem[];
+  workoutFocusType?: WorkoutFocusType | null;
 }
 
 export interface WorkoutSchedule {
   id: number;
   scheduledDate: string; // ISO string from backend
   status: WorkoutScheduleStatus;
-  workout: WorkoutResponse;
+
+  workout?: WorkoutResponse;
 }
 
 export interface WorkoutSessionExerciseSet extends WorkoutSetValue {
-  id: number | null;
-  workoutExerciseSetId?: number | null;
+  id: number;
   setNumber: number;
   performedAt: string | null;
   completedAt: string | null;
 }
 
 export interface WorkoutSessionExercise {
-  id: number | null;
-  workoutExerciseId?: number | null;
+  id: number;
   orderIndex: number;
-  restTime: number | null; // seconds
+  restTime: number | null;
   completedAt: string | null;
-  exercise: Exercise;
-  sets: WorkoutSessionExerciseSet[];
+
+  exercise?: Exercise;
+  sets?: WorkoutSessionExerciseSet[];
 }
 
 export interface WorkoutSession {
   id: number;
   status: WorkoutSessionStatus;
+
   startedAt: string | null;
   pausedAt: string | null;
   endedAt: string | null;
+
   totalPausedDuration: number;
   totalDuration: number | null;
   caloriesBurned: number | null;
-  workout: WorkoutResponse | null;
-  sessionExercises: WorkoutSessionExercise[];
+
+  workout?: WorkoutResponse | null;
+  sessionExercises?: WorkoutSessionExercise[];
 }
 
 export interface WorkoutSetPerformance {
@@ -152,9 +156,11 @@ export interface WorkoutProgressBestPerformance {
   exerciseId: number;
   exerciseName: string;
   exerciseImageUrl: string | null;
+
   bestWeightKg: number;
   bestSetVolumeKg: number;
   bestSetLabel: string;
+
   completedAt: string | null;
   setCompletedAt: string | null;
 }
@@ -163,6 +169,7 @@ export interface WorkoutProgressOverview {
   type: WorkoutProgressOverviewType;
   startDate: string;
   endDate: string;
+
   summary: WorkoutProgressSummary;
   volumeTrend: WorkoutProgressVolumeTrendItem[];
   bestPerformances: WorkoutProgressBestPerformance[];
@@ -174,13 +181,14 @@ export interface WorkoutTodayOverview {
   hasCompletedWorkoutToday: boolean;
 }
 
-export type WorkoutWeeklyPlanDay = {
+export interface WorkoutWeeklyPlanDay {
   id: number | null;
   dayOfWeek: number;
   dayType: WorkoutWeeklyPlanDayType;
-  workout: WorkoutResponse | null;
-};
 
-export type WorkoutWeeklyPlan = {
+  workout: WorkoutResponse | null;
+}
+
+export interface WorkoutWeeklyPlan {
   days: WorkoutWeeklyPlanDay[];
-};
+}

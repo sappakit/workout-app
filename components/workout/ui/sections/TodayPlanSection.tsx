@@ -1,8 +1,7 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
 import { SectionHeader } from "@/components/layout/SectionHeader";
-import { TodayPlanDisplayState } from "@/components/workout/WorkoutContent";
-import { WorkoutCardItem } from "@/components/workout/ui/workout-card/WorkoutCard";
-import { Dumbbell, RotateCcw } from "lucide-react-native";
+import type { TodayPlanDisplayState } from "@/components/workout/WorkoutContent";
+import type { WorkoutCardItem } from "@/components/workout/ui/workout-card/WorkoutCard";
 import { View } from "react-native";
 import { WorkoutHeroCard } from "../WorkoutHeroCard";
 
@@ -60,16 +59,22 @@ export function TodayPlanSection({
       {isScheduledPlanCompleted ? (
         <AppButton
           title="Repeat Today's Workout"
-          icon={RotateCcw}
           variant="primary"
+          icon={{
+            name: "refresh",
+            size: "sm",
+          }}
           onPress={onStartTodayPlan}
           loading={isStarting}
         />
       ) : (
         <AppButton
           title="Start Today's Plan"
-          icon={Dumbbell}
           variant="primary"
+          icon={{
+            name: "workout",
+            size: "sm",
+          }}
           onPress={onStartTodayPlan}
           loading={isStarting}
         />

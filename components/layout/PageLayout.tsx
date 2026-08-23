@@ -1,5 +1,8 @@
-import PageHeader, { PageHeaderProps } from "@/components/layout/PageHeader";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import PageHeader, {
+  type PageHeaderProps,
+} from "@/components/layout/PageHeader";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
 import {
   selectHasActiveWorkoutSession,
   useWorkoutSessionStore,
@@ -8,11 +11,15 @@ import {
   selectWorkoutTimerSheetCollapsedSnapPoint,
   useWorkoutTimerSheetStore,
 } from "@/stores/workoutTimerSheetStore";
-import clsx from "clsx";
-import { ReactNode, useRef, useState } from "react";
-import { Animated, RefreshControl, View, ViewStyle } from "react-native";
+import { type ReactNode, useRef, useState } from "react";
+import {
+  Animated,
+  Platform,
+  RefreshControl,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { twMerge } from "tailwind-merge";
 
 export const CONTENT_PADDING_TOP = 16;
 export const CONTENT_PADDING_BOTTOM = 16;
@@ -75,11 +82,10 @@ export function PageLayout({
   hasWorkoutTimerSheet = true,
   includeInsets = false,
 }: PageLayoutProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const insets = useSafeAreaInsets();
 
   const scrollY = useRef(new Animated.Value(0)).current;
-
   const [footerHeight, setFooterHeight] = useState(0);
 
   const hasActiveWorkoutSession = useWorkoutSessionStore(
@@ -143,10 +149,6 @@ export function PageLayout({
       : CONTENT_PADDING_HORIZONTAL,
   };
 
-  const rootStyle: ViewStyle = {
-    backgroundColor: colors.app.background,
-  };
-
   const stickyFooterStyle: ViewStyle = {
     paddingTop: STICKY_FOOTER_PADDING_TOP,
     paddingBottom: insets.bottom + STICKY_FOOTER_PADDING_BOTTOM,
@@ -161,6 +163,11 @@ export function PageLayout({
     <RefreshControl
       refreshing={pullToRefresh.refreshing}
       onRefresh={pullToRefresh.onRefresh}
+      tintColor={colors.primary}
+      colors={Platform.OS === "android" ? [colors.primary] : undefined}
+      progressBackgroundColor={
+        Platform.OS === "android" ? colors.card : undefined
+      }
     />
   ) : undefined;
 
@@ -175,7 +182,7 @@ export function PageLayout({
   );
 
   return (
-    <View className="flex-1" style={rootStyle}>
+    <View className="flex-1 bg-background">
       {header && (
         <PageHeader
           {...header.props}
@@ -199,7 +206,7 @@ export function PageLayout({
         </Animated.ScrollView>
       ) : (
         <View
-          className={twMerge(clsx("flex-1", className))}
+          className={cn("flex-1", className)}
           style={[contentContainerStyle, containerStyle]}
         >
           {children}
@@ -208,8 +215,10 @@ export function PageLayout({
 
       {stickyFooter && (
         <View
-          onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-          className="absolute bottom-0 left-0 right-0 flex-row gap-2 px-4"
+          onLayout={(event) => {
+            setFooterHeight(event.nativeEvent.layout.height);
+          }}
+          className="absolute bottom-0 left-0 right-0 flex-row gap-2 bg-background px-4"
           style={stickyFooterStyle}
         >
           {stickyFooter}

@@ -1,15 +1,16 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { Check, Ellipsis, LucideIcon } from "lucide-react-native";
-import { ReactNode } from "react";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
+import { type ReactNode } from "react";
 import { View } from "react-native";
 import {
   Menu,
   MenuOption,
-  MenuOptionProps,
+  type MenuOptionProps,
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { ThemedText } from "../themed-text";
 
 interface OptionsMenuProps {
   children: ReactNode;
@@ -22,7 +23,7 @@ export function OptionsMenu({
   isDisabled,
   menuTrigger,
 }: OptionsMenuProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <Menu>
@@ -37,8 +38,8 @@ export function OptionsMenu({
       <MenuOptions
         customStyles={{
           optionsContainer: {
-            backgroundColor: colors.app.toastBackground,
-            borderColor: colors.app.borderTertiary,
+            backgroundColor: colors.popover,
+            borderColor: colors.border,
             borderWidth: 1,
             borderRadius: 12,
             marginTop: 32,
@@ -63,7 +64,7 @@ export function OptionsMenu({
 interface DropdownItemProps extends MenuOptionProps {
   label: string;
   color?: string;
-  icon?: LucideIcon;
+  icon?: AppIconName;
   isToggleItem?: boolean;
   checked?: boolean;
 }
@@ -71,13 +72,15 @@ interface DropdownItemProps extends MenuOptionProps {
 export function DropdownItem({
   label,
   color,
-  icon: Icon,
+  icon,
   isToggleItem,
   checked,
   onSelect,
   ...props
 }: DropdownItemProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
+
+  const contentColor = color ?? colors.foreground;
 
   const handleSelect: MenuOptionProps["onSelect"] = (...args) => {
     onSelect?.(...args);
@@ -91,7 +94,11 @@ export function DropdownItem({
     <MenuOption
       {...props}
       onSelect={handleSelect}
-      customStyles={{ optionWrapper: { padding: 0 } }}
+      customStyles={{
+        optionWrapper: {
+          padding: 0,
+        },
+      }}
     >
       <View
         className="flex-row items-center justify-between"
@@ -100,23 +107,24 @@ export function DropdownItem({
           paddingRight: 12,
         }}
       >
-        {/* Check/label */}
         <View className="flex-row items-center">
-          <View style={{ width: 32, alignItems: "center" }}>
-            {checked && <Check size={14} color={colors.app.textAccent} />}
+          <View className="w-8 items-center">
+            {checked ? (
+              <AppIcon name="check" size="xs" color={contentColor} />
+            ) : null}
           </View>
 
           <ThemedText
+            type="body"
             style={{
-              color: color ?? colors.app.textAccent,
+              color: contentColor,
             }}
           >
             {label}
           </ThemedText>
         </View>
 
-        {/* Icon */}
-        {Icon && <Icon size={14} color={color ?? colors.app.textPrimary} />}
+        {icon ? <AppIcon name={icon} size="xs" color={contentColor} /> : null}
       </View>
     </MenuOption>
   );
@@ -124,8 +132,14 @@ export function DropdownItem({
 
 export function MenuSectionLabel({ label }: { label: string }) {
   return (
-    <View style={{ paddingLeft: 32, paddingRight: 12, paddingTop: 8 }}>
-      <ThemedText type="default" variant="primary" className="text-xs">
+    <View
+      style={{
+        paddingLeft: 32,
+        paddingRight: 12,
+        paddingTop: 8,
+      }}
+    >
+      <ThemedText type="caption" tone="muted">
         {label}
       </ThemedText>
     </View>
@@ -134,17 +148,16 @@ export function MenuSectionLabel({ label }: { label: string }) {
 
 // TODO: add animation on button
 function OptionsButton({ isDisabled }: { isDisabled?: boolean }) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <View
-      className="h-7 w-7 items-center justify-center rounded-lg"
+      className="h-7 w-7 items-center justify-center rounded-lg bg-secondary"
       style={{
-        backgroundColor: colors.app.cardSecondary,
         opacity: isDisabled ? 0.6 : 1,
       }}
     >
-      <Ellipsis size={12} color={colors.app.textPrimary} />
+      <AppIcon name="more" size="xs" color={colors.secondaryForeground} />
     </View>
   );
 }

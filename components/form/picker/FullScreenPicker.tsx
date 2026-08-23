@@ -1,12 +1,12 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { SectionHeader } from "@/components/layout/SectionHeader";
 import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
-import { ThemedText } from "@/components/themed-text";
-import { Check, Search, X } from "lucide-react-native";
-import React from "react";
-import { ActivityIndicator, StyleProp, View, ViewStyle } from "react-native";
+import type { ReactNode } from "react";
+import type { StyleProp, ViewStyle } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 interface FullScreenPickerProps {
   title: string;
@@ -21,7 +21,7 @@ interface FullScreenPickerProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
-  searchRight?: React.ReactNode;
+  searchRight?: ReactNode;
 
   isLoading?: boolean;
   isError?: boolean;
@@ -33,12 +33,12 @@ interface FullScreenPickerProps {
 
   emptyTitle?: string;
   emptyText?: string;
-  emptyState?: React.ReactNode;
+  emptyState?: ReactNode;
 
-  children: React.ReactNode;
+  children: ReactNode;
   contentContainerStyle?: StyleProp<ViewStyle>;
-  footerExtra?: React.ReactNode;
-  loadingSkeleton?: React.ReactNode;
+  footerExtra?: ReactNode;
+  loadingSkeleton?: ReactNode;
 }
 
 export default function FullScreenPicker({
@@ -79,9 +79,11 @@ export default function FullScreenPicker({
       <AppButton
         title={doneText}
         variant="primary"
-        icon={Check}
         className="flex-1"
-        textClassName="font-medium"
+        icon={{
+          name: "check",
+          size: "sm",
+        }}
         onPress={onDone}
         disabled={doneDisabled}
       />
@@ -89,8 +91,11 @@ export default function FullScreenPicker({
       <AppButton
         title={closeText}
         variant="secondary"
-        icon={X}
         className="w-36"
+        icon={{
+          name: "close",
+          size: "sm",
+        }}
         onPress={onClose}
       />
     </>
@@ -107,52 +112,44 @@ export default function FullScreenPicker({
   } else if (isError) {
     content = (
       <ErrorState
+        icon="warning"
         title={errorTitle}
         message={errorText}
         primaryAction={{
           onPress: onRetry,
         }}
-        secondaryAction={{ hidden: true }}
+        secondaryAction={{
+          hidden: true,
+        }}
       />
     );
   } else if (isEmpty) {
     content = emptyState ?? (
       <EmptyState
+        icon="search-off"
         title={emptyTitle}
         message={emptyText}
-        secondaryAction={{ hidden: true }}
+        secondaryAction={{
+          hidden: true,
+        }}
       />
     );
   }
 
   return (
-    <PageLayout
-      includeInsets={{ top: true }}
-      scrollable={false}
-      stickyFooter={footer}
-    >
-      <View className="gap-3">
-        <View>
-          <ThemedText type="title" variant="accent">
-            {title}
-          </ThemedText>
-
-          {description ? (
-            <ThemedText type="default" variant="primary">
-              {description}
-            </ThemedText>
-          ) : null}
-        </View>
+    <PageLayout scrollable={false} stickyFooter={footer} includeInsets>
+      <View className="gap-2">
+        <SectionHeader title={title} subtitle={description} />
 
         {shouldShowSearch ? (
           <View className="flex-row items-center gap-2">
             <FormTextInput
               clearable
-              className="flex-1 rounded-full"
+              containerClassName="flex-1 rounded-full"
               value={searchValue}
               onChangeText={onSearchChange}
               placeholder={searchPlaceholder}
-              icon={Search}
+              icon="search"
             />
 
             {searchRight}

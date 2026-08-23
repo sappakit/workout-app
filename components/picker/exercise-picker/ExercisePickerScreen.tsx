@@ -1,20 +1,19 @@
 import ExerciseFilterBottomSheet from "@/components/bottom-sheet/exercise-filter/ExerciseFilterBottomSheet";
 import {
   DEFAULT_EXERCISE_FILTERS,
-  ExerciseFilterValues,
+  type ExerciseFilterValues,
 } from "@/components/bottom-sheet/exercise-filter/ExerciseFilterSheetContent";
 import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
-import { ThemedText } from "@/components/themed-text";
 import {
   ExerciseCard,
   mapExerciseToExerciseCardItem,
 } from "@/components/workout/ui/exercise-card/ExerciseCard";
-import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDebounce } from "@/hooks/useDebounce";
 import { exerciseApi } from "@/lib/api/exercise.api";
 import { exerciseQueryKeys } from "@/lib/exercise/keys";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
-import { Exercise } from "@/types/workout/response/exercise.types";
+import { cn } from "@/lib/utils";
+import type { Exercise } from "@/types/workout/response/exercise.types";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 
@@ -22,14 +21,8 @@ export type ExercisePickerMode = "add" | "replace";
 
 type ExercisePickerScreenProps = {
   mode: ExercisePickerMode;
-
   targetExercise?: Exercise;
   addDescription: string;
-  missingSourceText: string;
-  missingTargetText: string;
-
-  hasSource: boolean;
-
   onClose: () => void;
   onDone: (selectedExercises: Exercise[]) => void | Promise<void>;
 };
@@ -38,23 +31,21 @@ export function ExercisePickerScreen({
   mode,
   targetExercise,
   addDescription,
-  missingSourceText,
-  missingTargetText,
-  hasSource,
   onClose,
   onDone,
 }: ExercisePickerScreenProps) {
-  const { colors } = useAppTheme();
-
   const isReplaceMode = mode === "replace";
 
   const [tempSelectedExercises, setTempSelectedExercises] = useState<
     Exercise[]
   >([]);
+
   const [search, setSearch] = useState("");
+
   const [filters, setFilters] = useState<ExerciseFilterValues>(
     DEFAULT_EXERCISE_FILTERS,
   );
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const debouncedSearch = useDebounce(search, 300);
@@ -76,6 +67,7 @@ export function ExercisePickerScreen({
     : addDescription;
 
   const selectedCount = tempSelectedExercises.length;
+
   const doneText = isReplaceMode
     ? "Replace"
     : selectedCount > 0
@@ -95,7 +87,7 @@ export function ExercisePickerScreen({
     queryKey: [
       exerciseQueryKeys.all,
       debouncedSearch,
-      filters.exerciseTypes,
+      filters.categoryIds,
       filters.muscleIds,
       filters.sortBy,
       filters.sortDirection,
@@ -103,8 +95,8 @@ export function ExercisePickerScreen({
     search: debouncedSearch,
     limit: 20,
     params: {
-      exerciseTypes:
-        filters.exerciseTypes.length > 0 ? filters.exerciseTypes : undefined,
+      categoryIds:
+        filters.categoryIds.length > 0 ? filters.categoryIds : undefined,
       muscleIds: filters.muscleIds.length > 0 ? filters.muscleIds : undefined,
       sortBy: sortByParam,
     },
@@ -113,7 +105,9 @@ export function ExercisePickerScreen({
   const exercises = data?.pages.flatMap((page) => page.data) ?? [];
 
   const loadMore = () => {
-    if (!hasNextPage || isFetchingNextPage) return;
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
 
     fetchNextPage();
   };
@@ -122,77 +116,38 @@ export function ExercisePickerScreen({
     const isReplacingWithSameExercise =
       isReplaceMode && exercise.id === targetExerciseId;
 
-    if (isReplacingWithSameExercise) return;
+    if (isReplacingWithSameExercise) {
+      return;
+    }
 
-    setTempSelectedExercises((prev) => {
-      const exists = prev.some((item) => item.id === exercise.id);
+    setTempSelectedExercises((previousExercises) => {
+      const exists = previousExercises.some((item) => item.id === exercise.id);
 
       if (exists) {
-        return prev.filter((item) => item.id !== exercise.id);
+        return previousExercises.filter((item) => item.id !== exercise.id);
       }
 
       if (isReplaceMode) {
         return [exercise];
       }
 
-      return [...prev, exercise];
+      return [...previousExercises, exercise];
     });
   };
 
   const handleDone = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      return;
+    }
 
     try {
       setIsSubmitting(true);
+
       await onDone(tempSelectedExercises);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (!hasSource) {
-    return (
-      <FullScreenPicker
-        title={pickerTitle}
-        onClose={onClose}
-        onDone={onClose}
-        doneText="Back"
-        closeText="Back"
-        doneDisabled={false}
-        searchValue=""
-        onSearchChange={() => {}}
-        isError={false}
-      >
-        <View className="flex-1 items-center justify-center px-6">
-          <ThemedText type="default" variant="secondary">
-            {missingSourceText}
-          </ThemedText>
-        </View>
-      </FullScreenPicker>
-    );
-  }
-
-  if (isReplaceMode && !targetExercise) {
-    return (
-      <FullScreenPicker
-        title="Replace Exercise"
-        onClose={onClose}
-        onDone={onClose}
-        doneText="Back"
-        closeText="Back"
-        doneDisabled={false}
-        searchValue=""
-        onSearchChange={() => {}}
-        isError={false}
-      >
-        <View className="flex-1 items-center justify-center px-6">
-          <ThemedText type="default" variant="secondary">
-            {missingTargetText}
-          </ThemedText>
-        </View>
-      </FullScreenPicker>
-    );
-  }
 
   return (
     <FullScreenPicker
@@ -208,10 +163,11 @@ export function ExercisePickerScreen({
       isLoading={isLoading}
       isError={isError}
       isEmpty={exercises.length === 0}
-      errorText="Failed to load exercises"
+      errorTitle="Couldn't load exercises"
+      errorText="Something went wrong while loading exercises."
       emptyTitle="No exercises found"
       emptyText="Try changing your search or filters."
-      onRetry={() => refetch()}
+      onRetry={refetch}
       searchRight={
         <ExerciseFilterBottomSheet
           value={filters}
@@ -227,7 +183,7 @@ export function ExercisePickerScreen({
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           isFetchingNextPage ? (
-            <View className="py-4">
+            <View className="items-center py-4">
               <ActivityIndicator />
             </View>
           ) : null
@@ -237,6 +193,7 @@ export function ExercisePickerScreen({
             isReplaceMode && item.id === targetExerciseId;
 
           const isSelected = tempSelectedExerciseIds.has(item.id);
+
           const cardItem = mapExerciseToExerciseCardItem(item);
 
           return (
@@ -247,10 +204,10 @@ export function ExercisePickerScreen({
               metaItems={cardItem.metaItems}
               onPress={() => handleToggleExercise(item)}
               disabled={isSubmitting || isReplacingWithSameExercise}
-              className="border"
-              style={{
-                borderColor: isSelected ? colors.app.brand : "transparent",
-              }}
+              className={cn(
+                "border",
+                isSelected ? "border-primary" : "border-transparent",
+              )}
             />
           );
         }}

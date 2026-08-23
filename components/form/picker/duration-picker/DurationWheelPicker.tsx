@@ -1,5 +1,5 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
 import WheelPicker from "@quidone/react-native-wheel-picker";
 import { View } from "react-native";
 import { buildNumberData } from "./utils";
@@ -28,8 +28,6 @@ export function DurationWheelPicker({
   value,
   onChange,
 }: DurationWheelPickerProps) {
-  const { colors } = useAppTheme();
-
   return (
     <View className="relative">
       {/* Wheel picker */}
@@ -38,31 +36,46 @@ export function DurationWheelPicker({
           unit="Hour"
           value={value.hours}
           data={HOUR_DATA}
-          onChange={(hours) => onChange({ ...value, hours })}
+          onChange={(hours) =>
+            onChange({
+              ...value,
+              hours,
+            })
+          }
         />
 
         <DurationColumn
           unit="Min"
           value={value.minutes}
           data={MINUTE_DATA}
-          onChange={(minutes) => onChange({ ...value, minutes })}
+          onChange={(minutes) =>
+            onChange({
+              ...value,
+              minutes,
+            })
+          }
         />
 
         <DurationColumn
           unit="Sec"
           value={value.seconds}
           data={SECOND_DATA}
-          onChange={(seconds) => onChange({ ...value, seconds })}
+          onChange={(seconds) =>
+            onChange({
+              ...value,
+              seconds,
+            })
+          }
         />
       </View>
 
-      {/* Overlay */}
+      {/* Selected-row highlight */}
       <View className="absolute bottom-0 left-0 right-0 top-0 -z-10 justify-center px-4">
         <View
-          className="h-14 rounded-xl"
+          className="h-14 rounded-xl bg-primary"
           pointerEvents="none"
           style={{
-            backgroundColor: colors.app.brand + 20,
+            opacity: 0.08,
           }}
         />
       </View>
@@ -81,7 +94,7 @@ function DurationColumn({
   data: PickerItem[];
   onChange: (value: number) => void;
 }) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <View className="relative w-full flex-1">
@@ -95,7 +108,7 @@ function DurationColumn({
         itemTextStyle={{
           textAlign: "left",
           paddingLeft: 16,
-          color: colors.app.textAccent,
+          color: colors.foreground,
         }}
       />
 
@@ -104,7 +117,7 @@ function DurationColumn({
         className="absolute bottom-0 right-0 top-0 justify-center p-4"
         pointerEvents="none"
       >
-        <ThemedText type="default" variant="primary">
+        <ThemedText type="body" tone="muted">
           {unit}
         </ThemedText>
       </View>

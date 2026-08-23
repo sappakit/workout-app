@@ -1,10 +1,9 @@
+import { AppButton } from "@/components/custom-ui/app-button";
 import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
-import { SectionHeader } from "@/components/layout/SectionHeader";
 import { WorkoutTodayOverview } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
-import React from "react";
 import { View } from "react-native";
-import { AppButton } from "../custom-ui/AppButton";
+import { SectionHeader } from "../layout/SectionHeader";
 import {
   RecentWorkoutCard,
   RecentWorkoutCardItem,
@@ -61,6 +60,7 @@ export default function HomeContent({
               <AppButton
                 title="View all"
                 variant="ghost"
+                size="sm"
                 onPress={handleViewAllWorkouts}
               />
             }
@@ -76,6 +76,7 @@ export default function HomeContent({
               <AppButton
                 title="View all"
                 variant="ghost"
+                size="sm"
                 onPress={handleViewAllHistory}
               />
             }

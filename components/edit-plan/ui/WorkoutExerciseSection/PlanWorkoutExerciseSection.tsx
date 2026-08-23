@@ -1,17 +1,18 @@
 import { createEmptyWorkoutExerciseFormSet } from "@/lib/workout/mappers";
-import { EditPlanForm } from "@/schemas/edit-plan.schema";
+import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
+import type { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { useMemo } from "react";
 import {
   Controller,
-  FieldPath,
-  UseFormReturn,
+  type FieldPath,
+  type UseFormReturn,
   useFormState,
   useWatch,
 } from "react-hook-form";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
 import {
   getWorkoutSetColumns,
-  WorkoutSetColumn,
+  type WorkoutSetColumn,
   WorkoutSetHeader,
   WorkoutSetInput,
   WorkoutSetRow,
@@ -45,12 +46,18 @@ export function PlanWorkoutExerciseSection({
     errors.workoutExercises?.[index]?.sets?.root?.message;
 
   const columns = useMemo<WorkoutSetColumn[]>(() => {
-    if (!exercise) return [];
+    if (!exercise) {
+      return [];
+    }
 
-    return getWorkoutSetColumns(exercise.exercise.exerciseType);
+    return getWorkoutSetColumns(exercise.exercise.category?.code);
   }, [exercise]);
 
-  if (!exercise) return null;
+  if (!exercise) {
+    return null;
+  }
+
+  const imageUrl = getExercisePrimaryImageUrl(exercise.exercise);
 
   const handleChangeRestTime = (seconds: number) => {
     setValue(`workoutExercises.${index}.restTime`, seconds, {
@@ -63,7 +70,6 @@ export function PlanWorkoutExerciseSection({
     const setsPath = `workoutExercises.${index}.sets` as const;
 
     const currentSets = getValues(setsPath) ?? [];
-
     const nextSetNumber = currentSets.length + 1;
 
     setValue(
@@ -106,7 +112,7 @@ export function PlanWorkoutExerciseSection({
       subtitle={`${exercise.sets.length} ${
         exercise.sets.length === 1 ? "set" : "sets"
       }`}
-      imageUrl={exercise.exercise.imageUrl}
+      imageUrl={imageUrl}
       sets={exercise.sets}
       restTime={exercise.restTime ?? 0}
       errorMessage={setsErrorMessage}

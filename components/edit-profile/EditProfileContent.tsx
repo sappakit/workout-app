@@ -1,4 +1,5 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { FormField } from "@/components/form/FormField";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
@@ -8,20 +9,18 @@ import { appendImageToFormData } from "@/lib/form-data/utils";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { userQueryKeys } from "@/lib/user/keys";
-import { EditProfileForm, editProfileSchema } from "@/schemas/user.schema";
-import { ReactNativeFile } from "@/types/common/file.types";
-import { User } from "@/types/user/response/user.types";
+import { editProfileSchema, type EditProfileForm } from "@/schemas/user.schema";
+import type { ReactNativeFile } from "@/types/common/file.types";
+import type { User } from "@/types/user/response/user.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { Save } from "lucide-react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Linking, View } from "react-native";
 import { AvatarImageEditor } from "../profile/ui/AvatarImageEditor";
 import { ProfileAvatar } from "../profile/ui/ProfileAvatar";
-import { ProfileFormField } from "./ui/ProfileFormField";
 
 interface EditProfileContentProps {
   data: User;
@@ -37,7 +36,9 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
   const [selectedImage, setSelectedImage] = useState<ReactNativeFile | null>(
     null,
   );
+
   const [pickedImageUri, setPickedImageUri] = useState<string | null>(null);
+
   const [isEditorVisible, setIsEditorVisible] = useState(false);
 
   const form = useForm<EditProfileForm>({
@@ -66,6 +67,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
       setSelectedImage(null);
       setPickedImageUri(null);
       setIsEditorVisible(false);
+
       router.back();
     };
 
@@ -106,10 +108,17 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
           "Photo access is blocked",
           "Please enable photo library access in your phone settings.",
           [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => Linking.openSettings() },
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Open Settings",
+              onPress: () => Linking.openSettings(),
+            },
           ],
         );
+
         return;
       }
 
@@ -117,6 +126,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
         "Permission needed",
         "Please allow photo library access to update your profile image.",
       );
+
       return;
     }
 
@@ -126,7 +136,9 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
       quality: 1,
     });
 
-    if (result.canceled) return;
+    if (result.canceled) {
+      return;
+    }
 
     const asset = result.assets[0];
 
@@ -153,6 +165,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
         },
       });
     },
+
     onSuccess: async (_, values) => {
       reset(values);
 
@@ -167,6 +180,7 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
 
       router.back();
     },
+
     onError: () => {
       toast.error({
         title: "Update failed",
@@ -194,10 +208,13 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
       }}
       stickyFooter={
         <AppButton
-          className="flex-1"
           title="Save Changes"
           variant="primary"
-          icon={Save}
+          className="flex-1"
+          icon={{
+            name: "save",
+            size: "sm",
+          }}
           loading={isPending}
           disabled={isPending}
           onPress={handleSubmit(onSubmit)}
@@ -216,49 +233,49 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
         </View>
 
         <View className="gap-4">
-          <ProfileFormField
-            label="First Name"
-            errorMessage={errors.firstName?.message}
-          >
-            <Controller
-              control={control}
-              name="firstName"
-              render={({ field }) => (
+          <Controller
+            control={control}
+            name="firstName"
+            render={({ field, fieldState }) => (
+              <FormField
+                label="First Name"
+                errorMessage={fieldState.error?.message}
+              >
                 <FormTextInput
                   placeholder="Enter your first name"
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
-                  error={!!errors.firstName}
+                  error={!!fieldState.error}
                 />
-              )}
-            />
-          </ProfileFormField>
+              </FormField>
+            )}
+          />
 
-          <ProfileFormField
-            label="Last Name"
-            errorMessage={errors.lastName?.message}
-          >
-            <Controller
-              control={control}
-              name="lastName"
-              render={({ field }) => (
+          <Controller
+            control={control}
+            name="lastName"
+            render={({ field, fieldState }) => (
+              <FormField
+                label="Last Name"
+                errorMessage={fieldState.error?.message}
+              >
                 <FormTextInput
                   placeholder="Enter your last name"
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
-                  error={!!errors.lastName}
+                  error={!!fieldState.error}
                 />
-              )}
-            />
-          </ProfileFormField>
+              </FormField>
+            )}
+          />
 
-          <ProfileFormField label="Email" errorMessage={errors.email?.message}>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field }) => (
+          <Controller
+            control={control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <FormField label="Email" errorMessage={fieldState.error?.message}>
                 <FormTextInput
                   placeholder="Enter your email"
                   keyboardType="email-address"
@@ -266,52 +283,33 @@ export default function EditProfileContent({ data }: EditProfileContentProps) {
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
-                  error={!!errors.email}
+                  error={!!fieldState.error}
                 />
-              )}
-            />
-          </ProfileFormField>
+              </FormField>
+            )}
+          />
 
-          <ProfileFormField
-            label="Phone Number"
-            errorMessage={errors.phoneNumber?.message}
-          >
-            <Controller
-              control={control}
-              name="phoneNumber"
-              render={({ field }) => (
+          <Controller
+            control={control}
+            name="phoneNumber"
+            render={({ field, fieldState }) => (
+              <FormField
+                label="Phone Number"
+                errorMessage={fieldState.error?.message}
+              >
                 <FormTextInput
                   placeholder="Enter your phone number"
                   keyboardType="phone-pad"
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
-                  error={!!errors.phoneNumber}
+                  error={!!fieldState.error}
                 />
-              )}
-            />
-          </ProfileFormField>
+              </FormField>
+            )}
+          />
 
           {/* TODO: add date of birth */}
-          {/* <ProfileFormField
-            label="Date of Birth"
-            errorMessage={errors.dateOfBirth?.message}
-          >
-            <Controller
-              control={control}
-              name="dateOfBirth"
-              render={({ field }) => (
-                <FormTextInput
-                  icon={Calendar}
-                  placeholder="Enter your date of birth"
-                  value={field.value}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  error={!!errors.dateOfBirth}
-                />
-              )}
-            />
-          </ProfileFormField> */}
         </View>
       </View>
 

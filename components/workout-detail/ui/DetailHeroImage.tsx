@@ -3,7 +3,8 @@ import {
   CONTENT_PADDING_TOP,
 } from "@/components/layout/PageLayout";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { ImageBackground, ImageStyle, StyleProp } from "react-native";
+import type { ImageStyle, StyleProp } from "react-native";
+import { ImageBackground } from "react-native";
 
 interface DetailHeroImageProps {
   imageUrl?: string | null;
@@ -22,16 +23,23 @@ export function DetailHeroImage({
 }: DetailHeroImageProps) {
   return (
     <ImageBackground
-      source={{ uri: imageUrl ?? WORKOUT_IMAGE }}
+      source={{
+        uri: imageUrl ?? WORKOUT_IMAGE,
+      }}
       resizeMode="cover"
       className={className}
-      style={[{ height }, style]}
+      style={[
+        {
+          height,
+          marginHorizontal: -CONTENT_PADDING_HORIZONTAL,
+          marginTop: -CONTENT_PADDING_TOP,
+        },
+        style,
+      ]}
       imageStyle={[
         {
           borderBottomLeftRadius: 16,
           borderBottomRightRadius: 16,
-          marginHorizontal: -CONTENT_PADDING_HORIZONTAL,
-          marginTop: -CONTENT_PADDING_TOP,
         },
         imageStyle,
       ]}

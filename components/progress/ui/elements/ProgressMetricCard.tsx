@@ -1,14 +1,14 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { LucideIcon } from "lucide-react-native";
-import React from "react";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
 import { FlatList, View } from "react-native";
 import { WorkoutImageAvatar } from "../sections/progress-history-section/RecentWorkoutCard";
 
 export interface ProgressMetricCardListItem {
   label: string;
   value: string;
-  icon: LucideIcon;
+  icon: AppIconName;
 }
 
 export interface ProgressMetricCardItem {
@@ -28,33 +28,23 @@ export function ProgressMetricCard({
   item,
   columns = 3,
 }: ProgressMetricCardProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className="overflow-hidden rounded-2xl"
-      style={{ backgroundColor: colors.app.cardPrimary }}
-    >
-      <View className="flex-1 flex-row items-center gap-3 p-4">
+    <View className="gap-3 overflow-hidden rounded-2xl bg-card p-3">
+      <View className="flex-row items-center gap-3">
         <WorkoutImageAvatar imageUrl={item.imageUrl} />
 
         <View className="flex-1">
-          <ThemedText type="subtitle" variant="accent" numberOfLines={1}>
+          <ThemedText type="bodyStrong" numberOfLines={1}>
             {item.title}
           </ThemedText>
 
-          <ThemedText type="extraSmall" variant="primary" numberOfLines={1}>
+          <ThemedText type="caption" tone="muted" numberOfLines={1}>
             {item.subtitle}
           </ThemedText>
         </View>
       </View>
 
-      <View
-        className="p-4"
-        style={{ backgroundColor: colors.app.cardPrimaryDark }}
-      >
-        <ProgressMetricList list={item.list} columns={columns} />
-      </View>
+      <ProgressMetricList list={item.list} columns={columns} />
     </View>
   );
 }
@@ -84,33 +74,25 @@ function ProgressMetricList({
 function MiniMetric({
   label,
   value,
-  icon: Icon,
+  icon,
 }: {
   label: string;
   value: string;
-  icon: LucideIcon;
+  icon: AppIconName;
 }) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
-    <View
-      className="flex-1 flex-row items-center gap-3 rounded-xl p-2"
-      style={{ backgroundColor: colors.app.cardSecondary }}
-    >
-      <View
-        className="rounded-xl p-3"
-        style={{ backgroundColor: colors.app.cardPrimary }}
-      >
-        <Icon size={18} color={colors.app.brand} />
-      </View>
+    <View className="flex-1 flex-row items-center gap-3 rounded-lg bg-secondary p-3">
+      <AppIcon name={icon} size="md" color={colors.primary} />
 
-      <View className="flex-1">
-        <ThemedText type="extraSmall" variant="primary" numberOfLines={1}>
-          {label}
+      <View className="flex-row items-center justify-between gap-2">
+        <ThemedText type="bodyStrong" numberOfLines={1}>
+          {value}
         </ThemedText>
 
-        <ThemedText type="default" variant="accent" numberOfLines={1}>
-          {value}
+        <ThemedText type="caption" tone="muted" numberOfLines={1}>
+          {label}
         </ThemedText>
       </View>
     </View>

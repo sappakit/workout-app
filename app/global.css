@@ -1,3 +1,156 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Both colors in 'lib/theme.ts' and in 'global.css' must match */
+@layer base {
+  :root {
+    /* Page */
+    --background: #f3f2f0;
+    --foreground: #161616;
+
+    /* Surfaces */
+    --card: #ffffff;
+    --card-foreground: #161616;
+
+    --popover: #ffffff;
+    --popover-foreground: #161616;
+
+    /* Main brand actions */
+    --primary: #ef6131;
+    --primary-hover: #d9572c;
+    --primary-foreground: #ffffff;
+
+    /* Secondary surfaces and controls */
+    --secondary: #e8e7e4;
+    --secondary-hover: #deddda;
+    --secondary-foreground: #1b1b1b;
+
+    /* Muted surfaces and lower-priority text */
+    --muted: #efeeeb;
+    --muted-foreground: #6f6e6a;
+    --subtle-foreground: #999792;
+
+    /* Interactive highlight */
+    --accent: #e8e7e4;
+    --accent-foreground: #161616;
+
+    /* High-contrast controls */
+    --contrast: #111111;
+    --contrast-hover: #2a2a2a;
+    --contrast-foreground: #ffffff;
+
+    /* Feedback */
+    --success: #1b9a59;
+    --success-foreground: #ffffff;
+
+    --warning: #e5a11a;
+    --warning-foreground: #171717;
+
+    --destructive: #dc3f3f;
+    --destructive-hover: #c93636;
+    --destructive-foreground: #ffffff;
+
+    /* Structure */
+    --border: #d8d7d3;
+    --border-strong: #aaa8a3;
+    --input: #e2e1de;
+    --ring: #ef6131;
+
+    /* Image content */
+    --image-overlay: rgba(0, 0, 0, 0.42);
+    --image-overlay-strong: rgba(0, 0, 0, 0.62);
+
+    /* Effects */
+    --shadow: rgba(25, 25, 23, 0.08);
+
+    /* Loading */
+    --skeleton: #e9e8e5;
+    --skeleton-highlight: #f6f5f3;
+
+    /* Shared component radius */
+    --radius: 0.625rem;
+
+    /* Charts */
+    --chart-1: #ef6131;
+    --chart-2: #555553;
+    --chart-3: #1b9a59;
+    --chart-4: #e5a11a;
+    --chart-5: #dc3f3f;
+  }
+
+  .dark:root {
+    /* Page */
+    --background: #1d1d1d;
+    --foreground: #f5f5f3;
+
+    /* Surfaces */
+    --card: #252525;
+    --card-foreground: #f5f5f3;
+
+    --popover: #252525;
+    --popover-foreground: #f5f5f3;
+
+    /* Main brand actions */
+    --primary: #ef6131;
+    --primary-hover: #d9572c;
+    --primary-foreground: #ffffff;
+
+    /* Secondary surfaces and controls */
+    --secondary: #2e2e2e;
+    --secondary-hover: #3a3a3a;
+    --secondary-foreground: #f5f5f3;
+
+    /* Muted surfaces and lower-priority text */
+    --muted: #2e2e2e;
+    --muted-foreground: #a8a8a4;
+    --subtle-foreground: #7f7f7a;
+
+    /* Interactive highlight */
+    --accent: #2e2e2e;
+    --accent-foreground: #f5f5f3;
+
+    /* High-contrast controls */
+    --contrast: #f4f4f2;
+    --contrast-hover: #ddddda;
+    --contrast-foreground: #171717;
+
+    /* Feedback */
+    --success: #2ab66b;
+    --success-foreground: #ffffff;
+
+    --warning: #e8ac32;
+    --warning-foreground: #171717;
+
+    --destructive: #ef5555;
+    --destructive-hover: #d94a4a;
+    --destructive-foreground: #ffffff;
+
+    /* Structure */
+    --border: #3a3a3a;
+    --border-strong: #555555;
+    --input: #3a3a3a;
+    --ring: #ef6131;
+
+    /* Image content */
+    --image-overlay: rgba(0, 0, 0, 0.32);
+    --image-overlay-strong: rgba(0, 0, 0, 0.62);
+
+    /* Effects */
+    --shadow: rgba(0, 0, 0, 0.4);
+
+    /* Loading */
+    --skeleton: #2b2b2b;
+    --skeleton-highlight: #353535;
+
+    /* Shared component radius */
+    --radius: 0.625rem;
+
+    /* Charts */
+    --chart-1: #ef6131;
+    --chart-2: #f4f4f2;
+    --chart-3: #2ab66b;
+    --chart-4: #e8ac32;
+    --chart-5: #ef5555;
+  }
+}

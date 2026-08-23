@@ -1,8 +1,8 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { SectionHeader } from "@/components/layout/SectionHeader";
+import { useAppColors } from "@/hooks/useAppColors";
+import { hexWithOpacity } from "@/lib/utils";
 import * as ImageManipulator from "expo-image-manipulator";
-import { X } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -52,7 +52,7 @@ export function AvatarImageEditor({
   onClose,
   onComplete,
 }: AvatarImageEditorProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -78,13 +78,17 @@ export function AvatarImageEditor({
   const pinchStartTranslateY = useSharedValue(0);
 
   const baseScale = useMemo(() => {
-    if (!imageSize) return 1;
+    if (!imageSize) {
+      return 1;
+    }
 
     return Math.max(cropSize / imageSize.width, cropSize / imageSize.height);
   }, [cropSize, imageSize]);
 
   const displayedImageSize = useMemo(() => {
-    if (!imageSize) return null;
+    if (!imageSize) {
+      return null;
+    }
 
     return {
       width: imageSize.width * baseScale,
@@ -126,7 +130,9 @@ export function AvatarImageEditor({
   };
 
   React.useEffect(() => {
-    if (!visible || !imageUri) return;
+    if (!visible || !imageUri) {
+      return;
+    }
 
     loadImageSize(imageUri);
   }, [visible, imageUri]);
@@ -146,9 +152,11 @@ export function AvatarImageEditor({
     }
 
     const scaledWidth = displayedImageSize.width * targetScale;
+
     const scaledHeight = displayedImageSize.height * targetScale;
 
     const maxTranslateX = Math.max(0, (scaledWidth - cropSize) / 2);
+
     const maxTranslateY = Math.max(0, (scaledHeight - cropSize) / 2);
 
     return {
@@ -175,18 +183,24 @@ export function AvatarImageEditor({
     });
 
     savedTranslateX.value = clampedTranslate.x;
+
     savedTranslateY.value = clampedTranslate.y;
   };
 
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
-      if (isPinching.value) return;
+      if (isPinching.value) {
+        return;
+      }
 
       translateX.value = savedTranslateX.value + event.translationX;
+
       translateY.value = savedTranslateY.value + event.translationY;
     })
     .onEnd(() => {
-      if (isPinching.value) return;
+      if (isPinching.value) {
+        return;
+      }
 
       snapToBounds(imageScale.value);
     });
@@ -196,7 +210,9 @@ export function AvatarImageEditor({
       isPinching.value = true;
 
       pinchStartScale.value = imageScale.value;
+
       pinchStartTranslateX.value = translateX.value;
+
       pinchStartTranslateY.value = translateY.value;
     })
     .onUpdate((event) => {
@@ -210,7 +226,9 @@ export function AvatarImageEditor({
       const scaleRatio = nextScale / pinchStartScale.value;
 
       translateX.value = pinchStartTranslateX.value * scaleRatio;
+
       translateY.value = pinchStartTranslateY.value * scaleRatio;
+
       imageScale.value = nextScale;
     })
     .onEnd(() => {
@@ -222,6 +240,7 @@ export function AvatarImageEditor({
       const scaleRatio = clampedScale / imageScale.value;
 
       const finalTranslateX = translateX.value * scaleRatio;
+
       const finalTranslateY = translateY.value * scaleRatio;
 
       const clampedTranslate = getClampedTranslate(
@@ -243,7 +262,9 @@ export function AvatarImageEditor({
       });
 
       savedImageScale.value = clampedScale;
+
       savedTranslateX.value = clampedTranslate.x;
+
       savedTranslateY.value = clampedTranslate.y;
 
       isPinching.value = false;
@@ -254,15 +275,19 @@ export function AvatarImageEditor({
 
   const composedGesture = Gesture.Race(pinchGesture, panGesture);
 
-  const imageAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: translateX.value },
-        { translateY: translateY.value },
-        { scale: imageScale.value },
-      ],
-    };
-  });
+  const imageAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateX: translateX.value,
+      },
+      {
+        translateY: translateY.value,
+      },
+      {
+        scale: imageScale.value,
+      },
+    ],
+  }));
 
   const resetPosition = () => {
     translateX.value = withTiming(0, {
@@ -289,13 +314,17 @@ export function AvatarImageEditor({
   };
 
   const handleDone = async () => {
-    if (!imageUri || !imageSize || !displayedImageSize) return;
+    if (!imageUri || !imageSize || !displayedImageSize) {
+      return;
+    }
 
     try {
       setIsProcessing(true);
 
       const currentScale = imageScale.value;
+
       const currentTranslateX = translateX.value;
+
       const currentTranslateY = translateY.value;
 
       const finalDisplayScale = baseScale * currentScale;
@@ -311,6 +340,7 @@ export function AvatarImageEditor({
         currentTranslateY;
 
       const cropLeft = (editorSize - cropSize) / 2;
+
       const cropTop = (editorSize - cropSize) / 2;
 
       const cropOriginX = clamp(
@@ -377,52 +407,52 @@ export function AvatarImageEditor({
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View
-          className="flex-1"
+          className="flex-1 bg-background"
           style={{
-            backgroundColor: colors.app.background,
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
           }}
         >
           <View className="flex-1 py-4">
-            <View className="flex-row items-center justify-between gap-2 px-4">
-              <View className="flex-1">
-                <ThemedText type="title" variant="accent">
-                  Adjust Photo
-                </ThemedText>
-
-                <ThemedText type="default" variant="primary">
-                  Pinch to zoom and drag to reposition
-                </ThemedText>
+            <View className="flex-row items-start gap-3 px-4">
+              <View className="min-w-0 flex-1">
+                <SectionHeader
+                  title="Adjust Photo"
+                  subtitle="Pinch to zoom and drag to reposition"
+                />
               </View>
 
               <AppButton
-                className="h-10 w-10"
-                shape="pill"
-                variant="option"
-                icon={X}
+                variant="secondary"
+                size="icon"
+                className="h-10 w-10 rounded-full"
+                icon={{
+                  name: "close",
+                  size: "sm",
+                }}
                 onPress={onClose}
               />
             </View>
 
             <View className="flex-1 items-center justify-center">
               <View
-                className="overflow-hidden"
+                className="overflow-hidden bg-secondary"
                 style={{
                   width: editorSize,
                   height: editorSize,
-                  backgroundColor: colors.app.cardSecondary,
                 }}
               >
                 {!imageUri || !displayedImageSize ? (
                   <View className="flex-1 items-center justify-center">
-                    <ActivityIndicator color={colors.app.brand} />
+                    <ActivityIndicator color={colors.primary} />
                   </View>
                 ) : (
                   <GestureDetector gesture={composedGesture}>
                     <Animated.View className="flex-1 items-center justify-center">
                       <Animated.Image
-                        source={{ uri: imageUri }}
+                        source={{
+                          uri: imageUri,
+                        }}
                         resizeMode="cover"
                         style={[
                           {
@@ -454,7 +484,7 @@ export function AvatarImageEditor({
                     <Rect
                       width="100%"
                       height="100%"
-                      fill="rgba(0, 0, 0, 0.5)"
+                      fill={hexWithOpacity(colors.imageOverlayStrong, 50)}
                       mask="url(#avatarCropMask)"
                     />
                   </Svg>
@@ -466,6 +496,10 @@ export function AvatarImageEditor({
               <AppButton
                 title="Use Photo"
                 variant="primary"
+                icon={{
+                  name: "check",
+                  size: "sm",
+                }}
                 loading={isProcessing}
                 disabled={isProcessing || !imageUri || !imageSize}
                 onPress={handleDone}
@@ -474,6 +508,10 @@ export function AvatarImageEditor({
               <AppButton
                 title="Reset Position"
                 variant="secondary"
+                icon={{
+                  name: "refresh",
+                  size: "sm",
+                }}
                 disabled={isProcessing}
                 onPress={resetPosition}
               />

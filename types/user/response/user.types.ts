@@ -1,8 +1,8 @@
 export interface UserProfile {
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string | null;
-  imageUrl?: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phoneNumber: string | null;
+  imageUrl: string | null;
 }
 
 export interface User {

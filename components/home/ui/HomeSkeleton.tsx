@@ -1,6 +1,11 @@
-import { PageLayout } from "@/components/layout/PageLayout";
+import {
+  CONTENT_PADDING_HORIZONTAL,
+  PageLayout,
+} from "@/components/layout/PageLayout";
+import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
 import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
-import { TextSkeleton } from "@/components/loading/TextSkeleton";
+import { RecentWorkoutCardSkeleton } from "@/components/progress/ui/sections/progress-history-section/ProgressHistorySkeleton";
+import { CategoryFilterSkeleton } from "@/components/workout/ui/workout-preview-card/muscle-category-filter/CategoryFilterSkeleton";
 import { WorkoutPreviewSectionSkeleton } from "@/components/workout/ui/workout-preview-card/WorkoutPreviewSectionSkeleton";
 import { View } from "react-native";
 
@@ -12,12 +17,31 @@ export function HomeSkeleton() {
       }}
       scrollable={false}
     >
-      <View className="gap-4">
+      <View className="flex-1 gap-4">
         <HeroCardSkeleton />
 
         <HomeStatsSkeleton />
 
-        <WorkoutPreviewSectionSkeleton titleWidthClassName="w-28" />
+        <View className="gap-3">
+          <SectionHeaderSkeleton titleWidthClassName="w-40" showAction />
+
+          <View
+            className="gap-3"
+            style={{ marginHorizontal: -CONTENT_PADDING_HORIZONTAL }}
+          >
+            <CategoryFilterSkeleton
+              contentContainerStyle={{
+                paddingHorizontal: CONTENT_PADDING_HORIZONTAL,
+              }}
+            />
+
+            <WorkoutPreviewSectionSkeleton
+              contentContainerStyle={{
+                paddingHorizontal: CONTENT_PADDING_HORIZONTAL,
+              }}
+            />
+          </View>
+        </View>
 
         <RecentWorkoutSkeleton />
       </View>
@@ -26,32 +50,33 @@ export function HomeSkeleton() {
 }
 
 export function HeroCardSkeleton() {
-  return <SkeletonPlaceholder className="h-44 rounded-3xl" />;
+  return (
+    <SkeletonPlaceholder
+      containerClassName="h-44 w-full"
+      skeletonClassName="rounded-3xl"
+    />
+  );
 }
 
 function HomeStatsSkeleton() {
   return (
-    <View className="flex-row gap-3">
-      <SkeletonPlaceholder className="aspect-[1.25] w-1/2 rounded-2xl" />
+    <View className="aspect-[2.4] flex-row gap-3">
+      <SkeletonPlaceholder
+        containerClassName="w-[55%]"
+        skeletonClassName="rounded-2xl"
+      />
 
       <View className="flex-1 gap-3">
-        <SkeletonPlaceholder className="flex-1 rounded-2xl" />
+        <SkeletonPlaceholder
+          containerClassName="flex-1"
+          skeletonClassName="rounded-2xl"
+        />
 
-        <SkeletonPlaceholder className="flex-1 rounded-2xl" />
+        <SkeletonPlaceholder
+          containerClassName="flex-1"
+          skeletonClassName="rounded-2xl"
+        />
       </View>
-    </View>
-  );
-}
-
-export function SectionHeaderSkeleton({
-  titleWidthClassName = "w-32",
-}: {
-  titleWidthClassName?: string;
-}) {
-  return (
-    <View className="flex-row items-center justify-between">
-      <TextSkeleton type="subtitle" className={titleWidthClassName} />
-      <TextSkeleton type="small" className="w-14" />
     </View>
   );
 }
@@ -59,11 +84,11 @@ export function SectionHeaderSkeleton({
 function RecentWorkoutSkeleton() {
   return (
     <View className="gap-3">
-      <SectionHeaderSkeleton titleWidthClassName="w-36" />
+      <SectionHeaderSkeleton titleWidthClassName="w-48" showAction />
 
-      <SkeletonPlaceholder className="aspect-[2.5] w-full rounded-3xl" />
-      <SkeletonPlaceholder className="aspect-[2.5] w-full rounded-3xl" />
-      <SkeletonPlaceholder className="aspect-[2.5] w-full rounded-3xl" />
+      {Array.from({ length: 3 }).map((_, index) => (
+        <RecentWorkoutCardSkeleton key={index} />
+      ))}
     </View>
   );
 }

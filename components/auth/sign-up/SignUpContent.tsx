@@ -1,33 +1,26 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import FormPasswordInput from "@/components/form/FormPasswordInput";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { FormField } from "@/components/form/FormField";
+import FormPasswordInputV2 from "@/components/form/FormPasswordInput";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
-import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { SignUpForm, signUpSchema } from "@/schemas/auth.schema";
-import { SignUpRequest } from "@/types/auth.types";
+import { type SignUpForm, signUpSchema } from "@/schemas/auth.schema";
+import type { SignUpRequest } from "@/types/auth.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { UserPlus } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { AuthHeader } from "../ui/AuthHeader";
 
 export default function SignUpContent() {
-  const { colors } = useAppTheme();
   const { signUp } = useAuth();
   const router = useRouter();
-
   const toast = useAppToast();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpForm>({
+  const { control, handleSubmit } = useForm<SignUpForm>({
     resolver: zodResolver(signUpSchema),
     mode: "onTouched",
     defaultValues: {
@@ -42,12 +35,14 @@ export default function SignUpContent() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (values: SignUpRequest) => signUp(values),
+
     onSuccess: () => {
       toast.success({
         title: "Welcome!",
         message: "Your account has been created.",
       });
     },
+
     onError: (err: unknown) => {
       const message =
         (err as any)?.response?.data?.message ??
@@ -63,232 +58,179 @@ export default function SignUpContent() {
   });
 
   const onSubmit = (values: SignUpForm) => {
-    const { confirmPassword, ...payload } = values;
+    const { confirmPassword: _confirmPassword, ...payload } = values;
+
     mutate(payload);
   };
 
   return (
-    <PageLayout includeInsets={{ top: true }}>
+    <PageLayout includeInsets={{ top: true, bottom: true }}>
       <AuthHeader
         title="Create Account"
         subtitle="Start tracking your workouts and build your streak."
       />
 
-      {/* Form */}
-      <View className="mt-4">
+      <View className="mt-7 gap-4">
         {/* Username */}
-        <View className="mt-4">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Username
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="username"
-            render={({ field }) => (
+        <Controller
+          control={control}
+          name="username"
+          render={({ field, fieldState }) => (
+            <FormField
+              label="Username"
+              errorMessage={fieldState.error?.message}
+            >
               <FormTextInput
                 placeholder="Choose a username"
                 autoCapitalize="none"
+                autoCorrect={false}
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.username}
+                onBlur={field.onBlur}
+                error={!!fieldState.error}
+                icon="profile"
+                clearable
               />
-            )}
-          />
-
-          {errors.username?.message && (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{ color: colors.app.error ?? "red" }}
-            >
-              {errors.username.message}
-            </ThemedText>
+            </FormField>
           )}
-        </View>
+        />
 
         {/* Password */}
-        <View className="mt-4">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Password
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field }) => (
-              <FormPasswordInput
+        <Controller
+          control={control}
+          name="password"
+          render={({ field, fieldState }) => (
+            <FormField
+              label="Password"
+              errorMessage={fieldState.error?.message}
+            >
+              <FormPasswordInputV2
                 placeholder="Create a password"
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.password}
+                onBlur={field.onBlur}
+                error={!!fieldState.error}
+                icon="password"
               />
-            )}
-          />
-
-          {errors.password?.message && (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{ color: colors.app.error ?? "red" }}
-            >
-              {errors.password.message}
-            </ThemedText>
+            </FormField>
           )}
-        </View>
+        />
 
         {/* Confirm Password */}
-        <View className="mt-4">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Confirm Password
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormPasswordInput
+        <Controller
+          control={control}
+          name="confirmPassword"
+          render={({ field, fieldState }) => (
+            <FormField
+              label="Confirm Password"
+              errorMessage={fieldState.error?.message}
+            >
+              <FormPasswordInputV2
                 placeholder="Re-enter your password"
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.confirmPassword}
+                onBlur={field.onBlur}
+                error={!!fieldState.error}
+                icon="password"
               />
-            )}
-          />
-
-          {errors.confirmPassword?.message && (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{ color: colors.app.error ?? "red" }}
-            >
-              {errors.confirmPassword.message}
-            </ThemedText>
+            </FormField>
           )}
-        </View>
+        />
 
         {/* First Name */}
-        <View className="mt-3">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            First Name
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="firstName"
-            render={({ field }) => (
+        <Controller
+          control={control}
+          name="firstName"
+          render={({ field, fieldState }) => (
+            <FormField
+              label="First Name"
+              errorMessage={fieldState.error?.message}
+            >
               <FormTextInput
                 placeholder="Enter your first name"
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.firstName}
+                onBlur={field.onBlur}
+                error={!!fieldState.error}
+                icon="profile"
+                clearable
               />
-            )}
-          />
-
-          {errors.firstName?.message && (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{ color: colors.app.error ?? "red" }}
-            >
-              {errors.firstName.message}
-            </ThemedText>
+            </FormField>
           )}
-        </View>
+        />
 
         {/* Last Name */}
-        <View className="mt-4">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Last Name
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="lastName"
-            render={({ field }) => (
+        <Controller
+          control={control}
+          name="lastName"
+          render={({ field, fieldState }) => (
+            <FormField
+              label="Last Name"
+              errorMessage={fieldState.error?.message}
+            >
               <FormTextInput
                 placeholder="Enter your last name"
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.lastName}
+                onBlur={field.onBlur}
+                error={!!fieldState.error}
+                icon="profile"
+                clearable
               />
-            )}
-          />
-
-          {errors.lastName?.message && (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{ color: colors.app.error ?? "red" }}
-            >
-              {errors.lastName.message}
-            </ThemedText>
+            </FormField>
           )}
-        </View>
+        />
 
         {/* Email */}
-        <View className="mt-4">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Email
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="email"
-            render={({ field }) => (
+        <Controller
+          control={control}
+          name="email"
+          render={({ field, fieldState }) => (
+            <FormField label="Email" errorMessage={fieldState.error?.message}>
               <FormTextInput
                 placeholder="Enter your email"
                 autoCapitalize="none"
+                autoCorrect={false}
                 keyboardType="email-address"
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.email}
+                onBlur={field.onBlur}
+                error={!!fieldState.error}
+                icon="email"
+                clearable
               />
-            )}
-          />
-
-          {errors.email?.message && (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{ color: colors.app.error ?? "red" }}
-            >
-              {errors.email.message}
-            </ThemedText>
+            </FormField>
           )}
-        </View>
+        />
 
         {/* Submit */}
-        <View className="mt-6">
+        <View className="mt-2 gap-4">
           <AppButton
             title="Sign Up"
             variant="primary"
-            icon={UserPlus}
-            textClassName="font-medium"
-            onPress={handleSubmit(onSubmit)}
+            icon={{
+              name: "sign-up",
+              size: "sm",
+            }}
             loading={isPending}
+            disabled={isPending}
+            onPress={handleSubmit(onSubmit)}
           />
 
-          <View className="mt-4 flex-row justify-center">
-            <ThemedText type="default" variant="primary" className="text-sm">
-              Already have an account?{" "}
-              <ThemedText
-                type="default"
-                variant="primary"
-                className="text-sm"
-                style={{ color: colors.app.brand }}
-                onPress={() => router.push("/(auth)/sign-in")}
-              >
+          <View className="flex-row items-center justify-center gap-1">
+            <ThemedText type="small" tone="muted">
+              Already have an account?
+            </ThemedText>
+
+            <Pressable
+              hitSlop={8}
+              accessibilityRole="button"
+              onPress={() => router.push("/(auth)/sign-in")}
+            >
+              <ThemedText type="small" tone="primary">
                 Sign In
               </ThemedText>
-            </ThemedText>
+            </Pressable>
           </View>
         </View>
       </View>

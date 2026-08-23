@@ -1,39 +1,86 @@
 import {
   DifficultyLevel,
-  ExerciseType,
+  ExerciseMediaType,
+  ExerciseOrigin,
+  ExerciseStatus,
 } from "@/types/workout/response/exercise.types";
-import { EquipmentCategory } from "@/types/workout/response/shared.types";
+import {
+  EquipmentCategory,
+  ExerciseMuscleRole,
+} from "@/types/workout/response/shared.types";
 import { z } from "zod";
 
 const muscleSchema = z.object({
   id: z.number(),
+  code: z.string(),
   name: z.string(),
 });
 
 const equipmentSchema = z.object({
   id: z.number(),
+  code: z.string(),
   name: z.string(),
   category: z.enum(EquipmentCategory),
 });
 
+const exerciseCategorySchema = z.object({
+  id: z.number(),
+  code: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  displayOrder: z.number(),
+  isActive: z.boolean(),
+});
+
+const exerciseSourceSchema = z.object({
+  id: z.number(),
+  key: z.string(),
+  name: z.string(),
+  sourceUrl: z.string(),
+
+  licenseName: z.string().nullable(),
+  licenseUrl: z.string().nullable(),
+  attributionText: z.string().nullable(),
+  sourceVersion: z.string().nullable(),
+  sourceCommitHash: z.string().nullable(),
+  importedAt: z.string().nullable(),
+});
+
+const exerciseMediaSchema = z.object({
+  id: z.number(),
+  mediaType: z.enum(ExerciseMediaType),
+  url: z.string(),
+
+  publicId: z.string().nullable(),
+  sourcePath: z.string().nullable(),
+
+  displayOrder: z.number(),
+  isPrimary: z.boolean(),
+
+  source: exerciseSourceSchema.nullable().optional(),
+});
+
 const exerciseMuscleItemSchema = z.object({
   id: z.number(),
-  muscle: muscleSchema,
+  role: z.enum(ExerciseMuscleRole),
+  muscle: muscleSchema.optional(),
 });
 
 const exerciseEquipmentLinkSchema = z.object({
   id: z.number(),
-  equipment: equipmentSchema,
+  equipment: equipmentSchema.optional(),
 });
 
 export const exerciseSchema = z.object({
   id: z.number(),
+  origin: z.enum(ExerciseOrigin),
+  status: z.enum(ExerciseStatus),
+
   name: z.string(),
   description: z.string().nullable(),
-  imageUrl: z.string().nullable(),
 
-  exerciseType: z.enum(ExerciseType),
-  difficultyLevel: z.enum(DifficultyLevel),
+  category: exerciseCategorySchema.optional(),
+  difficultyLevel: z.enum(DifficultyLevel).nullable(),
 
   defaultCaloriesBurned: z.number().nullable(),
   defaultDuration: z.number().nullable(),
@@ -42,10 +89,14 @@ export const exerciseSchema = z.object({
   defaultSets: z.number().nullable(),
 
   demoLink: z.string().nullable(),
-  howToPerform: z.string().nullable(),
+  howToPerform: z.array(z.string()).nullable(),
 
-  muscles: z.array(exerciseMuscleItemSchema).nullish(),
-  equipmentLinks: z.array(exerciseEquipmentLinkSchema).nullish(),
+  sourceExternalId: z.string().nullable(),
+  source: exerciseSourceSchema.nullable().optional(),
+
+  media: z.array(exerciseMediaSchema).optional(),
+  muscles: z.array(exerciseMuscleItemSchema).optional(),
+  equipmentLinks: z.array(exerciseEquipmentLinkSchema).optional(),
 });
 
 export const workoutExerciseSetFormSchema = z.object({

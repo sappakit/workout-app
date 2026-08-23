@@ -1,6 +1,10 @@
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import { useAppColors } from "@/hooks/useAppColors";
 import { ActivityIndicator, FlatList, View } from "react-native";
-import { RecentWorkoutCard, RecentWorkoutCardItem } from "./RecentWorkoutCard";
+import {
+  RecentWorkoutCard,
+  type RecentWorkoutCardItem,
+} from "./RecentWorkoutCard";
 
 interface ProgressHistorySectionProps {
   data: RecentWorkoutCardItem[];
@@ -13,6 +17,8 @@ export function ProgressHistorySection({
   isFetchingNextPage,
   onLoadMore,
 }: ProgressHistorySectionProps) {
+  const colors = useAppColors();
+
   return (
     <FlatList
       data={data}
@@ -29,8 +35,8 @@ export function ProgressHistorySection({
       }
       ListFooterComponent={
         isFetchingNextPage ? (
-          <View className="py-4">
-            <ActivityIndicator />
+          <View className="items-center py-4">
+            <ActivityIndicator color={colors.primary} />
           </View>
         ) : null
       }

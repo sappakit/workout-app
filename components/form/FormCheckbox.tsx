@@ -1,72 +1,69 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { Check } from "lucide-react-native";
-import React from "react";
-import { Pressable, PressableProps, View } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
+import type { PressableProps } from "react-native";
+import { Pressable, View } from "react-native";
 
-export interface FormCheckboxProps extends PressableProps {
+export interface FormCheckboxProps extends Omit<
+  PressableProps,
+  "onPress" | "children"
+> {
   value: boolean;
   onChange: (value: boolean) => void;
   label?: string;
   error?: boolean;
   disabled?: boolean;
+  selectionMode?: "multiple" | "single";
 }
 
 export default function FormCheckbox({
   value,
   onChange,
   label,
-  error,
-  disabled,
+  error = false,
+  disabled = false,
+  selectionMode = "multiple",
   className,
   ...props
 }: FormCheckboxProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
-  const borderColor = error
-    ? colors.app.error || "red"
-    : value
-      ? colors.app.brand
-      : colors.app.borderPrimary;
-
-  const backgroundColor = value ? colors.app.brand : colors.app.cardSecondary;
+  const isMultiple = selectionMode === "multiple";
 
   return (
     <Pressable
       {...props}
-      onPress={() => !disabled && onChange(!value)}
-      className={twMerge(clsx("flex-row items-center", className))}
+      onPress={() => onChange(!value)}
+      disabled={disabled}
+      className={cn(
+        "flex-row items-center active:opacity-80",
+        disabled && "opacity-50",
+        className,
+      )}
     >
-      {/* Checkbox box */}
       <View
-        className="h-5 w-5 items-center justify-center rounded border"
-        style={{
-          borderColor,
-          backgroundColor,
-          opacity: disabled ? 0.5 : 1,
-        }}
-      >
-        {value && (
-          <Check size={14} color={colors.app.textWhite} strokeWidth={3} />
+        className={cn(
+          "h-6 w-6 items-center justify-center border",
+          isMultiple ? "rounded-md" : "rounded-full",
+          value ? "border-primary bg-primary" : "border-border bg-card",
+          error && "border-destructive",
         )}
+      >
+        {value ? (
+          isMultiple ? (
+            <AppIcon name="check" size="xs" color={colors.primaryForeground} />
+          ) : (
+            <View className="h-2 w-2 rounded-full bg-primary-foreground" />
+          )
+        ) : null}
       </View>
 
-      {/* Label */}
-      {label && (
-        <ThemedText
-          type="default"
-          variant="primary"
-          className="ml-3"
-          style={{
-            color: value ? colors.app.textAccent : colors.app.textPrimary,
-            opacity: disabled ? 0.5 : 1,
-          }}
-        >
+      {label ? (
+        <ThemedText type="body" className="ml-3">
           {label}
         </ThemedText>
-      )}
+      ) : null}
     </Pressable>
   );
 }

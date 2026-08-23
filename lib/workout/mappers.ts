@@ -1,5 +1,9 @@
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
 import {
+  WorkoutExerciseItemModel,
+  WorkoutExerciseSetModel,
+} from "@/types/workout/model/workout-plan.types";
+import {
   UpdateWorkoutExercisePayload,
   UpdateWorkoutExerciseSetPayload,
   UpdateWorkoutPayload,
@@ -7,9 +11,18 @@ import {
 import { Exercise } from "@/types/workout/response/exercise.types";
 import {
   WorkoutExerciseItem,
+  WorkoutExerciseSet,
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { createClientId } from "../id/utils";
+import { hmsToSeconds, secondsToHMS } from "./duration.utils";
+import {
+  requireWorkoutExercise,
+  requireWorkoutExercises,
+  requireWorkoutExerciseSets,
+  requireWorkoutMuscle,
+  requireWorkoutMuscles,
+} from "./utils/response-guards.utils";
 
 export type RepsRange = {
   minReps: number | null;
@@ -26,41 +39,20 @@ export function parseRepsRange(repsRange: string | null): RepsRange {
   };
 }
 
-// seconds -> { hours, minutes, seconds }
-export function secondsToHMS(totalSeconds: number | null | undefined) {
-  if (totalSeconds == null) {
-    return { hours: null, minutes: null, seconds: null };
-  }
-
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return { hours, minutes, seconds };
-}
-
-// (hours, minutes, seconds) -> seconds
-export function hmsToSeconds(
-  hours: number | null | undefined,
-  minutes: number | null | undefined,
-  seconds: number | null | undefined,
-) {
-  if (hours == null || minutes == null || seconds == null) return null;
-
-  return hours * 3600 + minutes * 60 + seconds;
-}
-
 // unknown value -> number or null
 export function toNumberOrNull(value: unknown): number | null {
-  if (value == null || value === "") return null;
+  if (value == null || value === "") {
+    return null;
+  }
 
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) ? numberValue : null;
 }
 
 // API workout exercise set -> Form set
 export function mapWorkoutExerciseSetToFormSet(
-  set: WorkoutExerciseItem["sets"][number],
+  set: WorkoutExerciseSet,
 ): EditPlanForm["workoutExercises"][number]["sets"][number] {
   const duration = secondsToHMS(set.duration);
 
@@ -78,17 +70,20 @@ export function mapWorkoutExerciseSetToFormSet(
 
 // API workout exercise -> Form item
 export function mapWorkoutExerciseToFormItem(
-  item: WorkoutResponse["workoutExercises"][number],
+  item: WorkoutExerciseItem,
 ): EditPlanForm["workoutExercises"][number] {
+  const exercise = requireWorkoutExercise(item);
+  const sets = requireWorkoutExerciseSets(item);
+
   return {
     id: item.id,
     clientId: `existing-workout-exercise-${item.id}`,
     orderIndex: item.orderIndex,
     restTime: item.restTime,
-    exercise: item.exercise,
+    exercise,
     sets:
-      item.sets.length > 0
-        ? item.sets.map(mapWorkoutExerciseSetToFormSet)
+      sets.length > 0
+        ? sets.map(mapWorkoutExerciseSetToFormSet)
         : [createEmptyWorkoutExerciseFormSet(1)],
   };
 }
@@ -97,15 +92,22 @@ export function mapWorkoutExerciseToFormItem(
 export function mapWorkoutResponseToEditPlanForm(
   data: WorkoutResponse,
 ): EditPlanForm {
+  const workoutExercises = requireWorkoutExercises(data);
+  const workoutMuscles = requireWorkoutMuscles(data);
+
   return {
     name: data.name,
     workoutFocusTypeId: data.workoutFocusType?.id ?? null,
-    targetMuscles: data.muscles.map((item) => item.muscle.id),
+    targetMuscles: workoutMuscles.map((workoutMuscle) => {
+      const muscle = requireWorkoutMuscle(workoutMuscle);
+
+      return muscle.id;
+    }),
     duration: data.duration ?? 0,
     autoFillMuscles: false,
     autoFillDuration: false,
 
-    workoutExercises: data.workoutExercises.map(mapWorkoutExerciseToFormItem),
+    workoutExercises: workoutExercises.map(mapWorkoutExerciseToFormItem),
   };
 }
 
@@ -151,12 +153,13 @@ export function mapEditPlanFormToUpdateWorkoutPayload(
   };
 }
 
-// Form set -> WorkoutExerciseSet response-like item
+// Form set -> Workout exercise set model
 export function mapEditPlanSetToWorkoutExerciseSet(
   set: EditPlanForm["workoutExercises"][number]["sets"][number],
-): WorkoutExerciseItem["sets"][number] {
+): WorkoutExerciseSetModel {
   return {
     id: set.id,
+    clientId: set.clientId,
     setNumber: set.setNumber,
     reps: set.reps,
     weight: set.weight,
@@ -165,12 +168,13 @@ export function mapEditPlanSetToWorkoutExerciseSet(
   };
 }
 
-// Form workout exercise -> WorkoutExerciseItem response-like item
+// Form workout exercise -> Workout exercise item model
 export function mapEditPlanExerciseToWorkoutExerciseItem(
   item: EditPlanForm["workoutExercises"][number],
-): WorkoutExerciseItem {
+): WorkoutExerciseItemModel {
   return {
     id: item.id,
+    clientId: item.clientId,
     orderIndex: item.orderIndex,
     restTime: item.restTime,
     exercise: normalizeExercise(item.exercise),
@@ -185,7 +189,7 @@ function normalizeExercise(
   return {
     ...exercise,
     description: exercise.description ?? null,
-    imageUrl: exercise.imageUrl ?? null,
+    difficultyLevel: exercise.difficultyLevel ?? null,
 
     defaultCaloriesBurned: exercise.defaultCaloriesBurned ?? null,
     defaultDuration: exercise.defaultDuration ?? null,
@@ -196,8 +200,7 @@ function normalizeExercise(
     demoLink: exercise.demoLink ?? null,
     howToPerform: exercise.howToPerform ?? null,
 
-    muscles: exercise.muscles ?? null,
-    equipmentLinks: exercise.equipmentLinks ?? null,
+    sourceExternalId: exercise.sourceExternalId ?? null,
   };
 }
 

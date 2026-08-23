@@ -1,18 +1,19 @@
+import FormCheckbox from "@/components/form/FormCheckbox";
 import {
   getExerciseProgressText,
   getPreviousSetValue,
   getWorkoutSessionSetValue,
 } from "@/components/workout-in-progress/model/helpers";
-import { ExerciseFieldKey } from "@/lib/workout/config";
-import { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
-import { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
+import type { ExerciseFieldKey } from "@/lib/workout/config";
+import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
+import type { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
+import type { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
 import { useMemo, useState } from "react";
 import { BaseWorkoutExerciseSection } from "./base/BaseWorkoutExerciseSection";
 import {
   getWorkoutSetColumns,
-  SetPerformanceMode,
-  WorkoutSetColumn,
-  WorkoutSetDoneCheckbox,
+  type SetPerformanceMode,
+  type WorkoutSetColumn,
   WorkoutSetHeader,
   WorkoutSetInput,
   WorkoutSetPerformanceText,
@@ -49,12 +50,17 @@ export function InProgressWorkoutExerciseSection({
   const [performanceMode, setPerformanceMode] =
     useState<SetPerformanceMode>("previous");
 
+  const categoryCode = exercise.exercise.category?.code;
+  const imageUrl = getExercisePrimaryImageUrl(exercise.exercise);
+
   const columns = useMemo<WorkoutSetColumn[]>(() => {
-    return getWorkoutSetColumns(exercise.exercise.exerciseType);
-  }, [exercise.exercise.exerciseType]);
+    return getWorkoutSetColumns(categoryCode);
+  }, [categoryCode]);
 
   const handleTogglePerformanceMode = () => {
-    setPerformanceMode((prev) => (prev === "previous" ? "best" : "previous"));
+    setPerformanceMode((previousMode) =>
+      previousMode === "previous" ? "best" : "previous",
+    );
   };
 
   return (
@@ -62,7 +68,7 @@ export function InProgressWorkoutExerciseSection({
       exerciseId={exercise.exercise.id}
       exerciseName={exercise.exercise.name}
       subtitle={getExerciseProgressText(exercise)}
-      imageUrl={exercise.exercise.imageUrl}
+      imageUrl={imageUrl}
       sets={exercise.sets}
       restTime={exercise.restTime ?? 0}
       onChangeRestTime={onChangeRestTime}
@@ -109,8 +115,8 @@ export function InProgressWorkoutExerciseSection({
             return (
               <WorkoutSetInput
                 value={value}
-                onChange={(value) =>
-                  onChangeSetValue(setItem.clientId, column.key, value)
+                onChange={(nextValue) =>
+                  onChangeSetValue(setItem.clientId, column.key, nextValue)
                 }
                 placeholder={placeholder}
                 allowDecimal={column.allowDecimal}
@@ -120,9 +126,9 @@ export function InProgressWorkoutExerciseSection({
             );
           }}
           renderTrailingCell={() => (
-            <WorkoutSetDoneCheckbox
-              checked={!!setItem.completedAt}
-              onPress={() => onToggleSetCompleted(setItem.clientId)}
+            <FormCheckbox
+              value={!!setItem.completedAt}
+              onChange={() => onToggleSetCompleted(setItem.clientId)}
             />
           )}
         />

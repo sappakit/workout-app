@@ -1,27 +1,34 @@
-import { AppDarkTheme, AppLightTheme } from "@/constants/theme";
-import { ColorSchemeName } from "react-native";
-import { BaseToast, ErrorToast, ToastConfig } from "react-native-toast-message";
+import { type AppColorScheme, THEME } from "@/lib/theme";
+import type { ColorSchemeName } from "react-native";
+import {
+  BaseToast,
+  ErrorToast,
+  type ToastConfig,
+} from "react-native-toast-message";
 
 export const createToastConfig = (
   colorScheme: ColorSchemeName,
 ): ToastConfig => {
-  const theme = colorScheme === "dark" ? AppDarkTheme : AppLightTheme;
+  const resolvedColorScheme: AppColorScheme =
+    colorScheme === "dark" ? "dark" : "light";
+
+  const colors = THEME[resolvedColorScheme];
 
   return {
     success: (props) => (
       <BaseToast
         {...props}
         style={{
-          borderLeftColor: theme.colors.app.success,
-          backgroundColor: theme.colors.app.toastBackground,
+          borderLeftColor: colors.success,
+          backgroundColor: colors.popover,
           borderRadius: 14,
         }}
         text1Style={{
-          color: theme.colors.app.textAccent,
-          fontWeight: "500",
+          color: colors.foreground,
+          fontWeight: "600",
         }}
         text2Style={{
-          color: theme.colors.app.textPrimary,
+          color: colors.mutedForeground,
         }}
       />
     ),
@@ -30,16 +37,16 @@ export const createToastConfig = (
       <ErrorToast
         {...props}
         style={{
-          borderLeftColor: theme.colors.app.error,
-          backgroundColor: theme.colors.app.toastBackground,
+          borderLeftColor: colors.destructive,
+          backgroundColor: colors.popover,
           borderRadius: 14,
         }}
         text1Style={{
-          color: theme.colors.app.textAccent,
-          fontWeight: "500",
+          color: colors.foreground,
+          fontWeight: "600",
         }}
         text2Style={{
-          color: theme.colors.app.textPrimary,
+          color: colors.mutedForeground,
         }}
       />
     ),
@@ -48,16 +55,16 @@ export const createToastConfig = (
       <BaseToast
         {...props}
         style={{
-          borderLeftColor: theme.colors.app.warning,
-          backgroundColor: theme.colors.app.toastBackground,
+          borderLeftColor: colors.warning,
+          backgroundColor: colors.popover,
           borderRadius: 14,
         }}
         text1Style={{
-          color: theme.colors.app.textAccent,
-          fontWeight: "500",
+          color: colors.foreground,
+          fontWeight: "600",
         }}
         text2Style={{
-          color: theme.colors.app.textPrimary,
+          color: colors.mutedForeground,
         }}
       />
     ),

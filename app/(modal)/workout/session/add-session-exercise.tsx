@@ -1,7 +1,9 @@
+import { PageLayout } from "@/components/layout/PageLayout";
 import {
-  ExercisePickerMode,
   ExercisePickerScreen,
+  type ExercisePickerMode,
 } from "@/components/picker/exercise-picker/ExercisePickerScreen";
+import { ErrorState } from "@/components/state/ErrorState";
 import {
   addSessionExercise,
   replaceSessionExercise,
@@ -9,8 +11,8 @@ import {
 import { api } from "@/lib/api/client";
 import { exerciseApi } from "@/lib/api/exercise.api";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";
-import { Exercise } from "@/types/workout/response/exercise.types";
-import { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
+import type { Exercise } from "@/types/workout/response/exercise.types";
+import type { ExercisePerformanceSummary } from "@/types/workout/response/workout.types";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 type AddSessionExerciseParams = {
@@ -25,14 +27,18 @@ export default function AddSessionExercisePage() {
 
   const mode: ExercisePickerMode =
     params.mode === "replace" ? "replace" : "add";
+
   const isReplaceMode = mode === "replace";
   const targetExerciseClientId = params.exerciseClientId;
 
   const session = useWorkoutSessionStore((state) => state.session);
+
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
+
   const mergePerformanceByExerciseId = useWorkoutSessionStore(
     (state) => state.mergePerformanceByExerciseId,
   );
+
   const removePerformanceByExerciseId = useWorkoutSessionStore(
     (state) => state.removePerformanceByExerciseId,
   );
@@ -55,7 +61,9 @@ export default function AddSessionExercisePage() {
     const response = await api.get<{
       data: Record<string, ExercisePerformanceSummary>;
     }>(exerciseApi.getExercisesPerformance(), {
-      params: { exerciseIds },
+      params: {
+        exerciseIds,
+      },
     });
 
     return response.data.data;
@@ -78,7 +86,10 @@ export default function AddSessionExercisePage() {
   const handleAddExercises = async (selectedExercises: Exercise[]) => {
     const performanceMap = await fetchExercisePerformanceMap(selectedExercises);
 
-    updateSession((prev) => addSessionExercise(prev, selectedExercises));
+    updateSession((previousSession) =>
+      addSessionExercise(previousSession, selectedExercises),
+    );
+
     mergePerformanceByExerciseId(performanceMap);
 
     router.back();
@@ -98,8 +109,12 @@ export default function AddSessionExercisePage() {
       selectedExercise,
     ]);
 
-    updateSession((prev) =>
-      replaceSessionExercise(prev, targetExerciseClientId, selectedExercise),
+    updateSession((previousSession) =>
+      replaceSessionExercise(
+        previousSession,
+        targetExerciseClientId,
+        selectedExercise,
+      ),
     );
 
     if (oldExerciseId != null) {
@@ -111,14 +126,41 @@ export default function AddSessionExercisePage() {
     router.back();
   };
 
+  if (!session) {
+    return (
+      <PageLayout scrollable={false} includeInsets>
+        <ErrorState
+          icon="details"
+          title="No active workout session found"
+          message="We couldn't find the workout session you were editing."
+          primaryAction={{
+            hidden: true,
+          }}
+        />
+      </PageLayout>
+    );
+  }
+
+  if (isReplaceMode && !targetSessionExercise) {
+    return (
+      <PageLayout scrollable={false} includeInsets>
+        <ErrorState
+          icon="exercise"
+          title="Exercise not found"
+          message="We couldn't find the exercise you were trying to replace."
+          primaryAction={{
+            hidden: true,
+          }}
+        />
+      </PageLayout>
+    );
+  }
+
   return (
     <ExercisePickerScreen
       mode={mode}
-      hasSource={!!session}
       targetExercise={targetSessionExercise?.exercise}
       addDescription="Select one or more exercises to add to this workout session."
-      missingSourceText="No active workout session found."
-      missingTargetText="Exercise not found in this workout session."
       onClose={handleClose}
       onDone={handleDone}
     />

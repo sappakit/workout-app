@@ -1,3 +1,4 @@
+import { Exercise } from "../response/exercise.types";
 import {
   WorkoutSession,
   WorkoutSessionExercise,
@@ -14,10 +15,12 @@ export interface WorkoutSessionExerciseSetModel extends Omit<
 
 export interface WorkoutSessionExerciseModel extends Omit<
   WorkoutSessionExercise,
-  "id" | "sets"
+  "id" | "exercise" | "sets"
 > {
   id: number | null;
   clientId: string;
+
+  exercise: Exercise;
   sets: WorkoutSessionExerciseSetModel[];
 }
 

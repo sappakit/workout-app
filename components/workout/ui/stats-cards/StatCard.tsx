@@ -1,13 +1,13 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
 import { LinearGradient } from "expo-linear-gradient";
-import { ChartBar, LucideIcon } from "lucide-react-native";
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { type StyleProp, StyleSheet, View, type ViewStyle } from "react-native";
 
 interface SimpleStatCardProps {
-  icon: LucideIcon;
+  icon: AppIconName;
   label: string;
   value: string;
   className?: string;
@@ -15,21 +15,16 @@ interface SimpleStatCardProps {
 }
 
 export function SimpleStatCard({
-  icon: Icon,
+  icon,
   label,
   value,
   className,
   style,
 }: SimpleStatCardProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className={twMerge(clsx("rounded-2xl p-4", className))}
-      style={[{ backgroundColor: colors.app.cardPrimary }, style]}
-    >
+    <View className={cn("rounded-2xl bg-card p-4", className)} style={style}>
       <View className="flex-row items-center gap-3">
-        <StatIcon icon={Icon} />
+        <StatIcon icon={icon} />
 
         <View className="flex-1">
           <StatValue label={label} value={value} />
@@ -47,7 +42,7 @@ type VolumeStatTrendItem = {
 interface VolumeStatCardProps {
   value: string;
   volumeTrend: VolumeStatTrendItem[];
-  icon?: LucideIcon;
+  icon?: AppIconName;
   label?: string;
   className?: string;
   style?: StyleProp<ViewStyle>;
@@ -58,28 +53,29 @@ interface VolumeStatCardProps {
 export function VolumeStatCard({
   value,
   volumeTrend,
-  icon: Icon = ChartBar,
+  icon = "progress",
   label = "Volume",
   className,
   style,
   barMaxHeight = 36,
   barWidth = 20,
 }: VolumeStatCardProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const maxValue = Math.max(...volumeTrend.map((item) => item.value), 0);
 
   return (
     <View
-      className={twMerge(
-        clsx("justify-between gap-4 rounded-2xl p-4", className),
+      className={cn(
+        "justify-between gap-4 rounded-2xl bg-contrast p-4",
+        className,
       )}
-      style={[{ backgroundColor: colors.app.cardPrimary }, style]}
+      style={style}
     >
       <View className="flex-row items-center gap-3">
-        <StatIcon icon={Icon} />
+        <StatIcon icon={icon} />
 
-        <StatValue label={label} value={value} />
+        <StatValue label={label} value={value} variant="contrast" />
       </View>
 
       <View className="flex-row items-end justify-between">
@@ -96,11 +92,14 @@ export function VolumeStatCard({
                 style={{
                   width: barWidth,
                   height,
-                  backgroundColor: colors.app.brand,
+                  backgroundColor: colors.primary,
                 }}
               />
 
-              <ThemedText type="small" variant="primary">
+              <ThemedText
+                type="caption"
+                className="text-contrast-foreground opacity-70"
+              >
                 {item.label}
               </ThemedText>
             </View>
@@ -111,36 +110,52 @@ export function VolumeStatCard({
   );
 }
 
-function StatIcon({ icon: Icon }: { icon: LucideIcon }) {
-  const { colors } = useAppTheme();
+type StatIconProps = {
+  icon: AppIconName;
+};
+
+function StatIcon({ icon }: StatIconProps) {
+  const colors = useAppColors();
 
   return (
-    <View
-      className="h-11 w-11 items-center justify-center overflow-hidden rounded-2xl"
-      style={{ backgroundColor: colors.app.brand }}
-    >
+    <View className="h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-primary">
       <LinearGradient
-        colors={[colors.app.brandLight, colors.app.brand, colors.app.brandDark]}
+        colors={[colors.primary, colors.primaryHover]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View>
-        <Icon size={20} color={colors.app.textWhite} />
-      </View>
+      <AppIcon name={icon} size="md" color={colors.primaryForeground} />
     </View>
   );
 }
 
-function StatValue({ label, value }: { label: string; value: string }) {
+type StatValueProps = {
+  label: string;
+  value: string;
+  variant?: "default" | "contrast";
+};
+
+function StatValue({ label, value, variant = "default" }: StatValueProps) {
+  const isContrast = variant === "contrast";
+
   return (
     <View>
-      <ThemedText type="extraSmall" variant="primary">
+      <ThemedText
+        type="caption"
+        className={
+          isContrast ? "text-contrast-foreground opacity-70" : undefined
+        }
+        tone={isContrast ? undefined : "muted"}
+      >
         {label}
       </ThemedText>
 
-      <ThemedText type="subtitle" variant="accent">
+      <ThemedText
+        type="heading"
+        className={isContrast ? "text-contrast-foreground" : undefined}
+      >
         {value}
       </ThemedText>
     </View>

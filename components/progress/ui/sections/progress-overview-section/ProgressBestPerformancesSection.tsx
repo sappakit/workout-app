@@ -1,9 +1,8 @@
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { formatNumber } from "@/components/progress/model/progress-history.mapper";
 import { ProgressMetricCard } from "@/components/progress/ui/elements/ProgressMetricCard";
-import { ThemedText } from "@/components/themed-text";
-import { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
-import { Dumbbell, Trophy, Weight } from "lucide-react-native";
+import { ContentFeedback } from "@/components/state/ContentFeedback";
+import type { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
 import { View } from "react-native";
 
 interface ProgressBestPerformancesSectionProps {
@@ -16,7 +15,7 @@ export function ProgressBestPerformancesSection({
   const hasBestPerformances = data.length > 0;
 
   return (
-    <>
+    <View className="gap-3">
       <SectionHeader
         title="Best Performances"
         subtitle={
@@ -41,17 +40,17 @@ export function ProgressBestPerformancesSection({
                   {
                     label: "Weight",
                     value: `${formatNumber(record.bestWeightKg)} kg`,
-                    icon: Dumbbell,
+                    icon: "volume",
                   },
                   {
                     label: "Volume",
                     value: `${formatNumber(record.bestSetVolumeKg)} kg`,
-                    icon: Weight,
+                    icon: "progress",
                   },
                   {
                     label: "Set",
                     value: record.bestSetLabel,
-                    icon: Trophy,
+                    icon: "achievement",
                   },
                 ],
               }}
@@ -59,22 +58,20 @@ export function ProgressBestPerformancesSection({
           ))}
         </View>
       ) : (
-        <View>
-          <ThemedText type="default" variant="accent">
-            No best sets yet
-          </ThemedText>
-
-          <ThemedText type="default" variant="primary">
-            Log weight and reps to see your strongest sets.
-          </ThemedText>
-        </View>
+        <ContentFeedback
+          icon="achievement"
+          title="No best sets yet"
+          subtitle="Log weight and reps to see your strongest sets."
+        />
       )}
-    </>
+    </View>
   );
 }
 
 function formatCompletedDate(value: string | null) {
-  if (!value) return "Completed date unavailable";
+  if (!value) {
+    return "Completed date unavailable";
+  }
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short",

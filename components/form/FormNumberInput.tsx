@@ -1,17 +1,12 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { Minus, Plus } from "lucide-react-native";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import {
-  Pressable,
-  TextInput as RNTextInput,
-  StyleProp,
-  View,
-  ViewStyle,
-} from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
+import { View } from "react-native";
 import { TextInput as GestureHandlerTextInput } from "react-native-gesture-handler";
-import { twMerge } from "tailwind-merge";
-import { Separator } from "../custom-ui/Separator";
 
 export interface FormNumberInputProps {
   value?: number | null;
@@ -21,13 +16,30 @@ export interface FormNumberInputProps {
   max?: number;
   step?: number;
   error?: boolean;
-  className?: string;
+
+  /**
+   * Controls the outer number input container.
+   */
+  containerClassName?: string;
+
+  /**
+   * Controls the text input itself.
+   */
   inputClassName?: string;
-  style?: StyleProp<ViewStyle>;
+
+  /**
+   * Controls inline styles for the outer container.
+   */
+  containerStyle?: StyleProp<ViewStyle>;
+
   disabled?: boolean;
   allowDecimal?: boolean;
   showStepper?: boolean;
-  inputMode?: "default" | "gesture"; // "gesture" for ReanimatedSwipeable compatibility
+
+  /**
+   * Use "gesture" when rendered inside ReanimatedSwipeable.
+   */
+  inputMode?: "default" | "gesture";
 }
 
 export default function FormNumberInput({
@@ -37,23 +49,21 @@ export default function FormNumberInput({
   min,
   max,
   step = 1,
-  error,
-  className,
+  error = false,
+  containerClassName,
   inputClassName,
-  style,
-  disabled,
+  containerStyle,
+  disabled = false,
   allowDecimal = false,
   showStepper = true,
   inputMode = "default",
 }: FormNumberInputProps) {
-  const { colors } = useAppTheme();
-
-  const InputComponent =
-    inputMode === "gesture" ? GestureHandlerTextInput : RNTextInput;
+  const colors = useAppColors();
 
   const [inputValue, setInputValue] = useState(
     value != null ? String(value) : "",
   );
+
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
@@ -63,8 +73,14 @@ export default function FormNumberInput({
   }, [value, isFocused]);
 
   const clamp = (num: number) => {
-    if (min !== undefined && num < min) return min;
-    if (max !== undefined && num > max) return max;
+    if (min !== undefined && num < min) {
+      return min;
+    }
+
+    if (max !== undefined && num > max) {
+      return max;
+    }
+
     return num;
   };
 
@@ -85,13 +101,15 @@ export default function FormNumberInput({
   };
 
   const adjustValue = (change: number) => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     const current = value ?? 0;
-    const newValue = clamp(current + change);
+    const nextValue = clamp(current + change);
 
-    setInputValue(String(newValue));
-    onChange?.(newValue);
+    setInputValue(String(nextValue));
+    onChange?.(nextValue);
   };
 
   const handleTextChange = (text: string) => {
@@ -104,10 +122,10 @@ export default function FormNumberInput({
       return;
     }
 
-    const num = allowDecimal ? Number(clean) : parseInt(clean, 10);
+    const numberValue = allowDecimal ? Number(clean) : parseInt(clean, 10);
 
-    if (!Number.isNaN(num)) {
-      onChange?.(clamp(num));
+    if (!Number.isNaN(numberValue)) {
+      onChange?.(clamp(numberValue));
     }
   };
 
@@ -120,15 +138,17 @@ export default function FormNumberInput({
       return;
     }
 
-    const num = allowDecimal ? Number(inputValue) : parseInt(inputValue, 10);
+    const numberValue = allowDecimal
+      ? Number(inputValue)
+      : parseInt(inputValue, 10);
 
-    if (Number.isNaN(num)) {
+    if (Number.isNaN(numberValue)) {
       setInputValue("");
       onChange?.(null);
       return;
     }
 
-    const clampedValue = clamp(num);
+    const clampedValue = clamp(numberValue);
 
     setInputValue(String(clampedValue));
     onChange?.(clampedValue);
@@ -136,58 +156,77 @@ export default function FormNumberInput({
 
   return (
     <View
-      className={twMerge(
-        clsx(
-          "h-12 flex-row items-center justify-center rounded-lg px-2",
-          className,
-        ),
+      className={cn(
+        "h-10 flex-row items-center rounded-lg border bg-secondary px-2",
+        error ? "border-destructive" : "border-input",
+        disabled && "opacity-50",
+        containerClassName,
       )}
-      style={[
-        {
-          backgroundColor: colors.app.cardSecondary,
-          opacity: disabled ? 0.5 : 1,
-        },
-        style,
-      ]}
+      style={containerStyle}
     >
-      <InputComponent
-        className={twMerge(clsx("flex-1 text-center", inputClassName))}
-        style={{
-          color: colors.app.textAccent,
-        }}
-        value={inputValue}
-        placeholder={placeholder}
-        keyboardType={allowDecimal ? "decimal-pad" : "number-pad"}
-        onChangeText={handleTextChange}
-        onFocus={() => setIsFocused(true)}
-        onBlur={handleBlur}
-        placeholderTextColor={colors.app.textPrimary}
-        editable={!disabled}
-        multiline={true}
-        numberOfLines={1}
-      />
-
-      {showStepper && (
-        <View className="flex-row items-center gap-2">
-          <Pressable
-            onPress={() => adjustValue(-step)}
-            className="p-1"
-            disabled={disabled}
-          >
-            <Minus size={18} color={colors.app.textAccent} />
-          </Pressable>
-
-          <Separator className="h-6" />
-
-          <Pressable
-            onPress={() => adjustValue(+step)}
-            className="p-1"
-            disabled={disabled}
-          >
-            <Plus size={18} color={colors.app.textAccent} />
-          </Pressable>
-        </View>
+      {inputMode === "gesture" ? (
+        <GestureHandlerTextInput
+          className={cn(
+            "min-w-0 flex-1 text-center text-sm text-foreground",
+            inputClassName,
+          )}
+          value={inputValue}
+          placeholder={placeholder}
+          keyboardType={allowDecimal ? "decimal-pad" : "number-pad"}
+          onChangeText={handleTextChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={handleBlur}
+          placeholderTextColor={colors.mutedForeground}
+          editable={!disabled}
+          multiline={true}
+          numberOfLines={1}
+        />
+      ) : (
+        <Input
+          className={cn(
+            "h-full min-w-0 flex-1 border-0 bg-transparent px-0 text-center text-sm opacity-100 shadow-none",
+            inputClassName,
+          )}
+          value={inputValue}
+          placeholder={placeholder}
+          keyboardType={allowDecimal ? "decimal-pad" : "number-pad"}
+          onChangeText={handleTextChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={handleBlur}
+          placeholderTextColor={colors.mutedForeground}
+          editable={!disabled}
+        />
       )}
+
+      {showStepper ? (
+        <View className="flex-row items-center gap-1">
+          <AppButton
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            icon={{
+              name: "remove",
+              size: "sm",
+            }}
+            disabled={disabled}
+            onPress={() => adjustValue(-step)}
+          />
+
+          <Separator orientation="vertical" className="h-6" />
+
+          <AppButton
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            icon={{
+              name: "add",
+              size: "sm",
+            }}
+            disabled={disabled}
+            onPress={() => adjustValue(step)}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }

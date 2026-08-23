@@ -1,14 +1,14 @@
 import { mapWorkoutSessionsToHistoryItems } from "@/components/progress/model/progress-history.mapper";
 import ProgressContent, {
-  ProgressHistoryState,
-  ProgressOverviewState,
+  type ProgressHistoryState,
+  type ProgressOverviewState,
 } from "@/components/progress/ProgressContent";
-import { ProgressTab } from "@/components/progress/ui/elements/ProgressTabs";
+import type { ProgressTab } from "@/components/progress/ui/elements/ProgressTabs";
 import { workoutApi } from "@/lib/api/workout.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { workoutQueryKeys } from "@/lib/workout/keys";
-import {
+import type {
   WorkoutProgressOverview,
   WorkoutSession,
 } from "@/types/workout/response/workout.types";
@@ -62,6 +62,7 @@ export default function ProgressScreen() {
     onRetry: refetchSessionHistory,
     onLoadMore: () => {
       if (!hasNextPage || isFetchingNextPage) return;
+
       fetchNextPage();
     },
   };

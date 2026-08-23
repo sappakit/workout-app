@@ -1,33 +1,27 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import FormPasswordInput from "@/components/form/FormPasswordInput";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { FormField } from "@/components/form/FormField";
+import FormPasswordInputV2 from "@/components/form/FormPasswordInput";
 import FormTextInput from "@/components/form/FormTextInput";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/context/AuthContext";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { SignInForm, signInSchema } from "@/schemas/auth.schema";
+import { type SignInForm, signInSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { AtSign, Facebook, LogIn, Mail } from "lucide-react-native";
-import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { AuthHeader } from "../ui/AuthHeader";
 
 export default function SignInContent() {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const { signIn } = useAuth();
   const router = useRouter();
-
   const toast = useAppToast();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignInForm>({
+  const { control, handleSubmit } = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
     mode: "onTouched",
     defaultValues: {
@@ -38,16 +32,18 @@ export default function SignInContent() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (values: SignInForm) => signIn(values),
+
     onSuccess: () => {
       toast.success({
         title: "Welcome back 👋",
         message: "You're ready to train.",
       });
     },
+
     onError: () => {
       toast.error({
         title: "Sign in failed",
-        message: "Incorrect email/username or password",
+        message: "Incorrect email/username or password.",
       });
     },
   });
@@ -64,202 +60,152 @@ export default function SignInContent() {
       />
 
       {/* Form */}
-      <View className="mt-4">
-        {/* Email */}
-        <View className="mt-3">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Email or username
-          </ThemedText>
-
-          <Controller
-            control={control}
-            name="identifier"
-            render={({ field }) => (
+      <View className="mt-7 gap-4">
+        {/* Email / username */}
+        <Controller
+          control={control}
+          name="identifier"
+          render={({ field, fieldState }) => (
+            <FormField
+              label="Email or username"
+              errorMessage={fieldState.error?.message}
+            >
               <FormTextInput
                 placeholder="Enter your email or username"
                 autoCapitalize="none"
+                autoCorrect={false}
                 value={field.value}
                 onChangeText={field.onChange}
-                error={!!errors.identifier}
+                onBlur={field.onBlur}
+                error={!!fieldState.error}
+                icon="email"
+                clearable
               />
-            )}
-          />
-
-          {errors.identifier?.message ? (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              className="mt-2 text-sm"
-              style={{
-                color: colors.app.error ?? "red",
-              }}
-            >
-              {errors.identifier.message}
-            </ThemedText>
-          ) : null}
-        </View>
+            </FormField>
+          )}
+        />
 
         {/* Password */}
-        <View className="mt-4">
-          <ThemedText type="default" variant="accent" className="mb-2">
-            Password
-          </ThemedText>
-
+        <View className="gap-3">
           <Controller
             control={control}
             name="password"
-            render={({ field }) => (
-              <FormPasswordInput
-                placeholder="Enter your password"
-                value={field.value}
-                onChangeText={field.onChange}
-                error={!!errors.password}
-              />
+            render={({ field, fieldState }) => (
+              <FormField
+                label="Password"
+                errorMessage={fieldState.error?.message}
+              >
+                <FormPasswordInputV2
+                  placeholder="Enter your password"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  error={!!fieldState.error}
+                  icon="password"
+                />
+              </FormField>
             )}
           />
 
-          {errors.password?.message ? (
-            <ThemedText
-              type="default"
-              variant="secondary"
-              style={{
-                color: colors.app.error ?? "red",
-              }}
-              className="mt-2 text-sm"
-            >
-              {errors.password.message}
-            </ThemedText>
-          ) : null}
-
           {/* Forgot password */}
-          <View className="mt-3 items-end">
-            <ThemedText
-              type="default"
-              variant="primary"
-              className="text-sm"
+          <View className="items-end">
+            <Pressable
+              hitSlop={8}
+              accessibilityRole="button"
               onPress={() => router.push("/(auth)/forgot-password")}
             >
-              Forgot password?
-            </ThemedText>
+              <ThemedText type="small" tone="primary">
+                Forgot password?
+              </ThemedText>
+            </Pressable>
           </View>
         </View>
 
         {/* Submit */}
-        <View className="mt-6">
+        <View className="mt-2 gap-4">
           <AppButton
-            title="Sign in"
+            title="Sign In"
             variant="primary"
-            icon={LogIn}
-            textClassName="font-medium"
-            onPress={handleSubmit(onSubmit)}
+            icon={{
+              name: "sign-in",
+              size: "sm",
+            }}
             loading={isPending}
+            disabled={isPending}
+            onPress={handleSubmit(onSubmit)}
           />
 
-          {/* Sign Up */}
-          <View className="mt-4 flex-row justify-center">
-            <ThemedText type="default" variant="primary" className="text-sm">
-              Don't have an account?{" "}
-              <ThemedText
-                type="default"
-                variant="primary"
-                className="text-sm"
-                style={{
-                  color: colors.app.brand,
-                }}
-                onPress={() => router.push("/(auth)/sign-up")}
-              >
+          {/* Sign up */}
+          <View className="flex-row items-center justify-center gap-1">
+            <ThemedText type="small" tone="muted">
+              Don't have an account?
+            </ThemedText>
+
+            <Pressable
+              hitSlop={8}
+              accessibilityRole="button"
+              onPress={() => router.push("/(auth)/sign-up")}
+            >
+              <ThemedText type="small" tone="primary">
                 Sign Up
               </ThemedText>
-            </ThemedText>
+            </Pressable>
           </View>
         </View>
 
-        {/* Third party login */}
-        {/* Divider */}
-        <View className="mt-6 flex-row items-center">
-          <View
-            className="flex-1"
-            style={{ height: 1, backgroundColor: colors.app.borderSecondary }}
-          />
-          <ThemedText
-            type="default"
-            variant="secondary"
-            style={{
-              marginHorizontal: 10,
-              color: colors.app.textPrimary,
-              fontSize: 13,
-            }}
-          >
+        {/* Third-party login */}
+        <View className="mt-2 flex-row items-center gap-3">
+          <View className="h-px flex-1 bg-border" />
+
+          <ThemedText type="caption" tone="muted">
             or continue with
           </ThemedText>
-          <View
-            className="flex-1"
-            style={{ height: 1, backgroundColor: colors.app.borderSecondary }}
+
+          <View className="h-px flex-1 bg-border" />
+        </View>
+
+        {/* TODO: Add third-party authentication */}
+        <View className="flex-row justify-center gap-4">
+          <AppButton
+            variant="secondary"
+            size="icon"
+            className="h-14 w-16 rounded-lg"
+            icon={{
+              name: "facebook",
+              size: "lg",
+            }}
+            onPress={() => {
+              // TODO: handle Facebook sign in
+            }}
+          />
+
+          <AppButton
+            variant="secondary"
+            size="icon"
+            className="h-14 w-16 rounded-lg"
+            icon={{
+              name: "google",
+              size: "lg",
+            }}
+            onPress={() => {
+              // TODO: handle Google sign in
+            }}
+          />
+
+          <AppButton
+            variant="secondary"
+            size="icon"
+            className="h-14 w-16 rounded-lg"
+            icon={{
+              name: "email",
+              variant: "outline",
+              size: "lg",
+            }}
+            onPress={() => {
+              // TODO: handle email provider sign in
+            }}
           />
         </View>
-
-        {/* TODO: Facebook, Google, Hotmail */}
-        <View className="mt-6 flex-row justify-center gap-4">
-          <View
-            className="h-14 w-16 items-center justify-center rounded-lg"
-            style={{ backgroundColor: colors.app.cardSecondary }}
-          >
-            <Facebook size={24} color={colors.app.textAccent} />
-          </View>
-
-          <View
-            className="h-14 w-16 items-center justify-center rounded-lg"
-            style={{ backgroundColor: colors.app.cardSecondary }}
-          >
-            <Mail size={24} color={colors.app.textAccent} />
-          </View>
-
-          <View
-            className="h-14 w-16 items-center justify-center rounded-lg"
-            style={{ backgroundColor: colors.app.cardSecondary }}
-          >
-            <AtSign size={24} color={colors.app.textAccent} />
-          </View>
-        </View>
-
-        {/* Terms */}
-        {/* <View className="mt-7 items-center">
-            <ThemedText
-              type="default"
-              variant="secondary"
-              style={{
-                color: colors.app.textSecondary,
-                fontSize: 12,
-                textAlign: "center",
-              }}
-            >
-              By signing in, you agree to our{" "}
-              <ThemedText
-                type="default"
-                variant="primary"
-                style={{
-                  color: colors.app.textAccent,
-                  textDecorationLine: "underline",
-                }}
-                // onPress={() => router.push("/(auth)/terms")}
-              >
-                Terms
-              </ThemedText>{" "}
-              and{" "}
-              <ThemedText
-                type="default"
-                variant="primary"
-                style={{
-                  color: colors.app.textAccent,
-                  textDecorationLine: "underline",
-                }}
-                // onPress={() => router.push("/(auth)/privacy")}
-              >
-                Privacy Policy
-              </ThemedText>
-              .
-            </ThemedText>
-          </View> */}
       </View>
     </PageLayout>
   );

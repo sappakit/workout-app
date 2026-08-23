@@ -1,14 +1,14 @@
 import heroImage from "@/assets/images/home-screen/hero_image.png";
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
 import {
   WorkoutTodayOverview,
   WorkoutWeeklyPlanDayType,
 } from "@/types/workout/response/workout.types";
 import { LinearGradient } from "expo-linear-gradient";
 import { Href, useRouter } from "expo-router";
-import { ClipboardList, Dumbbell, LucideIcon } from "lucide-react-native";
 import { Image, StyleSheet, View } from "react-native";
 
 interface TodayWorkoutCardProps {
@@ -16,40 +16,40 @@ interface TodayWorkoutCardProps {
 }
 
 export function TodayWorkoutCard({ todayOverview }: TodayWorkoutCardProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const router = useRouter();
 
   const content = getTodayWorkoutCardContent(todayOverview);
 
   return (
-    <View
-      className="relative h-44 overflow-hidden rounded-3xl"
-      style={{ backgroundColor: colors.app.brand }}
-    >
+    <View className="relative h-44 overflow-hidden rounded-3xl bg-primary shadow-raised">
       <LinearGradient
-        colors={[colors.app.brandLight, colors.app.brand, colors.app.brandDark]}
+        colors={[colors.primary, colors.primaryHover]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
 
       <View className="flex-1 flex-row justify-between gap-4">
-        <View className="flex-1 justify-between p-4">
+        <View className="z-10 flex-1 justify-between p-4">
           <View>
-            <ThemedText type="title" variant="white" className="text-3xl">
+            <ThemedText type="display" className="text-primary-foreground">
               {content.title}
             </ThemedText>
 
-            <ThemedText type="small" variant="white">
+            <ThemedText type="small" className="text-primary-foreground">
               {content.subtitle}
             </ThemedText>
           </View>
 
           <AppButton
             title={content.buttonTitle}
-            variant="white"
-            shape="pill"
-            icon={content.icon}
+            variant="contrast"
+            className="rounded-full"
+            icon={{
+              name: content.icon,
+              size: "md",
+            }}
             onPress={() => router.push(content.href)}
           />
         </View>
@@ -73,7 +73,7 @@ type TodayWorkoutCardContent = {
   title: string;
   subtitle: string;
   buttonTitle: string;
-  icon: LucideIcon;
+  icon: AppIconName;
   href: Href;
 };
 
@@ -85,7 +85,7 @@ function getTodayWorkoutCardContent(
       title: "Nice Work",
       subtitle: "One more step forward. See your latest progress.",
       buttonTitle: "View Summary",
-      icon: ClipboardList,
+      icon: "history",
       href: "/(tabs)/progress",
     };
   }
@@ -99,7 +99,7 @@ function getTodayWorkoutCardContent(
         ? `${workoutName} is on the schedule today.`
         : "Your workout is on the schedule today.",
       buttonTitle: "Let's Train",
-      icon: Dumbbell,
+      icon: "workout",
       href: "/(tabs)/workout",
     };
   }
@@ -109,7 +109,7 @@ function getTodayWorkoutCardContent(
       title: "Rest Day",
       subtitle: "Take it easy today, or choose a workout if you feel ready.",
       buttonTitle: "View Workouts",
-      icon: Dumbbell,
+      icon: "workout",
       href: "/(tabs)/workout",
     };
   }
@@ -118,7 +118,7 @@ function getTodayWorkoutCardContent(
     title: "Get Moving",
     subtitle: "Start with any workout that feels right today.",
     buttonTitle: "Let's Train",
-    icon: Dumbbell,
+    icon: "workout",
     href: "/(tabs)/workout",
   };
 }

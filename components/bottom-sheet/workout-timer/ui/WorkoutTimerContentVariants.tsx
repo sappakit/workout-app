@@ -1,19 +1,11 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import {
-  AlarmClockMinus,
-  AlarmClockPlus,
-  CircleCheckBig,
-  Pause,
-  Play,
-  SkipForward,
-  Trash2,
-} from "lucide-react-native";
-import { View } from "react-native";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
+import { Pressable, View } from "react-native";
 import {
   SessionStatus,
-  WorkoutTimerDisplayProps,
+  type WorkoutTimerDisplayProps,
 } from "../model/workoutTimerDisplay";
 
 export function CollapsedTimerContent({
@@ -23,89 +15,91 @@ export function CollapsedTimerContent({
   discardAction,
   pauseAction,
 }: WorkoutTimerDisplayProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <View className="flex-row items-center justify-between">
-      <View className="flex-1">
-        <ThemedText type="default" variant="primary" className="text-sm">
+      <View className="min-w-0 flex-1">
+        <ThemedText type="small" tone="muted">
           {display.timer.label}
         </ThemedText>
-        <ThemedText type="default" variant="accent" className="text-lg">
-          {display.timer.value}
-        </ThemedText>
+
+        <ThemedText type="heading">{display.timer.value}</ThemedText>
       </View>
 
-      <View className="flex-row items-center justify-center">
+      <View className="flex-row items-center justify-center gap-1">
         {display.isResting ? (
           <>
-            <AppButton
-              icon={AlarmClockMinus}
-              variant="ghost"
-              iconSize={20}
-              className="p-4"
+            <Pressable
               onPress={() => restAction.onDecrease()}
-            />
+              hitSlop={8}
+              className="h-11 w-11 items-center justify-center rounded-full active:opacity-80"
+            >
+              <AppIcon name="remove" size="lg" color={colors.mutedForeground} />
+            </Pressable>
 
             <AppButton
               variant="primary"
-              icon={SkipForward}
-              iconSize={20}
-              shape="pill"
-              className="h-14 w-14"
+              size="icon"
+              className="h-14 w-14 rounded-full"
+              icon={{
+                name: "skip",
+                size: "md",
+              }}
               onPress={restAction.onSkip}
             />
 
-            <AppButton
-              icon={AlarmClockPlus}
-              variant="ghost"
-              iconSize={20}
-              className="p-4"
+            <Pressable
               onPress={() => restAction.onIncrease()}
-            />
+              hitSlop={8}
+              className="h-11 w-11 items-center justify-center rounded-full active:opacity-80"
+            >
+              <AppIcon name="add" size="lg" color={colors.mutedForeground} />
+            </Pressable>
           </>
         ) : (
           <>
-            <AppButton
-              variant="ghost"
-              icon={CircleCheckBig}
-              iconSize={20}
-              iconColor={colors.app.brand}
-              className="p-4"
+            <Pressable
               onPress={finishAction.onPress}
-              loading={finishAction.loading}
-            />
+              disabled={finishAction.loading}
+              hitSlop={8}
+              className="h-11 w-11 items-center justify-center rounded-full active:opacity-80 disabled:opacity-50"
+            >
+              <AppIcon name="completed" size="lg" color={colors.primary} />
+            </Pressable>
 
             <AppButton
-              variant="tertiary"
-              icon={pauseAction.isPaused ? Play : Pause}
-              iconSize={20}
-              shape="pill"
-              className="h-14 w-14"
+              variant="secondary"
+              size="icon"
+              className="h-14 w-14 rounded-full"
+              icon={{
+                name: pauseAction.isPaused ? "play" : "pause",
+                size: "lg",
+              }}
               onPress={pauseAction.onPress}
             />
 
-            <AppButton
-              variant="ghost"
-              icon={Trash2}
-              iconSize={20}
-              className="p-4"
+            <Pressable
               onPress={discardAction.onPress}
-              loading={discardAction.loading}
-            />
+              disabled={discardAction.loading}
+              hitSlop={8}
+              className="h-11 w-11 items-center justify-center rounded-full active:opacity-80 disabled:opacity-50"
+            >
+              <AppIcon name="delete" size="lg" color={colors.mutedForeground} />
+            </Pressable>
           </>
         )}
       </View>
 
-      <View className="flex-1 items-end">
-        <ThemedText type="default" variant="primary" className="text-sm">
+      <View className="min-w-0 flex-1 items-end">
+        <ThemedText type="small" tone="muted">
           {display.status.label}
         </ThemedText>
 
         <View className="flex-row items-center gap-2">
           <StatusDot status={display.status.value} size={10} />
 
-          <ThemedText type="default" variant="accent" className="text-base">
+          <ThemedText type="bodyStrong" numberOfLines={1}>
             {display.status.labelValue}
           </ThemedText>
         </View>
@@ -136,15 +130,11 @@ export function ExpandedTimerContent({
 
         {/* Mid */}
         <View className="items-center justify-between">
-          <ThemedText type="default" variant="primary">
+          <ThemedText type="small" tone="muted">
             {display.timer.label}
           </ThemedText>
 
-          <ThemedText
-            type="default"
-            variant="accent"
-            className="text-5xl font-semibold"
-          >
+          <ThemedText type="display" className="text-5xl leading-[56px]">
             {display.timer.value}
           </ThemedText>
         </View>
@@ -158,14 +148,14 @@ export function ExpandedTimerContent({
           />
 
           <View className="items-end">
-            <ThemedText type="default" variant="primary" className="text-xs">
+            <ThemedText type="caption" tone="muted">
               {display.status.label}
             </ThemedText>
 
             <View className="flex-row items-center gap-2">
               <StatusDot status={display.status.value} />
 
-              <ThemedText type="default" variant="accent" className="text-sm">
+              <ThemedText type="label" numberOfLines={1}>
                 {display.status.labelValue}
               </ThemedText>
             </View>
@@ -178,7 +168,7 @@ export function ExpandedTimerContent({
           <>
             <AppButton
               title="- 15 sec"
-              variant="tertiary"
+              variant="secondary"
               className="flex-1"
               onPress={() => restAction.onDecrease()}
             />
@@ -186,14 +176,17 @@ export function ExpandedTimerContent({
             <AppButton
               title="Skip"
               variant="primary"
-              icon={SkipForward}
               className="flex-[2]"
+              icon={{
+                name: "skip",
+                size: "sm",
+              }}
               onPress={restAction.onSkip}
             />
 
             <AppButton
               title="+ 15 sec"
-              variant="tertiary"
+              variant="secondary"
               className="flex-1"
               onPress={() => restAction.onIncrease()}
             />
@@ -203,24 +196,33 @@ export function ExpandedTimerContent({
             <AppButton
               title="Finish"
               variant="primary"
-              icon={CircleCheckBig}
               className="flex-1"
+              icon={{
+                name: "completed",
+                size: "sm",
+              }}
               onPress={finishAction.onPress}
               loading={finishAction.loading}
             />
 
             <AppButton
-              variant="tertiary"
-              icon={pauseAction.isPaused ? Play : Pause}
-              className="h-12 w-12"
+              variant="secondary"
+              size="icon"
+              icon={{
+                name: pauseAction.isPaused ? "play" : "pause",
+                size: "sm",
+              }}
               onPress={pauseAction.onPress}
             />
 
             <AppButton
               title="Discard"
               variant="outline"
-              icon={Trash2}
               className="flex-1"
+              icon={{
+                name: "delete",
+                size: "sm",
+              }}
               onPress={discardAction.onPress}
               loading={discardAction.loading}
             />
@@ -235,52 +237,41 @@ type TimerStatProps = {
   label: string;
   value: string;
   align?: "left" | "right";
-  labelClassName?: string;
-  valueClassName?: string;
 };
 
-function TimerStat({
-  label,
-  value,
-  align = "left",
-  labelClassName = "text-xs",
-  valueClassName = "text-sm",
-}: TimerStatProps) {
+function TimerStat({ label, value, align = "left" }: TimerStatProps) {
   return (
     <View className={align === "right" ? "items-end" : undefined}>
-      <ThemedText type="default" variant="primary" className={labelClassName}>
+      <ThemedText type="caption" tone="muted">
         {label}
       </ThemedText>
 
-      <ThemedText type="default" variant="accent" className={valueClassName}>
-        {value}
-      </ThemedText>
+      <ThemedText type="label">{value}</ThemedText>
     </View>
   );
 }
 
-function StatusDot({
-  status,
-  size = 8,
-}: {
+type StatusDotProps = {
   status: SessionStatus;
   size?: number;
-}) {
-  const { colors } = useAppTheme();
+};
+
+function StatusDot({ status, size = 8 }: StatusDotProps) {
+  const colors = useAppColors();
 
   const backgroundColor =
     status === SessionStatus.PAUSED
-      ? colors.app.textPrimary
+      ? colors.mutedForeground
       : status === SessionStatus.RESTING
-        ? colors.app.warning
-        : colors.app.success;
+        ? colors.warning
+        : colors.success;
 
   return (
     <View
       style={{
         width: size,
         height: size,
-        borderRadius: 999,
+        borderRadius: size / 2,
         backgroundColor,
       }}
     />

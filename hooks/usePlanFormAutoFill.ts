@@ -1,6 +1,9 @@
 import { calculateWorkoutDurationFromExercises } from "@/lib/workout/utils";
+import {
+  requireExerciseMuscle,
+  requireExerciseMuscles,
+} from "@/lib/workout/utils/response-guards.utils";
 import { EditPlanForm } from "@/schemas/edit-plan.schema";
-import { ExerciseMuscleItem } from "@/types/workout/response/exercise.types";
 import { useEffect } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 
@@ -59,11 +62,17 @@ export function usePlanFormAutoFill({ form }: UsePlanFormAutoFillProps) {
 
     const uniqueMuscleIds = Array.from(
       new Set(
-        workoutExercises.flatMap((workoutExercise) =>
-          (workoutExercise.exercise.muscles ?? []).map(
-            (item: ExerciseMuscleItem) => item.muscle.id,
-          ),
-        ),
+        workoutExercises.flatMap((workoutExercise) => {
+          const exerciseMuscles = requireExerciseMuscles(
+            workoutExercise.exercise,
+          );
+
+          return exerciseMuscles.map((exerciseMuscle) => {
+            const muscle = requireExerciseMuscle(exerciseMuscle);
+
+            return muscle.id;
+          });
+        }),
       ),
     );
 

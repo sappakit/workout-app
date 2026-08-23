@@ -1,5 +1,4 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { View } from "react-native";
 
 type StatCardProps = {
@@ -8,34 +7,13 @@ type StatCardProps = {
 };
 
 export function StatCard({ value, label }: StatCardProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View
-      className="flex-1 items-center justify-center rounded-2xl px-3 py-4"
-      style={{
-        backgroundColor: colors.app.cardPrimary,
-      }}
-    >
-      <ThemedText
-        type="subtitle"
-        variant="primary"
-        className="font-bold"
-        style={{
-          color: colors.app.textAccent,
-        }}
-      >
+    <View className="flex-1 items-center justify-center rounded-2xl bg-card px-3 py-4">
+      <ThemedText type="heading" className="text-center">
         {value}
       </ThemedText>
 
-      <ThemedText
-        type="default"
-        variant="secondary"
-        className="mt-1 text-xs"
-        style={{
-          color: colors.app.textPrimary,
-        }}
-      >
+      <ThemedText type="caption" tone="muted" className="mt-1 text-center">
         {label}
       </ThemedText>
     </View>

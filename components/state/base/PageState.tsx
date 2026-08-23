@@ -1,12 +1,13 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { LucideIcon, RefreshCw } from "lucide-react-native";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
 import { View } from "react-native";
 
 export type PageStateAction = {
   label: string;
-  icon?: LucideIcon;
+  icon?: AppIconName;
   onPress: () => void;
   hidden?: boolean;
 };
@@ -18,7 +19,7 @@ export type PageStateActionOverride = Partial<PageStateAction> & {
 type PageStateProps = {
   title: string;
   message?: string;
-  icon?: LucideIcon;
+  icon?: AppIconName;
   primaryAction?: PageStateAction;
   secondaryAction?: PageStateAction;
 };
@@ -26,61 +27,74 @@ type PageStateProps = {
 export function PageState({
   title,
   message,
-  icon: Icon = RefreshCw,
+  icon = "refresh",
   primaryAction,
   secondaryAction,
 }: PageStateProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const hasPrimaryAction = primaryAction && !primaryAction.hidden;
   const hasSecondaryAction = secondaryAction && !secondaryAction.hidden;
 
+  const hasSingleAction =
+    (hasPrimaryAction && !hasSecondaryAction) ||
+    (!hasPrimaryAction && hasSecondaryAction);
+
   return (
-    <View className="flex-1 items-center justify-center gap-8 px-12">
-      <View
-        className="h-28 w-28 items-center justify-center rounded-3xl"
-        style={{
-          backgroundColor: colors.app.cardPrimary,
-        }}
-      >
-        <Icon size={56} color={colors.app.textAccent} />
+    <View className="flex-1 items-center justify-center gap-6 bg-background px-6">
+      <View className="h-28 w-28 items-center justify-center rounded-3xl bg-card">
+        <AppIcon name={icon} size="2xl" color={colors.secondaryForeground} />
       </View>
 
       <View className="gap-2">
-        <ThemedText
-          type="title"
-          variant="accent"
-          className="text-center text-2xl"
-        >
+        <ThemedText type="title" className="text-center">
           {title}
         </ThemedText>
 
         {message ? (
-          <ThemedText type="default" variant="primary" className="text-center">
+          <ThemedText type="body" tone="muted" className="text-center">
             {message}
           </ThemedText>
         ) : null}
       </View>
 
       {hasPrimaryAction || hasSecondaryAction ? (
-        <View className="w-full flex-row gap-3">
+        <View
+          className={
+            hasSingleAction ? "w-full items-center" : "w-full flex-row gap-3"
+          }
+        >
           {hasSecondaryAction ? (
             <AppButton
               title={secondaryAction.label}
-              onPress={secondaryAction.onPress}
-              icon={secondaryAction.icon}
               variant="secondary"
-              className="flex-1"
+              className={hasSingleAction ? "w-2/3" : "flex-1"}
+              icon={
+                secondaryAction.icon
+                  ? {
+                      name: secondaryAction.icon,
+                      size: "sm",
+                    }
+                  : undefined
+              }
+              onPress={secondaryAction.onPress}
             />
           ) : null}
 
           {hasPrimaryAction ? (
             <AppButton
               title={primaryAction.label}
-              onPress={primaryAction.onPress}
-              icon={primaryAction.icon}
               variant="primary"
-              className="flex-1"
+              className={hasSingleAction ? "w-2/3" : "flex-1"}
+              icon={
+                primaryAction.icon
+                  ? {
+                      name: primaryAction.icon,
+                      size: "sm",
+                    }
+                  : undefined
+              }
+              onPress={primaryAction.onPress}
             />
           ) : null}
         </View>

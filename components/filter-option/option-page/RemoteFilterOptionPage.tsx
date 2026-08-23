@@ -1,11 +1,10 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
-import { PaginatedResponse } from "@/types/api.types";
+import type { PaginatedResponse } from "@/types/api.types";
 import { useMemo } from "react";
 import { View } from "react-native";
 import {
-  FilterOption,
+  type FilterOption,
   FilterOptionPage,
   FilterOptionPageHeader,
 } from "./FilterOptionPage";
@@ -55,7 +54,9 @@ export function RemoteFilterOptionPage<TItem>({
   }, [data?.pages, mapOption]);
 
   const handleEndReached = () => {
-    if (!hasNextPage || isFetchingNextPage) return;
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
 
     fetchNextPage();
   };
@@ -119,17 +120,17 @@ export function RemoteFilterOptionStatePage({
   bottomInset: number;
   onBack: () => void;
 }) {
-  const { colors } = useAppTheme();
-
   return (
-    <View className="gap-4 px-4" style={{ paddingBottom: bottomInset + 20 }}>
+    <View
+      className="gap-4 px-4"
+      style={{
+        paddingBottom: bottomInset + 20,
+      }}
+    >
       <FilterOptionPageHeader title={title} onBack={onBack} />
 
-      <View
-        className="gap-3 rounded-2xl p-4"
-        style={{ backgroundColor: colors.app.cardSecondary }}
-      >
-        <ThemedText type="default" variant="primary">
+      <View className="gap-3 rounded-2xl bg-secondary p-4">
+        <ThemedText type="body" tone="muted">
           {message}
         </ThemedText>
       </View>

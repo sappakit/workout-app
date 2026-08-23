@@ -1,6 +1,5 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
+import { AppButton } from "@/components/custom-ui/app-button";
 import { useRouter } from "expo-router";
-import { Mail, Send } from "lucide-react-native";
 import { View } from "react-native";
 import { AuthHeader } from "../../ui/AuthHeader";
 
@@ -21,21 +20,29 @@ export function ForgotPasswordSuccess({
     <View className="gap-6">
       <AuthHeader
         title="Check your Email"
-        subtitle={`If an account exists, reset instructions were sent to ${maskEmail(email)}. Check Spam or send another email if needed.`}
+        subtitle={`If an account exists, reset instructions were sent to ${maskEmail(
+          email,
+        )}. Check Spam or send another email if needed.`}
       />
 
       <View className="gap-3">
         <AppButton
           title="Back to Sign In"
           variant="primary"
-          icon={Mail}
+          icon={{
+            name: "email",
+            size: "sm",
+          }}
           onPress={() => router.back()}
         />
 
         <AppButton
           title="Send another email"
           variant="secondary"
-          icon={Send}
+          icon={{
+            name: "send",
+            size: "sm",
+          }}
           loading={loading}
           disabled={loading}
           onPress={onResend}
@@ -48,8 +55,11 @@ export function ForgotPasswordSuccess({
 function maskEmail(email: string) {
   const [name, domain] = email.split("@");
 
-  if (!name || !domain) return email;
+  if (!name || !domain) {
+    return email;
+  }
 
   const visibleName = name.slice(0, Math.min(2, name.length));
+
   return `${visibleName}••••@${domain}`;
 }

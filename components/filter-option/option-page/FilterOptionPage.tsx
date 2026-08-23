@@ -1,8 +1,10 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { Check, ChevronLeft } from "lucide-react-native";
-import { ListRenderItem, Pressable, View } from "react-native";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import FormCheckbox from "@/components/form/FormCheckbox";
+import { useAppColors } from "@/hooks/useAppColors";
+import { cn } from "@/lib/utils";
+import type { ListRenderItem } from "react-native";
+import { Pressable, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
 export type FilterOption<TId extends string | number = number> = {
@@ -34,8 +36,6 @@ export type FilterOptionPageProps<TId extends string | number = number> =
 export function FilterOptionPage<TId extends string | number = number>(
   props: FilterOptionPageProps<TId>,
 ) {
-  const { colors } = useAppTheme();
-
   const handleSelect = (id: TId) => {
     if (props.selectionMode === "multiple") {
       const nextSelectedIds = props.selectedIds.includes(id)
@@ -59,41 +59,30 @@ export function FilterOptionPage<TId extends string | number = number>(
 
   const renderItem: ListRenderItem<FilterOption<TId>> = ({ item, index }) => {
     const selected = isSelected(item.id);
+
     const isFirstItem = index === 0;
     const isLastItem = index === props.options.length - 1;
 
     return (
       <Pressable
         onPress={() => handleSelect(item.id)}
-        className={clsx(
-          "flex-row items-center gap-3 px-4 py-4",
-          index > 0 && "border-t",
+        className={cn(
+          "flex-row items-center gap-3 bg-secondary px-4 py-4 active:opacity-80",
+          index > 0 && "border-t border-border",
           isFirstItem && "rounded-t-2xl",
           isLastItem && "rounded-b-2xl",
         )}
-        style={{
-          backgroundColor: colors.app.cardSecondary,
-          borderColor: colors.app.borderPrimary,
-        }}
       >
-        <View
-          className={clsx(
-            "h-5 w-5 items-center justify-center border",
-            props.selectionMode === "multiple" ? "rounded-md" : "rounded-full",
-          )}
-          style={{
-            borderColor: selected
-              ? colors.app.brand
-              : colors.app.borderSecondary,
-            backgroundColor: selected ? colors.app.brand : "transparent",
-          }}
-        >
-          {selected ? <Check size={13} color={colors.app.textWhite} /> : null}
-        </View>
+        <FormCheckbox
+          value={selected}
+          onChange={() => handleSelect(item.id)}
+          selectionMode={props.selectionMode}
+          className="pointer-events-none"
+        />
 
         <ThemedText
-          type="default"
-          variant={selected ? "brand" : "accent"}
+          type="small"
+          tone={selected ? "primary" : "default"}
           className="flex-1"
         >
           {item.label}
@@ -104,7 +93,7 @@ export function FilterOptionPage<TId extends string | number = number>(
 
   const listFooterComponent = props.isFetchingNextPage ? (
     <View className="py-4">
-      <ThemedText type="small" variant="primary" className="text-center">
+      <ThemedText type="small" tone="muted" className="text-center">
         Loading more...
       </ThemedText>
     </View>
@@ -137,17 +126,16 @@ export function FilterOptionPageHeader({
   title: string;
   onBack: () => void;
 }) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
-    <Pressable onPress={onBack} className="flex-row items-center gap-2">
-      <View className="items-center justify-center">
-        <ChevronLeft size={22} color={colors.app.textAccent} />
-      </View>
+    <Pressable
+      onPress={onBack}
+      className="flex-row items-center gap-2 self-start active:opacity-80"
+    >
+      <AppIcon name="back" size="md" color={colors.foreground} />
 
-      <ThemedText type="subtitle" variant="accent">
-        {title}
-      </ThemedText>
+      <ThemedText type="heading">{title}</ThemedText>
     </Pressable>
   );
 }

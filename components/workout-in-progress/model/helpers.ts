@@ -2,6 +2,11 @@ import { getPausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
 import { createClientId } from "@/lib/id/utils";
 import { ExerciseFieldKey, getExerciseFields } from "@/lib/workout/config";
 import {
+  requireSessionExercise,
+  requireSessionExercises,
+  requireSessionExerciseSets,
+} from "@/lib/workout/utils/response-guards.utils";
+import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,
   WorkoutSessionModel,
@@ -96,7 +101,7 @@ export function addSessionExercise(
   session: WorkoutSessionModel,
   exercises: Exercise[],
 ): WorkoutSessionModel {
-  const currentExercises = session.sessionExercises ?? [];
+  const currentExercises = session.sessionExercises;
 
   const nextSessionExercises: WorkoutSessionExerciseModel[] = [
     ...currentExercises,
@@ -137,7 +142,6 @@ export function replaceSessionExercise(
 
       return {
         ...sessionExercise,
-        workoutExerciseId: null,
         exercise: selectedExercise,
         restTime: selectedExercise.defaultRestTime ?? null,
         completedAt: null,
@@ -145,7 +149,6 @@ export function replaceSessionExercise(
           sessionExercise.sets.length > 0
             ? sessionExercise.sets.map((set) => ({
                 ...set,
-                workoutExerciseSetId: null,
                 completedAt: null,
               }))
             : [createEmptySessionSet(1)],
@@ -177,7 +180,6 @@ function createEmptySessionSet(setNumber = 1): WorkoutSessionExerciseSetModel {
   return {
     id: null,
     clientId: createClientId("new-session-set"),
-    workoutExerciseSetId: null,
     setNumber,
     reps: null,
     weight: null,
@@ -189,25 +191,31 @@ function createEmptySessionSet(setNumber = 1): WorkoutSessionExerciseSetModel {
 }
 
 // API payload -> Workout Session UI
-export const mapWorkoutSessiontoWorkoutSessionModel = (
+export const mapWorkoutSessionToWorkoutSessionModel = (
   session: WorkoutSession,
-): WorkoutSessionModel => ({
-  ...session,
-  sessionExercises: session.sessionExercises.map((exercise) => {
-    const mappedSets: WorkoutSessionExerciseSetModel[] = exercise.sets.map(
-      (set) => ({
+): WorkoutSessionModel => {
+  const sessionExercises = requireSessionExercises(session);
+
+  return {
+    ...session,
+    sessionExercises: sessionExercises.map((sessionExercise) => {
+      const exercise = requireSessionExercise(sessionExercise);
+      const sets = requireSessionExerciseSets(sessionExercise);
+
+      const mappedSets: WorkoutSessionExerciseSetModel[] = sets.map((set) => ({
         ...set,
         clientId: `existing-session-set-${set.id}`,
-      }),
-    );
+      }));
 
-    return {
-      ...exercise,
-      clientId: `existing-session-exercise-${exercise.id}`,
-      sets: mappedSets.length > 0 ? mappedSets : [createEmptySessionSet(1)],
-    };
-  }),
-});
+      return {
+        ...sessionExercise,
+        clientId: `existing-session-exercise-${sessionExercise.id}`,
+        exercise,
+        sets: mappedSets.length > 0 ? mappedSets : [createEmptySessionSet(1)],
+      };
+    }),
+  };
+};
 
 // Exercise -> Workout Session Exercise UI
 function mapExerciseToSessionExerciseModel(
@@ -219,7 +227,6 @@ function mapExerciseToSessionExerciseModel(
   return {
     id: null,
     clientId: createClientId("new-session-exercise"),
-    workoutExerciseId: null,
     orderIndex,
     restTime: exercise.defaultRestTime ?? null,
     completedAt: null,
@@ -241,11 +248,11 @@ export const mapWorkoutSessionModelToFinishPayload = (
       )
     : 0;
 
-  // Combine past pauses + current pause
+  // Combine past pauses and the current pause
   const totalPausedDuration =
     session.totalPausedDuration + currentPausedSeconds;
 
-  // Calculate total active workout time (excluding all pauses)
+  // Calculate total active workout time
   const totalDuration = getPausableElapsedSeconds({
     startedAt: session.startedAt,
     pausedAt: null,
@@ -259,15 +266,13 @@ export const mapWorkoutSessionModelToFinishPayload = (
     totalPausedDuration,
     caloriesBurned: session.caloriesBurned,
     sessionExercises: session.sessionExercises.map((sessionExercise) => ({
-      id: sessionExercise.id ?? null,
-      workoutExerciseId: sessionExercise.workoutExerciseId ?? null,
+      id: sessionExercise.id,
       exerciseId: sessionExercise.exercise.id,
       orderIndex: sessionExercise.orderIndex,
-      restTime: sessionExercise.restTime ?? null,
+      restTime: sessionExercise.restTime,
       completedAt: sessionExercise.completedAt,
       sets: sessionExercise.sets.map((set) => ({
-        id: set.id ?? null,
-        workoutExerciseSetId: set.workoutExerciseSetId ?? null,
+        id: set.id,
         setNumber: set.setNumber,
         reps: set.reps,
         weight: set.weight,
@@ -293,12 +298,14 @@ export function commitInheritedSetValues({
   currentIndex: number;
   exercise: WorkoutSessionExerciseModel;
 }): WorkoutSessionExerciseSetModel {
-  const fields = Array.from(getExerciseFields(exercise.exercise.exerciseType));
+  const fields = Array.from(
+    getExerciseFields(exercise.exercise.category?.code),
+  );
 
   return fields.reduce<WorkoutSessionExerciseSetModel>((updatedSet, field) => {
     const currentValue = getWorkoutSessionSetValue(updatedSet, field);
 
-    // If user already typed a value, do not overwrite it.
+    // Do not overwrite values entered by the user
     if (currentValue != null) {
       return updatedSet;
     }
@@ -309,7 +316,7 @@ export function commitInheritedSetValues({
       field,
     });
 
-    // If there is no previous value, keep it empty.
+    // Keep the field empty when no previous value exists
     if (inheritedValue == null) {
       return updatedSet;
     }

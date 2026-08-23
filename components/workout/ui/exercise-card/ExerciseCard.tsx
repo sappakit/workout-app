@@ -1,28 +1,20 @@
+import { MetaPill, MetaPillList } from "@/components/custom-ui/MetaPill";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import Thumbnail from "@/components/custom-ui/Thumbnail";
-import { ThemedText } from "@/components/themed-text";
 import { EXERCISE_IMAGE } from "@/constants/images";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { cn } from "@/lib/utils";
 import {
-  Exercise,
-  ExerciseTypeLabel,
-} from "@/types/workout/response/exercise.types";
-import clsx from "clsx";
-import { LucideIcon } from "lucide-react-native";
-import { Pressable, StyleProp, View, ViewStyle } from "react-native";
-import { twMerge } from "tailwind-merge";
-import { WorkoutMetaPill } from "../workout-card/WorkoutCard";
+  requireExerciseMuscle,
+  requireExerciseMuscles,
+} from "@/lib/workout/utils/response-guards.utils";
+import type { Exercise } from "@/types/workout/response/exercise.types";
+import type { StyleProp, ViewStyle } from "react-native";
+import { Pressable, View } from "react-native";
+import type { WorkoutCardItem } from "../workout-card/WorkoutCard";
 
-type ExerciseCardMetaItem = {
-  icon?: LucideIcon;
-  label: string;
-};
+const MAX_VISIBLE_META_ITEMS = 2;
 
-type ExerciseCardItem = {
-  title: string;
-  subtitle?: string;
-  imageUrl?: string | null;
-  metaItems?: ExerciseCardMetaItem[];
-};
+type ExerciseCardItem = Omit<WorkoutCardItem, "id">;
 
 interface ExerciseCardProps extends ExerciseCardItem {
   disabled?: boolean;
@@ -41,49 +33,39 @@ export function ExerciseCard({
   className,
   style,
 }: ExerciseCardProps) {
-  const { colors } = useAppTheme();
-
   return (
     <Pressable
       disabled={disabled}
       onPress={onPress}
-      className={twMerge(
-        clsx("flex-row gap-3 overflow-hidden rounded-3xl p-3", className),
+      className={cn(
+        "flex-row gap-3 overflow-hidden rounded-3xl bg-card p-3 active:opacity-80",
+        disabled && "opacity-60",
+        className,
       )}
-      style={[
-        {
-          backgroundColor: colors.app.cardPrimary,
-          opacity: disabled ? 0.6 : 1,
-        },
-        style,
-      ]}
+      style={style}
     >
       <Thumbnail imageUri={imageUrl ?? EXERCISE_IMAGE} />
 
-      <View className="flex-1 justify-between gap-3">
-        <View>
+      <View className="min-w-0 flex-1 justify-between gap-3">
+        <View className="min-w-0">
           {subtitle ? (
-            <ThemedText type="extraSmall" variant="primary" numberOfLines={1}>
+            <ThemedText type="caption" tone="muted" numberOfLines={1}>
               {subtitle}
             </ThemedText>
           ) : null}
 
-          <ThemedText type="subtitle" variant="accent" numberOfLines={1}>
+          <ThemedText type="bodyStrong" numberOfLines={1}>
             {title}
           </ThemedText>
         </View>
 
-        {metaItems.length > 0 ? (
-          <View className="flex-row flex-wrap gap-2">
-            {metaItems.map((item) => (
-              <WorkoutMetaPill
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-              />
-            ))}
-          </View>
-        ) : null}
+        <MetaPillList
+          items={metaItems}
+          maxVisibleItems={MAX_VISIBLE_META_ITEMS}
+          renderItem={(item) => (
+            <MetaPill icon={item.icon} label={item.label} className="min-w-0" />
+          )}
+        />
       </View>
     </Pressable>
   );
@@ -92,16 +74,32 @@ export function ExerciseCard({
 export function mapExerciseToExerciseCardItem(
   exercise: Exercise,
 ): ExerciseCardItem {
-  const muscleMetaItems =
-    exercise.muscles?.map((item) => ({
-      label: item.muscle.name,
-    })) ?? [];
+  const exerciseMuscles = requireExerciseMuscles(exercise);
+
+  const muscleMetaItems = exerciseMuscles.map((item) => {
+    const muscle = requireExerciseMuscle(item);
+
+    return {
+      key: muscle.id,
+      label: muscle.name,
+    };
+  });
+
+  const primaryMedia =
+    exercise.media?.find((media) => media.isPrimary) ?? exercise.media?.[0];
 
   return {
     title: exercise.name,
-    subtitle: ExerciseTypeLabel[exercise.exerciseType],
-    imageUrl: exercise.imageUrl,
+    subtitle: exercise.category?.name ?? "Exercise",
+    imageUrl: primaryMedia?.url ?? null,
     metaItems:
-      muscleMetaItems.length > 0 ? muscleMetaItems : [{ label: "General" }],
+      muscleMetaItems.length > 0
+        ? muscleMetaItems
+        : [
+            {
+              key: "general",
+              label: "General",
+            },
+          ],
   };
 }

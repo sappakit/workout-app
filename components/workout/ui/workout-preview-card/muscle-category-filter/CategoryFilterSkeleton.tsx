@@ -1,15 +1,21 @@
 import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
-import clsx from "clsx";
-import { ScrollView } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/lib/utils";
+import { ScrollView, type StyleProp, type ViewStyle } from "react-native";
 
-export function CategoryFilterSkeleton() {
+type CategoryFilterSkeletonProps = {
+  contentContainerStyle?: StyleProp<ViewStyle>;
+};
+
+export function CategoryFilterSkeleton({
+  contentContainerStyle,
+}: CategoryFilterSkeletonProps) {
   return (
     <ScrollView
       horizontal
       scrollEnabled={false}
       showsHorizontalScrollIndicator={false}
       contentContainerClassName="gap-2"
+      contentContainerStyle={contentContainerStyle}
     >
       <CategoryPillSkeleton widthClassName="w-14" />
       <CategoryPillSkeleton widthClassName="w-24" />
@@ -28,7 +34,8 @@ function CategoryPillSkeleton({
 }) {
   return (
     <SkeletonPlaceholder
-      className={twMerge(clsx("h-8 rounded-full", widthClassName))}
+      containerClassName={cn("h-8", widthClassName)}
+      skeletonClassName="rounded-full"
     />
   );
 }

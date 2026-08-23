@@ -5,7 +5,7 @@ import { ErrorState } from "@/components/state/ErrorState";
 import { userApi } from "@/lib/api/user.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { userQueryKeys } from "@/lib/user/keys";
-import { User } from "@/types/user/response/user.types";
+import type { User } from "@/types/user/response/user.types";
 
 export default function ProfileScreen() {
   const url = userApi.getMyProfile();
@@ -15,9 +15,11 @@ export default function ProfileScreen() {
     url,
   );
 
-  if (isLoading) return <ProfileSkeleton />;
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
 
-  if (isError)
+  if (isError) {
     return (
       <ErrorState
         primaryAction={{
@@ -25,8 +27,17 @@ export default function ProfileScreen() {
         }}
       />
     );
+  }
 
-  if (!data) return <EmptyState />;
+  if (!data) {
+    return (
+      <EmptyState
+        icon="profile"
+        title="Profile unavailable"
+        message="Your profile information is not available right now."
+      />
+    );
+  }
 
   return <ProfileContent data={data} />;
 }

@@ -1,5 +1,5 @@
 import { mapWorkoutSessionModelToFinishPayload } from "@/components/workout-in-progress/model/helpers";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { usePausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";
 import { useRestCompleteAlert } from "@/hooks/useRestCompleteAlert";
@@ -41,7 +41,7 @@ const SHEET_HEIGHT_BUFFER = 24;
 export default function WorkoutTimerBottomSheet({
   bottomInset = 0,
 }: WorkoutTimerBottomSheetProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   const toast = useAppToast();
   const invalidateQueries = useInvalidateQueries();
@@ -52,6 +52,7 @@ export default function WorkoutTimerBottomSheet({
   const [collapsedContentHeight, setCollapsedContentHeight] = useState<
     number | null
   >(null);
+
   const [expandedContentHeight, setExpandedContentHeight] = useState<
     number | null
   >(null);
@@ -86,8 +87,11 @@ export default function WorkoutTimerBottomSheet({
   const hasActiveWorkoutSession = useWorkoutSessionStore(
     selectHasActiveWorkoutSession,
   );
+
   const storedSession = useWorkoutSessionStore(selectActiveWorkoutSession);
+
   const updateSession = useWorkoutSessionStore((state) => state.updateSession);
+
   const clearSession = useWorkoutSessionStore((state) => state.clearSession);
 
   const sessionTimer = usePausableElapsedSeconds({
@@ -103,10 +107,13 @@ export default function WorkoutTimerBottomSheet({
   // Cancel workout
   const cancelWorkoutMutation = useMutation({
     mutationFn: () => {
-      if (!storedSession) throw new Error("No active session");
+      if (!storedSession) {
+        throw new Error("No active session");
+      }
 
       return api.post(workoutApi.cancelSession(storedSession.id));
     },
+
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current]);
 
@@ -118,6 +125,7 @@ export default function WorkoutTimerBottomSheet({
         message: "Your workout was discarded.",
       });
     },
+
     onError: () => {
       toast.error({
         title: "Cancel failed",
@@ -129,12 +137,15 @@ export default function WorkoutTimerBottomSheet({
   // Finish workout
   const finishWorkoutSessionMutation = useMutation({
     mutationFn: async () => {
-      if (!storedSession) throw new Error("No active session");
+      if (!storedSession) {
+        throw new Error("No active session");
+      }
 
       const payload = mapWorkoutSessionModelToFinishPayload(storedSession);
 
       return api.patch(workoutApi.finishSession(storedSession.id), payload);
     },
+
     onSuccess: async () => {
       await invalidateQueries([workoutQueryKeys.current, workoutQueryKeys.all]);
 
@@ -146,6 +157,7 @@ export default function WorkoutTimerBottomSheet({
         message: "Your workout has been saved successfully.",
       });
     },
+
     onError: () => {
       toast.error({
         title: "Save failed",
@@ -175,33 +187,35 @@ export default function WorkoutTimerBottomSheet({
 
   // Finish session
   const handleFinishWorkoutSession = () => {
-    if (!storedSession) return;
+    if (!storedSession) {
+      return;
+    }
 
     finishWorkoutSessionMutation.mutate();
   };
 
   // Pause/resume session
   const handleTogglePauseWorkout = () => {
-    updateSession((prev) => {
+    updateSession((previousSession) => {
       const now = new Date();
 
       // Resume
-      if (prev.pausedAt) {
+      if (previousSession.pausedAt) {
         const pausedSeconds = Math.floor(
-          (now.getTime() - new Date(prev.pausedAt).getTime()) / 1000,
+          (now.getTime() - new Date(previousSession.pausedAt).getTime()) / 1000,
         );
 
         return {
-          ...prev,
+          ...previousSession,
           pausedAt: null,
           totalPausedDuration:
-            prev.totalPausedDuration + Math.max(0, pausedSeconds),
+            previousSession.totalPausedDuration + Math.max(0, pausedSeconds),
         };
       }
 
       // Pause
       return {
-        ...prev,
+        ...previousSession,
         pausedAt: now.toISOString(),
       };
     });
@@ -224,10 +238,10 @@ export default function WorkoutTimerBottomSheet({
       animateOnMount
       detached={false}
       backgroundStyle={{
-        backgroundColor: colors.app.cardPrimary,
+        backgroundColor: colors.card,
       }}
       handleIndicatorStyle={{
-        backgroundColor: colors.app.borderSecondary,
+        backgroundColor: colors.borderStrong,
       }}
     >
       <WorkoutTimerSheetContent
@@ -252,8 +266,8 @@ export default function WorkoutTimerBottomSheet({
           isPaused: sessionTimer.isPaused,
         }}
         onCollapsedLayout={(height) => {
-          setCollapsedContentHeight((prev) =>
-            prev === height ? prev : height,
+          setCollapsedContentHeight((previousHeight) =>
+            previousHeight === height ? previousHeight : height,
           );
 
           setCollapsedSnapPoint(
@@ -261,7 +275,9 @@ export default function WorkoutTimerBottomSheet({
           );
         }}
         onExpandedLayout={(height) => {
-          setExpandedContentHeight((prev) => (prev === height ? prev : height));
+          setExpandedContentHeight((previousHeight) =>
+            previousHeight === height ? previousHeight : height,
+          );
         }}
       />
     </BottomSheet>

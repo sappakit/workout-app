@@ -1,13 +1,13 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { AppButton } from "@/components/custom-ui/app-button";
+import { useAppColors } from "@/hooks/useAppColors";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { SlidersHorizontal } from "lucide-react-native";
-import { ReactNode, useCallback, useRef } from "react";
+import type { ReactNode } from "react";
+import { useCallback, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FilterBottomSheetProps<TValue> = {
@@ -26,8 +26,9 @@ export function FilterBottomSheet<TValue>({
   onApplyFilters,
   renderContent,
 }: FilterBottomSheetProps<TValue>) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
   const insets = useSafeAreaInsets();
+
   const animationConfigs = useDefaultBottomSheetAnimation();
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -54,11 +55,13 @@ export function FilterBottomSheet<TValue>({
   return (
     <>
       <AppButton
-        variant="option"
-        icon={SlidersHorizontal}
-        className="h-12 w-12"
-        shape="pill"
-        iconSize={18}
+        variant="secondary"
+        size="icon"
+        className="h-10 w-10 rounded-full"
+        icon={{
+          name: "filter",
+          size: "sm",
+        }}
         onPress={openSheet}
       />
 
@@ -72,13 +75,17 @@ export function FilterBottomSheet<TValue>({
         enableContentPanningGesture
         backdropComponent={renderBackdrop}
         backgroundStyle={{
-          backgroundColor: colors.app.cardPrimary,
+          backgroundColor: colors.popover,
         }}
         handleIndicatorStyle={{
-          backgroundColor: colors.app.borderSecondary,
+          backgroundColor: colors.borderStrong,
         }}
       >
-        <BottomSheetView style={{ minHeight: 380 }}>
+        <BottomSheetView
+          style={{
+            minHeight: 380,
+          }}
+        >
           {renderContent({
             value,
             bottomInset: insets.bottom,

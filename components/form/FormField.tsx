@@ -1,9 +1,8 @@
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { ReactNode } from "react";
-import { StyleProp, View, ViewStyle } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+import type { StyleProp, ViewStyle } from "react-native";
+import { View } from "react-native";
 
 type FormFieldProps = {
   label: string;
@@ -20,26 +19,33 @@ export function FormField({
   className,
   style,
 }: FormFieldProps) {
-  const { colors } = useAppTheme();
-
   return (
-    <View className={twMerge(clsx("gap-2", className))} style={style}>
-      <ThemedText type="default" variant="accent">
-        {label}
-      </ThemedText>
+    <View className={cn("gap-2", className)} style={style}>
+      <ThemedText type="label">{label}</ThemedText>
 
       {children}
 
-      {!!errorMessage && (
-        <ThemedText
-          type="small"
-          style={{
-            color: colors.app.error ?? "red",
-          }}
-        >
-          {errorMessage}
-        </ThemedText>
-      )}
+      <FormErrorMessage message={errorMessage} />
     </View>
+  );
+}
+
+type FormErrorMessageProps = {
+  message?: string;
+  className?: string;
+};
+
+export function FormErrorMessage({
+  message,
+  className,
+}: FormErrorMessageProps) {
+  if (!message) {
+    return null;
+  }
+
+  return (
+    <ThemedText type="small" tone="destructive" className={className}>
+      {message}
+    </ThemedText>
   );
 }

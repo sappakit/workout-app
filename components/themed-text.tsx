@@ -1,66 +1,60 @@
-import { useAppTheme } from "@/hooks/useAppTheme";
-import clsx from "clsx";
-import { Text, type TextProps } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { StyleSheet, Text, type TextProps } from "react-native";
 
-export type TextType =
-  | "default"
-  | "extraSmall"
-  | "small"
-  | "defaultSemiBold"
-  | "title"
-  | "subtitle";
-
-type Variant =
-  | "primary"
-  | "secondary"
-  | "accent"
-  | "brand"
-  | "success"
-  | "warning"
-  | "error"
-  | "white";
+import { useThemeColor } from "@/hooks/use-theme-color";
 
 export type ThemedTextProps = TextProps & {
-  type?: TextType;
-  variant?: Variant;
-  className?: string;
+  lightColor?: string;
+  darkColor?: string;
+  type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
 };
 
-const typeClassMap = {
-  default: "text-base",
-  extraSmall: "text-xs",
-  small: "text-sm",
-  defaultSemiBold: "text-base font-semibold",
-  title: "text-xl font-semibold",
-  subtitle: "text-lg font-medium",
-} satisfies Record<TextType, string>;
-
 export function ThemedText({
-  className,
-  type = "default",
-  variant = "primary",
   style,
+  lightColor,
+  darkColor,
+  type = "default",
   ...rest
 }: ThemedTextProps) {
-  const { colors } = useAppTheme();
-
-  const variantColorMap = {
-    primary: colors.app.textPrimary,
-    secondary: colors.app.textSecondary,
-    accent: colors.app.textAccent,
-    brand: colors.app.brand,
-    success: colors.app.success,
-    warning: colors.app.warning,
-    error: colors.app.error,
-    white: colors.app.textWhite,
-  } satisfies Record<Variant, string>;
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
 
   return (
     <Text
+      style={[
+        { color },
+        type === "default" ? styles.default : undefined,
+        type === "title" ? styles.title : undefined,
+        type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,
+        type === "subtitle" ? styles.subtitle : undefined,
+        type === "link" ? styles.link : undefined,
+        style,
+      ]}
       {...rest}
-      className={twMerge(clsx(typeClassMap[type], className))}
-      style={[{ color: variantColorMap[variant] }, style]}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  default: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  defaultSemiBold: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "600",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    lineHeight: 32,
+  },
+  subtitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  link: {
+    lineHeight: 30,
+    fontSize: 16,
+    color: "#0a7ea4",
+  },
+});

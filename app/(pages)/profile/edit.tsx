@@ -5,7 +5,7 @@ import { ErrorState } from "@/components/state/ErrorState";
 import { userApi } from "@/lib/api/user.api";
 import { useGetQuery } from "@/lib/query/useGetQuery";
 import { userQueryKeys } from "@/lib/user/keys";
-import { User } from "@/types/user/response/user.types";
+import type { User } from "@/types/user/response/user.types";
 
 export default function EditProfileScreen() {
   const url = userApi.getMyProfile();
@@ -15,18 +15,32 @@ export default function EditProfileScreen() {
     url,
   );
 
-  if (isLoading) return <EditProfileSkeleton />;
+  if (isLoading) {
+    return <EditProfileSkeleton />;
+  }
 
-  if (isError)
+  if (isError) {
     return (
       <ErrorState
+        icon="profile"
+        title="Couldn't load profile"
+        message="We couldn't load your profile information. Check your connection and try again."
         primaryAction={{
           onPress: refetch,
         }}
       />
     );
+  }
 
-  if (!data) return <EmptyState />;
+  if (!data) {
+    return (
+      <EmptyState
+        icon="profile"
+        title="Profile unavailable"
+        message="Your profile information is not available right now."
+      />
+    );
+  }
 
   return <EditProfileContent data={data} />;
 }

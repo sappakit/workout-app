@@ -3,7 +3,7 @@ import { authApi } from "@/lib/api/auth.api";
 import { api } from "@/lib/api/client";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import {
-  ForgotPasswordForm as ForgotPasswordFormValues,
+  type ForgotPasswordForm as ForgotPasswordFormValues,
   forgotPasswordSchema,
 } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,11 +19,7 @@ export default function ForgotPasswordContent() {
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordFormValues>({
+  const { control, handleSubmit } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     mode: "onTouched",
     defaultValues: {
@@ -50,7 +46,9 @@ export default function ForgotPasswordContent() {
   const handleResendEmail = () => {
     if (!submittedEmail) return;
 
-    mutate({ email: submittedEmail });
+    mutate({
+      email: submittedEmail,
+    });
   };
 
   return (
@@ -64,7 +62,6 @@ export default function ForgotPasswordContent() {
       ) : (
         <ForgotPasswordForm
           control={control}
-          errors={errors}
           loading={isPending}
           onSubmit={handleSubmit((values) => mutate(values))}
         />

@@ -1,16 +1,22 @@
-import { ThemedText } from "@/components/themed-text";
+import { MetaPill } from "@/components/custom-ui/MetaPill";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
-import { hexWithOpacity } from "@/constants/theme";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { WorkoutResponse } from "@/types/workout/response/workout.types";
-import clsx from "clsx";
-import { Clock, Dumbbell, LucideIcon } from "lucide-react-native";
-import { Image, Pressable, StyleProp, View, ViewStyle } from "react-native";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/lib/utils";
+import { requireWorkoutExercises } from "@/lib/workout/utils/response-guards.utils";
+import type { WorkoutResponse } from "@/types/workout/response/workout.types";
+import {
+  Image,
+  Pressable,
+  type StyleProp,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { formatWorkoutDuration } from "../../model/workout-content.mapper";
 
-type WorkoutCardMetaItem = {
-  icon: LucideIcon;
+export type WorkoutCardMetaItem = {
+  key: string | number;
+  icon?: AppIconName;
   label: string;
 };
 
@@ -39,45 +45,36 @@ export function WorkoutCard({
   className,
   style,
 }: WorkoutCardProps) {
-  const { colors } = useAppTheme();
-
   return (
     <Pressable
       disabled={disabled}
       onPress={onPress}
-      className={twMerge(
-        clsx("flex-row overflow-hidden rounded-3xl", className),
+      className={cn(
+        "flex-row overflow-hidden rounded-3xl bg-card active:opacity-80",
+        disabled && "opacity-60",
+        className,
       )}
-      style={[
-        {
-          backgroundColor: colors.app.cardPrimary,
-          opacity: disabled ? 0.6 : 1,
-        },
-        style,
-      ]}
+      style={style}
     >
-      <View
-        className="w-32 overflow-hidden"
-        style={{
-          backgroundColor: colors.app.cardSecondary,
-        }}
-      >
+      <View className="w-32 overflow-hidden bg-secondary">
         <Image
-          source={{ uri: imageUrl ?? WORKOUT_IMAGE }}
+          source={{
+            uri: imageUrl ?? WORKOUT_IMAGE,
+          }}
           className="w-full flex-1"
           resizeMode="cover"
         />
       </View>
 
-      <View className="flex-1 justify-between gap-3 p-3">
-        <View>
+      <View className="min-w-0 flex-1 justify-between gap-3 p-3">
+        <View className="min-w-0">
           {subtitle ? (
-            <ThemedText type="extraSmall" variant="primary" numberOfLines={1}>
+            <ThemedText type="caption" tone="muted" numberOfLines={1}>
               {subtitle}
             </ThemedText>
           ) : null}
 
-          <ThemedText type="subtitle" variant="accent" numberOfLines={1}>
+          <ThemedText type="bodyStrong" numberOfLines={1}>
             {title}
           </ThemedText>
         </View>
@@ -85,8 +82,8 @@ export function WorkoutCard({
         {metaItems.length > 0 ? (
           <View className="flex-row flex-wrap gap-2">
             {metaItems.map((item) => (
-              <WorkoutMetaPill
-                key={`${item.label}`}
+              <MetaPill
+                key={String(item.key)}
                 icon={item.icon}
                 label={item.label}
               />
@@ -98,49 +95,6 @@ export function WorkoutCard({
   );
 }
 
-interface WorkoutMetaPillProps {
-  icon?: LucideIcon;
-  label: string;
-}
-
-interface WorkoutMetaPillProps {
-  icon?: LucideIcon;
-  label: string;
-  variant?: "primary" | "overlay";
-}
-
-export function WorkoutMetaPill({
-  icon: Icon,
-  label,
-  variant = "primary",
-}: WorkoutMetaPillProps) {
-  const { colors } = useAppTheme();
-
-  const isOverlay = variant === "overlay";
-
-  return (
-    <View
-      className="flex-row items-center gap-1 rounded-full px-2 py-1"
-      style={{
-        backgroundColor: isOverlay
-          ? hexWithOpacity(colors.app.white, 15)
-          : colors.app.cardSecondary,
-      }}
-    >
-      {Icon ? (
-        <Icon
-          size={12}
-          color={isOverlay ? colors.app.textWhite : colors.app.textPrimary}
-        />
-      ) : null}
-
-      <ThemedText type="extraSmall" variant={isOverlay ? "white" : "primary"}>
-        {label}
-      </ThemedText>
-    </View>
-  );
-}
-
 export function formatExerciseCount(count: number) {
   return `${count} ${count === 1 ? "exercise" : "exercises"}`;
 }
@@ -148,6 +102,8 @@ export function formatExerciseCount(count: number) {
 export function mapWorkoutToWorkoutCardItem(
   workout: WorkoutResponse,
 ): WorkoutCardItem {
+  const workoutExercises = requireWorkoutExercises(workout);
+
   const durationLabel = formatWorkoutDuration(workout.duration);
 
   return {
@@ -157,13 +113,15 @@ export function mapWorkoutToWorkoutCardItem(
     imageUrl: workout.imageUrl,
     metaItems: [
       {
-        icon: Dumbbell,
-        label: formatExerciseCount(workout.workoutExercises.length),
+        key: "exercise-count",
+        icon: "workout",
+        label: formatExerciseCount(workoutExercises.length),
       },
       ...(durationLabel
         ? [
             {
-              icon: Clock,
+              key: "duration",
+              icon: "duration" as const,
               label: durationLabel,
             },
           ]

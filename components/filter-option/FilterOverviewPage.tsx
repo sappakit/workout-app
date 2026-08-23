@@ -1,14 +1,9 @@
-import { AppButton } from "@/components/custom-ui/AppButton";
-import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import {
-  ChevronRight,
-  ListFilter,
-  LucideIcon,
-  SlidersHorizontal,
-  Undo2,
-} from "lucide-react-native";
-import { ReactNode } from "react";
+import { AppButton } from "@/components/custom-ui/app-button";
+import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
+import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
+import { ThemedText } from "@/components/custom-ui/themed-text";
+import { useAppColors } from "@/hooks/useAppColors";
+import type { ReactNode } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 type FilterOverviewPageProps = {
@@ -16,7 +11,7 @@ type FilterOverviewPageProps = {
   subtitle: string;
   bottomInset: number;
   children: ReactNode;
-  headerIcon?: LucideIcon;
+  headerIcon?: AppIconName;
   resetText?: string;
   applyText?: string;
   onReset: () => void;
@@ -28,33 +23,35 @@ export function FilterOverviewPage({
   subtitle,
   bottomInset,
   children,
-  headerIcon: HeaderIcon = SlidersHorizontal,
+  headerIcon = "filter",
   resetText = "Reset",
   applyText = "Apply filters",
   onReset,
   onApply,
 }: FilterOverviewPageProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <View
       className="flex-1 gap-4 px-4"
-      style={{ paddingBottom: bottomInset + 20 }}
+      style={{
+        paddingBottom: bottomInset + 20,
+      }}
     >
       <View className="flex-row items-center gap-3">
-        <View
-          className="h-12 w-12 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: colors.app.cardSecondary }}
-        >
-          <HeaderIcon size={20} color={colors.app.textAccent} />
+        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-secondary">
+          <AppIcon
+            name={headerIcon}
+            variant="outline"
+            size="md"
+            color={colors.foreground}
+          />
         </View>
 
         <View className="flex-1">
-          <ThemedText type="subtitle" variant="accent">
-            {title}
-          </ThemedText>
+          <ThemedText type="heading">{title}</ThemedText>
 
-          <ThemedText type="small" variant="primary" numberOfLines={1}>
+          <ThemedText type="small" tone="muted" numberOfLines={1}>
             {subtitle}
           </ThemedText>
         </View>
@@ -62,7 +59,9 @@ export function FilterOverviewPage({
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: 12 }}
+        contentContainerStyle={{
+          gap: 12,
+        }}
       >
         {children}
       </ScrollView>
@@ -70,17 +69,23 @@ export function FilterOverviewPage({
       <View className="mt-auto flex-row gap-3">
         <AppButton
           title={resetText}
-          icon={Undo2}
           variant="outline"
           className="flex-1"
+          icon={{
+            name: "refresh",
+            size: "sm",
+          }}
           onPress={onReset}
         />
 
         <AppButton
           title={applyText}
-          icon={ListFilter}
           variant="primary"
           className="flex-1"
+          icon={{
+            name: "filter",
+            size: "sm",
+          }}
           onPress={onApply}
         />
       </View>
@@ -89,45 +94,48 @@ export function FilterOverviewPage({
 }
 
 type FilterNavigationItemProps = {
-  icon: LucideIcon;
+  icon: AppIconName;
   title: string;
   description: string;
   onPress: () => void;
 };
 
 export function FilterNavigationItem({
-  icon: Icon,
+  icon,
   title,
   description,
   onPress,
 }: FilterNavigationItemProps) {
-  const { colors } = useAppTheme();
+  const colors = useAppColors();
 
   return (
     <Pressable
       onPress={onPress}
-      className="rounded-2xl p-4"
-      style={{ backgroundColor: colors.app.cardSecondary }}
+      className="rounded-2xl bg-secondary p-4 active:opacity-80"
     >
       <View className="flex-row items-center gap-3">
-        <View
-          className="h-11 w-11 items-center justify-center rounded-xl"
-          style={{ backgroundColor: colors.app.cardPrimary }}
-        >
-          <Icon size={18} color={colors.app.textAccent} />
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-card">
+          <AppIcon
+            name={icon}
+            variant="outline"
+            size="md"
+            color={colors.foreground}
+          />
         </View>
 
         <View className="flex-1">
-          <ThemedText type="defaultSemiBold" variant="accent">
-            {title}
-          </ThemedText>
+          <ThemedText type="bodyStrong">{title}</ThemedText>
 
-          <ThemedText type="extraSmall" variant="primary" numberOfLines={1}>
+          <ThemedText type="caption" tone="muted" numberOfLines={1}>
             {description}
           </ThemedText>
         </View>
 
-        <ChevronRight size={18} color={colors.app.textPrimary} />
+        <AppIcon
+          name="chevron-right"
+          size="sm"
+          color={colors.mutedForeground}
+        />
       </View>
     </Pressable>
   );

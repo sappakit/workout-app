@@ -19,16 +19,22 @@ export function EditProfileSkeleton() {
         {/* Avatar */}
         <View className="items-center">
           <View className="p-6">
-            <SkeletonPlaceholder className="h-24 w-24 rounded-full" />
+            <SkeletonPlaceholder
+              containerClassName="h-24 w-24"
+              skeletonClassName="rounded-full"
+            />
           </View>
         </View>
 
         {/* Form fields */}
         <View className="gap-4">
-          <EditProfileFieldSkeleton labelClassName="w-24" />
-          <EditProfileFieldSkeleton labelClassName="w-28" />
-          <EditProfileFieldSkeleton labelClassName="w-32" />
-          <EditProfileFieldSkeleton labelClassName="w-20" />
+          <EditProfileFieldSkeleton labelWidthClassName="w-24" />
+
+          <EditProfileFieldSkeleton labelWidthClassName="w-24" />
+
+          <EditProfileFieldSkeleton labelWidthClassName="w-12" />
+
+          <EditProfileFieldSkeleton labelWidthClassName="w-28" />
         </View>
       </View>
     </PageLayout>
@@ -36,16 +42,20 @@ export function EditProfileSkeleton() {
 }
 
 type EditProfileFieldSkeletonProps = {
-  labelClassName?: string;
+  labelWidthClassName?: string;
 };
 
 function EditProfileFieldSkeleton({
-  labelClassName = "w-24",
+  labelWidthClassName = "w-24",
 }: EditProfileFieldSkeletonProps) {
   return (
     <View className="gap-2">
-      <TextSkeleton type="default" className={labelClassName} />
-      <SkeletonPlaceholder className="h-12 w-full rounded-2xl" />
+      <TextSkeleton type="label" className={labelWidthClassName} />
+
+      <SkeletonPlaceholder
+        containerClassName="h-10 w-full"
+        skeletonClassName="rounded-lg"
+      />
     </View>
   );
 }

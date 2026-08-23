@@ -6,36 +6,28 @@ type AppToastParams = {
   message?: string;
 };
 
-export const useAppToast = () => {
+export function useAppToast() {
   const insets = useSafeAreaInsets();
-  const toastOffset = insets.top + 12;
+  const topOffset = insets.top + 12;
+
+  const showToast = (
+    type: "success" | "error" | "info",
+    { title, message }: AppToastParams,
+  ) => {
+    Toast.show({
+      type,
+      text1: title,
+      text2: message,
+      position: "top",
+      topOffset,
+    });
+  };
 
   return {
-    success: ({ title, message }: AppToastParams) =>
-      Toast.show({
-        type: "success",
-        text1: title,
-        text2: message,
-        position: "top",
-        topOffset: toastOffset,
-      }),
+    success: (params: AppToastParams) => showToast("success", params),
 
-    error: ({ title, message }: AppToastParams) =>
-      Toast.show({
-        type: "error",
-        text1: title,
-        text2: message,
-        position: "top",
-        topOffset: toastOffset,
-      }),
+    error: (params: AppToastParams) => showToast("error", params),
 
-    info: ({ title, message }: AppToastParams) =>
-      Toast.show({
-        type: "info",
-        text1: title,
-        text2: message,
-        position: "top",
-        topOffset: toastOffset,
-      }),
+    info: (params: AppToastParams) => showToast("info", params),
   };
-};
+}

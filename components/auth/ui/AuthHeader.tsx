@@ -1,5 +1,5 @@
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { AppLogo } from "@/components/image/AppLogo";
-import { ThemedText } from "@/components/themed-text";
 import { View } from "react-native";
 
 interface AuthHeaderProps {
@@ -15,11 +15,11 @@ export function AuthHeader({ title, subtitle }: AuthHeaderProps) {
       </View>
 
       <View className="items-center gap-2">
-        <ThemedText type="title" variant="accent">
+        <ThemedText type="title" className="text-center">
           {title}
         </ThemedText>
 
-        <ThemedText type="small" variant="primary" className="text-center">
+        <ThemedText type="small" tone="muted" className="text-center">
           {subtitle}
         </ThemedText>
       </View>
