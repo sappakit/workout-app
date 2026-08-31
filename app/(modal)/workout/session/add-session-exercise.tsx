@@ -7,7 +7,7 @@ import { ErrorState } from "@/components/state/ErrorState";
 import {
   addSessionExercise,
   replaceSessionExercise,
-} from "@/components/workout-in-progress/model/helpers";
+} from "@/components/workout-in-progress/model/session-state.helpers";
 import { api } from "@/lib/api/client";
 import { exerciseApi } from "@/lib/api/exercise.api";
 import { useWorkoutSessionStore } from "@/stores/workoutSessionStore";

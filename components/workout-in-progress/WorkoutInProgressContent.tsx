@@ -22,13 +22,13 @@ import {
   getWorkoutTimerStats,
   INITIAL_TIMER_STATS,
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
+import { commitInheritedSetValues } from "./model/session-set.helpers";
 import {
   addSessionSet,
-  commitInheritedSetValues,
   deleteSessionExercise,
   deleteSessionSet,
   syncSessionExerciseCompletion,
-} from "./model/helpers";
+} from "./model/session-state.helpers";
 
 export function WorkoutInProgressContent() {
   const router = useRouter();

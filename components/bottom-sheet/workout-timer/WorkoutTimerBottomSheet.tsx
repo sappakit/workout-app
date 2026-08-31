@@ -1,4 +1,4 @@
-import { mapWorkoutSessionModelToFinishPayload } from "@/components/workout-in-progress/model/helpers";
+import { mapWorkoutSessionModelToFinishPayload } from "@/components/workout-in-progress/model/session-mappers";
 import { useAppColors } from "@/hooks/useAppColors";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { usePausableElapsedSeconds } from "@/hooks/usePausableElapsedSeconds";

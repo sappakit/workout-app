@@ -30,11 +30,11 @@ export default function Thumbnail({
       {imageUri ? (
         <Image
           source={{ uri: imageUri }}
-          className="h-full w-full"
+          className="flex-1"
           resizeMode="cover"
         />
       ) : (
-        <View className="h-full w-full items-center justify-center bg-secondary">
+        <View className="flex-1 items-center justify-center bg-secondary">
           <AppIcon
             name="image"
             size={iconSize}

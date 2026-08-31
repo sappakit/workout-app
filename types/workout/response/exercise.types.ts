@@ -1,27 +1,21 @@
 import { Equipment, ExerciseMuscleRole, Muscle } from "./shared.types";
+import { ContentStatus } from "./workout.types";
 
 export enum ExerciseOrigin {
   SYSTEM = "system",
   USER = "user",
 }
 
-export enum ExerciseStatus {
-  DRAFT = "draft",
-  ACTIVE = "active",
-  HIDDEN = "hidden",
-  ARCHIVED = "archived",
+export enum ExerciseMediaType {
+  IMAGE = "image",
+  VIDEO = "video",
+  GIF = "gif",
 }
 
 export enum DifficultyLevel {
   BEGINNER = "beginner",
   INTERMEDIATE = "intermediate",
   ADVANCED = "advanced",
-}
-
-export enum ExerciseMediaType {
-  IMAGE = "image",
-  VIDEO = "video",
-  GIF = "gif",
 }
 
 export const DifficultyLabel: Record<DifficultyLevel, string> = {
@@ -78,15 +72,38 @@ export interface ExerciseEquipmentLink {
   equipment?: Equipment;
 }
 
+// Must match the codes in the database exercise_tracking_types table
+export const EXERCISE_TRACKING_TYPE_CODES = [
+  "weight_reps",
+  "reps",
+  "duration",
+  "distance_duration",
+  "weighted_bodyweight",
+  "assisted_bodyweight",
+  "weight_distance",
+  "weight_duration",
+] as const;
+
+export type ExerciseTrackingTypeCode =
+  (typeof EXERCISE_TRACKING_TYPE_CODES)[number];
+
+export interface ExerciseTrackingType {
+  id: number;
+  code: ExerciseTrackingTypeCode;
+  name: string;
+  description: string | null;
+}
+
 export interface Exercise {
   id: number;
   origin: ExerciseOrigin;
-  status: ExerciseStatus;
-
+  status: ContentStatus;
   name: string;
   description: string | null;
 
   category?: ExerciseCategory;
+  trackingType?: ExerciseTrackingType;
+
   difficultyLevel: DifficultyLevel | null;
 
   defaultCaloriesBurned: number | null;
@@ -97,10 +114,9 @@ export interface Exercise {
 
   demoLink: string | null;
   howToPerform: string[] | null;
-
   sourceExternalId: string | null;
-  source?: ExerciseSource | null;
 
+  source?: ExerciseSource | null;
   media?: ExerciseMedia[];
   muscles?: ExerciseMuscleItem[];
   equipmentLinks?: ExerciseEquipmentLink[];

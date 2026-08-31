@@ -1,13 +1,14 @@
 import {
   DifficultyLevel,
+  EXERCISE_TRACKING_TYPE_CODES,
   ExerciseMediaType,
   ExerciseOrigin,
-  ExerciseStatus,
 } from "@/types/workout/response/exercise.types";
 import {
   EquipmentCategory,
   ExerciseMuscleRole,
 } from "@/types/workout/response/shared.types";
+import { ContentStatus } from "@/types/workout/response/workout.types";
 import { z } from "zod";
 
 const muscleSchema = z.object({
@@ -30,6 +31,13 @@ const exerciseCategorySchema = z.object({
   description: z.string().nullable(),
   displayOrder: z.number(),
   isActive: z.boolean(),
+});
+
+const exerciseTrackingTypeSchema = z.object({
+  id: z.number(),
+  code: z.enum(EXERCISE_TRACKING_TYPE_CODES),
+  name: z.string(),
+  description: z.string().nullable(),
 });
 
 const exerciseSourceSchema = z.object({
@@ -74,12 +82,14 @@ const exerciseEquipmentLinkSchema = z.object({
 export const exerciseSchema = z.object({
   id: z.number(),
   origin: z.enum(ExerciseOrigin),
-  status: z.enum(ExerciseStatus),
+  status: z.enum(ContentStatus),
 
   name: z.string(),
   description: z.string().nullable(),
 
   category: exerciseCategorySchema.optional(),
+  trackingType: exerciseTrackingTypeSchema.optional(),
+
   difficultyLevel: z.enum(DifficultyLevel).nullable(),
 
   defaultCaloriesBurned: z.number().nullable(),
@@ -107,14 +117,13 @@ export const workoutExerciseSetFormSchema = z.object({
 
   reps: z.number().min(0, "Reps cannot be negative").nullable(),
   weight: z.number().min(0, "Weight cannot be negative").nullable(),
-
   distance: z.number().min(0, "Distance cannot be negative").nullable(),
 
-  durationMinutes: z.number().min(0, "Minutes cannot be negative").nullable(),
-  durationSeconds: z
+  // Set duration, seconds
+  duration: z
     .number()
-    .min(0, "Seconds cannot be negative")
-    .max(59, "Seconds must be between 0 and 59")
+    .int("Duration must be a whole number")
+    .min(0, "Duration cannot be negative")
     .nullable(),
 });
 
@@ -123,23 +132,24 @@ export const workoutExerciseFormSchema = z.object({
   clientId: z.string(),
   orderIndex: z.number(),
 
-  // exercise-level rest time, seconds
+  // Exercise-level rest time, seconds
   restTime: z.number().min(0, "Rest time cannot be negative").nullable(),
 
   exercise: exerciseSchema,
 
-  // set-level config
+  // Set-level config
   sets: z.array(workoutExerciseSetFormSchema).min(1, "Add at least one set"),
 });
 
 export const editPlanFormSchema = z.object({
   name: z.string().min(1, "Plan name is required"),
   workoutFocusTypeId: z.number().nullable(),
+
   targetMuscles: z
     .array(z.number())
     .min(1, "Select target muscle groups or enable Auto-fill"),
 
-  // plan duration, seconds
+  // Plan duration, seconds
   duration: z
     .number()
     .int("Duration must be a whole number")
