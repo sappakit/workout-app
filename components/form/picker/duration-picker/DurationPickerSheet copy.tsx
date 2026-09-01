@@ -1,7 +1,6 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { CONTENT_PADDING_BOTTOM } from "@/components/layout/PageLayout";
 import { useAppColors } from "@/hooks/useAppColors";
 import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { cn } from "@/lib/utils";
@@ -11,11 +10,11 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import type { ReactNode } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DurationWheelPicker } from "./DurationWheelPicker";
+import { type DurationValue, DurationWheelPicker } from "./DurationWheelPicker";
 import { durationToSeconds, formatDuration, secondsToDuration } from "./utils";
 
 type DurationBottomSheetPickerRenderTriggerProps = {
@@ -52,16 +51,36 @@ export function DurationBottomSheetPicker({
 
   const animationConfigs = useDefaultBottomSheetAnimation();
 
+  const [draftValue, setDraftValue] = useState<DurationValue>(
+    secondsToDuration(value),
+  );
+
+  const hasChanges = durationToSeconds(draftValue) !== value;
+
   const openSheet = () => {
     if (disabled) {
       return;
     }
+
+    setDraftValue(secondsToDuration(value));
 
     bottomSheetModalRef.current?.present();
   };
 
   const closeSheet = () => {
     bottomSheetModalRef.current?.dismiss();
+  };
+
+  const handleCancel = () => {
+    setDraftValue(secondsToDuration(value));
+
+    closeSheet();
+  };
+
+  const handleDone = () => {
+    onChange?.(durationToSeconds(draftValue));
+
+    closeSheet();
   };
 
   const renderBackdrop = useCallback(
@@ -105,6 +124,7 @@ export function DurationBottomSheetPicker({
       <BottomSheetModal
         ref={bottomSheetModalRef}
         enableDynamicSizing
+        topInset={insets.top}
         enablePanDownToClose
         enableOverDrag
         enableContentPanningGesture={false}
@@ -116,31 +136,42 @@ export function DurationBottomSheetPicker({
         handleIndicatorStyle={{
           backgroundColor: colors.borderStrong,
         }}
+        onDismiss={() => setDraftValue(secondsToDuration(value))}
       >
         <BottomSheetView>
+          <View className="px-6 py-3">
+            <ThemedText type="title">{title}</ThemedText>
+          </View>
+
+          <DurationWheelPicker value={draftValue} onChange={setDraftValue} />
+
           <View
-            className="gap-4 px-4"
+            className="flex-row gap-3 px-4 pt-3"
             style={{
-              paddingBottom: insets.bottom + CONTENT_PADDING_BOTTOM,
+              paddingBottom: insets.bottom,
             }}
           >
-            <ThemedText type="title">{title}</ThemedText>
-
-            <DurationWheelPicker
-              value={secondsToDuration(value)}
-              onChange={(duration) => {
-                onChange?.(durationToSeconds(duration));
+            <AppButton
+              title="Cancel"
+              variant="secondary"
+              className="flex-1"
+              icon={{
+                name: "close",
+                size: "sm",
               }}
+              onPress={handleCancel}
             />
 
             <AppButton
               title="Done"
               variant="primary"
+              className="flex-1"
               icon={{
                 name: "check",
                 size: "sm",
               }}
-              onPress={closeSheet}
+              onPress={handleDone}
+              disabled={!hasChanges}
             />
           </View>
         </BottomSheetView>

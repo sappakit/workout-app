@@ -31,7 +31,7 @@ export function DurationWheelPicker({
   return (
     <View className="relative">
       {/* Wheel picker */}
-      <View className="flex-row items-start gap-3 px-4">
+      <View className="flex-row items-start gap-3">
         <DurationColumn
           unit="Hour"
           value={value.hours}
@@ -70,7 +70,7 @@ export function DurationWheelPicker({
       </View>
 
       {/* Selected-row highlight */}
-      <View className="absolute bottom-0 left-0 right-0 top-0 -z-10 justify-center px-4">
+      <View className="absolute bottom-0 left-0 right-0 top-0 -z-10 justify-center">
         <View
           className="h-14 rounded-xl bg-primary"
           pointerEvents="none"
@@ -114,7 +114,7 @@ function DurationColumn({
 
       {/* Unit display */}
       <View
-        className="absolute bottom-0 right-0 top-0 justify-center p-4"
+        className="absolute bottom-0 right-0 top-0 justify-center px-4"
         pointerEvents="none"
       >
         <ThemedText type="body" tone="muted">
