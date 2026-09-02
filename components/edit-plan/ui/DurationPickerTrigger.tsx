@@ -1,8 +1,4 @@
-import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
-import { ThemedText } from "@/components/custom-ui/themed-text";
-import { useAppColors } from "@/hooks/useAppColors";
-import { cn } from "@/lib/utils";
-import { Pressable } from "react-native";
+import { FormSelectTrigger } from "@/components/form/select-input/FormSelectTrigger";
 
 type DurationPickerTriggerProps = {
   value: number;
@@ -19,27 +15,16 @@ export function DurationPickerTrigger({
   error = false,
   className,
 }: DurationPickerTriggerProps) {
-  const colors = useAppColors();
-
   const selectedLabel = formatEstimatedDurationLabel(value);
 
   return (
-    <Pressable
+    <FormSelectTrigger
+      label={selectedLabel}
       onPress={onPress}
       disabled={disabled}
-      className={cn(
-        "h-10 flex-row items-center gap-2 rounded-lg border bg-secondary px-3 active:opacity-80",
-        error ? "border-destructive" : "border-input",
-        disabled && "opacity-50",
-        className,
-      )}
-    >
-      <ThemedText type="small" className="min-w-0 flex-1" numberOfLines={1}>
-        {selectedLabel}
-      </ThemedText>
-
-      <AppIcon name="chevron-down" size="sm" color={colors.mutedForeground} />
-    </Pressable>
+      error={error}
+      className={className}
+    />
   );
 }
 

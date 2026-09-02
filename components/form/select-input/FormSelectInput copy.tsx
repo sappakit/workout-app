@@ -1,19 +1,19 @@
-import { AppBottomSheetModal } from "@/components/bottom-sheet/AppBottomSheetModal";
 import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { useAppColors } from "@/hooks/useAppColors";
+import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { cn, hexWithOpacity } from "@/lib/utils";
 import {
+  BottomSheetBackdrop,
   BottomSheetFlatList,
   type BottomSheetFlatListMethods,
   BottomSheetModal,
 } from "@gorhom/bottom-sheet";
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import type { ListRenderItem, StyleProp, ViewStyle } from "react-native";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FormSelectTrigger } from "./FormSelectTrigger";
 
 export interface SelectOption {
   label: string;
@@ -90,6 +90,8 @@ export default function FormSelectInput({
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
 
+  const animationConfigs = useDefaultBottomSheetAnimation();
+
   const displayOptions = useMemo<DisplaySelectOption[]>(() => {
     if (!allowEmpty) {
       return options;
@@ -154,6 +156,17 @@ export default function FormSelectInput({
     closeSheet();
   };
 
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+      />
+    ),
+    [],
+  );
+
   let content: string | undefined;
 
   if (isLoading) {
@@ -210,24 +223,56 @@ export default function FormSelectInput({
   return (
     <>
       {/* Trigger */}
-      <FormSelectTrigger
-        label={selectedLabel ?? placeholder}
-        placeholder={!selectedLabel}
+      <Pressable
         onPress={openSheet}
-        icon={icon}
         disabled={disabled}
-        error={validationError}
-        className={className}
+        className={cn(
+          "h-10 flex-row items-center gap-2 rounded-lg border bg-secondary px-3 active:opacity-80",
+          validationError ? "border-destructive" : "border-input",
+          disabled && "opacity-50",
+          className,
+        )}
         style={style}
-      />
+      >
+        {icon ? (
+          <AppIcon
+            name={icon}
+            variant="outline"
+            size="sm"
+            color={colors.mutedForeground}
+          />
+        ) : null}
+
+        <ThemedText
+          type="small"
+          tone={selectedLabel ? "default" : "muted"}
+          className="min-w-0 flex-1"
+          numberOfLines={1}
+        >
+          {selectedLabel ?? placeholder}
+        </ThemedText>
+
+        <AppIcon name="chevron-down" size="sm" color={colors.mutedForeground} />
+      </Pressable>
 
       {/* Bottom Sheet Modal */}
-      <AppBottomSheetModal
+      <BottomSheetModal
         ref={bottomSheetModalRef}
         onChange={handleSheetChange}
         snapPoints={snapPoints ?? ["100%"]}
+        topInset={insets.top}
         enableDynamicSizing={false}
+        enablePanDownToClose
+        enableOverDrag
+        animationConfigs={animationConfigs}
         enableContentPanningGesture
+        backdropComponent={renderBackdrop}
+        backgroundStyle={{
+          backgroundColor: colors.popover,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: colors.borderStrong,
+        }}
       >
         {/* Title */}
         {title ? (
@@ -266,7 +311,7 @@ export default function FormSelectInput({
             }}
           />
         )}
-      </AppBottomSheetModal>
+      </BottomSheetModal>
     </>
   );
 }

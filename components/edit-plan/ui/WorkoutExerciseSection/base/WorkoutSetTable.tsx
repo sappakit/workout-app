@@ -2,9 +2,7 @@ import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import FormNumberInput from "@/components/form/FormNumberInput";
 import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
-import { formatDuration } from "@/components/form/picker/duration-picker/utils";
 import { useAppColors } from "@/hooks/useAppColors";
-import { cn } from "@/lib/utils";
 import {
   type ExerciseFieldKey,
   type ExerciseInputType,
@@ -226,7 +224,6 @@ export function WorkoutSetInput({
           value={value}
           onChange={onChange}
           error={error}
-          placeholder={placeholder}
           disabled={disabled}
         />
       );
@@ -274,7 +271,6 @@ type WorkoutSetDurationInputProps = {
   value?: number | null;
   onChange: (value: number | null) => void;
   error?: boolean;
-  placeholder?: string;
   disabled?: boolean;
 };
 
@@ -282,7 +278,6 @@ function WorkoutSetDurationInput({
   value,
   onChange,
   error,
-  placeholder = "-",
   disabled = false,
 }: WorkoutSetDurationInputProps) {
   return (
@@ -291,26 +286,9 @@ function WorkoutSetDurationInput({
       value={value ?? 0}
       onChange={onChange}
       disabled={disabled}
-      renderTrigger={({ openSheet, disabled }) => (
-        <Pressable
-          onPress={openSheet}
-          disabled={disabled}
-          className={cn(
-            "h-10 flex-row items-center justify-center rounded-lg border bg-secondary px-2",
-            error ? "border-destructive" : "border-input",
-            disabled && "opacity-50",
-          )}
-        >
-          <ThemedText
-            type="body"
-            tone={value == null ? "muted" : "default"}
-            className="text-center text-sm"
-            numberOfLines={1}
-          >
-            {value == null ? placeholder : formatDuration(value)}
-          </ThemedText>
-        </Pressable>
-      )}
+      triggerVariant="field"
+      error={error}
+      textAlign="center"
     />
   );
 }

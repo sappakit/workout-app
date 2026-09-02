@@ -9,6 +9,7 @@
   exercise must have at least one set
 - stop session timer when task is killed
 - workout in progress - add exercise ui padding bug
+- add weight, height, age input
 
 # OPTIONAL
 

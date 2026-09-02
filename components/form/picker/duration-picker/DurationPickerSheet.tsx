@@ -1,56 +1,50 @@
+import { AppBottomSheetModal } from "@/components/bottom-sheet/AppBottomSheetModal";
 import { AppButton } from "@/components/custom-ui/app-button";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { CONTENT_PADDING_BOTTOM } from "@/components/layout/PageLayout";
 import { useAppColors } from "@/hooks/useAppColors";
-import { useDefaultBottomSheetAnimation } from "@/hooks/useBottomSheetAnimation";
 import { cn } from "@/lib/utils";
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
-import type { ReactNode } from "react";
-import { useCallback, useRef } from "react";
+import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import { useRef } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FormSelectTrigger } from "../../select-input/FormSelectTrigger";
 import { DurationWheelPicker } from "./DurationWheelPicker";
 import { durationToSeconds, formatDuration, secondsToDuration } from "./utils";
 
-type DurationBottomSheetPickerRenderTriggerProps = {
-  value: number;
-  openSheet: () => void;
-  disabled?: boolean;
-};
+export type DurationPickerTriggerVariant = "label" | "field";
+
+type DurationPickerTextAlign = "left" | "center" | "right";
 
 type DurationBottomSheetPickerProps = {
   value: number;
   title: string;
   onChange?: (value: number) => void;
+  triggerVariant?: DurationPickerTriggerVariant;
+  textAlign?: DurationPickerTextAlign;
+  error?: boolean;
   className?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
-  renderTrigger?: (
-    props: DurationBottomSheetPickerRenderTriggerProps,
-  ) => ReactNode;
 };
 
 export function DurationBottomSheetPicker({
   value,
   title,
   onChange,
+  triggerVariant = "label",
+  textAlign = "left",
+  error = false,
   className,
   style,
   disabled = false,
-  renderTrigger,
 }: DurationBottomSheetPickerProps) {
   const colors = useAppColors();
   const insets = useSafeAreaInsets();
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-  const animationConfigs = useDefaultBottomSheetAnimation();
 
   const openSheet = () => {
     if (disabled) {
@@ -64,25 +58,18 @@ export function DurationBottomSheetPicker({
     bottomSheetModalRef.current?.dismiss();
   };
 
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-      />
-    ),
-    [],
-  );
-
   return (
     <>
-      {renderTrigger ? (
-        renderTrigger({
-          value,
-          openSheet,
-          disabled,
-        })
+      {triggerVariant === "field" ? (
+        <FormSelectTrigger
+          label={formatDurationFieldLabel(value)}
+          onPress={openSheet}
+          disabled={disabled}
+          error={error}
+          textAlign={textAlign}
+          className={className}
+          style={style}
+        />
       ) : (
         <Pressable
           onPress={openSheet}
@@ -102,20 +89,10 @@ export function DurationBottomSheetPicker({
         </Pressable>
       )}
 
-      <BottomSheetModal
+      <AppBottomSheetModal
         ref={bottomSheetModalRef}
         enableDynamicSizing
-        enablePanDownToClose
-        enableOverDrag
         enableContentPanningGesture={false}
-        animationConfigs={animationConfigs}
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{
-          backgroundColor: colors.popover,
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: colors.borderStrong,
-        }}
       >
         <BottomSheetView>
           <View
@@ -144,7 +121,33 @@ export function DurationBottomSheetPicker({
             />
           </View>
         </BottomSheetView>
-      </BottomSheetModal>
+      </AppBottomSheetModal>
     </>
   );
+}
+
+function formatDurationFieldLabel(seconds: number) {
+  if (seconds === 0) {
+    return "0 sec";
+  }
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  const parts: string[] = [];
+
+  if (hours > 0) {
+    parts.push(`${hours} ${hours === 1 ? "hour" : "hours"}`);
+  }
+
+  if (minutes > 0) {
+    parts.push(`${minutes} min`);
+  }
+
+  if (remainingSeconds > 0) {
+    parts.push(`${remainingSeconds} sec`);
+  }
+
+  return parts.join(" ");
 }

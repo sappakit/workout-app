@@ -19,7 +19,6 @@ import {
   useFormState,
 } from "react-hook-form";
 import { View } from "react-native";
-import { DurationPickerTrigger } from "./DurationPickerTrigger";
 import { ExerciseListMenu } from "./ExerciseListMenu";
 import { PlanWorkoutExerciseSection } from "./WorkoutExerciseSection/PlanWorkoutExerciseSection";
 
@@ -189,14 +188,8 @@ export function PlanFormFields({
                 value={field.value ?? 0}
                 onChange={field.onChange}
                 disabled={autoFillDuration}
-                renderTrigger={({ value, openSheet, disabled }) => (
-                  <DurationPickerTrigger
-                    value={value}
-                    onPress={openSheet}
-                    disabled={disabled}
-                    error={!!fieldState.error}
-                  />
-                )}
+                triggerVariant="field"
+                error={!!fieldState.error}
               />
             </FormField>
           )}
