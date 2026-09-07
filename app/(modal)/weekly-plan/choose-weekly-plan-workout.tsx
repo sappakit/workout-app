@@ -1,26 +1,13 @@
-import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
-import type { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
-import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { WorkoutPickerScreen } from "@/components/picker/workout-picker/WorkoutPickerScreen";
+import { ErrorState } from "@/components/state/ErrorState";
 import { useWeeklyPlanWorkoutPickerStore } from "@/components/weekly-plan/weeklyPlanWorkoutSelectionStore";
-import { ChooseWorkoutPickerSkeleton } from "@/components/workout/ui/workout-card/ChooseWorkoutPickerSkeleton";
-import {
-  mapWorkoutToWorkoutCardItem,
-  WorkoutCard,
-} from "@/components/workout/ui/workout-card/WorkoutCard";
-import { useAppColors } from "@/hooks/useAppColors";
-import { useDebounce } from "@/hooks/useDebounce";
-import { workoutApi } from "@/lib/api/workout.api";
-import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
-import { workoutQueryKeys } from "@/lib/workout/keys";
 import type { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
 import { DEFAULT_WORKOUT_FILTERS } from "../workout/choose-workout";
 
 export default function ChooseWeeklyPlanWorkoutPage() {
   const router = useRouter();
-  const colors = useAppColors();
 
   const params = useLocalSearchParams<{
     dayOfWeek?: string;
@@ -35,67 +22,14 @@ export default function ChooseWeeklyPlanWorkoutPage() {
     (state) => state.setResult,
   );
 
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(
-    currentWorkoutId,
-  );
-
-  const [filters, setFilters] = useState<WorkoutFilterValues>(
-    DEFAULT_WORKOUT_FILTERS,
-  );
-
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 300);
-
-  const sortByParam = filters.sortBy
-    ? `${filters.sortBy}:${filters.sortDirection}`
-    : undefined;
-
-  const {
-    data,
-    isLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useInfiniteOptionsQuery<WorkoutResponse>({
-    url: workoutApi.getAll(),
-    queryKey: [
-      workoutQueryKeys.all,
-      "weekly-plan-workout-picker",
-      debouncedSearch,
-      filters.focusTypeIds,
-      filters.muscleIds,
-      filters.sortBy,
-      filters.sortDirection,
-    ],
-    search: debouncedSearch,
-    limit: 20,
-    params: {
-      focusTypeIds:
-        filters.focusTypeIds.length > 0 ? filters.focusTypeIds : undefined,
-      muscleIds: filters.muscleIds.length > 0 ? filters.muscleIds : undefined,
-      sortBy: sortByParam,
-    },
-  });
-
-  const workouts = data?.pages.flatMap((page) => page.data) ?? [];
-
-  const selectedWorkout =
-    workouts.find((workout) => workout.id === selectedWorkoutId) ?? null;
-
-  const loadMore = () => {
-    if (!hasNextPage || isFetchingNextPage) return;
-
-    fetchNextPage();
+  const handleClose = () => {
+    router.back();
   };
 
-  const handleSelectWorkout = (workout: WorkoutResponse) => {
-    setSelectedWorkoutId(workout.id);
-  };
-
-  const handleDone = () => {
-    if (!dayOfWeek || !selectedWorkout) return;
+  const handleDone = (selectedWorkout: WorkoutResponse) => {
+    if (!dayOfWeek) {
+      return;
+    }
 
     setPickerResult({
       dayOfWeek,
@@ -105,67 +39,28 @@ export default function ChooseWeeklyPlanWorkoutPage() {
     router.back();
   };
 
-  const handleClose = () => {
-    router.back();
-  };
+  if (!dayOfWeek) {
+    return (
+      <PageLayout scrollable={false} includeInsets>
+        <ErrorState
+          icon="calendar"
+          title="Weekly plan day not found"
+          message="We couldn't find the weekly plan day you were trying to update."
+          primaryAction={{
+            hidden: true,
+          }}
+        />
+      </PageLayout>
+    );
+  }
 
   return (
-    <FullScreenPicker
-      title="Choose Workout"
+    <WorkoutPickerScreen
       description="Select one workout for this weekly plan day."
+      initialSelectedWorkoutId={currentWorkoutId}
+      defaultFilters={DEFAULT_WORKOUT_FILTERS}
       onClose={handleClose}
       onDone={handleDone}
-      doneText="Use Workout"
-      doneDisabled={!selectedWorkout || !dayOfWeek}
-      searchValue={search}
-      onSearchChange={setSearch}
-      searchPlaceholder="Search workout"
-      isLoading={isLoading}
-      isError={isError}
-      isEmpty={workouts.length === 0}
-      errorText="Failed to load workouts"
-      emptyTitle="No workouts found"
-      emptyText="Try changing your search or filters."
-      onRetry={() => refetch()}
-      loadingSkeleton={<ChooseWorkoutPickerSkeleton />}
-      searchRight={
-        <WorkoutFilterBottomSheet value={filters} onApplyFilters={setFilters} />
-      }
-    >
-      <FlatList
-        data={workouts}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerClassName="gap-3"
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <View className="py-4">
-              <ActivityIndicator color={colors.primary} />
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => {
-          const isSelected = selectedWorkoutId === item.id;
-
-          const cardItem = mapWorkoutToWorkoutCardItem(item);
-
-          return (
-            <WorkoutCard
-              id={cardItem.id}
-              title={cardItem.title}
-              subtitle={cardItem.subtitle}
-              imageUrl={cardItem.imageUrl}
-              metaItems={cardItem.metaItems}
-              onPress={() => handleSelectWorkout(item)}
-              className="border"
-              style={{
-                borderColor: isSelected ? colors.primary : "transparent",
-              }}
-            />
-          );
-        }}
-      />
-    </FullScreenPicker>
+    />
   );
 }

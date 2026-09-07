@@ -2,15 +2,21 @@ import { AppBottomSheetModal } from "@/components/bottom-sheet/AppBottomSheetMod
 import { AppButton } from "@/components/custom-ui/app-button";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { CONTENT_PADDING_BOTTOM } from "@/components/layout/PageLayout";
+import { FormSelectTrigger } from "@/components/form/FormSelectTrigger";
+import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
 import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
-import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
-import { useRef } from "react";
+import {
+  BottomSheetFooter,
+  BottomSheetModal,
+  BottomSheetView,
+  type BottomSheetFooterProps,
+} from "@gorhom/bottom-sheet";
+import { useCallback, useRef, useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FormSelectTrigger } from "../../select-input/FormSelectTrigger";
+import { OptionPickerPageHeader } from "../option-picker/OptionPickerPage";
 import { DurationWheelPicker } from "./DurationWheelPicker";
 import { durationToSeconds, formatDuration, secondsToDuration } from "./utils";
 
@@ -46,6 +52,8 @@ export function DurationBottomSheetPicker({
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
+  const [footerHeight, setFooterHeight] = useState(0);
+
   const openSheet = () => {
     if (disabled) {
       return;
@@ -54,9 +62,36 @@ export function DurationBottomSheetPicker({
     bottomSheetModalRef.current?.present();
   };
 
-  const closeSheet = () => {
+  const closeSheet = useCallback(() => {
     bottomSheetModalRef.current?.dismiss();
-  };
+  }, []);
+
+  const renderFooter = useCallback(
+    (props: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...props}>
+        <View
+          className="bg-popover px-4 pt-3"
+          style={{
+            paddingBottom: insets.bottom + CONTENT_PADDING_HORIZONTAL,
+          }}
+          onLayout={(event) => {
+            setFooterHeight(event.nativeEvent.layout.height);
+          }}
+        >
+          <AppButton
+            title="Done"
+            variant="primary"
+            icon={{
+              name: "check",
+              size: "sm",
+            }}
+            onPress={closeSheet}
+          />
+        </View>
+      </BottomSheetFooter>
+    ),
+    [closeSheet, insets.bottom],
+  );
 
   return (
     <>
@@ -93,31 +128,25 @@ export function DurationBottomSheetPicker({
         ref={bottomSheetModalRef}
         enableDynamicSizing
         enableContentPanningGesture={false}
+        footerComponent={renderFooter}
       >
         <BottomSheetView>
           <View
             className="gap-4 px-4"
             style={{
-              paddingBottom: insets.bottom + CONTENT_PADDING_BOTTOM,
+              paddingBottom:
+                footerHeight > 0
+                  ? footerHeight + CONTENT_PADDING_HORIZONTAL
+                  : 0,
             }}
           >
-            <ThemedText type="title">{title}</ThemedText>
+            <OptionPickerPageHeader title={title} />
 
             <DurationWheelPicker
               value={secondsToDuration(value)}
               onChange={(duration) => {
                 onChange?.(durationToSeconds(duration));
               }}
-            />
-
-            <AppButton
-              title="Done"
-              variant="primary"
-              icon={{
-                name: "check",
-                size: "sm",
-              }}
-              onPress={closeSheet}
             />
           </View>
         </BottomSheetView>

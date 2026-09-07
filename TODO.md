@@ -18,6 +18,5 @@
   schedule workout, user afk
 - make stickyFooter (pageLayout) follow keyboard
 - Add text for every EmptyState/ErrorState
-- refactor FormMulti/SelectInput into one file
 - Estimated duration always start as 0 sec instead of null
   fix: separate form input and validated output

@@ -1,4 +1,4 @@
-import { FormSelectTrigger } from "@/components/form/select-input/FormSelectTrigger";
+import { FormSelectTrigger } from "@/components/form/FormSelectTrigger";
 
 type DurationPickerTriggerProps = {
   value: number;

@@ -1,11 +1,11 @@
 import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
-import { ThemedText } from "@/components/custom-ui/themed-text";
 import {
   DropdownItem,
   MenuSectionLabel,
   OptionsMenu,
-} from "@/components/options-menu/OptionsMenu";
+} from "@/components/custom-ui/OptionsMenu";
+import { ThemedText } from "@/components/custom-ui/themed-text";
 import { WORKOUT_IMAGE } from "@/constants/images";
 import { useAppColors } from "@/hooks/useAppColors";
 import { hexWithOpacity } from "@/lib/utils";

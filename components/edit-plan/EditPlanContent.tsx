@@ -37,10 +37,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
   const draftMode = usePlanFormDraftStore((state) => state.mode);
   const draftWorkoutId = usePlanFormDraftStore((state) => state.workoutId);
   const draft = usePlanFormDraftStore((state) => state.draft);
+
   const initializeDraft = usePlanFormDraftStore(
     (state) => state.initializeDraft,
   );
+
   const replaceDraft = usePlanFormDraftStore((state) => state.replaceDraft);
+
   const resetDraft = usePlanFormDraftStore((state) => state.resetDraft);
 
   // Base values from the API response.
@@ -94,13 +97,13 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
     });
   }, [data.id, initialFormValues, initializeDraft]);
 
-  // Refresh RHF when the draft changes from another page, like manage mode.
+  // Refresh RHF when the draft changes from another page,
+  // such as manage mode or add/replace exercise.
   useEffect(() => {
     if (draftMode !== "edit" || draftWorkoutId !== data.id || !draft) {
       return;
     }
 
-    // Wait until the page has fully mounted.
     const frame = requestAnimationFrame(() => {
       reset(draft, {
         keepDefaultValues: true,
@@ -115,11 +118,12 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       const url = workoutApi.update(data.id);
       const payload = mapEditPlanFormToUpdateWorkoutPayload(values);
 
-      return await api.patch(url, payload);
+      return api.patch(url, payload);
     },
 
     onSuccess: async (_, values) => {
       form.reset(values);
+
       replaceDraft(values);
 
       await invalidateQueries([
@@ -238,7 +242,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
 
   // Open the manage mode page.
   const handleOpenManageMode = () => {
-    // Update Zustand with the latest form values.
     replaceDraft(getValues());
 
     router.push("/(modal)/workout/manage-exercises");
@@ -263,24 +266,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
       },
     });
   };
-
-  const selectedWorkoutFocusTypeOption = data.workoutFocusType
-    ? {
-        label: data.workoutFocusType.name,
-        value: data.workoutFocusType.id,
-      }
-    : undefined;
-
-  const selectedTargetMuscleOptions = data.muscles?.map((item) => {
-    if (!item.muscle) {
-      throw new Error("Workout muscle relation was not loaded.");
-    }
-
-    return {
-      label: item.muscle.name,
-      value: item.muscle.id,
-    };
-  });
 
   const footer = (
     <>
@@ -328,8 +313,6 @@ export default function EditPlanContent({ data }: EditPlanContentProps) {
         hasExercises={hasExercises}
         autoFillMuscles={!!autoFillMuscles}
         autoFillDuration={!!autoFillDuration}
-        selectedWorkoutFocusTypeOption={selectedWorkoutFocusTypeOption}
-        selectedTargetMuscleOptions={selectedTargetMuscleOptions}
         onOpenManageMode={handleOpenManageMode}
         onRemoveAllExercises={handleRemoveAllExercises}
         onRemoveExercise={handleRemoveExercise}

@@ -1,7 +1,7 @@
+import { DurationBottomSheetPicker } from "@/components/bottom-sheet/picker/duration-picker/DurationPickerSheet";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import FormNumberInput from "@/components/form/FormNumberInput";
-import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
 import { useAppColors } from "@/hooks/useAppColors";
 import {
   type ExerciseFieldKey,

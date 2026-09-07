@@ -1,5 +1,5 @@
-import { formatDuration } from "@/components/form/picker/duration-picker/utils";
 import type { WorkoutSessionModel } from "@/types/workout/model/workout.types";
+import { formatDuration } from "../../picker/duration-picker/utils";
 
 export const SessionStatus = {
   TRAINING: "training",

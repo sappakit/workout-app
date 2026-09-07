@@ -1,14 +1,16 @@
+import { DurationBottomSheetPicker } from "@/components/bottom-sheet/picker/duration-picker/DurationPickerSheet";
+import { RemoteOptionMultiSelectField } from "@/components/bottom-sheet/picker/option-picker/RemoteOptionMultiSelectField";
+import { RemoteOptionPickerBottomSheet } from "@/components/bottom-sheet/picker/option-picker/RemoteOptionPickerBottomSheet";
 import FormCheckbox from "@/components/form/FormCheckbox";
 import { FormErrorMessage, FormField } from "@/components/form/FormField";
+import { FormSelectTrigger } from "@/components/form/FormSelectTrigger";
 import FormTextInput from "@/components/form/FormTextInput";
-import { DurationBottomSheetPicker } from "@/components/form/picker/duration-picker/DurationPickerSheet";
-import FormInfiniteMultiSelectInput from "@/components/form/select-input/FormInfiniteMultiSelectInput";
-import FormInfiniteSelectInput from "@/components/form/select-input/FormInfiniteSelectInput";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ContentFeedback } from "@/components/state/ContentFeedback";
 import { muscleApi } from "@/lib/api/muscle.api";
 import { workoutApi } from "@/lib/api/workout.api";
 import { muscleQueryKeys } from "@/lib/exercise/keys";
+import { workoutQueryKeys } from "@/lib/workout/keys";
 import type { EditPlanForm } from "@/schemas/edit-plan.schema";
 import type { Muscle } from "@/types/workout/response/shared.types";
 import type { WorkoutFocusType } from "@/types/workout/response/workout.types";
@@ -22,19 +24,12 @@ import { View } from "react-native";
 import { ExerciseListMenu } from "./ExerciseListMenu";
 import { PlanWorkoutExerciseSection } from "./WorkoutExerciseSection/PlanWorkoutExerciseSection";
 
-type SelectOption = {
-  label: string;
-  value: number;
-};
-
 type PlanFormFieldsProps = {
   form: UseFormReturn<EditPlanForm>;
   fields: FieldArrayWithId<EditPlanForm, "workoutExercises", "fieldId">[];
   hasExercises: boolean;
   autoFillMuscles: boolean;
   autoFillDuration: boolean;
-  selectedWorkoutFocusTypeOption?: SelectOption;
-  selectedTargetMuscleOptions?: SelectOption[];
   onOpenManageMode: () => void;
   onRemoveAllExercises: () => void;
   onRemoveExercise: (index: number) => void;
@@ -47,8 +42,6 @@ export function PlanFormFields({
   hasExercises,
   autoFillMuscles,
   autoFillDuration,
-  selectedWorkoutFocusTypeOption,
-  selectedTargetMuscleOptions = [],
   onOpenManageMode,
   onRemoveAllExercises,
   onRemoveExercise,
@@ -94,22 +87,25 @@ export function PlanFormFields({
               label="Workout Type"
               errorMessage={fieldState.error?.message}
             >
-              <FormInfiniteSelectInput<WorkoutFocusType>
-                allowEmpty
-                emptySelectionLabel="No workout type"
+              <RemoteOptionPickerBottomSheet<WorkoutFocusType>
+                title="Select Workout Type"
                 url={workoutApi.getTypes()}
-                queryKey={["workout-types"]}
+                queryKey={workoutQueryKeys.type}
+                selectionMode="single"
+                value={field.value}
+                onChange={field.onChange}
                 mapOption={(item) => ({
                   label: item.name,
                   value: item.id,
                 })}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Select workout type"
-                validationError={!!fieldState.error}
-                title="Select Workout Type"
-                snapPoints={["70%"]}
-                selectedOption={selectedWorkoutFocusTypeOption}
+                trigger={({ open, selectedOption }) => (
+                  <FormSelectTrigger
+                    label={selectedOption?.label ?? "Select workout type"}
+                    placeholder={!selectedOption}
+                    onPress={open}
+                    error={!!fieldState.error}
+                  />
+                )}
               />
             </FormField>
           )}
@@ -131,6 +127,7 @@ export function PlanFormFields({
                 render={({ field: autoFillField }) => (
                   <FormCheckbox
                     label="Auto-filled"
+                    size="sm"
                     value={autoFillField.value}
                     onChange={autoFillField.onChange}
                     error={!!errors.autoFillMuscles}
@@ -139,21 +136,21 @@ export function PlanFormFields({
                 )}
               />
 
-              <FormInfiniteMultiSelectInput<Muscle>
+              <RemoteOptionMultiSelectField<Muscle>
+                title="Select Target Muscles"
                 url={muscleApi.getAll()}
                 queryKey={muscleQueryKeys.all}
+                value={field.value}
+                onChange={field.onChange}
                 mapOption={(item) => ({
                   label: item.name,
                   value: item.id,
                 })}
-                value={field.value}
-                onChange={field.onChange}
-                selectedOptions={selectedTargetMuscleOptions}
                 placeholder="Select target muscle group"
-                validationError={!!fieldState.error}
-                title="Select Target Muscles"
-                snapPoints={["70%"]}
+                selectedSingularLabel="muscle group selected"
+                selectedPluralLabel="muscle groups selected"
                 disabled={autoFillMuscles}
+                error={!!fieldState.error}
               />
             </FormField>
           )}
@@ -175,6 +172,7 @@ export function PlanFormFields({
                 render={({ field: autoFillField }) => (
                   <FormCheckbox
                     label="Auto-filled"
+                    size="sm"
                     value={autoFillField.value}
                     onChange={autoFillField.onChange}
                     error={!!errors.autoFillDuration}
