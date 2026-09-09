@@ -1,4 +1,4 @@
-import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
+import { CONTENT_PADDING_HORIZONTAL } from "@/constants/page-layout.constants";
 import type { ReactNode } from "react";
 import Animated, {
   SlideInLeft,

@@ -1,4 +1,4 @@
-import { PageLayout } from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
 import { authApi } from "@/lib/api/auth.api";
 import { api } from "@/lib/api/client";
 import { useAppToast } from "@/lib/toast/useAppToast";

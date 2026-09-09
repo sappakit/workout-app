@@ -1,11 +1,11 @@
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useAppColors } from "@/hooks/useAppColors";
 import type { User as UserResponse } from "@/types/user/response/user.types";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { ProfileAvatar } from "./ui/ProfileAvatar";
 import { ProfileMenuItem, ProfileSection } from "./ui/ProfileMenu";
 import { StatCard } from "./ui/StatCard";

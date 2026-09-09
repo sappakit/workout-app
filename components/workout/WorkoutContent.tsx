@@ -1,8 +1,4 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import {
-  PageLayout,
-  type PullToRefreshProps,
-} from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import {
   WORKOUT_REST_IMAGE,
@@ -22,6 +18,8 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
+import type { PullToRefreshProps } from "../layout/page-layout/page-layout.types";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { mapScheduleToWorkoutHeroCardItem } from "./model/workout-content.mapper";
 import { TodayPlanSection } from "./ui/sections/TodayPlanSection";
 import { WorkoutDayStateSection } from "./ui/sections/WorkoutDayStateSection";

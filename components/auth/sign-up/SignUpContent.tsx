@@ -3,7 +3,7 @@ import { ThemedText } from "@/components/custom-ui/themed-text";
 import { FormField } from "@/components/form/FormField";
 import FormPasswordInputV2 from "@/components/form/FormPasswordInput";
 import FormTextInput from "@/components/form/FormTextInput";
-import { PageLayout } from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useAppToast } from "@/lib/toast/useAppToast";
 import { type SignUpForm, signUpSchema } from "@/schemas/auth.schema";
@@ -89,7 +89,6 @@ export default function SignUpContent() {
                 onBlur={field.onBlur}
                 error={!!fieldState.error}
                 icon="profile"
-                clearable
               />
             </FormField>
           )}
@@ -153,7 +152,6 @@ export default function SignUpContent() {
                 onBlur={field.onBlur}
                 error={!!fieldState.error}
                 icon="profile"
-                clearable
               />
             </FormField>
           )}
@@ -175,7 +173,6 @@ export default function SignUpContent() {
                 onBlur={field.onBlur}
                 error={!!fieldState.error}
                 icon="profile"
-                clearable
               />
             </FormField>
           )}
@@ -197,7 +194,6 @@ export default function SignUpContent() {
                 onBlur={field.onBlur}
                 error={!!fieldState.error}
                 icon="email"
-                clearable
               />
             </FormField>
           )}

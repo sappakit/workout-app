@@ -1,12 +1,12 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import FormTextInput from "@/components/form/FormTextInput";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
 import type { ReactNode } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import { ActivityIndicator, View } from "react-native";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 
 interface FullScreenPickerProps {
   title: string;
@@ -137,30 +137,35 @@ export default function FullScreenPicker({
   }
 
   return (
-    <PageLayout scrollable={false} stickyFooter={footer} includeInsets>
-      <View className="gap-2">
-        <SectionHeader title={title} subtitle={description} />
+    <PageLayout
+      scrollable={false}
+      stickyFooter={footer}
+      includeInsets
+      disableContentPadding={{ bottom: true }}
+    >
+      <View className="flex-1 gap-4">
+        <View className="gap-2">
+          <SectionHeader title={title} subtitle={description} />
 
-        {shouldShowSearch ? (
-          <View className="flex-row items-center gap-2">
-            <FormTextInput
-              clearable
-              containerClassName="flex-1 rounded-full"
-              value={searchValue}
-              onChangeText={onSearchChange}
-              placeholder={searchPlaceholder}
-              icon="search"
-            />
+          {shouldShowSearch ? (
+            <View className="flex-row items-center gap-2">
+              <FormTextInput
+                containerClassName="flex-1 rounded-full"
+                value={searchValue}
+                onChangeText={onSearchChange}
+                placeholder={searchPlaceholder}
+                icon="search"
+                clearable
+              />
 
-            {searchRight}
-          </View>
-        ) : null}
+              {searchRight}
+            </View>
+          ) : null}
 
-        {footerExtra}
-      </View>
+          {footerExtra}
+        </View>
 
-      <View className="mt-4 flex-1" style={contentContainerStyle}>
-        {content}
+        <View style={contentContainerStyle}>{content}</View>
       </View>
     </PageLayout>
   );

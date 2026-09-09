@@ -1,5 +1,4 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { usePlanFormAutoFill } from "@/hooks/usePlanFormAutoFill";
 import { api } from "@/lib/api/client";
 import { workoutApi } from "@/lib/api/workout.api";
@@ -22,6 +21,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Alert } from "react-native";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { PlanFormFields } from "./ui/PlanFormFields";
 
 interface EditPlanContentProps {

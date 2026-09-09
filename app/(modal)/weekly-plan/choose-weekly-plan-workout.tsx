@@ -1,4 +1,4 @@
-import { PageLayout } from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
 import { WorkoutPickerScreen } from "@/components/picker/workout-picker/WorkoutPickerScreen";
 import { ErrorState } from "@/components/state/ErrorState";
 import { useWeeklyPlanWorkoutPickerStore } from "@/components/weekly-plan/weeklyPlanWorkoutSelectionStore";

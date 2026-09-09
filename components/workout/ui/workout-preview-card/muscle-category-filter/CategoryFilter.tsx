@@ -1,5 +1,5 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
+import { CONTENT_PADDING_HORIZONTAL } from "@/constants/page-layout.constants";
 import { ScrollView } from "react-native";
 
 export type CategoryFilterOption<TValue extends string | number = number> = {

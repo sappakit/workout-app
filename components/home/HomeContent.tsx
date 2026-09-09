@@ -1,9 +1,10 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
 import { ContentFeedback } from "@/components/state/ContentFeedback";
 import { WorkoutTodayOverview } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
+import { PullToRefreshProps } from "../layout/page-layout/page-layout.types";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { SectionHeader } from "../layout/SectionHeader";
 import {
   RecentWorkoutCard,

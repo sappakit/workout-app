@@ -1,8 +1,8 @@
-import { PageLayout } from "@/components/layout/PageLayout";
 import { EmptyState } from "@/components/state/EmptyState";
 import { ErrorState } from "@/components/state/ErrorState";
 import type { WorkoutProgressOverview } from "@/types/workout/response/workout.types";
 import { ScrollView, View } from "react-native";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { type ProgressTab, ProgressTabs } from "./ui/elements/ProgressTabs";
 import { ProgressHistorySection } from "./ui/sections/progress-history-section/ProgressHistorySection";
 import { ProgressHistorySkeleton } from "./ui/sections/progress-history-section/ProgressHistorySkeleton";

@@ -44,7 +44,6 @@ export function ForgotPasswordForm({
                 onBlur={field.onBlur}
                 error={!!fieldState.error}
                 icon="email"
-                clearable
               />
             </FormField>
           )}

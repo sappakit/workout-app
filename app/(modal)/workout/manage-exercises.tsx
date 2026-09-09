@@ -1,4 +1,4 @@
-import { PageLayout } from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
 import { ManageExercisesContent } from "@/components/manage-exercises/ManageExercisesContent";
 import { normalizeOrderIndex } from "@/components/manage-exercises/utils/manage-exercises.utils";
 import { ErrorState } from "@/components/state/ErrorState";

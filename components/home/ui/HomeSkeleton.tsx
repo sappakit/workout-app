@@ -1,12 +1,10 @@
-import {
-  CONTENT_PADDING_HORIZONTAL,
-  PageLayout,
-} from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
 import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
 import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { RecentWorkoutCardSkeleton } from "@/components/progress/ui/sections/progress-history-section/ProgressHistorySkeleton";
 import { CategoryFilterSkeleton } from "@/components/workout/ui/workout-preview-card/muscle-category-filter/CategoryFilterSkeleton";
 import { WorkoutPreviewSectionSkeleton } from "@/components/workout/ui/workout-preview-card/WorkoutPreviewSectionSkeleton";
+import { CONTENT_PADDING_HORIZONTAL } from "@/constants/page-layout.constants";
 import { View } from "react-native";
 
 export function HomeSkeleton() {

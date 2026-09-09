@@ -2,7 +2,6 @@ import { AppButton } from "@/components/custom-ui/app-button";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { ExerciseListMenu } from "@/components/edit-plan/ui/ExerciseListMenu";
 import { InProgressWorkoutExerciseSection } from "@/components/edit-plan/ui/WorkoutExerciseSection/InProgressWorkoutExerciseSection";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { RecentMetricList } from "@/components/progress/ui/sections/progress-history-section/RecentWorkoutCard";
 import { ContentFeedback } from "@/components/state/ContentFeedback";
 import { DetailHeroImage } from "@/components/workout-detail/ui/DetailHeroImage";
@@ -22,6 +21,7 @@ import {
   getWorkoutTimerStats,
   INITIAL_TIMER_STATS,
 } from "../bottom-sheet/workout-timer/model/workoutTimerDisplay";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { commitInheritedSetValues } from "./model/session-set.helpers";
 import {
   addSessionSet,

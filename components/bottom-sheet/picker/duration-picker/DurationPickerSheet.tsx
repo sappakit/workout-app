@@ -3,7 +3,7 @@ import { AppButton } from "@/components/custom-ui/app-button";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { FormSelectTrigger } from "@/components/form/FormSelectTrigger";
-import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
+import { CONTENT_PADDING_HORIZONTAL } from "@/constants/page-layout.constants";
 import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import {

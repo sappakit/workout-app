@@ -1,5 +1,5 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
+import { CONTENT_PADDING_HORIZONTAL } from "@/constants/page-layout.constants";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

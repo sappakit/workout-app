@@ -1,5 +1,4 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { usePlanFormAutoFill } from "@/hooks/usePlanFormAutoFill";
 import { api } from "@/lib/api/client";
 import { workoutApi } from "@/lib/api/workout.api";
@@ -19,6 +18,7 @@ import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { PlanFormFields } from "../edit-plan/ui/PlanFormFields";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 
 const CREATE_PLAN_DEFAULT_VALUES: EditPlanForm = {
   name: "",

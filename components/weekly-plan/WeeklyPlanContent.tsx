@@ -1,5 +1,4 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { useWeeklyPlanWorkoutPickerStore } from "@/components/weekly-plan/weeklyPlanWorkoutSelectionStore";
 import { api } from "@/lib/api/client";
@@ -15,6 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import {
   getTodayDayOfWeek,
   mapWeeklyPlanResponseToState,

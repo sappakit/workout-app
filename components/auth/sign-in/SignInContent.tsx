@@ -3,7 +3,7 @@ import { ThemedText } from "@/components/custom-ui/themed-text";
 import { FormField } from "@/components/form/FormField";
 import FormPasswordInputV2 from "@/components/form/FormPasswordInput";
 import FormTextInput from "@/components/form/FormTextInput";
-import { PageLayout } from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useAppColors } from "@/hooks/useAppColors";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -79,7 +79,6 @@ export default function SignInContent() {
                 onBlur={field.onBlur}
                 error={!!fieldState.error}
                 icon="email"
-                clearable
               />
             </FormField>
           )}
