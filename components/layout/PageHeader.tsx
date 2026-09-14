@@ -85,7 +85,7 @@ export default function PageHeader(props: PageHeaderRootProps) {
       <Animated.View
         pointerEvents="none"
         style={[
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           {
             backgroundColor: colors.background,
             opacity: backgroundOpacity,
