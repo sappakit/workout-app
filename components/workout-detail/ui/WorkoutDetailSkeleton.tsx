@@ -1,12 +1,12 @@
-import {
-  CONTENT_PADDING_HORIZONTAL,
-  CONTENT_PADDING_TOP,
-  PageLayout,
-} from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
 import { ScreenSection } from "@/components/layout/ScreenSection";
 import { SectionHeaderSkeleton } from "@/components/loading/SectionHeaderSkeleton";
 import { SkeletonPlaceholder } from "@/components/loading/SkeletonPlaceholder";
 import { TextSkeleton } from "@/components/loading/TextSkeleton";
+import {
+  CONTENT_PADDING_HORIZONTAL,
+  CONTENT_PADDING_TOP,
+} from "@/constants/page-layout.constants";
 import { View } from "react-native";
 
 export function WorkoutDetailSkeleton() {

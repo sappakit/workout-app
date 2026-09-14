@@ -2,7 +2,7 @@ import {
   DropdownItem,
   MenuSectionLabel,
   OptionsMenu,
-} from "@/components/options-menu/OptionsMenu";
+} from "@/components/custom-ui/OptionsMenu";
 import { useAppColors } from "@/hooks/useAppColors";
 import { useExerciseDisplayStore } from "@/stores/exerciseDisplayStore";
 

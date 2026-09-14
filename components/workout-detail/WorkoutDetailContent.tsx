@@ -1,5 +1,4 @@
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { ScreenSection } from "@/components/layout/ScreenSection";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ContentFeedback } from "@/components/state/ContentFeedback";
@@ -8,6 +7,7 @@ import type { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { View } from "react-native";
 import { ExerciseListMenu } from "../edit-plan/ui/ExerciseListMenu";
 import { DisplayWorkoutExerciseSection } from "../edit-plan/ui/WorkoutExerciseSection/DisplayWorkoutExerciseSection";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { DetailHeroImage } from "./ui/DetailHeroImage";
 
 interface WorkoutDetailContentProps {

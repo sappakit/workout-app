@@ -1,7 +1,6 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ContentFeedback } from "@/components/state/ContentFeedback";
 import { useAppColors } from "@/hooks/useAppColors";
@@ -10,6 +9,7 @@ import ReorderableList, {
   type ReorderableListReorderEvent,
   useReorderableDrag,
 } from "react-native-reorderable-list";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 
 type ManageExerciseItem = {
   clientId: string;

@@ -1,4 +1,3 @@
-import { AppButton } from "@/components/custom-ui/app-button";
 import type { AppIconName } from "@/components/custom-ui/app-icon/app-icon.registry";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
@@ -9,35 +8,22 @@ import { Pressable, ScrollView, View } from "react-native";
 type FilterOverviewPageProps = {
   title: string;
   subtitle: string;
-  bottomInset: number;
   children: ReactNode;
   headerIcon?: AppIconName;
-  resetText?: string;
-  applyText?: string;
-  onReset: () => void;
-  onApply: () => void;
+  bottomContentInset?: number;
 };
 
 export function FilterOverviewPage({
   title,
   subtitle,
-  bottomInset,
   children,
   headerIcon = "filter",
-  resetText = "Reset",
-  applyText = "Apply filters",
-  onReset,
-  onApply,
+  bottomContentInset = 0,
 }: FilterOverviewPageProps) {
   const colors = useAppColors();
 
   return (
-    <View
-      className="flex-1 gap-4 px-4"
-      style={{
-        paddingBottom: bottomInset + 20,
-      }}
-    >
+    <View className="flex-1 gap-4">
       <View className="flex-row items-center gap-3">
         <View className="h-12 w-12 items-center justify-center rounded-2xl bg-secondary">
           <AppIcon
@@ -61,34 +47,11 @@ export function FilterOverviewPage({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           gap: 12,
+          paddingBottom: bottomContentInset,
         }}
       >
         {children}
       </ScrollView>
-
-      <View className="mt-auto flex-row gap-3">
-        <AppButton
-          title={resetText}
-          variant="outline"
-          className="flex-1"
-          icon={{
-            name: "refresh",
-            size: "sm",
-          }}
-          onPress={onReset}
-        />
-
-        <AppButton
-          title={applyText}
-          variant="primary"
-          className="flex-1"
-          icon={{
-            name: "filter",
-            size: "sm",
-          }}
-          onPress={onApply}
-        />
-      </View>
     </View>
   );
 }

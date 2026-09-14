@@ -1,9 +1,9 @@
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { ScreenSection } from "@/components/layout/ScreenSection";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import type { Exercise } from "@/types/workout/response/exercise.types";
 import { View } from "react-native";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { DetailHeroImage } from "../workout-detail/ui/DetailHeroImage";
 
 interface ExerciseDetailContentProps {

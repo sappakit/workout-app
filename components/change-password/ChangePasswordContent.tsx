@@ -1,7 +1,6 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import { FormField } from "@/components/form/FormField";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { authApi } from "@/lib/api/auth.api";
 import { api } from "@/lib/api/client";
 import { useAppToast } from "@/lib/toast/useAppToast";
@@ -16,6 +15,7 @@ import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, View } from "react-native";
 import FormPasswordInputV2 from "../form/FormPasswordInput";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 
 export default function ChangePasswordContent() {
   const router = useRouter();

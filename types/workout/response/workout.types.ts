@@ -33,6 +33,18 @@ export enum WorkoutWeeklyPlanDayType {
   UNASSIGNED = "unassigned",
 }
 
+export enum WorkoutPlanType {
+  TEMPLATE = "template",
+  USER_PLAN = "user_plan",
+}
+
+export enum ContentStatus {
+  DRAFT = "draft",
+  ACTIVE = "active",
+  HIDDEN = "hidden",
+  ARCHIVED = "archived",
+}
+
 export interface WorkoutSetValue {
   reps: number | null;
   weight: number | null;
@@ -67,6 +79,11 @@ export interface WorkoutFocusType {
 
 export interface WorkoutResponse {
   id: number;
+
+  code: string | null;
+  planType: WorkoutPlanType;
+  status: ContentStatus;
+
   name: string;
   imageUrl: string | null;
   description: string | null;
@@ -74,6 +91,8 @@ export interface WorkoutResponse {
 
   workoutExercises?: WorkoutExerciseItem[];
   muscles?: WorkoutMuscleItem[];
+
+  sourceWorkout?: WorkoutResponse | null;
   workoutFocusType?: WorkoutFocusType | null;
 }
 

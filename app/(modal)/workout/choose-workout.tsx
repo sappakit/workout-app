@@ -1,25 +1,16 @@
-import WorkoutFilterBottomSheet from "@/components/bottom-sheet/workout-filter/WorkoutFilterBottomSheet";
-import type { WorkoutFilterValues } from "@/components/bottom-sheet/workout-filter/WorkoutFilterSheetContent";
-import type { SortDirection } from "@/components/filter-option/FilterSortPage";
-import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
-import { ChooseWorkoutPickerSkeleton } from "@/components/workout/ui/workout-card/ChooseWorkoutPickerSkeleton";
-import {
-  mapWorkoutToWorkoutCardItem,
-  WorkoutCard,
-} from "@/components/workout/ui/workout-card/WorkoutCard";
-import { useDebounce } from "@/hooks/useDebounce";
+import type { SortDirection } from "@/components/bottom-sheet/filter/filter-page/FilterSortPage";
+import type { WorkoutFilterValues } from "@/components/bottom-sheet/filter/workout-filter/WorkoutFilterSheetContent";
+import { PageLayout } from "@/components/layout/page-layout/PageLayout";
+import { WorkoutPickerScreen } from "@/components/picker/workout-picker/WorkoutPickerScreen";
+import { ErrorState } from "@/components/state/ErrorState";
 import { api } from "@/lib/api/client";
 import { workoutApi } from "@/lib/api/workout.api";
-import { useInfiniteOptionsQuery } from "@/lib/query/useInfiniteOptionsQuery";
 import { useInvalidateQueries } from "@/lib/query/utils";
 import { useAppToast } from "@/lib/toast/useAppToast";
-import { cn } from "@/lib/utils";
 import { workoutQueryKeys } from "@/lib/workout/keys";
 import type { WorkoutResponse } from "@/types/workout/response/workout.types";
 import { useMutation } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
 
 export type WorkoutSortKey = "created_at" | "name" | "duration";
 
@@ -36,7 +27,9 @@ export const DEFAULT_WORKOUT_FILTERS: WorkoutFilterValues = {
 
 export default function ChooseWorkoutPage() {
   const router = useRouter();
+
   const toast = useAppToast();
+
   const invalidateQueries = useInvalidateQueries();
 
   const params = useLocalSearchParams<{
@@ -48,59 +41,7 @@ export default function ChooseWorkoutPage() {
 
   const currentWorkoutId = params.workoutId ? Number(params.workoutId) : null;
 
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(
-    currentWorkoutId,
-  );
-
-  const [filters, setFilters] = useState<WorkoutFilterValues>(
-    DEFAULT_WORKOUT_FILTERS,
-  );
-
-  const [search, setSearch] = useState("");
-
-  const debouncedSearch = useDebounce(search, 300);
-
-  const sortByParam = filters.sortBy
-    ? `${filters.sortBy}:${filters.sortDirection}`
-    : undefined;
-
-  const {
-    data,
-    isLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useInfiniteOptionsQuery<WorkoutResponse>({
-    url: workoutApi.getAll(),
-    queryKey: [
-      workoutQueryKeys.all,
-      "today-workout-picker",
-      debouncedSearch,
-      filters.focusTypeIds,
-      filters.muscleIds,
-      filters.sortBy,
-      filters.sortDirection,
-    ],
-    search: debouncedSearch,
-    limit: 20,
-    params: {
-      focusTypeIds:
-        filters.focusTypeIds.length > 0 ? filters.focusTypeIds : undefined,
-      muscleIds: filters.muscleIds.length > 0 ? filters.muscleIds : undefined,
-      sortBy: sortByParam,
-    },
-  });
-
-  const workouts = data?.pages.flatMap((page) => page.data) ?? [];
-
-  const selectedWorkout =
-    workouts.find((workout) => workout.id === selectedWorkoutId) ?? null;
-
-  const isSameWorkout = selectedWorkoutId === currentWorkoutId;
-
-  const { mutate: updateScheduleWorkout, isPending } = useMutation({
+  const { mutateAsync: updateScheduleWorkout } = useMutation({
     mutationFn: async (workoutId: number) => {
       if (!scheduleId) {
         throw new Error("Missing schedule id");
@@ -130,91 +71,37 @@ export default function ChooseWorkoutPage() {
     },
   });
 
-  const loadMore = () => {
-    if (!hasNextPage || isFetchingNextPage) {
-      return;
-    }
-
-    fetchNextPage();
-  };
-
-  const handleSelectWorkout = (workout: WorkoutResponse) => {
-    setSelectedWorkoutId(workout.id);
-  };
-
-  const handleDone = () => {
-    if (!selectedWorkoutId || !scheduleId) {
-      return;
-    }
-
-    updateScheduleWorkout(selectedWorkoutId);
-  };
-
   const handleClose = () => {
     router.back();
   };
 
+  const handleDone = async (selectedWorkout: WorkoutResponse) => {
+    await updateScheduleWorkout(selectedWorkout.id);
+  };
+
+  if (!scheduleId) {
+    return (
+      <PageLayout scrollable={false} includeInsets>
+        <ErrorState
+          icon="workout"
+          title="Workout schedule not found"
+          message="We couldn't find the workout schedule you were trying to update."
+          primaryAction={{
+            hidden: true,
+          }}
+        />
+      </PageLayout>
+    );
+  }
+
   return (
-    <FullScreenPicker
-      title="Choose Workout"
+    <WorkoutPickerScreen
       description="Select one workout to use for today's plan."
+      initialSelectedWorkoutId={currentWorkoutId}
+      requireDifferentSelection
+      defaultFilters={DEFAULT_WORKOUT_FILTERS}
       onClose={handleClose}
       onDone={handleDone}
-      doneText="Use Workout"
-      doneDisabled={
-        !selectedWorkout || !scheduleId || isSameWorkout || isPending
-      }
-      searchValue={search}
-      onSearchChange={setSearch}
-      searchPlaceholder="Search workout"
-      isLoading={isLoading}
-      isError={isError}
-      isEmpty={workouts.length === 0}
-      errorTitle="Couldn't load workouts"
-      errorText="Something went wrong while loading workouts."
-      emptyTitle="No workouts found"
-      emptyText="Try changing your search or filters."
-      onRetry={refetch}
-      loadingSkeleton={<ChooseWorkoutPickerSkeleton />}
-      searchRight={
-        <WorkoutFilterBottomSheet value={filters} onApplyFilters={setFilters} />
-      }
-    >
-      <FlatList
-        data={workouts}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerClassName="gap-3"
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <View className="items-center py-4">
-              <ActivityIndicator />
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => {
-          const isSelected = selectedWorkoutId === item.id;
-
-          const cardItem = mapWorkoutToWorkoutCardItem(item);
-
-          return (
-            <WorkoutCard
-              id={cardItem.id}
-              title={cardItem.title}
-              subtitle={cardItem.subtitle}
-              imageUrl={cardItem.imageUrl}
-              metaItems={cardItem.metaItems}
-              onPress={() => handleSelectWorkout(item)}
-              disabled={isPending}
-              className={cn(
-                "border",
-                isSelected ? "border-primary" : "border-transparent",
-              )}
-            />
-          );
-        }}
-      />
-    </FullScreenPicker>
+    />
   );
 }

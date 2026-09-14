@@ -1,8 +1,8 @@
+import { WORKOUT_IMAGE } from "@/constants/images";
 import {
   CONTENT_PADDING_HORIZONTAL,
   CONTENT_PADDING_TOP,
-} from "@/components/layout/PageLayout";
-import { WORKOUT_IMAGE } from "@/constants/images";
+} from "@/constants/page-layout.constants";
 import type { ImageStyle, StyleProp } from "react-native";
 import { ImageBackground } from "react-native";
 

@@ -1,4 +1,4 @@
-import { mapWorkoutSessionToWorkoutSessionModel } from "@/components/workout-in-progress/model/helpers";
+import { mapWorkoutSessionToWorkoutSessionModel } from "@/components/workout-in-progress/model/session-mappers";
 import {
   WorkoutSessionExerciseModel,
   WorkoutSessionExerciseSetModel,

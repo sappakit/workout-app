@@ -32,12 +32,12 @@ export function DisplayWorkoutExerciseSection({
   const exercise = requireWorkoutExercise(workoutExercise);
   const workoutExerciseSets = requireWorkoutExerciseSets(workoutExercise);
 
-  const categoryCode = exercise.category?.code;
+  const trackingTypeCode = exercise.trackingType?.code;
   const imageUrl = getExercisePrimaryImageUrl(exercise);
 
   const columns = useMemo<WorkoutSetColumn[]>(() => {
-    return getWorkoutSetColumns(categoryCode);
-  }, [categoryCode]);
+    return getWorkoutSetColumns(trackingTypeCode);
+  }, [trackingTypeCode]);
 
   const sets = useMemo<DisplayWorkoutExerciseSet[]>(() => {
     return workoutExerciseSets.map((set) => ({

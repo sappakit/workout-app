@@ -4,7 +4,6 @@ import type { EditPlanForm } from "@/schemas/edit-plan.schema";
 import { useMemo } from "react";
 import {
   Controller,
-  type FieldPath,
   type UseFormReturn,
   useFormState,
   useWatch,
@@ -45,13 +44,15 @@ export function PlanWorkoutExerciseSection({
   const setsErrorMessage =
     errors.workoutExercises?.[index]?.sets?.root?.message;
 
+  const trackingTypeCode = exercise?.exercise.trackingType?.code;
+
   const columns = useMemo<WorkoutSetColumn[]>(() => {
     if (!exercise) {
       return [];
     }
 
-    return getWorkoutSetColumns(exercise.exercise.category?.code);
-  }, [exercise]);
+    return getWorkoutSetColumns(trackingTypeCode);
+  }, [exercise, trackingTypeCode]);
 
   if (!exercise) {
     return null;
@@ -154,63 +155,17 @@ function PlanWorkoutSetInput({
   exerciseIndex,
   setIndex,
 }: PlanWorkoutSetInputProps) {
-  const baseName =
-    `workoutExercises.${exerciseIndex}.sets.${setIndex}` as const;
+  const name =
+    `workoutExercises.${exerciseIndex}.sets.${setIndex}.${column.key}` as const;
 
-  switch (column.key) {
-    case "duration":
-      return (
-        <Controller
-          control={control}
-          name={`${baseName}.durationMinutes`}
-          render={({ field, fieldState }) => (
-            <WorkoutSetInput
-              value={field.value}
-              onChange={field.onChange}
-              error={!!fieldState.error}
-              placeholder={column.placeholder}
-              allowDecimal={column.allowDecimal}
-              min={column.min}
-              max={column.max}
-            />
-          )}
-        />
-      );
-
-    case "weight":
-    case "reps":
-    case "distance":
-      return (
-        <PlanWorkoutNumberSetInput
-          control={control}
-          name={`${baseName}.${column.key}`}
-          column={column}
-        />
-      );
-
-    default:
-      return null;
-  }
-}
-
-type PlanWorkoutNumberSetInputProps = {
-  control: UseFormReturn<EditPlanForm>["control"];
-  name: FieldPath<EditPlanForm>;
-  column: WorkoutSetColumn;
-};
-
-function PlanWorkoutNumberSetInput({
-  control,
-  name,
-  column,
-}: PlanWorkoutNumberSetInputProps) {
   return (
     <Controller
       control={control}
       name={name}
       render={({ field, fieldState }) => (
         <WorkoutSetInput
-          value={field.value as number | null}
+          inputType={column.inputType}
+          value={field.value}
           onChange={field.onChange}
           error={!!fieldState.error}
           placeholder={column.placeholder}

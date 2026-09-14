@@ -1,12 +1,15 @@
+import { DurationBottomSheetPicker } from "@/components/bottom-sheet/picker/duration-picker/DurationPickerSheet";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
 import FormNumberInput from "@/components/form/FormNumberInput";
 import { useAppColors } from "@/hooks/useAppColors";
 import {
   type ExerciseFieldKey,
+  type ExerciseInputType,
   getExerciseFieldConfig,
   getExerciseFields,
 } from "@/lib/workout/config";
+import type { ExerciseTrackingTypeCode } from "@/types/workout/response/exercise.types";
 import type { ReactElement } from "react";
 import { Pressable, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -15,21 +18,23 @@ export type SetPerformanceMode = "previous" | "best";
 
 export type WorkoutSetColumn = {
   key: ExerciseFieldKey;
+  inputType: ExerciseInputType;
   label: string;
   placeholder: string;
-  allowDecimal: boolean;
-  min: number;
+  allowDecimal?: boolean;
+  min?: number;
   max?: number;
 };
 
 export function getWorkoutSetColumns(
-  categoryCode: string | null | undefined,
+  trackingTypeCode: ExerciseTrackingTypeCode | null | undefined,
 ): WorkoutSetColumn[] {
-  return Array.from(getExerciseFields(categoryCode)).map((field) => {
+  return getExerciseFields(trackingTypeCode).map((field) => {
     const config = getExerciseFieldConfig(field);
 
     return {
       key: field,
+      inputType: config.inputType,
       label: config.label,
       placeholder: config.placeholder,
       allowDecimal: config.allowDecimal,
@@ -176,6 +181,7 @@ function WorkoutSetRowContent({
 }
 
 type WorkoutSetInputProps = {
+  inputType: ExerciseInputType;
   value?: number | null;
   onChange: (value: number | null) => void;
   error?: boolean;
@@ -187,6 +193,7 @@ type WorkoutSetInputProps = {
 };
 
 export function WorkoutSetInput({
+  inputType,
   value,
   onChange,
   error,
@@ -196,6 +203,54 @@ export function WorkoutSetInput({
   max,
   disabled = false,
 }: WorkoutSetInputProps) {
+  switch (inputType) {
+    case "number-input":
+      return (
+        <WorkoutSetNumberInput
+          value={value}
+          onChange={onChange}
+          error={error}
+          placeholder={placeholder}
+          allowDecimal={allowDecimal}
+          min={min}
+          max={max}
+          disabled={disabled}
+        />
+      );
+
+    case "duration-picker":
+      return (
+        <WorkoutSetDurationInput
+          value={value}
+          onChange={onChange}
+          error={error}
+          disabled={disabled}
+        />
+      );
+  }
+}
+
+type WorkoutSetNumberInputProps = {
+  value?: number | null;
+  onChange: (value: number | null) => void;
+  error?: boolean;
+  placeholder?: string;
+  allowDecimal?: boolean;
+  min?: number;
+  max?: number;
+  disabled?: boolean;
+};
+
+function WorkoutSetNumberInput({
+  value,
+  onChange,
+  error,
+  placeholder = "-",
+  allowDecimal = false,
+  min = 0,
+  max,
+  disabled = false,
+}: WorkoutSetNumberInputProps) {
   return (
     <FormNumberInput
       inputMode="gesture"
@@ -208,6 +263,32 @@ export function WorkoutSetInput({
       min={min}
       max={max}
       error={error}
+    />
+  );
+}
+
+type WorkoutSetDurationInputProps = {
+  value?: number | null;
+  onChange: (value: number | null) => void;
+  error?: boolean;
+  disabled?: boolean;
+};
+
+function WorkoutSetDurationInput({
+  value,
+  onChange,
+  error,
+  disabled = false,
+}: WorkoutSetDurationInputProps) {
+  return (
+    <DurationBottomSheetPicker
+      title="Select Duration"
+      value={value ?? 0}
+      onChange={onChange}
+      disabled={disabled}
+      triggerVariant="field"
+      error={error}
+      textAlign="center"
     />
   );
 }

@@ -1,0 +1,6 @@
+export const CONTENT_PADDING_TOP = 16;
+export const CONTENT_PADDING_BOTTOM = 16;
+export const CONTENT_PADDING_HORIZONTAL = 16;
+
+export const STICKY_FOOTER_PADDING_TOP = 16;
+export const STICKY_FOOTER_PADDING_BOTTOM = 8;

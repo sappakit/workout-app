@@ -1,6 +1,6 @@
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
 import { ThemedText } from "@/components/custom-ui/themed-text";
-import { CONTENT_PADDING_HORIZONTAL } from "@/components/layout/PageLayout";
+import { CONTENT_PADDING_HORIZONTAL } from "@/constants/page-layout.constants";
 import { useAppColors } from "@/hooks/useAppColors";
 import { cn } from "@/lib/utils";
 import { WorkoutWeeklyPlanDayType } from "@/types/workout/response/workout.types";

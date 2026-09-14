@@ -3,7 +3,7 @@ import {
   getExerciseProgressText,
   getPreviousSetValue,
   getWorkoutSessionSetValue,
-} from "@/components/workout-in-progress/model/helpers";
+} from "@/components/workout-in-progress/model/session-set.helpers";
 import type { ExerciseFieldKey } from "@/lib/workout/config";
 import { getExercisePrimaryImageUrl } from "@/lib/workout/utils";
 import type { WorkoutSessionExerciseModel } from "@/types/workout/model/workout.types";
@@ -50,12 +50,13 @@ export function InProgressWorkoutExerciseSection({
   const [performanceMode, setPerformanceMode] =
     useState<SetPerformanceMode>("previous");
 
-  const categoryCode = exercise.exercise.category?.code;
+  const trackingTypeCode = exercise.exercise.trackingType?.code;
+
   const imageUrl = getExercisePrimaryImageUrl(exercise.exercise);
 
   const columns = useMemo<WorkoutSetColumn[]>(() => {
-    return getWorkoutSetColumns(categoryCode);
-  }, [categoryCode]);
+    return getWorkoutSetColumns(trackingTypeCode);
+  }, [trackingTypeCode]);
 
   const handleTogglePerformanceMode = () => {
     setPerformanceMode((previousMode) =>
@@ -114,6 +115,7 @@ export function InProgressWorkoutExerciseSection({
 
             return (
               <WorkoutSetInput
+                inputType={column.inputType}
                 value={value}
                 onChange={(nextValue) =>
                   onChangeSetValue(setItem.clientId, column.key, nextValue)

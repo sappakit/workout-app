@@ -15,7 +15,6 @@ import {
   WorkoutResponse,
 } from "@/types/workout/response/workout.types";
 import { createClientId } from "../id/utils";
-import { hmsToSeconds, secondsToHMS } from "./duration.utils";
 import {
   requireWorkoutExercise,
   requireWorkoutExercises,
@@ -54,8 +53,6 @@ export function toNumberOrNull(value: unknown): number | null {
 export function mapWorkoutExerciseSetToFormSet(
   set: WorkoutExerciseSet,
 ): EditPlanForm["workoutExercises"][number]["sets"][number] {
-  const duration = secondsToHMS(set.duration);
-
   return {
     id: set.id,
     clientId: `existing-workout-exercise-set-${set.id}`,
@@ -63,8 +60,7 @@ export function mapWorkoutExerciseSetToFormSet(
     reps: set.reps,
     weight: set.weight,
     distance: set.distance,
-    durationMinutes: duration.minutes,
-    durationSeconds: duration.seconds,
+    duration: set.duration,
   };
 }
 
@@ -98,12 +94,15 @@ export function mapWorkoutResponseToEditPlanForm(
   return {
     name: data.name,
     workoutFocusTypeId: data.workoutFocusType?.id ?? null,
+
     targetMuscles: workoutMuscles.map((workoutMuscle) => {
       const muscle = requireWorkoutMuscle(workoutMuscle);
 
       return muscle.id;
     }),
+
     duration: data.duration ?? 0,
+
     autoFillMuscles: false,
     autoFillDuration: false,
 
@@ -121,7 +120,7 @@ export function mapWorkoutExerciseFormSetToPayload(
     reps: set.reps,
     weight: set.weight,
     distance: set.distance,
-    duration: hmsToSeconds(0, set.durationMinutes, set.durationSeconds),
+    duration: set.duration,
   };
 }
 
@@ -164,7 +163,7 @@ export function mapEditPlanSetToWorkoutExerciseSet(
     reps: set.reps,
     weight: set.weight,
     distance: set.distance,
-    duration: hmsToSeconds(0, set.durationMinutes, set.durationSeconds),
+    duration: set.duration,
   };
 }
 
@@ -188,6 +187,7 @@ function normalizeExercise(
 ): Exercise {
   return {
     ...exercise,
+
     description: exercise.description ?? null,
     difficultyLevel: exercise.difficultyLevel ?? null,
 
@@ -215,8 +215,7 @@ export function createEmptyWorkoutExerciseFormSet(
     reps: null,
     weight: null,
     distance: null,
-    durationMinutes: null,
-    durationSeconds: null,
+    duration: null,
   };
 }
 

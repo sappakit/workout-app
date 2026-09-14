@@ -1,7 +1,6 @@
 import { AppButton } from "@/components/custom-ui/app-button";
 import { FormField } from "@/components/form/FormField";
 import FormTextInput from "@/components/form/FormTextInput";
-import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api/client";
 import { userApi } from "@/lib/api/user.api";
@@ -19,6 +18,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Linking, View } from "react-native";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { AvatarImageEditor } from "../profile/ui/AvatarImageEditor";
 import { ProfileAvatar } from "../profile/ui/ProfileAvatar";
 

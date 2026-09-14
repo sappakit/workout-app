@@ -1,9 +1,9 @@
-import ExerciseFilterBottomSheet from "@/components/bottom-sheet/exercise-filter/ExerciseFilterBottomSheet";
 import {
   DEFAULT_EXERCISE_FILTERS,
+  ExerciseFilterSheetContent,
   type ExerciseFilterValues,
-} from "@/components/bottom-sheet/exercise-filter/ExerciseFilterSheetContent";
-import FullScreenPicker from "@/components/form/picker/FullScreenPicker";
+} from "@/components/bottom-sheet/filter/exercise-filter/ExerciseFilterSheetContent";
+import { FilterBottomSheet } from "@/components/bottom-sheet/filter/FilterBottomSheet";
 import {
   ExerciseCard,
   mapExerciseToExerciseCardItem,
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import type { Exercise } from "@/types/workout/response/exercise.types";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
+import FullScreenPicker from "../FullScreenPicker";
 
 export type ExercisePickerMode = "add" | "replace";
 
@@ -169,10 +170,19 @@ export function ExercisePickerScreen({
       emptyText="Try changing your search or filters."
       onRetry={refetch}
       searchRight={
-        <ExerciseFilterBottomSheet
+        <FilterBottomSheet<ExerciseFilterValues>
           value={filters}
-          onApplyFilters={setFilters}
-        />
+          onChange={setFilters}
+          resetValue={DEFAULT_EXERCISE_FILTERS}
+        >
+          {({ value, onChange, bottomContentInset }) => (
+            <ExerciseFilterSheetContent
+              value={value}
+              onChange={onChange}
+              bottomContentInset={bottomContentInset}
+            />
+          )}
+        </FilterBottomSheet>
       }
     >
       <FlatList

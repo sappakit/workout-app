@@ -1,8 +1,10 @@
 import { AppButton } from "@/components/custom-ui/app-button";
-import { PageLayout, PullToRefreshProps } from "@/components/layout/PageLayout";
+import { ContentFeedback } from "@/components/state/ContentFeedback";
 import { WorkoutTodayOverview } from "@/types/workout/response/workout.types";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
+import { PullToRefreshProps } from "../layout/page-layout/page-layout.types";
+import { PageLayout } from "../layout/page-layout/PageLayout";
 import { SectionHeader } from "../layout/SectionHeader";
 import {
   RecentWorkoutCard,
@@ -69,7 +71,7 @@ export default function HomeContent({
           <WorkoutPreviewSection {...workoutPreviewSection} />
         </View>
 
-        <View>
+        <View className="gap-3">
           <SectionHeader
             title="Recent workout"
             action={
@@ -82,11 +84,19 @@ export default function HomeContent({
             }
           />
 
-          <View className="mt-3 gap-4">
-            {historyItems.map((item) => (
-              <RecentWorkoutCard key={item.id} item={item} />
-            ))}
-          </View>
+          {historyItems.length > 0 ? (
+            <View className="gap-4">
+              {historyItems.map((item) => (
+                <RecentWorkoutCard key={item.id} item={item} />
+              ))}
+            </View>
+          ) : (
+            <ContentFeedback
+              icon="history"
+              title="No recent workouts yet"
+              subtitle="Complete a workout to see your recent activity here."
+            />
+          )}
         </View>
       </View>
     </PageLayout>
