@@ -1,6 +1,5 @@
 import WorkoutTimerBottomSheet from "@/components/bottom-sheet/workout-timer/WorkoutTimerBottomSheet";
 import { AppIcon } from "@/components/custom-ui/app-icon/AppIcon";
-import { HapticTab } from "@/components/haptic-tab";
 import { AppLoadingScreen } from "@/components/state/AppLoadingScreen";
 import { WorkoutSessionSync } from "@/components/workout-in-progress/WorkoutSessionSync";
 import { useAuth } from "@/context/AuthContext";
@@ -37,7 +36,7 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarButton: HapticTab,
+          // tabBarButton: HapticTab,
 
           // Active/inactive icon and label colors
           tabBarActiveTintColor: colors.primary,

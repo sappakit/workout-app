@@ -32,7 +32,7 @@ export function WeeklyPlanSummary({
               x: 1,
               y: 1,
             }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
 
           <AppIcon

@@ -123,7 +123,7 @@ function StatIcon({ icon }: StatIconProps) {
         colors={[colors.primary, colors.primaryHover]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
       />
 
       <AppIcon name={icon} size="md" color={colors.primaryForeground} />

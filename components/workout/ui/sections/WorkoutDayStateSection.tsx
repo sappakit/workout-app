@@ -46,7 +46,7 @@ export function WorkoutDayStateSection({
         >
           <View
             style={[
-              StyleSheet.absoluteFillObject,
+              StyleSheet.absoluteFill,
               {
                 backgroundColor: colors.imageOverlay,
               },
@@ -56,7 +56,7 @@ export function WorkoutDayStateSection({
           <LinearGradient
             colors={["transparent", colors.imageOverlayStrong]}
             locations={[0.4, 1]}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
 
           <View className="h-16 w-16 items-center justify-center rounded-2xl border border-white">

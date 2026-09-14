@@ -73,7 +73,11 @@ export function PickerBottomSheet({
         footerComponent={footer ? renderFooter : undefined}
         onChange={handleChange}
       >
-        <View className="flex-1" pointerEvents={isReady ? "auto" : "none"}>
+        <View className="flex-1">
+          {!isReady && (
+            <View className="absolute inset-0 z-50" pointerEvents="auto" />
+          )}
+
           {children}
         </View>
       </AppBottomSheetModal>

@@ -27,7 +27,7 @@ export function TodayWorkoutCard({ todayOverview }: TodayWorkoutCardProps) {
         colors={[colors.primary, colors.primaryHover]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
       />
 
       <View className="flex-1 flex-row justify-between gap-4">

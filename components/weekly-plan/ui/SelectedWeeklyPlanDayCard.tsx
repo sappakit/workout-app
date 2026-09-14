@@ -155,7 +155,7 @@ export function SelectedWeeklyPlanDayCard({
         >
           <View
             style={[
-              StyleSheet.absoluteFillObject,
+              StyleSheet.absoluteFill,
               {
                 backgroundColor: colors.imageOverlay,
               },
@@ -165,7 +165,7 @@ export function SelectedWeeklyPlanDayCard({
           <LinearGradient
             colors={["transparent", colors.imageOverlayStrong]}
             locations={[0.25, 1]}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
 
           {topContent}

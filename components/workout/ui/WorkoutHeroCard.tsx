@@ -51,7 +51,7 @@ export function WorkoutHeroCard({
       >
         <View
           style={[
-            StyleSheet.absoluteFillObject,
+            StyleSheet.absoluteFill,
             {
               backgroundColor: colors.imageOverlay,
             },
@@ -61,7 +61,7 @@ export function WorkoutHeroCard({
         <LinearGradient
           colors={["transparent", colors.imageOverlayStrong]}
           locations={[0.4, 1]}
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
         />
 
         <View className="z-10 flex-row justify-between">

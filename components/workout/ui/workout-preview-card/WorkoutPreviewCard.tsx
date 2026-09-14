@@ -140,7 +140,7 @@ export function WorkoutPreviewCard({ item }: { item: WorkoutPreviewCardItem }) {
         <LinearGradient
           colors={["transparent", colors.imageOverlayStrong]}
           locations={[0.4, 1]}
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
         />
 
         <View className="absolute bottom-0 left-0 right-0 p-2">
