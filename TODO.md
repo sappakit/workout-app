@@ -11,6 +11,9 @@
 - workout in progress - add exercise ui padding bug
 - add weight, height, age input
 
+- @gorhom/bottom-sheet: screen flashes during a slow pan-down-to-close on Android
+  fix: wait for the package to update
+
 # OPTIONAL
 
 - Allow > 1 workout schedule per day
